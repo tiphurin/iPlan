@@ -1,0 +1,58 @@
+{
+  "common": {
+    "appName": "iPlan",
+    "loading": "กำลังโหลด…",
+    "retry": "ลองใหม่",
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "comingSoon": "เร็วๆ นี้"
+  },
+  "nav": {
+    "trips": "ทริป",
+    "today": "วันนี้",
+    "money": "การเงิน",
+    "settings": "ตั้งค่า"
+  },
+  "login": {
+    "title": "วางแผนเที่ยวและการเงินในที่เดียว",
+    "subtitle": "จัดแผนเที่ยว หารค่าใช้จ่าย และดูรายรับรายจ่ายรายเดือน",
+    "google": "เข้าสู่ระบบด้วย Google",
+    "googleMissing": "ยังไม่ได้ตั้งค่า Google sign-in (ดู docs/INFRA.md)",
+    "devTitle": "สำหรับทดสอบในเครื่อง",
+    "devOwner": "เข้าเป็น Demo Owner",
+    "devFriend": "เข้าเป็น Demo Friend"
+  },
+  "home": {
+    "greeting": "สวัสดี {name}",
+    "subtitle": "ทริปของคุณ"
+  },
+  "today": {
+    "title": "วันนี้"
+  },
+  "money": {
+    "title": "การเงิน",
+    "comingSoonBody": "รายรับ รายการหัก ค่าใช้จ่ายประจำ และงบรายเดือน จะมาใน PR ถัดๆ ไป"
+  },
+  "settings": {
+    "title": "ตั้งค่า",
+    "signedInAs": "เข้าสู่ระบบเป็น {email}",
+    "language": "ภาษา",
+    "theme": "ธีม",
+    "themeSystem": "ตามระบบ",
+    "themeLight": "สว่าง",
+    "themeDark": "มืด",
+    "signOut": "ออกจากระบบ"
+  },
+  "errors": {
+    "UNAUTHORIZED": "กรุณาเข้าสู่ระบบ",
+    "FORBIDDEN": "คุณไม่มีสิทธิ์ทำรายการนี้",
+    "NOT_FOUND": "ไม่พบข้อมูล",
+    "VALIDATION_FAILED": "ข้อมูลไม่ถูกต้อง",
+    "CONFLICT": "ข้อมูลขัดแย้งกัน กรุณาลองใหม่",
+    "RATE_LIMITED": "ทำรายการถี่เกินไป กรุณารอสักครู่",
+    "INTERNAL": "เกิดข้อผิดพลาด กรุณาลองใหม่",
+    "DEV_LOGIN_DISABLED": "ปิดการเข้าระบบแบบทดสอบอยู่",
+    "DEMO_DATA_MISSING": "ยังไม่มีข้อมูลตัวอย่าง ให้รัน yarn db:seed",
+    "NETWORK": "เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ต"
+  }
+}

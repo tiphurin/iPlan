@@ -1,0 +1,4 @@
+{
+  "extends": "@iplan/config/tsconfig/base.json",
+  "include": ["src"]
+}

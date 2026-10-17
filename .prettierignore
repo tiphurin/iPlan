@@ -1,4 +1,5 @@
-pnpm-lock.yaml
+yarn.lock
+.yarn/
 legacy/
 .next/
 dist/

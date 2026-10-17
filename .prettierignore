@@ -5,3 +5,4 @@ legacy/
 dist/
 coverage/
 .turbo/
+packages/db/migrations/

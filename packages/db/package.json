@@ -1,0 +1,35 @@
+{
+  "name": "@iplan/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx src/seed.ts",
+    "db:setup": "yarn db:migrate && yarn db:seed",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@iplan/core": "workspace:*",
+    "drizzle-orm": "0.45.2",
+    "pg": "8.23.0"
+  },
+  "devDependencies": {
+    "@iplan/config": "workspace:*",
+    "@types/node": "22.20.3",
+    "@types/pg": "8.23.1",
+    "drizzle-kit": "0.31.10",
+    "eslint": "10.10.0",
+    "tsx": "4.23.13",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}

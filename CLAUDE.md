@@ -33,5 +33,6 @@ iPlan: a mobile-first web app for (1) planning trips and splitting trip costs be
 - Money: integer minor units (`bigint` in DB), store FX rate at time of spend.
 - Time: `timestamptz` UTC + per-item IANA tz for display.
 - Authorization in the API service layer; DB credentials never reach the browser.
+- Dependencies: stable major lines (Node 22 LTS) and exact versions published at least 30 days ago; `.yarnrc.yml` enforces this with `npmMinimalAgeGate`.
 - No secrets in git. `.env.example` documents every variable.
 - README must cover: stack, project structure, architecture diagram (Mermaid), local run, deploy, free-tier notes.

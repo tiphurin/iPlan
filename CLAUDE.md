@@ -17,13 +17,13 @@ iPlan: a mobile-first web app for (1) planning trips and splitting trip costs be
 
 ## Architecture (approved 17 Oct 2026)
 
-- Turborepo + pnpm monorepo, TypeScript strict everywhere (TS 6.0.x until typescript-eslint supports 7).
+- Turborepo + Yarn 4 workspaces monorepo (`nodeLinker: node-modules`), TypeScript strict everywhere (TS 6.0.x until typescript-eslint supports 7).
 - `apps/web`: Next.js App Router. Server Components for reads (BFF only, no business logic), Client Components for interaction (TanStack Query, React Hook Form + Zod). Tailwind v4 + shadcn/ui. Recharts lazy-loaded. next-intl (th/en). PWA manifest.
 - `apps/api`: Hono, mounted into Next.js at `/api/*` (same origin, one Vercel deployment) but never imports from Next. Per module: `<m>.routes.ts` (Zod + OpenAPI) → `<m>.service.ts` (business logic + authorization) → `<m>.repository.ts` (Drizzle only) with `<m>.mapper.ts` converting DB row ↔ domain ↔ DTO. Better Auth (Google + admin plugin + dev-only login locally). API returns error codes; the web translates them.
 - Storage behind a `StorageProvider` interface (S3 API): MinIO locally, Backblaze B2 in production. DB stores object keys, never full URLs. Images are resized to WebP in the browser before upload (slips 2000px/q0.85, photos 1600px/q0.80, thumbnails 400px), EXIF stripped.
 - `packages/core` pure domain logic (money in minor units, split/settle, monthly budget with overrides, schedule progress/delay) with Vitest.
 - `packages/db` Drizzle schema + migrations + seed. `packages/contracts` shared Zod schemas. `packages/i18n` locales + Intl formatters. `packages/config` shared lint/tsconfig.
-- Local: docker compose (Postgres + MinIO), dev-only login, `pnpm db:seed` demo data, `/showcase` route demoing every feature.
+- Local: docker compose (Postgres + MinIO), dev-only login, `yarn db:seed` demo data, `/showcase` route demoing every feature.
 - Hosting: Vercel Hobby (web + api), Neon (Postgres), Backblaze B2 (files), Google Cloud (OAuth client only). No Cloudflare.
 - Exports: Excel via exceljs in the browser; PDF via print-friendly pages (correct Thai rendering); CSV, JSON backup, .ics.
 

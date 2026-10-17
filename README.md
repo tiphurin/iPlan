@@ -8,7 +8,7 @@ A mobile-first web app for **planning trips** with friends (itinerary across tim
 
 | Layer    | Choice                                                                                                                        |
 | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Monorepo | Turborepo + pnpm, TypeScript strict                                                                                           |
+| Monorepo | Turborepo + Yarn 4 workspaces, TypeScript strict                                                                              |
 | Web      | Next.js (App Router), Tailwind CSS v4, shadcn/ui, TanStack Query, React Hook Form + Zod, Recharts, next-intl (Thai / English) |
 | API      | Hono with Zod + OpenAPI, Better Auth (Google sign-in, admin roles)                                                            |
 | Data     | PostgreSQL with Drizzle ORM                                                                                                   |
@@ -68,28 +68,28 @@ Why this shape:
 
 ## Run locally
 
-Requirements: Node 22 (`.nvmrc`), pnpm via Corepack, Docker (Docker Desktop, OrbStack or Colima).
+Requirements: Node 22 (`.nvmrc`), Yarn via Corepack, Docker (Docker Desktop, OrbStack or Colima).
 
 ```bash
 corepack enable
-pnpm install
+yarn install
 cp .env.example .env
-pnpm check          # format, lint, typecheck, test, build
+yarn check          # format, lint, typecheck, test, build
 ```
 
-Database, API and web app commands (`docker compose up -d`, `pnpm db:setup`, `pnpm dev`) arrive with the PRs that add them.
+Database, API and web app commands (`docker compose up -d`, `yarn db:setup`, `yarn dev`) arrive with the PRs that add them.
 
 ## Scripts
 
 | Command                             | What it does                    |
 | ----------------------------------- | ------------------------------- |
-| `pnpm dev`                          | Run every app in watch mode     |
-| `pnpm build`                        | Build all packages and apps     |
-| `pnpm lint`                         | ESLint in every package         |
-| `pnpm typecheck`                    | `tsc --noEmit` in every package |
-| `pnpm test`                         | Vitest in every package         |
-| `pnpm format` / `pnpm format:check` | Prettier write / check          |
-| `pnpm check`                        | Everything CI runs              |
+| `yarn dev`                          | Run every app in watch mode     |
+| `yarn build`                        | Build all packages and apps     |
+| `yarn lint`                         | ESLint in every package         |
+| `yarn typecheck`                    | `tsc --noEmit` in every package |
+| `yarn test`                         | Vitest in every package         |
+| `yarn format` / `yarn format:check` | Prettier write / check          |
+| `yarn check`                        | Everything CI runs              |
 
 ## Deploy _(planned)_
 

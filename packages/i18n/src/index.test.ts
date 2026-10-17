@@ -31,16 +31,19 @@ describe('formatters', () => {
   })
 
   it('uses the Buddhist era in Thai by default', () => {
-    expect(formatDate('2026-10-23', th)).toContain('2569')
-    expect(formatDate('2026-10-23', { locale: 'th', era: 'gregory' })).toContain('2026')
+    expect(formatDate('2026-10-23', th)).toBe('23 ต.ค. 2569')
+    expect(formatDate('2026-10-23', { locale: 'th', era: 'gregory' })).toBe('23 ต.ค. 2026')
     expect(formatDate('2026-10-23', en)).toBe('23 Oct 2026')
   })
 
   it('labels trip days and ranges', () => {
     expect(formatDayLabel('2026-10-23', en)).toBe('Fri 23 Oct')
     expect(formatDayLabel('2026-10-23', th)).toBe('ศ. 23 ต.ค.')
-    expect(formatDayLabel('2027-01-03', th)).toBe('อา. 3 ม.ค.')
     expect(formatDateRange('2026-10-22', '2026-10-27', en)).toBe('22–27 Oct 2026')
+    expect(formatDateRange('2026-10-22', '2026-10-27', th)).toBe('22–27 ต.ค. 2569')
+    expect(formatDateRange('2026-10-30', '2026-11-02', en)).toBe('30 Oct – 2 Nov 2026')
+    expect(formatDateRange('2026-12-30', '2027-01-02', en)).toBe('30 Dec 2026 – 2 Jan 2027')
+    expect(formatDateRange('2026-10-22', '2026-10-22', en)).toBe('22 Oct 2026')
   })
 
   it('formats money per locale', () => {

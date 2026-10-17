@@ -1,0 +1,35 @@
+{
+  "name": "@iplan/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "dev:standalone": "tsx watch src/dev-server.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hono/zod-openapi": "1.6.3",
+    "@iplan/contracts": "workspace:*",
+    "@iplan/core": "workspace:*",
+    "@iplan/db": "workspace:*",
+    "@scalar/hono-api-reference": "0.12.2",
+    "better-auth": "1.7.5",
+    "drizzle-orm": "0.45.2",
+    "hono": "4.13.8",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@hono/node-server": "2.1.1",
+    "@iplan/config": "workspace:*",
+    "@types/node": "22.20.3",
+    "eslint": "10.10.0",
+    "tsx": "4.23.13",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
+  }
+}

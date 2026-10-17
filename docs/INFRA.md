@@ -52,7 +52,7 @@ Never commit a secret. `.env.example` lists every variable with a note on where 
 | Variable                                    | Local value             | Production value from                                |
 | ------------------------------------------- | ----------------------- | ---------------------------------------------------- |
 | `DATABASE_URL`                              | Docker Postgres         | Neon → Connection details → pooled connection string |
-| `BETTER_AUTH_SECRET`                        | any string              | `openssl rand -base64 32`                            |
+| `BETTER_AUTH_SECRET`                        | 32+ characters          | `openssl rand -base64 32`                            |
 | `BETTER_AUTH_URL`                           | `http://localhost:3000` | `https://<project>.vercel.app`                       |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | optional                | Google Cloud → Credentials → OAuth client            |
 | `DEV_LOGIN_ENABLED`                         | `true`                  | `false`                                              |

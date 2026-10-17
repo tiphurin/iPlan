@@ -106,3 +106,25 @@ export function durationParts(ms: number): DurationParts {
 export function sleepMinutes(sleptAt: Date, wokeAt: Date): number {
   return Math.max(0, Math.round((wokeAt.getTime() - sleptAt.getTime()) / 60_000))
 }
+
+/**
+ * Which trip day "now" belongs to: the last day whose first item has started,
+ * or the first day before the trip begins. Works across time zones because it
+ * compares instants, not wall-clock dates. Null when there are no items.
+ */
+export function currentTripDay(
+  items: readonly { dayDate: string; startsAt: Date }[],
+  now: Date,
+): string | null {
+  const firstStart = new Map<string, number>()
+  for (const item of items) {
+    const t = item.startsAt.getTime()
+    const seen = firstStart.get(item.dayDate)
+    if (seen === undefined || t < seen) firstStart.set(item.dayDate, t)
+  }
+  const days = [...firstStart.entries()].sort((a, b) => a[0].localeCompare(b[0]))
+  if (days.length === 0) return null
+  let current = days[0]?.[0] ?? null
+  for (const [day, start] of days) if (start <= now.getTime()) current = day
+  return current
+}

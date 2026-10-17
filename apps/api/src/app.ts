@@ -3,8 +3,12 @@ import type { ErrorResponse } from '@iplan/contracts'
 import { Scalar } from '@scalar/hono-api-reference'
 import type { AuthGateway } from './infra/auth'
 import { DEV_LOGIN_EMAILS, type DevLoginEmail } from './infra/dev-login'
+import { itemRoutes } from './modules/items/items.routes'
+import type { ItemsService } from './modules/items/items.service'
 import { meRoutes } from './modules/me/me.routes'
 import type { MeService } from './modules/me/me.service'
+import { tripRoutes } from './modules/trips/trips.routes'
+import type { TripsService } from './modules/trips/trips.service'
 import type { SessionUser } from './shared/context'
 import { AppError } from './shared/errors'
 import { createRouter, errorResponses } from './shared/openapi'
@@ -15,6 +19,8 @@ export interface AppDeps {
   devLogin?: (email: DevLoginEmail) => Promise<Response>
   services: {
     me: MeService
+    trips: TripsService
+    items: ItemsService
   }
 }
 
@@ -90,6 +96,8 @@ export function createApp(deps: AppDeps) {
   }
 
   app.route('/', meRoutes(deps.services.me))
+  app.route('/', tripRoutes(deps.services.trips))
+  app.route('/', itemRoutes(deps.services.items))
 
   app.doc31('/openapi.json', {
     openapi: '3.1.0',

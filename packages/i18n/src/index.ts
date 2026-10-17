@@ -40,8 +40,30 @@ function dateKeyToUtcNoon(dateKey: string): Date {
   return new Date(`${dateKey}T12:00:00Z`)
 }
 
+// Thai abbreviations are spelled out because ICU data differs between Node and
+// browsers ("ศ." vs "ศุกร์"), which would break hydration.
+const TH_WEEKDAYS = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.']
+const TH_MONTHS = [
+  'ม.ค.',
+  'ก.พ.',
+  'มี.ค.',
+  'เม.ย.',
+  'พ.ค.',
+  'มิ.ย.',
+  'ก.ค.',
+  'ส.ค.',
+  'ก.ย.',
+  'ต.ค.',
+  'พ.ย.',
+  'ธ.ค.',
+]
+
 /** "ส. 17 ต.ค." / "Sat 17 Oct" for a trip day (YYYY-MM-DD). */
 export function formatDayLabel(dateKey: string, { locale, era }: FormatOptions): string {
+  if (locale === 'th') {
+    const date = dateKeyToUtcNoon(dateKey)
+    return `${TH_WEEKDAYS[date.getUTCDay()]} ${date.getUTCDate()} ${TH_MONTHS[date.getUTCMonth()]}`
+  }
   return new Intl.DateTimeFormat(intlLocale(locale, era), {
     timeZone: 'UTC',
     weekday: 'short',

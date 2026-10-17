@@ -38,6 +38,8 @@ describe('formatters', () => {
 
   it('labels trip days and ranges', () => {
     expect(formatDayLabel('2026-10-23', en)).toBe('Fri 23 Oct')
+    expect(formatDayLabel('2026-10-23', th)).toBe('ศ. 23 ต.ค.')
+    expect(formatDayLabel('2027-01-03', th)).toBe('อา. 3 ม.ค.')
     expect(formatDateRange('2026-10-22', '2026-10-27', en)).toBe('22–27 Oct 2026')
   })
 

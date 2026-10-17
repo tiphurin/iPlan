@@ -25,7 +25,7 @@ iPlan/
 │  └─ api/          Hono app: modules/<m>/{routes,service,repository,mapper} (planned)
 ├─ packages/
 │  ├─ config/       Shared tsconfig and ESLint config
-│  ├─ core/         Pure domain logic: money, split, budget, schedule  (planned)
+│  ├─ core/         Pure domain logic: money, split, budget, schedule, time zones
 │  ├─ db/           Drizzle schema, migrations, seed                    (planned)
 │  ├─ contracts/    Zod request/response schemas shared by web and API  (planned)
 │  └─ i18n/         Locales and Intl formatters                         (planned)

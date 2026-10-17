@@ -26,7 +26,7 @@ iPlan/
 ├─ packages/
 │  ├─ config/       Shared tsconfig and ESLint config
 │  ├─ core/         Pure domain logic: money, split, budget, schedule, time zones
-│  ├─ db/           Drizzle schema, migrations, seed                    (planned)
+│  ├─ db/           Drizzle schema, migrations, demo seed
 │  ├─ contracts/    Zod request/response schemas shared by web and API  (planned)
 │  └─ i18n/         Locales and Intl formatters                         (planned)
 ├─ docs/            HANDOFF.md (background), INFRA.md (accounts, secrets)
@@ -74,22 +74,27 @@ Requirements: Node 22 (`.nvmrc`), Yarn via Corepack, Docker (Docker Desktop, Orb
 corepack enable
 yarn install
 cp .env.example .env
+yarn db:setup       # Postgres in Docker + migrations + demo data
 yarn check          # format, lint, typecheck, test, build
 ```
 
-Database, API and web app commands (`docker compose up -d`, `yarn db:setup`, `yarn dev`) arrive with the PRs that add them.
+The web app and API (`yarn dev`) arrive with the PRs that add them.
 
 ## Scripts
 
-| Command                             | What it does                    |
-| ----------------------------------- | ------------------------------- |
-| `yarn dev`                          | Run every app in watch mode     |
-| `yarn build`                        | Build all packages and apps     |
-| `yarn lint`                         | ESLint in every package         |
-| `yarn typecheck`                    | `tsc --noEmit` in every package |
-| `yarn test`                         | Vitest in every package         |
-| `yarn format` / `yarn format:check` | Prettier write / check          |
-| `yarn check`                        | Everything CI runs              |
+| Command                             | What it does                            |
+| ----------------------------------- | --------------------------------------- |
+| `yarn dev`                          | Run every app in watch mode             |
+| `yarn build`                        | Build all packages and apps             |
+| `yarn lint`                         | ESLint in every package                 |
+| `yarn typecheck`                    | `tsc --noEmit` in every package         |
+| `yarn test`                         | Vitest in every package                 |
+| `yarn format` / `yarn format:check` | Prettier write / check                  |
+| `yarn check`                        | Everything CI runs                      |
+| `yarn db:setup`                     | Start Postgres, migrate, seed demo data |
+| `yarn db:generate`                  | New migration after editing the schema  |
+| `yarn db:seed`                      | Reset demo data                         |
+| `yarn db:down`                      | Stop local Postgres                     |
 
 ## Deploy _(planned)_
 

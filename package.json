@@ -2,7 +2,7 @@
   "name": "iplan",
   "private": true,
   "type": "module",
-  "packageManager": "yarn@4.18.1",
+  "packageManager": "yarn@4.18.0",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -21,9 +21,9 @@
     "check": "yarn format:check && yarn lint && yarn typecheck && yarn test && yarn build"
   },
   "devDependencies": {
-    "@types/node": "22.20.5",
-    "prettier": "3.9.10",
-    "turbo": "2.11.8",
+    "@types/node": "22.20.3",
+    "prettier": "3.9.7",
+    "turbo": "2.10.13",
     "typescript": "6.0.3"
   }
 }

@@ -3,7 +3,7 @@
 import type { TripDetailDto, TripItemDto } from '@iplan/contracts'
 import { currentTripDay } from '@iplan/core'
 import { formatDateRange } from '@iplan/i18n'
-import { Clock, Pencil, Plus, Users } from 'lucide-react'
+import { ClipboardList, Clock, Info, Pencil, Plus, Users } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -74,22 +74,25 @@ export function TripView({
           {formatDateRange(trip.startDate, trip.endDate, { locale: f.locale })}
           {trip.destination && ` · ${trip.destination}`}
         </p>
-        <div className="mt-3 flex gap-2">
-          <Link
-            href={`/trips/${trip.id}/today` as Route}
-            className={buttonVariants({ variant: 'secondary' })}
-          >
-            <Clock aria-hidden className="size-4" />
-            {t('trips.openToday')}
-          </Link>
-          <Link
-            href={`/trips/${trip.id}/members` as Route}
-            className={buttonVariants({ variant: 'secondary' })}
-          >
-            <Users aria-hidden className="size-4" />
-            {t('trips.members', { count: trip.members.length })}
-          </Link>
-        </div>
+        <nav className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
+          {(
+            [
+              ['today', Clock, t('trips.openToday')],
+              ['checklist', ClipboardList, t('trips.checklist')],
+              ['info', Info, t('trips.info')],
+              ['members', Users, t('trips.members', { count: trip.members.length })],
+            ] as const
+          ).map(([path, Icon, label]) => (
+            <Link
+              key={path}
+              href={`/trips/${trip.id}/${path}` as Route}
+              className={cn(buttonVariants({ variant: 'secondary' }), 'shrink-0')}
+            >
+              <Icon aria-hidden className="size-4" />
+              {label}
+            </Link>
+          ))}
+        </nav>
       </header>
 
       <nav

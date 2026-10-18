@@ -3,6 +3,10 @@ import { type App, createApp } from './app'
 import { readEnv } from './env'
 import { authGateway, createAuth } from './infra/auth'
 import { devLogin } from './infra/dev-login'
+import { DrizzleChecklistRepository } from './modules/checklist/checklist.repository'
+import { ChecklistService } from './modules/checklist/checklist.service'
+import { DrizzleInfoCardsRepository } from './modules/info-cards/info-cards.repository'
+import { InfoCardsService } from './modules/info-cards/info-cards.service'
 import { DrizzleItemsRepository } from './modules/items/items.repository'
 import { ItemsService } from './modules/items/items.service'
 import { DrizzleMeRepository } from './modules/me/me.repository'
@@ -30,6 +34,8 @@ export function buildApp(env = readEnv()): App {
       trips,
       items: new ItemsService(new DrizzleItemsRepository(db), trips, audit),
       members: new MembersService(new DrizzleMembersRepository(db), trips, audit),
+      checklist: new ChecklistService(new DrizzleChecklistRepository(db), trips, audit),
+      infoCards: new InfoCardsService(new DrizzleInfoCardsRepository(db), trips, audit),
     },
   })
 }

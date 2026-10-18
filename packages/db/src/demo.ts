@@ -329,3 +329,48 @@ export function buildDemoTrip(today: string): DemoTrip {
     items,
   }
 }
+
+/** Fictional checklist grouped like the prototype's. */
+export const DEMO_CHECKLIST: { groupKey: string; title: string; ticked?: boolean }[] = [
+  { groupKey: 'documents', title: 'Passports (6+ months valid)', ticked: true },
+  { groupKey: 'documents', title: 'K-ETA approval printout', ticked: true },
+  { groupKey: 'documents', title: 'Travel insurance policy' },
+  { groupKey: 'bookings', title: 'Flight e-tickets in wallet', ticked: true },
+  { groupKey: 'bookings', title: 'Hotel confirmation' },
+  { groupKey: 'money', title: 'KRW cash for markets' },
+  { groupKey: 'money', title: 'T-money card topped up' },
+  { groupKey: 'money', title: 'eSIM installed' },
+  { groupKey: 'packing', title: 'Power adapter (type C/F)' },
+  { groupKey: 'packing', title: 'Power bank under 100 Wh (carry-on)' },
+  { groupKey: 'clothes', title: 'Light jacket for evenings' },
+  { groupKey: 'airport', title: 'Online check-in done' },
+  { groupKey: 'airport', title: 'Liquids under 100 ml in a clear bag' },
+  { groupKey: 'return', title: 'Tax refund receipts' },
+]
+
+export const DEMO_INFO_CARDS: {
+  kind: 'flight' | 'hotel' | 'health' | 'lounge' | 'emergency' | 'tip' | 'other'
+  title: string
+  body: string
+}[] = [
+  {
+    kind: 'flight',
+    title: 'Flights',
+    body: 'DM 101 BKK → ICN, departs 02:25 (Bangkok), arrives 10:00 (Seoul)\nDM 102 ICN → BKK, departs 19:50 (Seoul), arrives 00:10 (Bangkok)\nBooking ref: DEMO01',
+  },
+  {
+    kind: 'hotel',
+    title: 'Hotel',
+    body: 'Demo Hotel Sinchon\nSinchon, Seodaemun-gu, Seoul\nCheck-in 15:00 · Check-out 11:00',
+  },
+  {
+    kind: 'emergency',
+    title: 'Emergency numbers (Korea)',
+    body: 'Police 112\nFire & ambulance 119\nTourist helpline 1330 (English, Thai)',
+  },
+  {
+    kind: 'tip',
+    title: 'Getting around',
+    body: 'Tap the T-money card when you get on AND off buses.\nSubway lines are colour-coded; follow the line number.',
+  },
+]

@@ -3,6 +3,10 @@ import type { ErrorResponse } from '@iplan/contracts'
 import { Scalar } from '@scalar/hono-api-reference'
 import type { AuthGateway } from './infra/auth'
 import { DEV_LOGIN_EMAILS, type DevLoginEmail } from './infra/dev-login'
+import { checklistRoutes } from './modules/checklist/checklist.routes'
+import type { ChecklistService } from './modules/checklist/checklist.service'
+import { infoCardRoutes } from './modules/info-cards/info-cards.routes'
+import type { InfoCardsService } from './modules/info-cards/info-cards.service'
 import { itemRoutes } from './modules/items/items.routes'
 import type { ItemsService } from './modules/items/items.service'
 import { meRoutes } from './modules/me/me.routes'
@@ -24,6 +28,8 @@ export interface AppDeps {
     trips: TripsService
     items: ItemsService
     members: MembersService
+    checklist: ChecklistService
+    infoCards: InfoCardsService
   }
 }
 
@@ -102,6 +108,8 @@ export function createApp(deps: AppDeps) {
   app.route('/', tripRoutes(deps.services.trips))
   app.route('/', itemRoutes(deps.services.items))
   app.route('/', memberRoutes(deps.services.members))
+  app.route('/', checklistRoutes(deps.services.checklist))
+  app.route('/', infoCardRoutes(deps.services.infoCards))
 
   app.doc31('/openapi.json', {
     openapi: '3.1.0',

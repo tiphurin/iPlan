@@ -211,6 +211,69 @@ export const tripItemCheckIn = pgTable(
 )
 
 // ---------------------------------------------------------------------------
+// Checklist and info cards
+// ---------------------------------------------------------------------------
+
+export const checklistItem = pgTable(
+  'checklist_item',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tripId: uuid('trip_id')
+      .notNull()
+      .references(() => trip.id, { onDelete: 'cascade' }),
+    /** Free-form group key, e.g. documents, packing, airport, day-2. */
+    groupKey: text('group_key').notNull(),
+    title: text('title').notNull(),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt,
+    updatedAt,
+  },
+  (t) => [index('checklist_item_trip_idx').on(t.tripId, t.groupKey)],
+)
+
+/** Who ticked an item; an item counts as done once anyone ticks it. */
+export const checklistTick = pgTable(
+  'checklist_tick',
+  {
+    itemId: uuid('item_id')
+      .notNull()
+      .references(() => checklistItem.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    tickedAt: timestamptz('ticked_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.itemId, t.userId] })],
+)
+
+export const infoCardKind = pgEnum('info_card_kind', [
+  'flight',
+  'hotel',
+  'health',
+  'lounge',
+  'emergency',
+  'tip',
+  'other',
+])
+
+export const infoCard = pgTable(
+  'info_card',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tripId: uuid('trip_id')
+      .notNull()
+      .references(() => trip.id, { onDelete: 'cascade' }),
+    kind: infoCardKind('kind').notNull(),
+    title: text('title').notNull(),
+    body: text('body').notNull().default(''),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt,
+    updatedAt,
+  },
+  (t) => [index('info_card_trip_idx').on(t.tripId)],
+)
+
+// ---------------------------------------------------------------------------
 // Audit
 // ---------------------------------------------------------------------------
 

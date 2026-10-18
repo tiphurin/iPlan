@@ -1,0 +1,3614 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Seoul 26" />
+    <meta name="theme-color" content="#00A84D" />
+    <title>Seoul 22–27 ต.ค. 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f2f4f7;
+        --surface: #ffffff;
+        --sunk: #e9edf2;
+        --ink: #14171d;
+        --muted: #5a6371;
+        --faint: #8a93a0;
+        --line: #dde2e8;
+        --l1: #0052a4;
+        --l2: #00a84d;
+        --l3: #ef7c1c;
+        --l5: #996cac;
+        --la: #0090d2;
+        --lw: #9aa3ae;
+        --lc: #4a5563;
+        --good: #00a84d;
+        --warn: #d9822b;
+        --bad: #d6453d;
+        --pool: #c2185b;
+        --r-lg: 22px;
+        --r-md: 16px;
+        --r-sm: 12px;
+        --head: 'Bai Jamjuree', 'IBM Plex Sans Thai', system-ui, sans-serif;
+        --body: 'IBM Plex Sans Thai', -apple-system, 'Sukhumvit Set', system-ui, sans-serif;
+        color-scheme: light;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #0e1115;
+          --surface: #181c22;
+          --sunk: #222831;
+          --ink: #eceff3;
+          --muted: #a3acb8;
+          --faint: #7a8492;
+          --line: #2b323c;
+          --l1: #3d8be0;
+          --l2: #22c46a;
+          --l3: #ff9640;
+          --l5: #b98acb;
+          --la: #2ab2ee;
+          --lw: #6f7884;
+          --lc: #8893a1;
+          --good: #22c46a;
+          --warn: #f0a04b;
+          --bad: #f06a61;
+          --pool: #f06292;
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme='dark'] {
+        --bg: #0e1115;
+        --surface: #181c22;
+        --sunk: #222831;
+        --ink: #eceff3;
+        --muted: #a3acb8;
+        --faint: #7a8492;
+        --line: #2b323c;
+        --l1: #3d8be0;
+        --l2: #22c46a;
+        --l3: #ff9640;
+        --l5: #b98acb;
+        --la: #2ab2ee;
+        --lw: #6f7884;
+        --lc: #8893a1;
+        --good: #22c46a;
+        --warn: #f0a04b;
+        --bad: #f06a61;
+        --pool: #f06292;
+        color-scheme: dark;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--body);
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0 0 auto;
+        height: env(safe-area-inset-top, 0px);
+        z-index: 30;
+        background: var(--bg);
+      }
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+        color: inherit;
+      }
+      button {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      a {
+        color: inherit;
+      }
+      :focus-visible {
+        outline: 3px solid var(--la);
+        outline-offset: 2px;
+        border-radius: 8px;
+      }
+      .wrap {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 0 16px 130px;
+      }
+      .top {
+        position: sticky;
+        top: env(safe-area-inset-top, 0px);
+        z-index: 20;
+        background: var(--bg);
+        padding: 10px 16px 8px;
+        max-width: 560px;
+        margin: 0 auto;
+      }
+      .top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .brand {
+        font-family: var(--head);
+        font-weight: 700;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .brand .dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 4px solid var(--l2);
+        background: var(--surface);
+      }
+      .clocks {
+        display: flex;
+        gap: 6px;
+      }
+      .clock {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 3px 10px;
+        font-size: 13px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .clock b {
+        font-family: var(--head);
+        color: var(--ink);
+        font-weight: 600;
+        font-size: 15px;
+        margin-left: 4px;
+      }
+      .sync {
+        font-size: 12px;
+        color: var(--faint);
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .sync i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--faint);
+        display: inline-block;
+      }
+      .sync.on i {
+        background: var(--good);
+      }
+      .sync.err i {
+        background: var(--bad);
+      }
+      .nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 25;
+        background: var(--surface);
+        border-top: 1px solid var(--line);
+        padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+      }
+      .nav-in {
+        max-width: 560px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+      }
+      .nav button {
+        background: none;
+        border: 0;
+        padding: 6px 2px;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        font-size: 12px;
+        color: var(--faint);
+        min-height: 52px;
+      }
+      .nav button svg {
+        width: 25px;
+        height: 25px;
+      }
+      .nav button[aria-current='page'] {
+        color: var(--ink);
+      }
+      .nav button[aria-current='page'] svg {
+        color: var(--l2);
+      }
+      h2 {
+        font-family: var(--head);
+        font-weight: 700;
+        font-size: 24px;
+        line-height: 1.2;
+        margin: 18px 0 10px;
+      }
+      h3 {
+        font-family: var(--head);
+        font-weight: 600;
+        font-size: 18px;
+        line-height: 1.3;
+        margin: 0 0 4px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .small {
+        font-size: 14px;
+      }
+      .tiny {
+        font-size: 12px;
+        color: var(--faint);
+      }
+      .num {
+        font-family: var(--head);
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--r-md);
+        padding: 14px 16px;
+        margin: 10px 0;
+      }
+      .hero {
+        border-radius: var(--r-lg);
+        padding: 18px;
+        margin: 12px 0;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero .k {
+        font-size: 14px;
+        opacity: 0.92;
+      }
+      .hero .big {
+        font-family: var(--head);
+        font-weight: 700;
+        font-size: 32px;
+        line-height: 1.12;
+        margin: 4px 0;
+      }
+      .hero .sub {
+        font-size: 15px;
+        opacity: 0.95;
+      }
+      .hero.g {
+        background: var(--l2);
+      }
+      .hero.b {
+        background: var(--la);
+      }
+      .hero.p {
+        background: var(--l5);
+      }
+      .hero.o {
+        background: var(--l3);
+      }
+      .hero.ink {
+        background: #1f2a37;
+      }
+      .hero.blue {
+        background: var(--l1);
+      }
+      .hero .ring {
+        position: absolute;
+        right: -34px;
+        top: -34px;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 18px solid rgba(255, 255, 255, 0.18);
+      }
+      .between {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .stat {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--r-md);
+        padding: 12px 14px;
+        text-align: left;
+      }
+      .stat .v {
+        font-family: var(--head);
+        font-weight: 700;
+        font-size: 20px;
+        line-height: 1.2;
+      }
+      .stat .l {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .pill.late {
+        background: color-mix(in srgb, var(--bad) 16%, transparent);
+        color: var(--bad);
+      }
+      .pill.ok {
+        background: color-mix(in srgb, var(--good) 16%, transparent);
+        color: var(--good);
+      }
+      .pill.early {
+        background: color-mix(in srgb, var(--la) 16%, transparent);
+        color: var(--la);
+      }
+      .btn {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        border-radius: 999px;
+        padding: 9px 15px;
+        font-size: 15px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        text-decoration: none;
+        min-height: 44px;
+        font-weight: 500;
+      }
+      .btn.solid {
+        background: var(--ink);
+        color: var(--bg);
+        border-color: var(--ink);
+      }
+      .btn.green {
+        background: var(--l2);
+        color: #fff;
+        border-color: var(--l2);
+      }
+      .btn.danger {
+        color: var(--bad);
+      }
+      .btn.block {
+        width: 100%;
+        padding: 13px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: var(--r-md);
+      }
+      .btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .actions .btn {
+        padding: 8px 6px;
+        font-size: 14px;
+        border-radius: var(--r-sm);
+      }
+      .fab {
+        position: fixed;
+        right: max(16px, calc(50% - 264px));
+        bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+        z-index: 24;
+        background: var(--l2);
+        color: #fff;
+        border: 0;
+        border-radius: 999px;
+        padding: 15px 22px;
+        font-weight: 600;
+        font-size: 16px;
+        box-shadow: 0 6px 18px rgba(0, 168, 77, 0.35);
+      }
+      .days {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        margin: 6px -16px 12px;
+        padding: 0 16px 4px;
+        scrollbar-width: none;
+      }
+      .day {
+        flex: none;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        border-radius: var(--r-sm);
+        padding: 8px 12px;
+        text-align: center;
+        min-width: 66px;
+      }
+      .day b {
+        display: block;
+        font-family: var(--head);
+        font-size: 17px;
+      }
+      .day span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .day[aria-pressed='true'] {
+        background: var(--dc);
+        border-color: var(--dc);
+        color: #fff;
+      }
+      .day[aria-pressed='true'] span {
+        color: #fff;
+      }
+      .it {
+        display: grid;
+        grid-template-columns: 50px 26px 1fr;
+        column-gap: 8px;
+      }
+      .it .t {
+        font-family: var(--head);
+        font-weight: 600;
+        font-size: 15px;
+        text-align: right;
+        padding-top: 12px;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.2;
+      }
+      .it .t small {
+        display: block;
+        font-family: var(--body);
+        font-weight: 400;
+        font-size: 11px;
+        color: var(--faint);
+      }
+      .it .rail {
+        position: relative;
+      }
+      .it .rail::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        margin-left: -3px;
+        background: var(--rc, var(--lw));
+      }
+      .it.walk .rail::before {
+        background: none;
+        border-left: 3px dotted var(--lw);
+        width: 0;
+        margin-left: -1.5px;
+      }
+      .it .node {
+        position: absolute;
+        left: 50%;
+        top: 13px;
+        width: 22px;
+        height: 22px;
+        margin-left: -11px;
+        border-radius: 50%;
+        background: var(--surface);
+        border: 5px solid var(--dc);
+      }
+      .it.minor .node {
+        width: 14px;
+        height: 14px;
+        margin-left: -7px;
+        top: 17px;
+        border-width: 3px;
+        border-color: var(--rc, var(--lw));
+      }
+      .it.done .node {
+        background: var(--dc);
+      }
+      .it.skip .node {
+        border-color: var(--lw);
+        background: var(--sunk);
+      }
+      .it.now .node {
+        box-shadow: 0 0 0 6px color-mix(in srgb, var(--dc) 28%, transparent);
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .it.now .node {
+          animation: pulse 1.8s ease-in-out infinite;
+        }
+      }
+      @keyframes pulse {
+        50% {
+          box-shadow: 0 0 0 10px color-mix(in srgb, var(--dc) 10%, transparent);
+        }
+      }
+      .pc {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--r-md);
+        margin: 6px 0;
+        overflow: hidden;
+      }
+      .it.now .pc {
+        border: 2px solid var(--dc);
+      }
+      .it.skip .pc {
+        opacity: 0.6;
+      }
+      .cover {
+        height: 118px;
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        padding: 12px 14px;
+        color: #fff;
+        background: var(--cc, var(--l2));
+        overflow: hidden;
+      }
+      .cover img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .cover .shade {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(transparent 40%, rgba(0, 0, 0, 0.55));
+      }
+      .cover .kr {
+        position: relative;
+        font-family: var(--head);
+        font-weight: 700;
+        font-size: 24px;
+        line-height: 1.1;
+        text-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+      }
+      .cover .deco {
+        position: absolute;
+        right: -20px;
+        top: -26px;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 16px solid rgba(255, 255, 255, 0.2);
+      }
+      .cover .deco2 {
+        position: absolute;
+        right: 56px;
+        top: 40px;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: 8px solid rgba(255, 255, 255, 0.16);
+      }
+      .cover .cnt {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        background: rgba(0, 0, 0, 0.45);
+        border-radius: 999px;
+        font-size: 12px;
+        padding: 2px 8px;
+      }
+      .pc .in {
+        padding: 12px 14px;
+      }
+      .pc p {
+        margin: 4px 0 0;
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .det {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 8px;
+        display: grid;
+        gap: 2px;
+      }
+      .det a {
+        color: var(--la);
+        text-decoration: none;
+      }
+      .thumbs {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        margin-top: 10px;
+      }
+      .thumbs button {
+        flex: none;
+        border: 0;
+        padding: 0;
+        border-radius: 10px;
+        overflow: hidden;
+        width: 64px;
+        height: 64px;
+        background: var(--sunk);
+      }
+      .thumbs img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .mvrow {
+        background: none;
+        border: 0;
+        width: 100%;
+        text-align: left;
+        font-size: 14px;
+        color: var(--muted);
+        padding: 8px 0;
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .taskrow {
+        background: var(--surface);
+        border: 1px dashed var(--line);
+        border-radius: var(--r-sm);
+        padding: 9px 12px;
+        margin: 6px 0;
+        width: 100%;
+        text-align: left;
+        font-size: 14px;
+      }
+      .taskrow b {
+        font-weight: 600;
+      }
+      .lb {
+        flex: none;
+        min-width: 24px;
+        height: 24px;
+        border-radius: 999px;
+        color: #fff;
+        font-family: var(--head);
+        font-weight: 700;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 6px;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 12px;
+        border-radius: 999px;
+        padding: 1px 8px;
+        margin: 6px 4px 0 0;
+        border: 1px solid var(--line);
+        color: var(--muted);
+      }
+      .tag.fix {
+        background: var(--l3);
+        border-color: var(--l3);
+        color: #fff;
+      }
+      .tag.ver {
+        border-color: var(--warn);
+        color: var(--warn);
+      }
+      .tag.ok {
+        border-color: var(--good);
+        color: var(--good);
+      }
+      .tag.opt {
+        border-style: dashed;
+      }
+      .tag.tz {
+        border-color: var(--l1);
+        color: var(--l1);
+      }
+      .money-line {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
+      }
+      .done-line {
+        font-size: 13px;
+        color: var(--good);
+        margin-top: 6px;
+      }
+      .list {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--r-md);
+        overflow: hidden;
+        margin: 10px 0;
+      }
+      .li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 0;
+        border-top: 1px solid var(--line);
+        background: none;
+        width: 100%;
+        text-align: left;
+        min-height: 52px;
+      }
+      .li:first-child {
+        border-top: 0;
+      }
+      .li .grow {
+        flex: 1;
+        min-width: 0;
+      }
+      .li .ttl {
+        font-weight: 500;
+        overflow-wrap: anywhere;
+      }
+      .li .meta {
+        font-size: 12px;
+        color: var(--faint);
+        display: block;
+      }
+      .amt {
+        text-align: right;
+        white-space: nowrap;
+      }
+      .amt b {
+        display: block;
+        font-family: var(--head);
+        font-weight: 600;
+      }
+      .amt span {
+        font-size: 12px;
+        color: var(--faint);
+      }
+      .cat {
+        width: 34px;
+        height: 34px;
+        flex: none;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+        font-family: var(--head);
+      }
+      .chk {
+        width: 30px;
+        height: 30px;
+        flex: none;
+        border-radius: 9px;
+        border: 2px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--surface);
+      }
+      .chk.on {
+        background: var(--l2);
+        border-color: var(--l2);
+      }
+      .chk svg {
+        width: 18px;
+        height: 18px;
+        color: #fff;
+        opacity: 0;
+      }
+      .chk.on svg {
+        opacity: 1;
+      }
+      .li.done .ttl {
+        text-decoration: line-through;
+        color: var(--faint);
+      }
+      .icon-btn {
+        background: none;
+        border: 0;
+        color: var(--faint);
+        padding: 8px;
+        border-radius: 10px;
+        min-width: 40px;
+        min-height: 40px;
+        font-size: 15px;
+      }
+      .bar {
+        height: 9px;
+        background: var(--sunk);
+        border-radius: 99px;
+        overflow: hidden;
+        margin-top: 6px;
+        display: flex;
+      }
+      .bar i {
+        display: block;
+        height: 100%;
+      }
+      .bar.over {
+        outline: 2px solid var(--bad);
+      }
+      .group-h {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 20px 2px 0;
+        gap: 8px;
+      }
+      .group-h h3 {
+        margin: 0;
+      }
+      .settle {
+        border-radius: var(--r-md);
+        padding: 14px 16px;
+        background: var(--sunk);
+        margin: 10px 0;
+      }
+      .av {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 600;
+        font-size: 13px;
+        flex: none;
+      }
+      .av.A {
+        background: var(--l1);
+      }
+      .av.B {
+        background: var(--l3);
+      }
+      .av.POOL {
+        background: var(--pool);
+      }
+      .legend {
+        display: grid;
+        gap: 6px;
+        font-size: 14px;
+      }
+      .legend span.sw {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 4px;
+        margin-right: 6px;
+        vertical-align: -1px;
+      }
+      .chartwrap {
+        display: grid;
+        grid-template-columns: 130px 1fr;
+        gap: 14px;
+        align-items: center;
+      }
+      .scrim {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 12, 16, 0.45);
+        z-index: 40;
+        display: none;
+      }
+      .sheet {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 41;
+        background: var(--surface);
+        border-radius: 22px 22px 0 0;
+        max-height: 90vh;
+        overflow: auto;
+        padding: 8px 18px calc(20px + env(safe-area-inset-bottom, 0px));
+        transform: translateY(105%);
+        transition: transform 0.25s ease;
+        max-width: 560px;
+        margin: 0 auto;
+      }
+      .sheet.open {
+        transform: none;
+      }
+      .scrim.open {
+        display: block;
+      }
+      .grab {
+        width: 40px;
+        height: 5px;
+        border-radius: 9px;
+        background: var(--line);
+        margin: 4px auto 12px;
+      }
+      label.f {
+        display: block;
+        font-size: 14px;
+        color: var(--muted);
+        margin: 14px 0 6px;
+      }
+      .in {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: var(--bg);
+        border-radius: var(--r-sm);
+        padding: 11px 12px;
+        font-size: 16px;
+        min-height: 46px;
+      }
+      textarea.in {
+        min-height: 80px;
+      }
+      .amount-in {
+        font-family: var(--head);
+        font-size: 30px;
+        font-weight: 700;
+        padding: 8px 12px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .chip {
+        border: 1px solid var(--line);
+        background: var(--bg);
+        border-radius: 999px;
+        padding: 8px 13px;
+        font-size: 14px;
+        min-height: 40px;
+      }
+      .chip[aria-pressed='true'] {
+        background: var(--ink);
+        color: var(--bg);
+        border-color: var(--ink);
+      }
+      .seg {
+        display: inline-flex;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .seg button {
+        border: 0;
+        background: var(--bg);
+        padding: 8px 14px;
+        font-weight: 600;
+        min-height: 40px;
+      }
+      .seg button[aria-pressed='true'] {
+        background: var(--ink);
+        color: var(--bg);
+      }
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+        transform: translateX(-50%);
+        background: var(--ink);
+        color: var(--bg);
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-size: 14px;
+        z-index: 60;
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
+        max-width: 90vw;
+        text-align: center;
+      }
+      .toast.show {
+        opacity: 1;
+      }
+      .note {
+        font-size: 13px;
+        color: var(--muted);
+        background: var(--sunk);
+        border-radius: var(--r-sm);
+        padding: 10px 12px;
+        margin-top: 10px;
+      }
+      .pre {
+        white-space: pre-line;
+        font-size: 14px;
+      }
+      .empty {
+        text-align: center;
+        padding: 22px 10px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .sleep-btns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .bigimg {
+        width: 100%;
+        border-radius: var(--r-md);
+        display: block;
+      }
+      .hbar {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 99px;
+        overflow: hidden;
+        margin: 14px 0 6px;
+        position: relative;
+      }
+      .hbar i {
+        display: block;
+        height: 100%;
+        background: #fff;
+        border-radius: 99px;
+      }
+      .hbtn {
+        margin-top: 12px;
+        background: #fff;
+        color: #14171d;
+        border: 0;
+        width: 100%;
+        font-weight: 600;
+      }
+      .countdown {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+        gap: 12px;
+      }
+      .countdown .nt {
+        font-family: var(--head);
+        font-weight: 600;
+        font-size: 18px;
+        line-height: 1.3;
+      }
+      .cd {
+        text-align: right;
+        flex: none;
+      }
+      .cd b {
+        display: block;
+        font-size: 24px;
+        line-height: 1.1;
+      }
+      .simbar {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        margin-top: 6px;
+      }
+      .simbar .btn {
+        min-height: 34px;
+        padding: 4px 12px;
+        font-size: 13px;
+      }
+      .steps4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        margin-top: 8px;
+      }
+      .steps4 .btn {
+        padding: 6px 4px;
+        font-size: 14px;
+      }
+      .btn[disabled] {
+        opacity: 0.4;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top" id="top"></header>
+    <main class="wrap" id="main"></main>
+    <nav class="nav" aria-label="เมนูหลัก"><div class="nav-in" id="nav"></div></nav>
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <input type="file" id="photoIn" accept="image/*" hidden />
+    <script>
+      const PAGE_SOURCE = '<!doctype html>\n' + document.documentElement.outerHTML
+      const $ = (s) => document.querySelector(s)
+      const esc = (s) =>
+        String(s ?? '').replace(
+          /[&<>"']/g,
+          (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
+        )
+      const LS = {
+        get(k, d) {
+          try {
+            const v = localStorage.getItem('seoul26.' + k)
+            return v == null ? d : JSON.parse(v)
+          } catch (e) {
+            return d
+          }
+        },
+        set(k, v) {
+          try {
+            localStorage.setItem('seoul26.' + k, JSON.stringify(v))
+            return true
+          } catch (e) {
+            return false
+          }
+        },
+      }
+      const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7)
+      const pad = (n) => String(n).padStart(2, '0')
+      function toast(m) {
+        const t = $('#toast')
+        t.textContent = m
+        t.classList.add('show')
+        clearTimeout(t._h)
+        t._h = setTimeout(() => t.classList.remove('show'), 2600)
+      }
+      const ICON = {
+        today:
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+        plan: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.5"/><circle cx="6" cy="19" r="2.5"/><path d="M6 7.5v9M11 5h9M11 19h9M11 12h6"/></svg>',
+        money:
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><circle cx="16" cy="14.5" r="1.3"/></svg>',
+        check:
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>',
+        info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+        tick: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+      }
+
+      /* ================= DEFAULT DATA ================= */
+      const DAYS = [
+        {
+          n: 0,
+          date: '2026-10-22',
+          label: 'พฤ. 22',
+          title: 'เตรียมตัวและไปสุวรรณภูมิ',
+          color: '--lc',
+          tz: 'TH',
+        },
+        {
+          n: 1,
+          date: '2026-10-23',
+          label: 'ศ. 23',
+          title: 'บิน มาถึง คลินิก คังนัม ฮงแด',
+          color: '--l2',
+          tz: 'KR',
+        },
+        {
+          n: 2,
+          date: '2026-10-24',
+          label: 'ส. 24',
+          title: 'วังเก่า ตลาด อึลจีโร ลำธาร',
+          color: '--l3',
+          tz: 'KR',
+        },
+        {
+          n: 3,
+          date: '2026-10-25',
+          label: 'อา. 25',
+          title: 'คาเฟ่ซองซู อึลจีโร แม่น้ำฮัน',
+          color: '--l5',
+          tz: 'KR',
+        },
+        {
+          n: 4,
+          date: '2026-10-26',
+          label: 'จ. 26',
+          title: 'เมียงดง รถไฟ เลานจ์ บินกลับ',
+          color: '--la',
+          tz: 'KR',
+        },
+        { n: 5, date: '2026-10-27', label: 'อ. 27', title: 'ถึงกรุงเทพ', color: '--lc', tz: 'TH' },
+      ]
+      const LINES = {
+        1: '--l1',
+        2: '--l2',
+        3: '--l3',
+        5: '--l5',
+        A: '--la',
+        W: '--lw',
+        car: '--lc',
+      }
+      const LINE_NAME = {
+        1: 'สาย 1',
+        2: 'สาย 2',
+        3: 'สาย 3',
+        5: 'สาย 5',
+        A: 'AREX',
+        W: 'เดิน',
+        car: 'รถ/แท็กซี่',
+      }
+      const KINDS = [
+        ['place', 'สถานที่'],
+        ['move', 'เดินทาง'],
+        ['flight', 'เที่ยวบิน'],
+        ['task', 'สิ่งที่ต้องทำ'],
+        ['wake', 'ตื่นนอน'],
+        ['sleep', 'เข้านอน'],
+      ]
+      const HOTEL_Q = '신촌 아늑호텔'
+      const HOTEL_ADDR = '49 Yonsei-ro 2-gil, Seodaemun-gu, Seoul 03780'
+      const X = (id, day, t, kind, title, o = {}) => ({ id, day, t, kind, title, desc: '', ...o })
+      const DEFAULT_PLAN = [
+        X('d0-pack', 0, '18:00', 'task', 'จัดกระเป๋ารอบสุดท้าย', {
+          desc: 'พาสปอร์ต บัตร UOB Premier, ttb absolute, YouTrip ปลั๊กแปลง พาวเวอร์แบงก์อยู่กระเป๋าถือ ชั่งน้ำหนักกระเป๋าเทียบกับที่ซื้อไว้',
+        }),
+        X('d0-leave', 0, '21:30', 'move', 'ออกจากบ้านไปสุวรรณภูมิ', {
+          l: 'car',
+          desc: 'เผื่อรถติด ให้ถึงก่อน 23:00',
+        }),
+        X('d0-bkk', 0, '23:00', 'place', 'สุวรรณภูมิ เช็กอิน VZ850', {
+          end: '23:40',
+          q: 'Suvarnabhumi Airport',
+          kr: 'BKK',
+          desc: 'เคาน์เตอร์ Thai VietJet โหลดกระเป๋า แล้วผ่าน ตม. ปิด Data Roaming ซิมไทยก่อนขึ้นเครื่อง',
+          tags: ['fix:บิน 02:25'],
+        }),
+        X('d0-lounge', 0, '23:45', 'place', 'เลานจ์สุวรรณภูมิ', {
+          end: '01:15',
+          q: 'Miracle Lounge Suvarnabhumi Airport',
+          kr: 'Lounge',
+          desc: 'Tribhurin ใช้สิทธิ์บัตร UOB Premier, Saowalak ใช้ Miracle Lounge ที่ซื้อเพิ่ม ถามเจ้าหน้าที่ว่าเดินไปเกตกี่นาที',
+        }),
+        X('d1-gate', 1, '01:15', 'move', 'ออกจากเลานจ์ เดินไปเกต', {
+          l: 'W',
+          tz: 'TH',
+          desc: 'บางเกตเดิน 10–15 นาที ประตูปิดราว 20 นาทีก่อนบิน',
+        }),
+        X('d1-board', 1, '01:45', 'task', 'เริ่มขึ้นเครื่อง', {
+          tz: 'TH',
+          desc: 'ที่นั่ง Saowalak 6F, Tribhurin 6E',
+        }),
+        X('d1-fly', 1, '02:25', 'flight', 'VZ850 กรุงเทพ → อินชอน', {
+          tz: 'TH',
+          end: '08:00',
+          desc: 'ถึงอินชอน 10:00 เวลาเกาหลี รหัสจอง 5S5QVT',
+          tags: ['fix:5S5QVT'],
+        }),
+        X('d1-land', 1, '10:00', 'place', 'ถึงสนามบินอินชอน', {
+          end: '11:45',
+          q: 'Incheon International Airport Terminal 1',
+          kr: '인천공항',
+          desc: 'ตม. รับกระเป๋า เปิด eSIM ซื้อ T-money เติม ₩20,000 แล้วขึ้นรถไฟให้ได้ก่อน 12:00',
+        }),
+        X('d1-arex', 1, '11:45', 'move', 'AREX รถไฟธรรมดา สนามบิน → Hongik Univ.', {
+          l: 'A',
+          desc: '~55 นาที อย่าขึ้นรถด่วน เพราะไม่จอดฮงแด',
+        }),
+        X('d1-l2a', 1, '12:45', 'move', 'สาย 2 Hongik Univ. → Sinchon (1 สถานี)', { l: '2' }),
+        X('d1-w1', 1, '12:50', 'move', 'เดินไป Aank Hotel (~5 นาที)', { l: 'W' }),
+        X('d1-hotel', 1, '13:00', 'place', 'Aank Hotel ฝากกระเป๋า', {
+          end: '13:25',
+          q: HOTEL_Q,
+          kr: '신촌 아늑호텔',
+          addr: HOTEL_ADDR,
+          desc: 'ขอ early check-in หรือฝากกระเป๋า แล้วออกไปคลินิก',
+        }),
+        X('d1-l2b', 1, '13:30', 'move', 'สาย 2 Sinchon → Gangnam ตรง 18 สถานี', {
+          l: '2',
+          desc: '~38 นาที ขึ้นฝั่งที่ไป Hongik Univ./Hapjeong',
+        }),
+        X('d1-w2', 1, '14:10', 'move', 'ออกสถานี Gangnam เดินไปคลินิก', {
+          l: 'W',
+          desc: 'เช็กทางออกใน Naver Map',
+        }),
+        X('d1-clinic', 1, '14:30', 'place', 'Toxnfill คลินิก สาขาคังนัม', {
+          end: '16:30',
+          q: '톡스앤필 강남본점',
+          kr: '톡스앤필 강남',
+          addr: '10–11F, 415 Gangnam-daero, Seocho-gu, Seoul 06614',
+          phone: '02-537-4842',
+          url: 'https://www.toxnfill1.com/',
+          hours: 'จ.–ส. 10:00–21:00',
+          desc: 'นัดไว้แล้ว ทำตามคำแนะนำหลังทำหัตถการ เก็บใบเสร็จไว้ขอ tax refund',
+          tags: ['fix:จองแล้ว'],
+        }),
+        X('d1-l2c', 1, '16:35', 'move', 'สาย 2 Gangnam → Samseong (3 สถานี)', { l: '2' }),
+        X('d1-w3', 1, '16:45', 'move', 'เดินไปวัด ตรงข้าม COEX (~10 นาที)', { l: 'W' }),
+        X('d1-temple', 1, '17:00', 'place', 'วัดบงอึนซา', {
+          end: '17:55',
+          q: '봉은사',
+          kr: '봉은사',
+          desc: 'วัดกลางคังนัม ช่วงพลบค่ำเงียบสงบ พูดเบาๆ ในโถง',
+          tags: ['ver'],
+        }),
+        X('d1-w4', 1, '17:55', 'move', 'เดินผ่าน COEX Mall ไปห้องสมุด ชั้น B1', { l: 'W' }),
+        X('d1-library', 1, '18:05', 'place', 'Starfield Library', {
+          end: '19:00',
+          q: '별마당도서관',
+          kr: '별마당 도서관',
+          hours: 'ทุกวัน 10:30–22:00',
+          desc: 'เข้าฟรี มุมสวยสุดคือบันไดด้านหน้า',
+        }),
+        X('d1-l2d', 1, '19:05', 'move', 'สาย 2 Samseong → Hongik Univ. ตรง 20 สถานี', {
+          l: '2',
+          desc: '~42 นาที ขึ้นฝั่งที่ไป Gangnam/Sadang',
+        }),
+        X('d1-dinner', 1, '19:50', 'place', 'Hong Jjukkumi ปลาหมึกผัด', {
+          end: '21:00',
+          q: '홍쭈꾸미 홍대',
+          kr: '홍쭈꾸미',
+          budget: 40000,
+          desc: 'เผ็ดมาก ถ้าคลินิกห้ามกินเผ็ดให้เปลี่ยนร้าน เช็กสาขาใน Naver Map',
+          tags: ['ver'],
+        }),
+        X('d1-hongdae', 1, '21:00', 'place', 'ถนนฮงแด', {
+          end: '22:00',
+          q: '홍대 걷고싶은거리',
+          kr: '홍대',
+          desc: 'ร้านค้าและนักดนตรีเปิดหมวก',
+          tags: ['opt'],
+        }),
+        X('d1-home', 1, '22:00', 'move', 'กลับที่พัก (เดิน ~20 นาที หรือสาย 2 หนึ่งสถานี)', {
+          l: 'W',
+        }),
+        X('d1-sleep', 1, '23:00', 'sleep', 'เข้านอน', {
+          desc: 'เมื่อคืนนอนบนเครื่อง นอนเร็วหน่อย',
+        }),
+        X('d2-wake', 2, '07:30', 'wake', 'ตื่นนอน', { desc: 'ออกจากที่พัก 08:30' }),
+        X('d2-l2', 2, '08:30', 'move', 'สาย 2 Sinchon → Chungjeongno (3 สถานี)', { l: '2' }),
+        X('d2-l5', 2, '08:40', 'move', 'สาย 5 Chungjeongno → Gwanghwamun (2 สถานี)', {
+          l: '5',
+          desc: 'เดินเปลี่ยนสายราว 4 นาที',
+        }),
+        X('d2-w1', 2, '08:50', 'move', 'ทางออก 2 เดินไปประตูวัง', { l: 'W' }),
+        X('d2-palace', 2, '09:00', 'place', 'พระราชวังคย็องบกกุง', {
+          end: '11:40',
+          q: '경복궁',
+          kr: '경복궁',
+          budget: 6000,
+          hours: '09:00–18:00 ปิดวันอังคาร',
+          desc: 'ค่าเข้า ₩3,000 ใส่ฮันบกเข้าฟรี พิธีเปลี่ยนเวรยามราว 10:00',
+          tags: ['ver'],
+        }),
+        X('d2-w2', 2, '11:40', 'move', 'เดินไปสถานี Gyeongbokgung', { l: 'W' }),
+        X('d2-l3', 2, '11:50', 'move', 'สาย 3 Gyeongbokgung → Jongno 3-ga (2 สถานี)', { l: '3' }),
+        X('d2-w3', 2, '12:00', 'move', 'ทางออก 11 เดินเลียบกำแพง Jongmyo ไป Seosulla-gil', {
+          l: 'W',
+          desc: '~12 นาที',
+        }),
+        X('d2-cafe', 2, '12:30', 'place', 'Seoul Gypsy คาเฟ่', {
+          end: '13:50',
+          q: '서울집시',
+          kr: '서울집시',
+          budget: 25000,
+          desc: 'คาเฟ่ในซอยเงียบข้างกำแพงศาลเจ้า',
+          tags: ['ver'],
+        }),
+        X('d2-w4', 2, '13:55', 'move', 'เดินไปตลาด (~18 นาที) หรือสาย 1 หนึ่งสถานี', { l: 'W' }),
+        X('d2-market', 2, '14:15', 'place', 'ตลาดควังจัง', {
+          end: '16:00',
+          q: '광장시장',
+          kr: '광장시장',
+          budget: 50000,
+          desc: 'บินแดต็อก มายักคิมบับ ต็อกบกกี ยุกฮเว ส่วนใหญ่รับเงินสด',
+          tags: ['ver', 'เงินสด'],
+        }),
+        X('d2-w5', 2, '16:00', 'move', 'เดินไปย่าน Euljiro 3-ga/4-ga (~15 นาที)', { l: 'W' }),
+        X('d2-hipjiro', 2, '16:15', 'place', 'เดินเล่นอึลจีโร', {
+          end: '17:50',
+          q: '을지로3가 힙지로',
+          kr: '힙지로',
+          budget: 15000,
+          desc: 'ตรอกโรงพิมพ์เก่ากับคาเฟ่ลับ',
+          tags: ['opt'],
+        }),
+        X('d2-crab', 2, '18:00', 'place', 'Odarijip ปูดอง', {
+          end: '19:20',
+          q: '오다리집 을지로',
+          kr: '오다리집',
+          budget: 90000,
+          desc: 'ไปเร็วหน่อย เช็กเวลาเปิดและจองใน Naver Map',
+          tags: ['ver', 'เงินสด'],
+        }),
+        X('d2-w6', 2, '19:20', 'move', 'เดินไปลำธาร (~10 นาที)', { l: 'W' }),
+        X('d2-stream', 2, '19:30', 'place', 'ลำธารชองกเยชอน', {
+          end: '20:45',
+          q: '청계천',
+          kr: '청계천',
+          desc: 'เปิดไฟสวยตอนกลางคืน เดินไปทางตะวันตก ~2 กม. ถึง Cheonggye Plaza',
+        }),
+        X('d2-w7', 2, '20:45', 'move', 'Cheonggye Plaza → สถานี Gwanghwamun', { l: 'W' }),
+        X('d2-l5b', 2, '20:55', 'move', 'สาย 5 Gwanghwamun → Chungjeongno', { l: '5' }),
+        X('d2-l2b', 2, '21:05', 'move', 'สาย 2 Chungjeongno → Sinchon', { l: '2' }),
+        X('d2-sleep', 2, '23:00', 'sleep', 'เข้านอน'),
+        X('d3-wake', 3, '09:00', 'wake', 'ตื่นนอน', { desc: 'ออกจากที่พัก 10:20' }),
+        X('d3-l2', 3, '10:20', 'move', 'สาย 2 Sinchon → Seongsu ตรง 14 สถานี', {
+          l: '2',
+          desc: '~33 นาที ผ่าน City Hall/Euljiro',
+        }),
+        X('d3-w1', 3, '10:55', 'move', 'ทางออก 3 เข้าย่านคาเฟ่', { l: 'W' }),
+        X('d3-seongsu', 3, '11:00', 'place', 'ย่านคาเฟ่ซองซู', {
+          end: '13:30',
+          q: '성수동 카페거리',
+          kr: '성수동',
+          budget: 30000,
+          desc: 'คาเฟ่โรงงานเก่า ร้านคอนเซปต์ ป๊อปอัป วันอาทิตย์คนเยอะ',
+        }),
+        X('d3-l2b', 3, '13:35', 'move', 'สาย 2 Seongsu → Euljiro 3-ga ตรง 8 สถานี', { l: '2' }),
+        X('d3-w2', 3, '13:55', 'move', 'เดินไปร้าน', { l: 'W' }),
+        X('d3-lunch', 3, '14:00', 'place', 'Sancheong มื้อกลางวัน', {
+          end: '15:15',
+          q: '산청 을지로',
+          kr: '을지로 산청',
+          budget: 40000,
+          hours: 'ทุกวัน 11:30–23:00',
+          desc: 'มื้อกลางวันสบายๆ',
+        }),
+        X('d3-w3', 3, '15:15', 'move', 'เดินไปสถานี Euljiro 4-ga', { l: 'W' }),
+        X('d3-l5', 3, '15:25', 'move', 'สาย 5 Euljiro 4-ga → Yeouinaru ตรง 8 สถานี', { l: '5' }),
+        X('d3-w4', 3, '15:50', 'move', 'ทางออก 2 ไปสวนริมแม่น้ำ', { l: 'W' }),
+        X('d3-river', 3, '16:30', 'place', 'สวนฮันกังยออีโด', {
+          end: '19:30',
+          q: '여의도한강공원',
+          kr: '여의도 한강공원',
+          budget: 20000,
+          desc: 'ต้มรามยอนราว 17:15 พระอาทิตย์ตกราว 17:35',
+        }),
+        X('d3-l5b', 3, '19:30', 'move', 'สาย 5 Yeouinaru → Chungjeongno', { l: '5' }),
+        X('d3-l2c', 3, '19:45', 'move', 'สาย 2 Chungjeongno → Sinchon', { l: '2' }),
+        X('d3-pack', 3, '21:00', 'task', 'จัดกระเป๋าล่วงหน้า', {
+          desc: 'ชั่งน้ำหนักเทียบกับที่ซื้อไว้ขากลับ แยกของ tax refund',
+        }),
+        X('d3-sleep', 3, '23:00', 'sleep', 'เข้านอน'),
+        X('d4-wake', 4, '08:00', 'wake', 'ตื่นนอน', { desc: 'อาบน้ำ เก็บของ เช็กเอาต์ 09:30' }),
+        X('d4-out', 4, '09:30', 'place', 'เช็กเอาต์ ฝากกระเป๋า', {
+          q: HOTEL_Q,
+          kr: '신촌 아늑호텔',
+          addr: HOTEL_ADDR,
+          desc: 'ฝากกระเป๋าไว้ที่โรงแรม กลับมารับ 14:00',
+        }),
+        X('d4-l2', 4, '09:40', 'move', 'สาย 2 Sinchon → Euljiro 1-ga (5 สถานี)', { l: '2' }),
+        X('d4-w1', 4, '09:55', 'move', 'เดินไปถนนเมียงดง (~12 นาที)', { l: 'W' }),
+        X('d4-myeongdong', 4, '10:15', 'place', 'ถนนเมียงดง', {
+          end: '12:50',
+          q: '명동거리',
+          kr: '명동',
+          budget: 30000,
+          desc: 'เครื่องสำอาง แฟชั่น ร้านเปิด 10:00–10:30 กินมื้อกลางวันที่นี่',
+        }),
+        X('d4-w2', 4, '12:50', 'move', 'เดินกลับสถานี Euljiro 1-ga', { l: 'W' }),
+        X('d4-l2b', 4, '13:05', 'move', 'สาย 2 Euljiro 1-ga → Sinchon', { l: '2' }),
+        X('d4-w3', 4, '13:25', 'move', 'เดินกลับโรงแรม', { l: 'W' }),
+        X('d4-bags', 4, '14:00', 'place', 'รับกระเป๋าที่โรงแรม', {
+          end: '15:00',
+          q: HOTEL_Q,
+          kr: '신촌 아늑호텔',
+          addr: HOTEL_ADDR,
+          desc: 'จัดกระเป๋า เช็กยอด T-money เหลืออย่างน้อย ₩5,000 ออกจากโรงแรม 15:00',
+        }),
+        X('d4-l2c', 4, '15:00', 'move', 'สาย 2 Sinchon → Hongik Univ.', { l: '2' }),
+        X('d4-arex', 4, '15:10', 'move', 'AREX รถไฟธรรมดา Hongik Univ. → อินชอน', {
+          l: 'A',
+          desc: '~55 นาที ช้าสุดไม่ควรเกิน 16:00 จาก Hongik',
+        }),
+        X('d4-icn', 4, '16:10', 'place', 'ถึงสนามบินอินชอน', {
+          q: 'Incheon International Airport',
+          kr: '인천공항',
+          desc: 'เช็กเทอร์มินัลของ TW101 ในตั๋วอีกครั้ง',
+        }),
+        X('d4-checkin', 4, '16:50', 'place', 'เช็กอิน TW101', {
+          end: '17:30',
+          q: 'Incheon International Airport',
+          kr: 'TW101',
+          desc: 'โหลดกระเป๋า เช็กน้ำหนักที่ซื้อไว้ ทำ tax refund ของที่จะโหลดก่อนเช็กอิน',
+          tags: ['fix:R3RS3N'],
+        }),
+        X('d4-lounge', 4, '17:40', 'place', 'เลานจ์อินชอน (ttb absolute)', {
+          end: '19:00',
+          q: 'Incheon Airport lounge',
+          kr: 'Lounge',
+          desc: 'เช็กว่าบัตร ttb absolute เข้าเลานจ์ไหนได้ในเทอร์มินัลนี้ และเดินไปเกตกี่นาที',
+        }),
+        X('d4-gate', 4, '19:00', 'move', 'ไปเกต', {
+          l: 'W',
+          desc: 'ถ้าเกตเลข 101 ขึ้นไป ต้องนั่งรถไฟภายในสนามบิน เผื่อเวลา',
+        }),
+        X('d4-board', 4, '19:20', 'task', 'ขึ้นเครื่อง'),
+        X('d4-fly', 4, '19:50', 'flight', 'TW101 อินชอน → กรุงเทพ', {
+          end: '02:10',
+          desc: 'ถึงสุวรรณภูมิ 00:10 เวลาไทย วันที่ 27',
+          tags: ['fix:R3RS3N'],
+        }),
+        X('d5-bkk', 5, '00:10', 'place', 'ถึงสุวรรณภูมิ', {
+          q: 'Suvarnabhumi Airport',
+          kr: 'BKK',
+          desc: 'สลับกลับใช้ซิมไทย ปิด eSIM เกาหลี',
+        }),
+      ]
+      const BUDGET = { 1: [42000, 61000], 2: [82000, 123000], 3: [41000, 71000], 4: [40000, 58000] }
+      const CATS = [
+        { id: 'food', name: 'อาหาร', c: '--l3' },
+        { id: 'cafe', name: 'คาเฟ่', c: '--l5' },
+        { id: 'move', name: 'เดินทาง', c: '--l2' },
+        { id: 'shop', name: 'ช้อปปิ้ง', c: '--pool' },
+        { id: 'ticket', name: 'ค่าเข้า', c: '--la' },
+        { id: 'clinic', name: 'คลินิก', c: '--l1' },
+        { id: 'other', name: 'อื่นๆ', c: '--lw' },
+      ]
+      const METHODS = ['เงินสด', 'YouTrip', 'บัตรเครดิต', 'T-money']
+      const CGROUPS = [
+        ['docs', 'เอกสาร'],
+        ['book', 'จองและซื้อ'],
+        ['money', 'เงินและมือถือ'],
+        ['pack', 'จัดกระเป๋า'],
+        ['clothes', 'เสื้อผ้า'],
+        ['airport', 'วันบิน 22 ต.ค.'],
+        ['d1', 'D1 ที่อินชอน'],
+        ['d2', 'D2'],
+        ['d3', 'D3'],
+        ['back', 'วันกลับ 26 ต.ค.'],
+      ]
+      const C = (id, g, t) => ({ id, g, t })
+      const DEFAULT_CHECK = [
+        C('c-passport', 'docs', 'พาสปอร์ตทั้งสองคน อายุเหลือเกิน 6 เดือน'),
+        C('c-keta', 'docs', 'เช็กเอกสารเข้าเกาหลี (K-ETA) ของคนไทยปีนี้'),
+        C('c-tix', 'docs', 'แคปตั๋ว VZ850 (5S5QVT) และ TW101 (R3RS3N)'),
+        C('c-hotel', 'docs', 'แคปการจอง Aank Hotel'),
+        C('c-clinicdoc', 'docs', 'แคปการนัด Toxnfill 23 ต.ค. 14:30'),
+        C('c-ins', 'docs', 'ประกันเดินทาง'),
+        C('c-lounge-a', 'book', 'เลานจ์ขาไป: เช็กสิทธิ์ UOB Premier ที่สุวรรณภูมิ (Tribhurin)'),
+        C('c-lounge-b', 'book', 'Miracle Lounge ของ Saowalak ซื้อแล้ว เก็บ voucher ไว้'),
+        C('c-lounge-back', 'book', 'เลานจ์ขากลับ: เช็กสิทธิ์ ttb absolute ที่อินชอน'),
+        C('c-bag-out', 'book', 'ซื้อน้ำหนักกระเป๋าเพิ่ม VZ850 แล้ว'),
+        C('c-bag-back', 'book', 'ซื้อน้ำหนักกระเป๋าเพิ่ม TW101 แล้ว'),
+        C('c-webcheck', 'book', 'เช็กอินออนไลน์ VZ850'),
+        C('c-clinic', 'book', 'ยืนยันนัดคลินิกอีกครั้ง'),
+        C('c-hotelask', 'book', 'ขอ early check-in หรือฝากกระเป๋ากับ Aank Hotel'),
+        C('c-esim', 'money', 'ซื้อและติดตั้ง eSIM (เปิดใช้ตอนถึงเกาหลี)'),
+        C('c-roam', 'money', 'ปิด Data Roaming ซิมไทย เปิด Wi-Fi Calling'),
+        C('c-youtrip', 'money', 'แลกวอนเข้า YouTrip'),
+        C('c-cash', 'money', 'เตรียมเงินสด (บาทไว้แลก หรือวอน ₩50,000–70,000)'),
+        C('c-cards', 'money', 'บัตร UOB Premier, ttb absolute, YouTrip อยู่ในกระเป๋าตังค์'),
+        C('c-apps', 'money', 'โหลด Naver Map, Papago, Kakao T'),
+        C('c-power', 'pack', 'พาวเวอร์แบงก์ในกระเป๋าถือ (ห้ามโหลด)'),
+        C('c-plug', 'pack', 'ปลั๊กแปลง (เกาหลีขากลม 220V) และสายชาร์จ'),
+        C('c-meds', 'pack', 'ยาประจำตัว และยาหรือของหลังทำหัตถการ'),
+        C('c-liquid', 'pack', 'ของเหลวในกระเป๋าถือไม่เกิน 100 ml ต่อชิ้น'),
+        C('c-space', 'pack', 'เว้นที่ในกระเป๋าไว้ใส่ของช้อป'),
+        C('c-weigh', 'pack', 'ชั่งน้ำหนักกระเป๋าแล้ว'),
+        C('c-jacket', 'clothes', 'แจ็กเก็ตหรือเสื้อกันหนาว (ปลาย ต.ค. โซลเย็น)'),
+        C('c-outfit', 'clothes', 'ชุดเที่ยว 4 วัน'),
+        C('c-under', 'clothes', 'ชุดชั้นในและถุงเท้า 5 ชุด'),
+        C('c-sleepwear', 'clothes', 'ชุดนอน'),
+        C('c-shoes', 'clothes', 'รองเท้าเดินสบาย'),
+        C('c-leave', 'airport', 'ออกจากบ้าน 21:30'),
+        C('c-counter', 'airport', 'เช็กอินเคาน์เตอร์ VietJet และโหลดกระเป๋า'),
+        C('c-lounge-in', 'airport', 'เข้าเลานจ์ราว 23:45'),
+        C('c-gate', 'airport', 'ออกจากเลานจ์ 01:15 ถึงเกตก่อน 01:30'),
+        C('c-d1esim', 'd1', 'เปิด eSIM ตั้ง Cellular Data และเปิด Data Roaming ที่ eSIM'),
+        C('c-d1tm', 'd1', 'ซื้อ T-money และเติม ₩20,000'),
+        C('c-d1train', 'd1', 'ขึ้น AREX รถไฟธรรมดาก่อน 12:00'),
+        C('c-d2book', 'd2', 'จองหรือเช็กเวลาเปิด Odarijip'),
+        C('c-d2cash', 'd2', 'พกเงินสดไปตลาดควังจัง'),
+        C('c-d3tm', 'd3', 'เติม T-money อีก ₩10,000–15,000'),
+        C('c-backtm', 'back', 'T-money เหลืออย่างน้อย ₩5,000'),
+        C('c-backbags', 'back', 'รับกระเป๋าที่โรงแรม 14:00 ออก 15:00'),
+        C('c-backtrain', 'back', 'ขึ้น AREX จาก Hongik ไม่เกิน 16:00'),
+        C('c-backterm', 'back', 'ยืนยันเทอร์มินัลของ TW101'),
+        C('c-backtax', 'back', 'ทำ tax refund ก่อนโหลดกระเป๋า'),
+        C('c-backspend', 'back', 'ใช้เงินที่เหลือในบัตรให้หมด'),
+      ]
+      const DEFAULT_INFO = [
+        {
+          id: 'i-flight',
+          ord: 1,
+          title: 'เที่ยวบิน',
+          body: "ขาไป VZ850 (Thai VietJet)\nศ. 23 ต.ค. 02:25 กรุงเทพ → 10:00 อินชอน\nรหัสจอง 5S5QVT  หมายเลข 2045822046\nที่นั่ง Saowalak 6F, Tribhurin 6E\n\nขากลับ TW101 (T'way)\nจ. 26 ต.ค. 19:50 อินชอน → 00:10 กรุงเทพ (27 ต.ค.)\nรหัสจอง R3RS3N  หมายเลข 2045822045",
+          links: '',
+          copy: '5S5QVT',
+        },
+        {
+          id: 'i-hotel',
+          ord: 2,
+          title: 'Aank Hotel Sinchon (신촌 아늑호텔)',
+          body: '49 Yonsei-ro 2-gil, Seodaemun-gu, Seoul 03780\nใกล้สถานี Sinchon สาย 2\nยื่นชื่อภาษาเกาหลีให้แท็กซี่ดูได้',
+          links:
+            'Google Maps | https://www.google.com/maps/search/?api=1&query=' +
+            encodeURIComponent('Aank Hotel Sinchon 49 Yonsei-ro 2-gil') +
+            '\nNaver Map | https://map.naver.com/p/search/' +
+            encodeURIComponent(HOTEL_Q),
+          copy: '신촌 아늑호텔 연세로2길 49',
+        },
+        {
+          id: 'i-clinic',
+          ord: 3,
+          title: 'Toxnfill สาขาคังนัม (톡스앤필 강남본점)',
+          body: 'ศ. 23 ต.ค. 14:30 ประมาณ 2 ชม.\n10–11F, 415 Gangnam-daero, Seocho-gu, Seoul 06614\nโทร 02-537-4842\nเปิด จ.–ส. 10:00–21:00',
+          links:
+            'Google Maps | https://www.google.com/maps/search/?api=1&query=' +
+            encodeURIComponent('Toxnfill Gangnam 415 Gangnam-daero') +
+            '\nNaver Map | https://map.naver.com/p/search/' +
+            encodeURIComponent('톡스앤필 강남본점') +
+            '\nเว็บไซต์ | https://www.toxnfill1.com/\nโทร | tel:025374842',
+          copy: '',
+        },
+        {
+          id: 'i-lounge',
+          ord: 4,
+          title: 'เลานจ์',
+          body: 'ขาไป (สุวรรณภูมิ)\nTribhurin: บัตร UOB Premier\nSaowalak: Miracle Lounge ที่ซื้อเพิ่ม\nเข้า 23:45 ออก 01:15 ถึงเกตก่อน 01:30 (เครื่องออก 02:25)\n\nขากลับ (อินชอน)\nบัตร ttb absolute เข้าราว 17:40 ออก 19:00',
+          links: '',
+          copy: '',
+        },
+        {
+          id: 'i-sos',
+          ord: 5,
+          title: 'ฉุกเฉิน',
+          body: 'ตำรวจ 112\nรถพยาบาล/ดับเพลิง 119\nสายด่วนนักท่องเที่ยว 1330 (มีล่าม)',
+          links: 'โทร 112 | tel:112\nโทร 119 | tel:119\nโทร 1330 | tel:1330',
+          copy: '',
+        },
+        {
+          id: 'i-tips',
+          ord: 6,
+          title: 'ทิปที่คุยกันไว้',
+          body: 'ซิมไทยปิด Data Roaming รับสายเบอร์ไทยที่เกาหลีเสียค่าโรมมิ่ง ตัดสายแล้วโทรกลับทาง LINE\nจากสนามบินนั่ง AREX รถไฟธรรมดา รถด่วนไม่จอดฮงแด\nT-money เติมเงินสดทีละ ₩10,000 เงินเหลือใช้ซื้อของร้านสะดวกซื้อได้\nร้านทั่วไปรูด YouTrip ได้ ตลาดกับร้านเก่าพกเงินสด',
+          links: '',
+          copy: '',
+        },
+      ]
+
+      /* ================= TIME ================= */
+      const off = (tz) => (tz === 'TH' ? 7 : 9)
+      function msAt(dateStr, hm, tz) {
+        const [y, mo, d] = dateStr.split('-').map(Number)
+        const [h, mi] = String(hm || '00:00')
+          .split(':')
+          .map(Number)
+        return Date.UTC(y, mo - 1, d, h - off(tz), mi)
+      }
+      function partsIn(ms, tz) {
+        const d = new Date(ms + off(tz) * 3600e3)
+        return {
+          y: d.getUTCFullYear(),
+          mo: d.getUTCMonth() + 1,
+          d: d.getUTCDate(),
+          h: d.getUTCHours(),
+          mi: d.getUTCMinutes(),
+        }
+      }
+      const hmOf = (ms, tz) => {
+        const p = partsIn(ms, tz)
+        return pad(p.h) + ':' + pad(p.mi)
+      }
+      const itemTz = (it) => it.tz || (DAYS[it.day] || DAYS[1]).tz
+      function fmtDur(ms) {
+        const m = Math.max(0, Math.round(ms / 60e3))
+        const d = Math.floor(m / 1440),
+          h = Math.floor((m % 1440) / 60),
+          mi = m % 60
+        if (d) return `${d} วัน ${h} ชม.`
+        if (h) return `${h} ชม. ${mi} นาที`
+        return `${mi} นาที`
+      }
+      const SIMS = [
+        ['', 'เวลาจริง'],
+        ['pre', 'ก่อนบิน', msAt('2026-10-20', '12:00', 'TH')],
+        ['air', 'สุวรรณภูมิ', msAt('2026-10-22', '23:55', 'TH')],
+        ['d1', 'D1 15:00', msAt('2026-10-23', '15:00', 'KR')],
+        ['d2w', 'D2 08:05', msAt('2026-10-24', '08:05', 'KR')],
+        ['d2', 'D2 14:40', msAt('2026-10-24', '14:40', 'KR')],
+        ['d3', 'D3 17:10', msAt('2026-10-25', '17:10', 'KR')],
+        ['d4', 'D4 15:30', msAt('2026-10-26', '15:30', 'KR')],
+      ]
+      let sim = LS.get('sim', '')
+      if (typeof sim !== 'number') {
+        const s0 = SIMS.find((x) => x[0] === sim && x[2])
+        sim = s0 ? s0[2] : ''
+      }
+      function now() {
+        return typeof sim === 'number' ? sim : Date.now()
+      }
+      function setSim(v) {
+        sim = v
+        LS.set('sim', sim)
+        render()
+      }
+      function simCard() {
+        const t = now(),
+          k = partsIn(t, 'KR')
+        return `<div class="card" id="simcard"><div class="between"><h3>ทดลองเวลา</h3><span class="tiny">${sim !== '' ? 'กำลังจำลอง' : 'ใช้เวลาจริง'}</span></div>
+    <div class="small muted">เลือกวันและเวลาเกาหลีเอง เพื่อดูหน้าจอตอนอยู่เกาหลี</div>
+    <input class="in" type="datetime-local" id="simdt" style="margin-top:8px" value="${k.y}-${pad(k.mo)}-${pad(k.d)}T${pad(k.h)}:${pad(k.mi)}" min="2026-10-20T00:00" max="2026-10-27T06:00">
+    <div class="steps4"><button class="btn" data-act="simstep" data-m="-60">−1 ชม.</button><button class="btn" data-act="simstep" data-m="-15">−15 นาที</button><button class="btn" data-act="simstep" data-m="15">+15 นาที</button><button class="btn" data-act="simstep" data-m="60">+1 ชม.</button></div>
+    <div class="chips" style="margin-top:10px">${SIMS.map((x) => `<button class="chip" data-sim="${x[0]}" aria-pressed="${x[2] ? sim === x[2] : sim === ''}">${x[1]}</button>`).join('')}</div></div>`
+      }
+      const TRIP_LIVE = msAt('2026-10-22', '17:00', 'TH')
+      const TRIP_END = msAt('2026-10-27', '03:00', 'TH')
+
+      /* ================= STATE + STORE ================= */
+      const COLS = [
+        'meta',
+        'plan',
+        'clist',
+        'checks',
+        'info',
+        'expenses',
+        'pool',
+        'wallet',
+        'stops',
+        'sleep',
+        'photos',
+      ]
+      const S = {
+        meta: {},
+        plan: {},
+        clist: {},
+        checks: {},
+        info: {},
+        expenses: [],
+        pool: [],
+        wallet: {},
+        stops: {},
+        sleep: {},
+        photos: [],
+      }
+      const MAPCOLS = ['plan', 'clist', 'checks', 'info', 'wallet', 'stops', 'sleep']
+      let me = LS.get('me', 'A')
+      let tab = LS.get('tab', 'today')
+      let planDay = LS.get('planDay', 1)
+      let store = null,
+        unsubs = [],
+        syncState = { kind: 'local', err: false },
+        readOnly = false,
+        downloadsCap = null
+      const names = () => ({
+        A: S.meta.nameA || 'Tribhurin',
+        B: S.meta.nameB || 'Saowalak',
+        POOL: 'กองกลาง',
+      })
+      const rate = () => (Number(S.meta.rate) > 0 ? Number(S.meta.rate) : 23)
+
+      function LocalStore() {
+        const subs = {}
+        const read = (c) => LS.get('db.' + c, {})
+        const arr = (o) => Object.entries(o).map(([id, v]) => ({ id, ...v }))
+        return {
+          kind: 'local',
+          subscribe(c, cb) {
+            ;(subs[c] = subs[c] || []).push(cb)
+            cb(arr(read(c)))
+            return () => {}
+          },
+          async set(c, id, data) {
+            const o = read(c)
+            o[id] = data
+            if (!LS.set('db.' + c, o)) throw { code: 'quota' }
+            ;(subs[c] || []).forEach((f) => f(arr(o)))
+          },
+          async del(c, id) {
+            const o = read(c)
+            delete o[id]
+            LS.set('db.' + c, o)
+            ;(subs[c] || []).forEach((f) => f(arr(o)))
+          },
+        }
+      }
+      function RemoteStore(kind, colRef) {
+        return {
+          kind,
+          subscribe(c, cb) {
+            return colRef(c).onSnapshot(
+              (s) => cb(s.docs.map((d) => ({ id: d.id, ...d.data() }))),
+              () => {
+                syncState.err = true
+                renderTop()
+              },
+            )
+          },
+          set: (c, id, data) => colRef(c).doc(id).set(data),
+          del: (c, id) => colRef(c).doc(id).delete(),
+        }
+      }
+      function apply(c, rows) {
+        if (c === 'meta') S.meta = rows.find((r) => r.id === 'settings') || {}
+        else if (MAPCOLS.includes(c)) S[c] = Object.fromEntries(rows.map((r) => [r.id, r]))
+        else S[c] = rows
+      }
+      function connect(st) {
+        unsubs.forEach((u) => {
+          try {
+            u()
+          } catch (e) {}
+        })
+        store = st
+        syncState = { kind: st.kind, err: false }
+        unsubs = COLS.map((c) =>
+          st.subscribe(c, (rows) => {
+            apply(c, rows)
+            scheduleRender()
+          }),
+        )
+        renderTop()
+      }
+      let rq = 0
+      function scheduleRender() {
+        cancelAnimationFrame(rq)
+        rq = requestAnimationFrame(render)
+      }
+      const strip = (o) => {
+        const x = { ...o }
+        delete x.id
+        delete x.ms
+        delete x.endMs
+        return x
+      }
+      async function put(c, id, data) {
+        if (readOnly) {
+          toast('บัญชีนี้ดูได้อย่างเดียว แก้ไขไม่ได้')
+          return false
+        }
+        try {
+          await store.set(c, id, strip(data))
+          return true
+        } catch (e) {
+          if (e && e.code === 'invalid_argument') {
+            toast('บันทึกไม่ได้ ข้อมูลอาจใหญ่เกินไปหรือไม่มีสิทธิ์แก้ไข')
+          } else if (e && (e.code === 'quota' || e.code === 'quota_exceeded'))
+            toast('พื้นที่เก็บข้อมูลเต็ม ลองลบรูปบางรูป')
+          else toast('บันทึกไม่สำเร็จ ลองอีกครั้ง')
+          return false
+        }
+      }
+      async function del(c, id) {
+        if (readOnly) {
+          toast('บัญชีนี้ดูได้อย่างเดียว')
+          return
+        }
+        try {
+          await store.del(c, id)
+        } catch (e) {
+          toast('ลบไม่สำเร็จ')
+        }
+      }
+      function loadScript(src) {
+        return new Promise((res, rej) => {
+          const s = document.createElement('script')
+          s.src = src
+          s.onload = res
+          s.onerror = rej
+          document.head.appendChild(s)
+        })
+      }
+      async function startFirebase(cfg, code) {
+        if (!window.firebase) {
+          await loadScript('https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js')
+          await loadScript(
+            'https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-firestore-compat.js',
+          )
+        }
+        const app = firebase.apps.length ? firebase.app() : firebase.initializeApp(cfg)
+        const base = app.firestore().collection('trips').doc(code)
+        connect(RemoteStore('firebase', (c) => base.collection(c)))
+      }
+
+      /* ================= MERGED VIEWS ================= */
+      function planAll() {
+        const map = {}
+        DEFAULT_PLAN.forEach((p) => (map[p.id] = { ...p }))
+        Object.values(S.plan).forEach((d) => {
+          if (d.deleted) delete map[d.id]
+          else map[d.id] = { ...(map[d.id] || {}), ...d }
+        })
+        const arr = Object.values(map)
+          .filter((p) => DAYS[p.day])
+          .map((p) => {
+            const tz = itemTz(p),
+              date = DAYS[p.day].date
+            const ms = msAt(date, p.t, tz)
+            return { ...p, tz, ms }
+          })
+          .sort((a, b) => a.ms - b.ms || (a.kind === 'move') - (b.kind === 'move'))
+        arr.forEach((p, i) => {
+          let e = null
+          if (p.end) {
+            e = msAt(DAYS[p.day].date, p.end, p.tz)
+            if (e <= p.ms) e += 864e5
+          } else {
+            const nx = arr[i + 1]
+            e = nx ? Math.min(nx.ms, p.ms + 60 * 60e3) : p.ms + 60 * 60e3
+            if (e <= p.ms) e = p.ms + 15 * 60e3
+          }
+          p.endMs = e
+        })
+        return arr
+      }
+      function checkAll() {
+        const map = {}
+        DEFAULT_CHECK.forEach((c) => (map[c.id] = { ...c, def: true }))
+        Object.values(S.clist).forEach((d) => {
+          if (d.deleted) delete map[d.id]
+          else map[d.id] = { ...(map[d.id] || {}), ...d }
+        })
+        return Object.values(map)
+      }
+      function infoAll() {
+        const map = {}
+        DEFAULT_INFO.forEach((c) => (map[c.id] = { ...c }))
+        Object.values(S.info).forEach((d) => {
+          if (d.deleted) delete map[d.id]
+          else map[d.id] = { ...(map[d.id] || {}), ...d }
+        })
+        return Object.values(map).sort((a, b) => (a.ord || 99) - (b.ord || 99))
+      }
+      const photosOf = (id) =>
+        S.photos.filter((p) => p.item === id).sort((a, b) => (a.ts || 0) - (b.ts || 0))
+
+      /* ================= MONEY ================= */
+      const W = (k) => (k < 0 ? '−' : '') + '₩' + Math.abs(Math.round(k)).toLocaleString('en-US')
+      const B = (k) =>
+        (k < 0 ? '−' : '') + '฿' + Math.abs(Math.round((k * rate()) / 1000)).toLocaleString('en-US')
+      function shares(e) {
+        const k = Number(e.krw) || 0
+        const a =
+          e.split === 'A'
+            ? k
+            : e.split === 'B'
+              ? 0
+              : e.split === 'custom'
+                ? Math.min(k, Math.max(0, Number(e.shareA) || 0))
+                : k / 2
+        return { A: a, B: k - a }
+      }
+      function calc() {
+        const P = { A: { paid: 0, contrib: 0, share: 0 }, B: { paid: 0, contrib: 0, share: 0 } }
+        let poolSpent = 0,
+          total = 0
+        const byDay = {},
+          byCat = {},
+          byItem = {}
+        for (const e of S.expenses) {
+          const k = Number(e.krw) || 0
+          total += k
+          if (e.payer === 'POOL') poolSpent += k
+          else if (P[e.payer]) P[e.payer].paid += k
+          const s = shares(e)
+          P.A.share += s.A
+          P.B.share += s.B
+          const d = (byDay[e.day || 0] = byDay[e.day || 0] || { A: 0, B: 0, t: 0 })
+          d.A += s.A
+          d.B += s.B
+          d.t += k
+          byCat[e.cat] = (byCat[e.cat] || 0) + k
+          if (e.item) byItem[e.item] = (byItem[e.item] || 0) + k
+        }
+        for (const p of S.pool) if (P[p.who]) P[p.who].contrib += Number(p.krw) || 0
+        const tc = P.A.contrib + P.B.contrib,
+          left = tc - poolSpent
+        const refA = tc > 0 ? (left * P.A.contrib) / tc : left / 2,
+          refB = left - refA
+        const netA = P.A.paid + P.A.contrib - P.A.share - refA
+        return { P, poolSpent, total, tc, left, refA, refB, netA, byDay, byCat, byItem }
+      }
+
+      /* ================= HEADER / NAV ================= */
+      function renderTop() {
+        const t = now(),
+          k = partsIn(t, 'KR'),
+          th = partsIn(t, 'TH')
+        const label = {
+          local: 'ข้อมูลอยู่ในเครื่องนี้',
+          claude: 'ซิงก์ 2 คนผ่าน Claude (เดโม)',
+          firebase: 'ซิงก์ 2 คนผ่าน Firebase',
+        }[syncState.kind]
+        $('#top').innerHTML =
+          `<div class="top-row"><div class="brand"><span class="dot" aria-hidden="true"></span>Seoul 26</div>
+    <div class="clocks"><span class="clock">เกาหลี<b>${pad(k.h)}:${pad(k.mi)}</b></span><span class="clock">ไทย<b>${pad(th.h)}:${pad(th.mi)}</b></span></div></div>
+    <div class="sync ${syncState.err ? 'err' : syncState.kind !== 'local' ? 'on' : ''}"><i></i>${syncState.err ? 'ซิงก์ขัดข้อง' : label}${readOnly ? ', ดูอย่างเดียว' : ''}</div>${sim !== '' ? `<div class="simbar"><span class="tiny" style="color:var(--warn)">กำลังจำลองเวลา</span><button class="btn" data-act="simreset">กลับเวลาจริง</button></div>` : ''}`
+      }
+      const TABS = [
+        ['today', 'วันนี้'],
+        ['plan', 'แผน'],
+        ['money', 'เงิน'],
+        ['check', 'เช็กลิสต์'],
+        ['info', 'ข้อมูล'],
+      ]
+      function renderNav() {
+        $('#nav').innerHTML = TABS.map(
+          ([id, n]) =>
+            `<button data-tab="${id}" ${tab === id ? 'aria-current="page"' : ''}>${ICON[id]}<span>${n}</span></button>`,
+        ).join('')
+      }
+
+      /* ================= MAPS / CALENDAR / FILES ================= */
+      const naver = (q) => 'https://map.naver.com/p/search/' + encodeURIComponent(q)
+      const gmap = (q) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q)
+      const icsDate = (ms) =>
+        new Date(ms)
+          .toISOString()
+          .replace(/[-:]/g, '')
+          .replace(/\.\d{3}/, '')
+      const icsEsc = (s) =>
+        String(s || '')
+          .replace(/\\/g, '\\\\')
+          .replace(/[,;]/g, (m) => '\\' + m)
+          .replace(/\n/g, '\\n')
+      function buildIcs(items) {
+        const ev = items.map((p) =>
+          [
+            'BEGIN:VEVENT',
+            'UID:' + p.id + '@seoul26',
+            'DTSTAMP:' + icsDate(Date.now()),
+            'DTSTART:' + icsDate(p.ms),
+            'DTEND:' + icsDate(p.endMs),
+            'SUMMARY:' + icsEsc(p.title),
+            'DESCRIPTION:' +
+              icsEsc([p.desc, p.addr, p.q ? gmap(p.q) : ''].filter(Boolean).join('\n')),
+            'LOCATION:' + icsEsc(p.addr || p.q || ''),
+            'BEGIN:VALARM',
+            'TRIGGER:-PT30M',
+            'ACTION:DISPLAY',
+            'DESCRIPTION:' + icsEsc(p.title),
+            'END:VALARM',
+            'END:VEVENT',
+          ].join('\r\n'),
+        )
+        return [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//Seoul26//TH',
+          'CALSCALE:GREGORIAN',
+          ...ev,
+          'END:VCALENDAR',
+        ].join('\r\n')
+      }
+      const gcal = (p) =>
+        'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' +
+        encodeURIComponent(p.title) +
+        '&dates=' +
+        icsDate(p.ms) +
+        '/' +
+        icsDate(p.endMs) +
+        '&details=' +
+        encodeURIComponent(p.desc || '') +
+        '&location=' +
+        encodeURIComponent(p.addr || p.q || '')
+      async function saveFile(filename, text, mime) {
+        const blob = new Blob([text], { type: mime })
+        if (downloadsCap) {
+          try {
+            await downloadsCap.save({ filename, data: blob })
+            toast('บันทึกไฟล์แล้ว')
+            return
+          } catch (e) {
+            if (e && e.code === 'declined') return
+          }
+        }
+        try {
+          const a = document.createElement('a')
+          a.href = URL.createObjectURL(blob)
+          a.download = filename
+          document.body.appendChild(a)
+          a.click()
+          setTimeout(() => {
+            URL.revokeObjectURL(a.href)
+            a.remove()
+          }, 1500)
+        } catch (e) {
+          toast('ดาวน์โหลดไม่ได้ในหน้านี้')
+        }
+      }
+
+      /* ================= STATUS ================= */
+      function statusInfo(t, items) {
+        const done = items.filter(
+          (p) =>
+            S.stops[p.id] &&
+            S.stops[p.id].status === 'done' &&
+            S.stops[p.id].at &&
+            p.ms <= t + 3 * 3600e3,
+        )
+        let delay = null,
+          ref = null
+        if (done.length) {
+          ref = done[done.length - 1]
+          const st = S.stops[ref.id]
+          let act = msAt(DAYS[ref.day].date, st.at, ref.tz)
+          if (act - ref.ms > 12 * 3600e3) act -= 864e5
+          if (ref.ms - act > 12 * 3600e3) act += 864e5
+          delay = Math.round((act - ref.ms) / 60e3)
+        }
+        return { delay, ref }
+      }
+      function delayPill(d) {
+        if (d == null) return '<span class="pill ok">ยังไม่มีการเช็กอิน</span>'
+        if (d > 5) return `<span class="pill late">ช้ากว่าแพลน ${fmtDur(d * 60e3)}</span>`
+        if (d < -5) return `<span class="pill early">เร็วกว่าแพลน ${fmtDur(-d * 60e3)}</span>`
+        return '<span class="pill ok">ตรงตามแพลน</span>'
+      }
+      function sleepKey(dateStr, p) {
+        return dateStr + '_' + p
+      }
+      function nightDate(t) {
+        const p = partsIn(t - 6 * 3600e3, 'KR')
+        return `${p.y}-${pad(p.mo)}-${pad(p.d)}`
+      }
+
+      /* ================= PLACE CARD ================= */
+      function coverHtml(p, color) {
+        const ph = photosOf(p.id)
+        const img = ph.length
+          ? `<img src="${ph[ph.length - 1].data}" alt="">`
+          : '<span class="deco"></span><span class="deco2"></span>'
+        return `<div class="cover" style="--cc:var(${color})">${img}${ph.length ? '<span class="shade"></span>' : ''}<span class="kr">${esc(p.kr || p.title)}</span>${ph.length ? `<span class="cnt">${ph.length} รูป</span>` : ''}</div>`
+      }
+      function tagsHtml(p) {
+        let h = (p.tags || [])
+          .map((t) =>
+            t === 'ver'
+              ? '<span class="tag ver">เช็กเวลาเปิดก่อนไป</span>'
+              : t === 'opt'
+                ? '<span class="tag opt">ไม่บังคับ</span>'
+                : t.startsWith('fix:')
+                  ? `<span class="tag fix">${esc(t.slice(4))}</span>`
+                  : `<span class="tag">${esc(t)}</span>`,
+          )
+          .join('')
+        if (p.tz !== DAYS[p.day].tz)
+          h = `<span class="tag tz">เวลา${p.tz === 'TH' ? 'ไทย' : 'เกาหลี'}</span>` + h
+        if (p.hours) h += `<span class="tag ok">${esc(p.hours)}</span>`
+        return h
+      }
+      function placeCard(p, c, opts = {}) {
+        const st = S.stops[p.id] || {},
+          n = names()
+        const spent = (c && c.byItem[p.id]) || 0
+        const ph = photosOf(p.id)
+        const exps = S.expenses
+          .filter((e) => e.item === p.id)
+          .sort((a, b) => (a.ts || 0) - (b.ts || 0))
+        const det = [
+          p.addr ? esc(p.addr) : '',
+          p.phone
+            ? `<a href="tel:${esc(p.phone.replace(/[^\d+]/g, ''))}">โทร ${esc(p.phone)}</a>`
+            : '',
+          p.url
+            ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.url.replace(/^https?:\/\//, '').replace(/\/$/, ''))}</a>`
+            : '',
+        ].filter(Boolean)
+        return `<div class="pc">${p.kind === 'place' ? coverHtml(p, opts.color || DAYS[p.day].color) : ''}<div class="in">
+    <h3>${esc(p.title)}</h3>${p.desc ? `<p>${esc(p.desc)}</p>` : ''}<div>${tagsHtml(p)}</div>
+    ${det.length ? `<div class="det">${det.map((x) => `<span>${x}</span>`).join('')}</div>` : ''}
+    ${st.note ? `<div class="note">${esc(st.note)}</div>` : ''}
+    ${st.status === 'done' ? `<div class="done-line">ถึงแล้ว ${esc(st.at || '')}${st.by ? ' โดย ' + esc(n[st.by]) : ''}</div>` : st.status === 'skip' ? '<div class="tiny">ข้ามจุดนี้</div>' : ''}
+    ${p.budget || spent ? `<div class="money-line"><span class="muted">ใช้จริง ${W(spent)} ≈ ${B(spent)}${exps.length ? ` (${exps.length} รายการ)` : ''}</span><span class="${p.budget && spent > p.budget ? '' : 'muted'}" style="${p.budget && spent > p.budget ? 'color:var(--bad)' : ''}">${p.budget ? 'งบ ' + W(p.budget) : ''}</span></div>` : ''}
+    ${ph.length ? `<div class="thumbs">${ph.map((x) => `<button data-act="viewphoto" data-id="${x.id}" aria-label="ดูรูป"><img src="${x.data}" alt=""></button>`).join('')}</div>` : ''}
+    ${exps.length ? `<div class="list" style="margin:10px 0 0">${exps.map(expRow).join('')}</div>` : ''}
+    <div class="actions">
+      <button class="btn ${st.status === 'done' ? '' : 'green'}" data-act="stop" data-id="${p.id}">${st.status ? 'แก้สถานะ' : 'เช็กอิน'}</button>
+      <button class="btn" data-act="nav" data-id="${p.id}" ${p.q || p.addr ? '' : 'disabled'}>นำทาง</button>
+      <button class="btn" data-act="addexp" data-item="${p.id}">+ เงิน</button>
+    </div>
+    <button class="btn block" style="margin-top:8px" data-act="more" data-id="${p.id}">เพิ่มรูป ลงปฏิทิน แก้ไข</button>
+  </div></div>`
+      }
+      function moveRow(p) {
+        const line = p.l || 'W'
+        return `<button class="mvrow" data-act="edititem" data-id="${p.id}">${line === 'W' ? '' : `<span class="lb" style="background:var(${LINES[line] || '--lw'})">${line === 'car' ? 'รถ' : line}</span>`}<span><span style="color:var(--ink)">${esc(p.title)}</span>${p.desc ? `<br><span class="tiny">${esc(p.desc)}</span>` : ''}${p.tz !== DAYS[p.day].tz ? ' <span class="tag tz">เวลาไทย</span>' : ''}</span></button>`
+      }
+      function taskRow(p) {
+        const icon = { wake: 'ตื่น', sleep: 'นอน', task: 'ทำ', flight: 'บิน' }[p.kind] || ''
+        const st = S.stops[p.id] || {}
+        return `<button class="taskrow" data-act="edititem" data-id="${p.id}"><b>${icon ? icon + ': ' : ''}${esc(p.title)}</b>${st.status === 'done' ? ' <span class="tiny" style="color:var(--good)">เสร็จ ' + esc(st.at || '') + '</span>' : ''}${p.desc ? `<br><span class="tiny">${esc(p.desc)}</span>` : ''}${p.tz !== DAYS[p.day].tz ? ' <span class="tag tz">เวลาไทย</span>' : ''}</button>`
+      }
+
+      /* ================= TODAY ================= */
+      function renderToday() {
+        const t = now(),
+          items = planAll(),
+          c = calc(),
+          n = names()
+        let h = ''
+        if (t < TRIP_LIVE) {
+          const bkk =
+            items.find((p) => p.id === 'd0-bkk') || items.find((p) => p.day === 0) || items[0]
+          const pre = checkAll().filter((x) =>
+            ['docs', 'book', 'money', 'pack', 'clothes'].includes(x.g),
+          )
+          const dn = pre.filter((x) => S.checks[x.id] && S.checks[x.id].done).length
+          const todo = pre.filter((x) => !(S.checks[x.id] && S.checks[x.id].done)).slice(0, 5)
+          h += `<div class="hero g"><div class="ring"></div><div class="k">อีกนานแค่ไหนถึงเวลาเช็กอินที่สุวรรณภูมิ</div><div class="big">${fmtDur(bkk.ms - t)}</div><div class="sub">พฤ. 22 ต.ค. ${bkk.t} น. บิน VZ850 ตี 2:25</div></div>
+      <div class="card"><div class="between"><h3>เตรียมตัวก่อนบิน</h3><span class="num">${dn}/${pre.length}</span></div><div class="bar"><i style="width:${pre.length ? (dn / pre.length) * 100 : 0}%;background:var(--l2)"></i></div>
+      ${todo.length ? `<div class="list">${todo.map((x) => checkRow(x)).join('')}</div>` : '<div class="tiny" style="margin-top:8px">เตรียมครบแล้ว</div>'}
+      <div class="btns"><button class="btn" data-tab="check">ดูเช็กลิสต์ทั้งหมด</button><button class="btn" data-act="calsheet">ลงปฏิทิน</button></div></div>
+      <h2>แผน 6 วัน</h2>${DAYS.map((d) => `<button class="li card" style="margin:8px 0" data-goday="${d.n}"><span class="lb" style="background:var(${d.color})">${d.n === 0 ? 'เตรียม' : d.n === 5 ? 'กลับ' : 'D' + d.n}</span><span class="grow"><span class="ttl">${esc(d.title)}</span><span class="meta">${d.label} ต.ค. ${items.filter((p) => p.day === d.n && p.kind === 'place').length} สถานที่</span></span></button>`).join('')}`
+        } else if (t > TRIP_END) {
+          h += `<div class="hero ink"><div class="ring"></div><div class="k">จบทริปแล้ว ใช้ไปทั้งหมด</div><div class="big">${W(c.total)}</div><div class="sub">≈ ${B(c.total)}</div></div>${settleBox(c)}`
+        } else {
+          const act = [...items].reverse().find((p) => p.ms <= t) || items[0]
+          const cur = [...items].reverse().find((p) => p.ms <= t && p.kind !== 'move')
+          const next = items.find((p) => p.ms > t)
+          const nextMain = items.find((p) => p.ms > t && p.kind !== 'move')
+          const { delay } = statusInfo(t, items)
+          const dn = act.day,
+            day = DAYS[dn]
+          const heroCls =
+            { '--l2': 'g', '--l3': 'o', '--l5': 'p', '--la': 'b', '--lc': 'ink' }[day.color] || 'g'
+          const span = Math.max(60e3, act.endMs - act.ms),
+            el = Math.min(span, Math.max(0, t - act.ms)),
+            over = t > act.endMs
+          const stA = S.stops[act.id] || {}
+          h += `<div class="hero ${heroCls}"><div class="ring"></div><div class="k">${dn === 0 ? 'วันเดินทาง' : 'D' + dn} ${act.kind === 'move' ? 'กำลังเดินทาง' : over ? 'เลยเวลาของจุดนี้แล้ว' : 'ตอนนี้'}</div>
+      <div class="big">${esc(act.title)}</div><div class="sub">${act.t}–${hmOf(act.endMs, act.tz)}${act.tz !== day.tz ? ' เวลาไทย' : ''}</div>
+      <div class="hbar" role="progressbar" aria-valuenow="${Math.round((el / span) * 100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${(el / span) * 100}%"></i></div>
+      <div class="between" style="font-size:14px"><span>ผ่านไป ${fmtDur(el)}</span><span>${over ? 'เกินมา ' + fmtDur(t - act.endMs) : 'เหลือ ' + fmtDur(act.endMs - t)}</span></div>
+      ${act.kind !== 'move' && !stA.status ? `<button class="btn hbtn" data-act="quickdone" data-id="${act.id}">ถึงแล้ว เช็กอินตอนนี้</button>` : stA.status === 'done' ? `<div class="sub" style="margin-top:8px">เช็กอินแล้ว ${esc(stA.at)}</div>` : ''}</div>`
+          h += `<div class="card"><div class="between"><span class="small muted">เทียบกับแพลน</span>${delayPill(delay)}</div>
+      ${next ? `<div class="countdown"><div><div class="tiny">ต่อไป ${next.t}${next.tz !== DAYS[next.day].tz ? ' (เวลาไทย)' : ''}</div><div class="nt">${esc(next.title)}</div></div><div class="cd"><span class="tiny">อีก</span><b class="num">${fmtDur(next.ms - t)}</b></div></div>` : ''}
+      ${delay != null && delay > 5 && next ? `<div class="tiny" style="margin-top:6px">ถ้ายังช้าอยู่ ${fmtDur(delay * 60e3)} จะเริ่ม "${esc(next.title)}" ราว ${hmOf(next.ms + delay * 60e3, next.tz)}</div>` : ''}
+      ${delay != null && delay > 10 && nextMain ? `<div class="note">ลองตัดเวลาที่จุดนี้ หรือข้ามจุดที่มีป้าย "ไม่บังคับ" เพื่อให้ทัน ${esc(nextMain.title)}</div>` : ''}
+      ${delay == null ? '<div class="tiny" style="margin-top:6px">กด "เช็กอิน" เมื่อถึงแต่ละที่ แอปจะบอกว่าช้าหรือเร็วกว่าแพลนกี่นาที</div>' : ''}</div>`
+          const todays = items.filter((p) => p.day === dn && p.kind !== 'move')
+          const doneN = todays.filter((p) => S.stops[p.id] && S.stops[p.id].status).length,
+            passed = todays.filter((p) => p.ms <= t).length
+          h += `<div class="card"><div class="between"><h3>ความคืบหน้า${dn === 0 ? 'วันเดินทาง' : ' D' + dn}</h3><span class="num small">${doneN}/${todays.length}</span></div>
+      <div class="bar" style="position:relative"><i style="width:${todays.length ? (doneN / todays.length) * 100 : 0}%;background:var(--l2)"></i></div>
+      <div class="tiny" style="margin-top:4px">เช็กอินแล้ว ${doneN} จุด ตามเวลาควรถึงแล้ว ${passed} จุด${passed > doneN ? `, ยังไม่ได้เช็กอิน ${passed - doneN} จุด` : ''}</div>
+      <div class="list">${items
+        .filter((p) => p.ms > t)
+        .slice(0, 5)
+        .map(
+          (p) =>
+            `<button class="li" data-goday="${p.day}"><span class="num" style="width:46px">${p.t}</span><span class="grow"><span class="ttl">${esc(p.title)}</span><span class="meta">อีก ${fmtDur(p.ms - t)}</span></span></button>`,
+        )
+        .join('')}</div></div>`
+          if (act.kind === 'place') h += placeCard(act, c)
+          if (nextMain && nextMain.kind === 'place' && nextMain !== act)
+            h +=
+              `<div class="group-h"><h3>จุดถัดไป</h3><span class="tiny">${nextMain.t}</span></div>` +
+              placeCard(nextMain, c)
+          h += sleepCard(t, items)
+          if (dn >= 1 && dn <= 4) {
+            const bd = c.byDay[dn] || { A: 0, B: 0 },
+              bud = BUDGET[dn][1]
+            h += `<div class="group-h"><h3>เงินวันนี้ (ต่อคน)</h3><button class="btn" data-tab="money">ดูทั้งหมด</button></div><div class="grid2">${['A', 'B'].map((p) => `<div class="stat"><div class="l">${esc(n[p])}</div><div class="v">${W(bd[p])}</div><div class="tiny">≈ ${B(bd[p])} งบ ${W(bud)}</div><div class="bar ${bd[p] > bud ? 'over' : ''}"><i style="width:${Math.min(100, (bd[p] / bud) * 100)}%;background:var(${p === 'A' ? '--l1' : '--l3'})"></i></div></div>`).join('')}</div>`
+          }
+          if (dn === 4) {
+            const low = ['A', 'B'].filter(
+              (p) => (Number((S.wallet['tmoney_' + p] || {}).bal) || 0) < 5000,
+            )
+            if (low.length)
+              h += `<div class="note">T-money ของ ${low.map((p) => esc(n[p])).join(' และ ')} เหลือไม่ถึง ₩5,000 (≈ ${B(5000)}) เติมก่อนขึ้นรถไฟไปสนามบิน</div>`
+          }
+        }
+        h += simCard()
+        return h
+      }
+      function sleepCard(t, items) {
+        const n = names(),
+          nd = nightDate(t)
+        const nextWake = items.find((p) => p.kind === 'wake' && p.ms > t - 3 * 3600e3)
+        const lastSleepPlan = [...items]
+          .reverse()
+          .find((p) => p.kind === 'sleep' && p.ms <= t + 4 * 3600e3)
+        const rows = ['A', 'B']
+          .map((p) => {
+            const rec = S.sleep[sleepKey(nd, p)] || {}
+            let txt = 'ยังไม่บันทึก'
+            if (rec.bed && rec.wake)
+              txt = `นอน ${hmOf(rec.bed, 'KR')} ตื่น ${hmOf(rec.wake, 'KR')} (${fmtDur(rec.wake - rec.bed)})`
+            else if (rec.bed)
+              txt = `เข้านอน ${hmOf(rec.bed, 'KR')}${nextWake ? `, นอนได้อีก ${fmtDur(nextWake.ms - Math.max(t, rec.bed))}` : ''}`
+            else if (rec.wake) txt = `ตื่น ${hmOf(rec.wake, 'KR')}`
+            let late = ''
+            if (rec.wake && nextWake && Math.abs(rec.wake - nextWake.ms) < 6 * 3600e3) {
+              const d = Math.round((rec.wake - nextWake.ms) / 60e3)
+              late =
+                d > 5
+                  ? ` <span class="pill late" style="font-size:12px;padding:1px 8px">ตื่นช้า ${d} นาที</span>`
+                  : ' <span class="pill ok" style="font-size:12px;padding:1px 8px">ทันแพลน</span>'
+            }
+            return `<div class="between small" style="margin-top:6px"><span><span class="av ${p}" style="width:22px;height:22px;font-size:11px">${esc(n[p].slice(0, 1))}</span> ${esc(n[p])}</span><span class="muted">${txt}${late}</span></div>`
+          })
+          .join('')
+        return `<div class="card"><div class="between"><h3>นอนและตื่น</h3><span class="tiny">${nextWake ? `ต้องตื่น ${nextWake.t} (${DAYS[nextWake.day].label})` : ''}</span></div>
+    ${lastSleepPlan ? `<div class="tiny">แผนเข้านอน ${lastSleepPlan.t}${nextWake ? `, ถ้านอนตอนนี้จะได้ ${fmtDur(nextWake.ms - t)}` : ''}</div>` : ''}
+    ${rows}<div class="sleep-btns"><button class="btn" data-act="bed">เข้านอนแล้ว (${esc(n[me])})</button><button class="btn green" data-act="wake">ตื่นแล้ว (${esc(n[me])})</button></div></div>`
+      }
+
+      /* ================= PLAN ================= */
+      function renderPlan() {
+        const t = now(),
+          items = planAll(),
+          c = calc()
+        const cur = [...items].reverse().find((p) => p.ms <= t && t < p.endMs && p.kind !== 'move')
+        const d = DAYS[planDay] || DAYS[1]
+        const list = items.filter((p) => p.day === d.n)
+        const spentDay = list.reduce((a, p) => a + (c.byItem[p.id] || 0), 0),
+          budDay = list.reduce((a, p) => a + (Number(p.budget) || 0), 0)
+        let h = `<h2>แผนเที่ยว</h2><div class="days">${DAYS.map((x) => `<button class="day" style="--dc:var(${x.color})" data-day="${x.n}" aria-pressed="${x.n === d.n}"><b>${x.n === 0 ? 'เตรียม' : x.n === 5 ? 'กลับ' : 'D' + x.n}</b><span>${x.label}</span></button>`).join('')}</div>
+    <div class="card"><h3>${esc(d.title)}</h3><div class="tiny">${d.label} ต.ค. 2026 เวลา${d.tz === 'TH' ? 'ไทย' : 'เกาหลี'}${budDay ? `, งบในแผน ${W(budDay)} ≈ ${B(budDay)}` : ''}${spentDay ? `, ใช้จริง ${W(spentDay)}` : ''}</div>
+    <div class="btns"><button class="btn green" data-act="newitem" data-day="${d.n}">+ เพิ่มรายการ</button>${cur && cur.day === d.n ? '<button class="btn" data-act="gonow">ไปที่ตอนนี้</button>' : ''}<button class="btn" data-act="calsheet" data-day="${d.n}">ลงปฏิทินทั้งวัน</button></div></div>
+    <div style="--dc:var(${d.color})">`
+        if (!list.length)
+          h += `<div class="card empty">วันนี้ยังไม่มีรายการ กด "+ เพิ่มรายการ" เพื่อเริ่ม</div>`
+        list.forEach((p, i) => {
+          const st = S.stops[p.id] || {}
+          const rc =
+            p.kind === 'move'
+              ? LINES[p.l] || '--lw'
+              : list[i + 1] && list[i + 1].kind === 'move'
+                ? LINES[list[i + 1].l] || '--lw'
+                : '--lw'
+          const minor = p.kind !== 'place'
+          const cls = [
+            'it',
+            p.kind === 'move' && (p.l || 'W') === 'W' ? 'walk' : '',
+            minor ? 'minor' : '',
+            st.status === 'done' ? 'done' : '',
+            st.status === 'skip' ? 'skip' : '',
+            cur && cur.id === p.id ? 'now' : '',
+          ].join(' ')
+          const body =
+            p.kind === 'place' ? placeCard(p, c) : p.kind === 'move' ? moveRow(p) : taskRow(p)
+          h += `<div class="${cls}" style="--rc:var(${rc})"><div class="t">${p.t}${p.end && p.kind === 'place' ? `<small>${p.end}</small>` : ''}${p.tz !== d.tz ? '<small>ไทย</small>' : ''}</div><div class="rail">${p.kind === 'move' ? '' : '<span class="node"></span>'}</div><div>${body}</div></div>`
+        })
+        h += `</div><button class="btn block green" style="margin-top:12px" data-act="newitem" data-day="${d.n}">+ เพิ่มรายการใน${d.n === 0 ? 'วันเตรียมตัว' : ' D' + d.n}</button>
+    <div class="note">กดที่รายการเดินทางหรือสิ่งที่ต้องทำเพื่อแก้ไข เวลาเรียงอัตโนมัติ ถ้าแก้เวลาแล้วรายการจะย้ายตำแหน่งเอง</div>`
+        return h
+      }
+
+      /* ================= MONEY ================= */
+      function settleBox(c) {
+        const n = names(),
+          diff = Math.round(c.netA)
+        let line = 'ตอนนี้ไม่มีใครติดเงินใคร'
+        if (diff > 0)
+          line = `${esc(n.B)} โอนให้ ${esc(n.A)} <span class="num">${W(diff)}</span> <span class="muted small">≈ ${B(diff)}</span>`
+        if (diff < 0)
+          line = `${esc(n.A)} โอนให้ ${esc(n.B)} <span class="num">${W(-diff)}</span> <span class="muted small">≈ ${B(-diff)}</span>`
+        const refund =
+          c.tc > 0 && Math.round(c.left) !== 0
+            ? `<div class="tiny" style="margin-top:6px">คิดรวมการคืนเงินกองกลางที่เหลือ ${W(c.left)} ตามสัดส่วนที่ลง: ${esc(n.A)} ${W(c.refA)}, ${esc(n.B)} ${W(c.refB)}</div>`
+            : ''
+        return `<div class="settle"><div class="small muted">ใครติดเงินใคร</div><div style="margin-top:4px;font-size:17px">${line}</div>${refund}<div class="tiny" style="margin-top:6px">ไม่ได้หารสองทั้งหมด คิดจากแต่ละรายการว่าใครจ่ายและเป็นส่วนของใคร</div></div>`
+      }
+      function donut(segs, total) {
+        const R = 52,
+          L = 2 * Math.PI * R
+        let acc = 0
+        const circles =
+          total > 0
+            ? segs
+                .map((s) => {
+                  const len = (s.v / total) * L
+                  const el = `<circle r="${R}" cx="65" cy="65" fill="none" stroke="var(${s.c})" stroke-width="18" stroke-dasharray="${len} ${L - len}" stroke-dashoffset="${-acc}" transform="rotate(-90 65 65)"/>`
+                  acc += len
+                  return el
+                })
+                .join('')
+            : ''
+        return `<svg viewBox="0 0 130 130" width="130" height="130" role="img" aria-label="สัดส่วนค่าใช้จ่ายตามหมวด"><circle r="${R}" cx="65" cy="65" fill="none" stroke="var(--sunk)" stroke-width="18"/>${circles}<text x="65" y="62" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--body)">รวม</text><text x="65" y="80" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)" font-family="var(--head)">${total >= 1e6 ? (total / 1e6).toFixed(1) + 'M' : Math.round(total / 1000) + 'k'}</text></svg>`
+      }
+      function expRow(e) {
+        const cat = CATS.find((x) => x.id === e.cat) || CATS[6],
+          n = names(),
+          s = shares(e)
+        const it = e.item ? planAll().find((p) => p.id === e.item) : null
+        const splitTxt =
+          e.split === 'A'
+            ? 'ของ ' + n.A
+            : e.split === 'B'
+              ? 'ของ ' + n.B
+              : e.split === 'custom'
+                ? `${n.A} ${W(s.A)}, ${n.B} ${W(s.B)}`
+                : 'หารครึ่ง'
+        return `<button class="li" data-act="editexp" data-id="${e.id}"><span class="cat" style="background:var(${cat.c})">${cat.name.slice(0, 2)}</span><span class="grow"><span class="ttl">${esc(e.title || (it ? it.title : cat.name))}</span><span class="meta">${esc(n[e.payer] || '')} จ่าย${e.method ? ' ด้วย ' + esc(e.method) : ''}, ${esc(splitTxt)}${it && e.title ? ', ' + esc(it.title) : ''}${e.cur === 'THB' ? `, จ่าย ฿${Number(e.amt).toLocaleString('en-US')}` : ''}</span></span><span class="amt"><b>${W(e.krw)}</b><span>≈ ${B(e.krw)}</span></span></button>`
+      }
+      function renderMoney() {
+        const c = calc(),
+          n = names(),
+          items = planAll()
+        const cats = CATS.filter((x) => c.byCat[x.id]).map((x) => ({ ...x, v: c.byCat[x.id] }))
+        let h = `<h2>เงิน</h2><div class="hero b"><div class="ring"></div><div class="k">ใช้ไปทั้งหมด 2 คน</div><div class="big">${W(c.total)}</div><div class="sub">≈ ${B(c.total)} เรต ₩1,000 = ฿${rate()}</div></div>${settleBox(c)}
+  <div class="grid2">${['A', 'B'].map((p) => `<div class="stat"><div class="row"><span class="av ${p}">${esc(n[p].slice(0, 1))}</span><span class="l">${esc(n[p])}</span></div><div class="v" style="margin-top:6px">${W(c.P[p].share)}</div><div class="tiny">ส่วนที่ใช้จริง ≈ ${B(c.P[p].share)}</div><div class="tiny">ควักจ่าย ${W(c.P[p].paid)}, ลงกองกลาง ${W(c.P[p].contrib)}</div></div>`).join('')}</div>`
+        h += `<div class="group-h"><h3>ใช้ไปกับอะไร</h3></div><div class="card">${cats.length ? `<div class="chartwrap">${donut(cats, c.total)}<div class="legend">${cats.map((x) => `<div class="between"><span><span class="sw" style="background:var(${x.c})"></span>${x.name}</span><span class="num small">${Math.round((x.v / c.total) * 100)}%</span></div>`).join('')}</div></div>` : '<div class="empty">ยังไม่มีรายการ กราฟจะขึ้นเมื่อเริ่มบันทึก</div>'}</div>`
+        const maxDay = Math.max(
+          1,
+          ...[1, 2, 3, 4].map((d) => Math.max(BUDGET[d][1] * 2, (c.byDay[d] || { t: 0 }).t)),
+        )
+        h += `<div class="group-h"><h3>รายวันเทียบงบ</h3><span class="tiny"><span class="sw" style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--l1)"></span> ${esc(n.A)} <span class="sw" style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--l3);margin-left:6px"></span> ${esc(n.B)}</span></div><div class="card">${[
+          0, 1, 2, 3, 4,
+        ]
+          .map((d) => {
+            const bd = c.byDay[d] || { A: 0, B: 0, t: 0 }
+            const bud = BUDGET[d] ? BUDGET[d][1] * 2 : 0
+            if (!bd.t && !bud) return ''
+            return `<div style="margin:10px 0"><div class="between small"><span><b>${d === 0 ? 'ก่อนเดินทาง' : 'D' + d}</b> ${W(bd.t)} <span class="tiny">≈ ${B(bd.t)}</span></span><span class="tiny">${bud ? 'งบ 2 คน ' + W(bud) : ''}</span></div><div class="bar ${bud && bd.t > bud ? 'over' : ''}"><i style="width:${(bd.A / maxDay) * 100}%;background:var(--l1)"></i><i style="width:${(bd.B / maxDay) * 100}%;background:var(--l3)"></i></div>${bud ? `<div style="position:relative;height:0"><span style="position:absolute;left:${(bud / maxDay) * 100}%;top:-13px;width:2px;height:13px;background:var(--ink);opacity:.5"></span></div>` : ''}</div>`
+          })
+          .join('')}<div class="tiny">เส้นขีดคืองบ ไม่รวมคลินิกและช้อปปิ้ง</div></div>`
+        const linked = items.filter((p) => c.byItem[p.id] || p.budget)
+        if (linked.length)
+          h += `<div class="group-h"><h3>ตามแผน</h3><span class="tiny">ใช้จริง/งบ</span></div><div class="list">${linked
+            .map((p) => {
+              const s = c.byItem[p.id] || 0
+              return `<button class="li" data-act="addexp" data-item="${p.id}"><span class="lb" style="background:var(${DAYS[p.day].color})">${p.day === 0 ? 'ต' : p.day === 5 ? 'ก' : 'D' + p.day}</span><span class="grow"><span class="ttl">${esc(p.title)}</span><span class="meta">${p.budget ? 'งบ ' + W(p.budget) : 'ไม่ได้ตั้งงบ'}${p.budget ? `<span class="bar ${s > p.budget ? 'over' : ''}" style="display:flex"><i style="width:${Math.min(100, (s / p.budget) * 100)}%;background:var(--l2)"></i></span>` : ''}</span></span><span class="amt"><b>${W(s)}</b><span>≈ ${B(s)}</span></span></button>`
+            })
+            .join('')}</div>`
+        h += `<div class="card"><div class="between"><div class="row"><span class="av POOL">กล</span><h3 style="margin:0">กองกลาง</h3></div><button class="btn" data-act="addpool">ลงเงิน</button></div>
+    <div class="grid2" style="margin-top:10px"><div><div class="tiny">ลงไปแล้ว</div><div class="num">${W(c.tc)}</div></div><div><div class="tiny">เหลือ</div><div class="num" style="${c.left < 0 ? 'color:var(--bad)' : ''}">${W(c.left)}</div><div class="tiny">≈ ${B(c.left)}</div></div></div>
+    ${
+      S.pool.length
+        ? `<div class="list">${[...S.pool]
+            .sort((a, b) => (b.ts || 0) - (a.ts || 0))
+            .map(
+              (p) =>
+                `<div class="li"><span class="av ${p.who}">${esc(n[p.who].slice(0, 1))}</span><span class="grow"><span class="ttl">${esc(n[p.who])} ลงเงิน</span><span class="meta">${esc(p.note || '')}</span></span><span class="amt"><b>${W(p.krw)}</b><span>≈ ${B(p.krw)}</span></span><button class="icon-btn" data-act="delpool" data-id="${p.id}" aria-label="ลบ">ลบ</button></div>`,
+            )
+            .join('')}</div>`
+        : '<div class="tiny" style="margin-top:8px">เช่น ลงคนละ ₩50,000 ไว้จ่ายค่าอาหารร่วมกัน</div>'
+    }</div>`
+        h += `<div class="group-h"><h3>กระเป๋าเงิน</h3><span class="tiny">กดเพื่อปรับยอด</span></div><div class="grid2">${[
+          'A',
+          'B',
+        ]
+          .flatMap((p) =>
+            [
+              ['tmoney', 'T-money'],
+              ['cash', 'เงินสด'],
+            ].map(([w, wn]) => {
+              const bal = Number((S.wallet[w + '_' + p] || {}).bal) || 0
+              return `<button class="stat" data-act="wallet" data-w="${w}_${p}"><div class="l">${wn} ${esc(n[p])}</div><div class="v">${W(bal)}</div><div class="tiny">≈ ${B(bal)}${w === 'tmoney' && bal < 5000 ? ', เหลือน้อย' : ''}</div></button>`
+            }),
+          )
+          .join('')}</div>`
+        h += `<div class="group-h"><h3>รายการทั้งหมด</h3><span class="tiny">${S.expenses.length} รายการ</span></div>`
+        if (!S.expenses.length)
+          h += `<div class="card empty">ยังไม่มีรายการ กดปุ่ม "+ เพิ่มค่าใช้จ่าย" ด้านล่าง</div>`
+        ;[0, 1, 2, 3, 4, 5].forEach((dn) => {
+          const rows = S.expenses
+            .filter((e) => (e.day || 0) === dn)
+            .sort((a, b) => (b.ts || 0) - (a.ts || 0))
+          if (!rows.length) return
+          const sum = rows.reduce((a, e) => a + (Number(e.krw) || 0), 0)
+          h += `<div class="between" style="margin:14px 2px 0"><span class="small"><b>${dn === 0 ? 'ก่อนเดินทาง' : dn === 5 ? 'หลังกลับ' : 'D' + dn + ' ' + DAYS[dn].label + ' ต.ค.'}</b></span><span class="tiny">${W(sum)} ≈ ${B(sum)}</span></div><div class="list">${rows.map(expRow).join('')}</div>`
+        })
+        h += `<div class="btns"><button class="btn" data-act="csv">ส่งออก CSV</button><button class="btn" data-act="rate">เปลี่ยนเรตเงิน</button></div>`
+        return h
+      }
+
+      /* ================= CHECKLIST ================= */
+      function checkRow(x) {
+        const ck = S.checks[x.id] || {},
+          n = names()
+        return `<div class="li ${ck.done ? 'done' : ''}"><button class="chk ${ck.done ? 'on' : ''}" data-act="tick" data-id="${x.id}" aria-pressed="${!!ck.done}" aria-label="ติ๊ก">${ICON.tick}</button><span class="grow" data-act="tick" data-id="${x.id}"><span class="ttl">${esc(x.t)}</span>${ck.done && ck.by ? `<span class="meta">${esc(n[ck.by])} ติ๊ก</span>` : ''}</span><button class="icon-btn" data-act="editcheck" data-id="${x.id}" aria-label="แก้ไข">แก้</button></div>`
+      }
+      function renderCheck() {
+        const all = checkAll()
+        const dn = all.filter((x) => S.checks[x.id] && S.checks[x.id].done).length
+        let h = `<h2>เช็กลิสต์</h2><div class="card"><div class="between"><span class="small muted">ทำไปแล้ว</span><span class="num">${dn}/${all.length}</span></div><div class="bar"><i style="width:${all.length ? (dn / all.length) * 100 : 0}%;background:var(--l2)"></i></div>
+    <div class="btns"><button class="btn green" data-act="newcheck">+ เพิ่มรายการ</button></div></div>`
+        CGROUPS.forEach(([g, gn]) => {
+          const items = all.filter((x) => x.g === g).sort((a, b) => (a.ts || 0) - (b.ts || 0))
+          const gd = items.filter((x) => S.checks[x.id] && S.checks[x.id].done).length
+          h += `<div class="group-h"><h3>${gn}</h3><span class="row"><span class="tiny">${gd}/${items.length}</span><button class="icon-btn" data-act="newcheck" data-g="${g}" aria-label="เพิ่มใน${gn}">+ เพิ่ม</button></span></div>`
+          h += items.length
+            ? `<div class="list">${items.map(checkRow).join('')}</div>`
+            : '<div class="tiny" style="margin:8px 2px">ยังไม่มีรายการ</div>'
+        })
+        return h
+      }
+
+      /* ================= INFO ================= */
+      function renderInfo() {
+        const n = names(),
+          cards = infoAll()
+        let h = `<h2>ข้อมูลสำคัญ</h2>`
+        h += cards
+          .map((cd) => {
+            const links = String(cd.links || '')
+              .split('\n')
+              .map((l) => l.split('|').map((x) => x.trim()))
+              .filter((x) => x[0] && x[1])
+            return `<div class="card"><div class="between"><h3>${esc(cd.title)}</h3><button class="icon-btn" data-act="editinfo" data-id="${cd.id}">แก้</button></div><div class="pre">${esc(cd.body)}</div>
+      ${links.length || cd.copy ? `<div class="btns">${links.map(([l, u]) => `<a class="btn" href="${esc(u)}" ${u.startsWith('tel:') ? '' : 'target="_blank" rel="noopener"'}>${esc(l)}</a>`).join('')}${cd.copy ? `<button class="btn" data-act="copy" data-v="${esc(cd.copy)}">คัดลอก ${esc(cd.copy.length > 14 ? cd.copy.slice(0, 14) + '…' : cd.copy)}</button>` : ''}</div>` : ''}</div>`
+          })
+          .join('')
+        h += `<button class="btn block" data-act="newinfo">+ เพิ่มการ์ดข้อมูล</button>
+  <h2>ปฏิทิน</h2><div class="card"><div class="small">เพิ่มแผนลงปฏิทินพร้อมแจ้งเตือนก่อน 30 นาที</div><div class="btns"><button class="btn green" data-act="calsheet">เลือกวิธีลงปฏิทิน</button></div></div>
+  <h2>ตั้งค่า</h2><div class="list">
+    <button class="li" data-act="settings"><span class="grow"><span class="ttl">ชื่อและเครื่องนี้เป็นของใคร</span><span class="meta">${esc(n.A)} กับ ${esc(n.B)}, เครื่องนี้คือ ${esc(n[me])}</span></span><span class="tiny">แก้</span></button>
+    <button class="li" data-act="rate"><span class="grow"><span class="ttl">เรตเงิน</span><span class="meta">₩1,000 = ฿${rate()}</span></span><span class="tiny">แก้</span></button>
+    <button class="li" data-act="theme"><span class="grow"><span class="ttl">ธีม</span><span class="meta">${{ '': 'ตามเครื่อง', light: 'สว่าง', dark: 'มืด' }[LS.get('theme', '')]}</span></span><span class="tiny">เปลี่ยน</span></button>
+    <button class="li" data-act="resetplan"><span class="grow"><span class="ttl">คืนค่าแผนเดิม</span><span class="meta">ล้างการแก้ไขแผนทั้งหมด (ค่าใช้จ่ายและรูปยังอยู่)</span></span></button>
+  </div>
+  <h2>ข้อมูลและการซิงก์</h2><div class="card"><div class="small">${{ local: 'ตอนนี้ข้อมูลอยู่ในเครื่องนี้เท่านั้น อีกคนจะไม่เห็น', claude: 'ตอนนี้ซิงก์ผ่าน Claude (โหมดเดโม) ทั้งสองคนต้องเปิดลิงก์ที่แชร์และล็อกอิน Claude', firebase: 'ตอนนี้ซิงก์ผ่าน Firebase ของคุณเอง ฟรีและไม่พึ่ง Claude' }[syncState.kind]}</div>
+    <div class="btns"><button class="btn" data-act="backup">สำรองข้อมูล</button><button class="btn" data-act="restore">นำเข้าข้อมูล</button><button class="btn" data-act="csv">ส่งออก CSV</button></div></div>
+  <div class="card"><h3>ใช้งานเองฟรี ไม่พึ่ง Claude</h3><ol class="small" style="padding-left:20px;margin:6px 0">
+    <li>กด "ดาวน์โหลดไฟล์แอป"</li><li>ลากไฟล์ไปวางที่ app.netlify.com/drop จะได้ลิงก์ฟรีของตัวเอง</li>
+    <li>เปิดลิงก์ใน Safari กดแชร์ แล้ว "เพิ่มไปยังหน้าจอโฮม"</li><li>อยากให้ 2 คนซิงก์กัน ตั้งค่า Firebase ฟรี ใส่ config และรหัสทริปเดียวกันทั้งสองเครื่อง</li>
+    <li>ย้ายข้อมูลจากเดโม: "สำรองข้อมูล" ที่นี่ แล้ว "นำเข้าข้อมูล" ในแอปใหม่</li></ol>
+    <div class="btns"><button class="btn solid" data-act="dlapp">ดาวน์โหลดไฟล์แอป</button><button class="btn" data-act="firebase">ตั้งค่า Firebase</button></div></div>`
+        return h
+      }
+
+      /* ================= RENDER ================= */
+      function render() {
+        if ($('#sheet').classList.contains('open') && $('#sheet').dataset.lock === '1') {
+          renderTop()
+          return
+        }
+        renderTop()
+        renderNav()
+        const y = window.scrollY
+        $('#main').innerHTML = {
+          today: renderToday,
+          plan: renderPlan,
+          money: renderMoney,
+          check: renderCheck,
+          info: renderInfo,
+        }[tab]()
+        let fab = $('#fab')
+        if (tab === 'money') {
+          if (!fab) {
+            fab = document.createElement('button')
+            fab.id = 'fab'
+            fab.className = 'fab'
+            fab.dataset.act = 'addexp'
+            fab.textContent = '+ เพิ่มค่าใช้จ่าย'
+            document.body.appendChild(fab)
+          }
+        } else if (fab) fab.remove()
+        window.scrollTo(0, y)
+      }
+      function setTab(t) {
+        tab = t
+        LS.set('tab', t)
+        window.scrollTo(0, 0)
+        render()
+      }
+
+      /* ================= SHEETS ================= */
+      function openSheet(html, mount, lock = true) {
+        const sh = $('#sheet')
+        sh.dataset.lock = lock ? '1' : '0'
+        sh.innerHTML = '<div class="grab"></div>' + html
+        $('#scrim').classList.add('open')
+        requestAnimationFrame(() => sh.classList.add('open'))
+        if (mount) mount(sh)
+      }
+      function closeSheet() {
+        const sh = $('#sheet')
+        sh.classList.remove('open')
+        sh.dataset.lock = '0'
+        $('#scrim').classList.remove('open')
+        scheduleRender()
+      }
+      $('#scrim').addEventListener('click', closeSheet)
+      function chipGroup(name, opts, val) {
+        return `<div class="chips" data-group="${name}">${opts.map(([v, l]) => `<button type="button" class="chip" data-v="${esc(v)}" aria-pressed="${String(v) === String(val)}">${esc(l)}</button>`).join('')}</div>`
+      }
+      function bindChips(root, cb) {
+        root.querySelectorAll('[data-group]').forEach((g) =>
+          g.addEventListener('click', (e) => {
+            const b = e.target.closest('.chip')
+            if (!b) return
+            g.querySelectorAll('.chip').forEach((x) => x.setAttribute('aria-pressed', x === b))
+            cb && cb(g.dataset.group, b.dataset.v)
+          }),
+        )
+      }
+      const chipVal = (root, name) => {
+        const b = root.querySelector(`[data-group="${name}"] [aria-pressed="true"]`)
+        return b ? b.dataset.v : null
+      }
+      const val = (sh, id) => (sh.querySelector('#' + id) || {}).value || ''
+      function curSeg(sh, cur, onChange) {
+        sh.querySelector('#cur').addEventListener('click', (ev) => {
+          const b = ev.target.closest('button')
+          if (!b) return
+          sh.querySelectorAll('#cur button').forEach((x) => x.setAttribute('aria-pressed', x === b))
+          onChange(b.dataset.c)
+        })
+      }
+
+      function itemSheet(p, presetDay) {
+        const isNew = !p
+        p = p || {
+          id: 'u-' + uid(),
+          day: presetDay ?? planDay,
+          t: '12:00',
+          kind: 'place',
+          title: '',
+          desc: '',
+          l: '2',
+        }
+        const tz = p.tz || DAYS[p.day].tz
+        openSheet(
+          `<h3>${isNew ? 'เพิ่มรายการ' : 'แก้ไขรายการ'}</h3>
+    <label class="f">ประเภท</label>${chipGroup('kind', KINDS, p.kind)}
+    <label class="f" for="title">ชื่อ</label><input class="in" id="title" value="${esc(p.title)}" placeholder="เช่น ร้านไก่ทอด">
+    <label class="f">วัน</label>${chipGroup(
+      'day',
+      DAYS.map((d) => [d.n, d.n === 0 ? 'เตรียม 22' : d.n === 5 ? 'กลับ 27' : 'D' + d.n]),
+      p.day,
+    )}
+    <div class="two"><div><label class="f" for="t">เวลาเริ่ม</label><input class="in" id="t" type="time" value="${esc(p.t)}"></div><div><label class="f" for="end">ถึง (ไม่ใส่ก็ได้)</label><input class="in" id="end" type="time" value="${esc(p.end || '')}"></div></div>
+    <label class="f">เขตเวลา</label>${chipGroup(
+      'tz',
+      [
+        ['KR', 'เวลาเกาหลี'],
+        ['TH', 'เวลาไทย'],
+      ],
+      tz,
+    )}
+    <div id="lineBox"><label class="f">วิธีเดินทาง</label>${chipGroup(
+      'l',
+      Object.keys(LINE_NAME).map((k) => [k, LINE_NAME[k]]),
+      p.l || 'W',
+    )}</div>
+    <label class="f" for="desc">รายละเอียด</label><textarea class="in" id="desc" rows="2">${esc(p.desc || '')}</textarea>
+    <div id="placeBox">
+      <label class="f" for="kr">ชื่อบนรูปปก (เช่น ภาษาเกาหลี)</label><input class="in" id="kr" value="${esc(p.kr || '')}">
+      <label class="f" for="q">คำค้นในแผนที่</label><input class="in" id="q" value="${esc(p.q || '')}" placeholder="ชื่อร้านหรือที่อยู่">
+      <label class="f" for="addr">ที่อยู่</label><input class="in" id="addr" value="${esc(p.addr || '')}">
+      <div class="two"><div><label class="f" for="phone">เบอร์โทร</label><input class="in" id="phone" value="${esc(p.phone || '')}" inputmode="tel"></div><div><label class="f" for="hours">เวลาเปิด</label><input class="in" id="hours" value="${esc(p.hours || '')}"></div></div>
+      <label class="f" for="url">เว็บไซต์</label><input class="in" id="url" value="${esc(p.url || '')}" inputmode="url">
+      <label class="f" for="budget">งบ 2 คน (วอน)</label><input class="in" id="budget" inputmode="numeric" value="${esc(p.budget || '')}">
+    </div>
+    <div class="btns" style="margin-top:18px"><button class="btn block green" id="save">${isNew ? 'เพิ่ม' : 'บันทึก'}</button>
+    ${isNew ? '' : '<div class="two" style="width:100%"><button class="btn block" id="dup">ทำสำเนา</button><button class="btn block danger" id="delete">ลบ</button></div>'}</div>`,
+          (sh) => {
+            const vis = (k) => {
+              sh.querySelector('#lineBox').style.display = k === 'move' ? 'block' : 'none'
+              sh.querySelector('#placeBox').style.display = k === 'place' ? 'block' : 'none'
+            }
+            vis(p.kind)
+            bindChips(sh, (g, v) => {
+              if (g === 'kind') vis(v)
+            })
+            const collect = () => {
+              const kind = chipVal(sh, 'kind'),
+                day = Number(chipVal(sh, 'day')),
+                tzv = chipVal(sh, 'tz')
+              const o = {
+                ...p,
+                kind,
+                day,
+                title: val(sh, 'title').trim(),
+                t: val(sh, 't') || '12:00',
+                end: val(sh, 'end'),
+                desc: val(sh, 'desc').trim(),
+              }
+              if (tzv !== DAYS[day].tz) o.tz = tzv
+              else delete o.tz
+              if (kind === 'move') o.l = chipVal(sh, 'l')
+              if (kind === 'place') {
+                ;['kr', 'q', 'addr', 'phone', 'hours', 'url'].forEach(
+                  (k) => (o[k] = val(sh, k).trim()),
+                )
+                o.budget = Number(val(sh, 'budget').replace(/[^\d]/g, '')) || 0
+              }
+              return o
+            }
+            sh.querySelector('#save').addEventListener('click', async () => {
+              const o = collect()
+              if (!o.title) {
+                toast('ใส่ชื่อรายการก่อน')
+                return
+              }
+              if (await put('plan', o.id, o)) {
+                planDay = o.day
+                LS.set('planDay', planDay)
+                closeSheet()
+                toast(isNew ? 'เพิ่มแล้ว' : 'บันทึกแล้ว')
+              }
+            })
+            const d = sh.querySelector('#delete')
+            if (d)
+              d.addEventListener('click', async () => {
+                if (confirm('ลบรายการนี้ออกจากแผน?')) {
+                  if (await put('plan', p.id, { deleted: true })) {
+                    closeSheet()
+                    toast('ลบแล้ว')
+                  }
+                }
+              })
+            const dp = sh.querySelector('#dup')
+            if (dp)
+              dp.addEventListener('click', async () => {
+                const o = collect()
+                o.id = 'u-' + uid()
+                o.title += ' (สำเนา)'
+                if (await put('plan', o.id, o)) {
+                  closeSheet()
+                  toast('ทำสำเนาแล้ว')
+                }
+              })
+          },
+        )
+      }
+      function expenseSheet(e, presetItem) {
+        const n = names(),
+          isNew = !e,
+          items = planAll()
+        const pi = presetItem ? items.find((p) => p.id === presetItem) : null
+        e = e || {
+          cur: 'KRW',
+          cat: pi && pi.id.includes('clinic') ? 'clinic' : 'food',
+          payer: me,
+          split: 'half',
+          method: 'YouTrip',
+          day: pi
+            ? pi.day
+            : (() => {
+                const t = now()
+                const cur = [...items].reverse().find((p) => p.ms <= t)
+                return t < TRIP_LIVE ? 0 : cur ? cur.day : 1
+              })(),
+          item: pi ? pi.id : '',
+        }
+        const amt0 = e.cur === 'THB' ? e.amt : (e.krw ?? '')
+        const opts = items.filter((p) => p.kind === 'place')
+        openSheet(
+          `<div class="between"><h3>${isNew ? 'เพิ่มค่าใช้จ่าย' : 'แก้ไขรายการ'}</h3><div class="seg" id="cur"><button type="button" data-c="KRW" aria-pressed="${e.cur !== 'THB'}">₩</button><button type="button" data-c="THB" aria-pressed="${e.cur === 'THB'}">฿</button></div></div>
+    <input class="in amount-in" id="amt" inputmode="decimal" placeholder="0" value="${amt0 === '' ? '' : esc(amt0)}" aria-label="ยอดรวม" style="margin-top:8px"><div class="tiny" id="conv" style="margin-top:6px"></div>
+    <label class="f" for="ttl">รายการ</label><input class="in" id="ttl" placeholder="เช่น ปูดอง 2 ที่" value="${esc(e.title || '')}">
+    <label class="f" for="item">ผูกกับแผน</label><select class="in" id="item"><option value="">ไม่ผูก</option>${DAYS.map(
+      (d) =>
+        `<optgroup label="${d.n === 0 ? 'เตรียม' : d.n === 5 ? 'กลับ' : 'D' + d.n}">${opts
+          .filter((p) => p.day === d.n)
+          .map(
+            (p) =>
+              `<option value="${p.id}" ${e.item === p.id ? 'selected' : ''}>${esc(p.t + ' ' + p.title)}</option>`,
+          )
+          .join('')}</optgroup>`,
+    ).join('')}</select>
+    <label class="f">หมวด</label>${chipGroup(
+      'cat',
+      CATS.map((c) => [c.id, c.name]),
+      e.cat,
+    )}
+    <label class="f">ใครจ่าย</label>${chipGroup(
+      'payer',
+      [
+        ['A', n.A],
+        ['B', n.B],
+        ['POOL', 'กองกลาง'],
+      ],
+      e.payer,
+    )}
+    <label class="f">ส่วนของใคร</label>${chipGroup(
+      'split',
+      [
+        ['half', 'หารครึ่ง'],
+        ['custom', 'กำหนดเอง'],
+        ['A', 'ของ ' + n.A + ' คนเดียว'],
+        ['B', 'ของ ' + n.B + ' คนเดียว'],
+      ],
+      e.split,
+    )}
+    <div id="customBox" class="card" style="display:${e.split === 'custom' ? 'block' : 'none'}"><div class="tiny">เช่น ข้าว ₩2,000 ${esc(n.A)} ยินดีออก ₩1,500 ใส่ ₩1,500 ช่องซ้าย ช่องขวาคำนวณให้</div>
+      <div class="two"><div><label class="f" for="sa">${esc(n.A)}</label><input class="in" id="sa" inputmode="decimal"></div><div><label class="f" for="sb">${esc(n.B)}</label><input class="in" id="sb" inputmode="decimal"></div></div>
+      <div class="chips" style="margin-top:8px"><button type="button" class="chip" data-pct="50">50/50</button><button type="button" class="chip" data-pct="60">60/40</button><button type="button" class="chip" data-pct="70">70/30</button><button type="button" class="chip" data-pct="75">75/25</button></div></div>
+    <label class="f">จ่ายด้วย</label>${chipGroup(
+      'method',
+      METHODS.map((m) => [m, m]),
+      e.method,
+    )}
+    <label class="f">วัน</label>${chipGroup(
+      'day',
+      DAYS.map((d) => [d.n, d.n === 0 ? 'ก่อนเดินทาง' : d.n === 5 ? 'หลังกลับ' : 'D' + d.n]),
+      e.day || 0,
+    )}
+    <div class="btns" style="margin-top:18px"><button class="btn block green" id="save">${isNew ? 'บันทึก' : 'บันทึกการแก้ไข'}</button>${isNew ? '' : '<button class="btn block danger" id="delete">ลบรายการนี้</button>'}</div>`,
+          (sh) => {
+            let cur = e.cur || 'KRW'
+            const toK = (x) => (cur === 'KRW' ? x : (x * 1000) / rate())
+            const fromK = (k) => (cur === 'KRW' ? k : (k * rate()) / 1000)
+            const total = () => parseFloat(val(sh, 'amt')) || 0
+            const conv = () => {
+              const v = total()
+              sh.querySelector('#conv').textContent = v
+                ? cur === 'KRW'
+                  ? `≈ ${B(v)}`
+                  : `≈ ${W((v * 1000) / rate())}`
+                : `เรต ₩1,000 = ฿${rate()}`
+            }
+            const sa = sh.querySelector('#sa'),
+              sb = sh.querySelector('#sb')
+            if (e.split === 'custom') {
+              const a = fromK(Number(e.shareA) || 0)
+              sa.value = Math.round(a * 100) / 100
+              sb.value = Math.round((total() - a) * 100) / 100
+            }
+            sa.addEventListener('input', () => {
+              const a = parseFloat(sa.value) || 0
+              sb.value = Math.max(0, Math.round((total() - a) * 100) / 100)
+            })
+            sb.addEventListener('input', () => {
+              const b = parseFloat(sb.value) || 0
+              sa.value = Math.max(0, Math.round((total() - b) * 100) / 100)
+            })
+            sh.querySelectorAll('[data-pct]').forEach((b) =>
+              b.addEventListener('click', () => {
+                const pc = Number(b.dataset.pct) / 100
+                sa.value = Math.round(total() * pc * 100) / 100
+                sb.value = Math.round(total() * (1 - pc) * 100) / 100
+              }),
+            )
+            curSeg(sh, cur, (c) => {
+              cur = c
+              conv()
+            })
+            sh.querySelector('#amt').addEventListener('input', () => {
+              conv()
+              if (sa.value)
+                sb.value = Math.max(
+                  0,
+                  Math.round((total() - (parseFloat(sa.value) || 0)) * 100) / 100,
+                )
+            })
+            conv()
+            sh.querySelector('#item').addEventListener('change', (ev) => {
+              const it = items.find((p) => p.id === ev.target.value)
+              if (it) {
+                sh.querySelectorAll('[data-group="day"] .chip').forEach((x) =>
+                  x.setAttribute('aria-pressed', x.dataset.v === String(it.day)),
+                )
+              }
+            })
+            bindChips(sh, (g, v) => {
+              if (g === 'split') {
+                sh.querySelector('#customBox').style.display = v === 'custom' ? 'block' : 'none'
+                if (v === 'custom' && !sa.value) {
+                  sa.value = Math.round((total() / 2) * 100) / 100
+                  sb.value = Math.round((total() / 2) * 100) / 100
+                }
+              }
+            })
+            sh.querySelector('#save').addEventListener('click', async () => {
+              const v = total()
+              if (!(v > 0)) {
+                toast('ใส่ยอดเงินก่อน')
+                sh.querySelector('#amt').focus()
+                return
+              }
+              const split = chipVal(sh, 'split')
+              const doc = {
+                ...e,
+                title: val(sh, 'ttl').trim(),
+                cur,
+                amt: v,
+                krw: Math.round(toK(v)),
+                cat: chipVal(sh, 'cat'),
+                payer: chipVal(sh, 'payer'),
+                split,
+                method: chipVal(sh, 'method'),
+                day: Number(chipVal(sh, 'day')),
+                item: val(sh, 'item'),
+                ts: e.ts || Date.now(),
+                by: me,
+              }
+              if (split === 'custom') {
+                const a = parseFloat(sa.value)
+                if (!(a >= 0) || a > v + 0.001) {
+                  toast('ส่วนของ ' + n.A + ' ต้องไม่เกินยอดรวม')
+                  return
+                }
+                doc.shareA = Math.round(toK(a))
+              } else delete doc.shareA
+              if (await put('expenses', e.id || uid(), doc)) {
+                closeSheet()
+                toast(isNew ? 'บันทึกแล้ว' : 'แก้ไขแล้ว')
+              }
+            })
+            const d = sh.querySelector('#delete')
+            if (d)
+              d.addEventListener('click', async () => {
+                if (confirm('ลบรายการนี้?')) {
+                  await del('expenses', e.id)
+                  closeSheet()
+                  toast('ลบแล้ว')
+                }
+              })
+          },
+        )
+      }
+      function poolSheet() {
+        const n = names()
+        openSheet(
+          `<div class="between"><h3>ลงเงินกองกลาง</h3><div class="seg" id="cur"><button type="button" data-c="KRW" aria-pressed="true">₩</button><button type="button" data-c="THB" aria-pressed="false">฿</button></div></div>
+    <input class="in amount-in" id="amt" inputmode="decimal" placeholder="0" style="margin-top:10px" aria-label="จำนวนเงิน"><div class="tiny" id="conv" style="margin-top:6px"></div>
+    <label class="f">ใครลง</label>${chipGroup(
+      'who',
+      [
+        ['A', n.A],
+        ['B', n.B],
+      ],
+      me,
+    )}
+    <label class="f" for="note">หมายเหตุ</label><input class="in" id="note" placeholder="เช่น เงินสดไว้จ่ายตลาด">
+    <div class="btns" style="margin-top:18px"><button class="btn block green" id="save">บันทึก</button></div>`,
+          (sh) => {
+            let cur = 'KRW'
+            const conv = () => {
+              const v = parseFloat(val(sh, 'amt')) || 0
+              sh.querySelector('#conv').textContent = v
+                ? cur === 'KRW'
+                  ? `≈ ${B(v)}`
+                  : `≈ ${W((v * 1000) / rate())}`
+                : ''
+            }
+            curSeg(sh, cur, (c) => {
+              cur = c
+              conv()
+            })
+            sh.querySelector('#amt').addEventListener('input', conv)
+            bindChips(sh)
+            sh.querySelector('#save').addEventListener('click', async () => {
+              const v = parseFloat(val(sh, 'amt'))
+              if (!(v > 0)) {
+                toast('ใส่จำนวนเงินก่อน')
+                return
+              }
+              if (
+                await put('pool', uid(), {
+                  who: chipVal(sh, 'who'),
+                  krw: Math.round(cur === 'KRW' ? v : (v * 1000) / rate()),
+                  cur,
+                  amt: v,
+                  note: val(sh, 'note').trim(),
+                  ts: Date.now(),
+                })
+              ) {
+                closeSheet()
+                toast('ลงเงินกองกลางแล้ว')
+              }
+            })
+          },
+        )
+      }
+      function walletSheet(key) {
+        const [w, p] = key.split('_'),
+          n = names(),
+          bal = Number((S.wallet[key] || {}).bal) || 0
+        const quick = w === 'tmoney' ? [1550, 4750, 10000, 20000] : [5000, 10000, 50000]
+        openSheet(
+          `<h3>${w === 'tmoney' ? 'T-money' : 'เงินสด'} ของ ${esc(n[p])}</h3><div class="muted small">ยอดตอนนี้ ${W(bal)} ≈ ${B(bal)}</div>
+    <input class="in amount-in" id="amt" inputmode="numeric" placeholder="₩" style="margin-top:12px" aria-label="จำนวนเงินวอน">
+    <div class="chips" style="margin-top:8px">${quick.map((q) => `<button type="button" class="chip" data-q="${q}">${W(q)}</button>`).join('')}</div>
+    <div class="two" style="margin-top:16px"><button class="btn block green" data-op="add">${w === 'tmoney' ? 'เติม' : 'เพิ่ม'}</button><button class="btn block" data-op="sub">ใช้ไป</button></div>
+    <button class="btn block" data-op="set" style="margin-top:8px">ตั้งเป็นยอดนี้</button>`,
+          (sh) => {
+            sh.querySelectorAll('[data-q]').forEach((b) =>
+              b.addEventListener('click', () => {
+                sh.querySelector('#amt').value = b.dataset.q
+              }),
+            )
+            sh.querySelectorAll('[data-op]').forEach((b) =>
+              b.addEventListener('click', async () => {
+                const v = parseFloat(val(sh, 'amt'))
+                if (!(v >= 0) || (b.dataset.op !== 'set' && !v)) {
+                  toast('ใส่จำนวนเงินก่อน')
+                  return
+                }
+                const nb = b.dataset.op === 'add' ? bal + v : b.dataset.op === 'sub' ? bal - v : v
+                if (await put('wallet', key, { bal: Math.round(nb), ts: Date.now(), by: me })) {
+                  closeSheet()
+                  toast('อัปเดตยอดแล้ว')
+                }
+              }),
+            )
+          },
+        )
+      }
+      function stopSheet(id) {
+        const p = planAll().find((x) => x.id === id),
+          st = S.stops[id] || {}
+        openSheet(
+          `<h3>${esc(p.title)}</h3><div class="tiny">แผน ${p.t}${p.tz !== DAYS[p.day].tz ? ' (เวลาไทย)' : ''}</div>
+    <label class="f" for="at">เวลาที่ถึงจริง (${p.tz === 'TH' ? 'เวลาไทย' : 'เวลาเกาหลี'})</label><input class="in" id="at" type="time" value="${esc(st.at || hmOf(now(), p.tz))}">
+    <label class="f" for="note">โน้ต</label><textarea class="in" id="note" rows="2" placeholder="เช่น คิวยาว 30 นาที">${esc(st.note || '')}</textarea>
+    <div class="two" style="margin-top:16px"><button class="btn block green" data-op="done">ถึงแล้ว</button><button class="btn block" data-op="skip">ข้ามจุดนี้</button></div>
+    ${st.status ? '<button class="btn block" data-op="clear" style="margin-top:8px">ล้างสถานะ</button>' : ''}`,
+          (sh) => {
+            sh.querySelectorAll('[data-op]').forEach((b) =>
+              b.addEventListener('click', async () => {
+                if (b.dataset.op === 'clear') {
+                  await del('stops', id)
+                  closeSheet()
+                  return
+                }
+                if (
+                  await put('stops', id, {
+                    status: b.dataset.op,
+                    at: val(sh, 'at'),
+                    note: val(sh, 'note').trim(),
+                    by: me,
+                    ts: Date.now(),
+                  })
+                ) {
+                  closeSheet()
+                  toast(b.dataset.op === 'done' ? 'เช็กอินแล้ว' : 'ข้ามแล้ว')
+                }
+              }),
+            )
+          },
+        )
+      }
+      function checkSheet(x, presetG) {
+        const isNew = !x
+        x = x || { id: 'uc-' + uid(), g: presetG || 'pack', t: '' }
+        openSheet(
+          `<h3>${isNew ? 'เพิ่มรายการเช็กลิสต์' : 'แก้ไขรายการ'}</h3><label class="f" for="t">รายการ</label><textarea class="in" id="t" rows="2" placeholder="เช่น ซื้อขนมฝากที่ทำงาน">${esc(x.t)}</textarea>
+    <label class="f">หมวด</label>${chipGroup('g', CGROUPS, x.g)}
+    <div class="btns" style="margin-top:18px"><button class="btn block green" id="save">${isNew ? 'เพิ่ม' : 'บันทึก'}</button>${isNew ? '' : '<button class="btn block danger" id="delete">ลบรายการนี้</button>'}</div>`,
+          (sh) => {
+            bindChips(sh)
+            sh.querySelector('#save').addEventListener('click', async () => {
+              const t = val(sh, 't').trim()
+              if (!t) {
+                toast('พิมพ์รายการก่อน')
+                return
+              }
+              const o = { ...x, t, g: chipVal(sh, 'g'), ts: x.ts || Date.now() }
+              delete o.def
+              if (await put('clist', x.id, o)) closeSheet()
+            })
+            const d = sh.querySelector('#delete')
+            if (d)
+              d.addEventListener('click', async () => {
+                if (confirm('ลบรายการนี้?')) {
+                  await put('clist', x.id, { deleted: true })
+                  await del('checks', x.id)
+                  closeSheet()
+                }
+              })
+          },
+        )
+      }
+      function infoSheet(cd) {
+        const isNew = !cd
+        cd = cd || { id: 'ui-' + uid(), ord: 50, title: '', body: '', links: '', copy: '' }
+        openSheet(
+          `<h3>${isNew ? 'เพิ่มการ์ดข้อมูล' : 'แก้ไขการ์ด'}</h3><label class="f" for="title">หัวข้อ</label><input class="in" id="title" value="${esc(cd.title)}">
+    <label class="f" for="body">รายละเอียด</label><textarea class="in" id="body" rows="7">${esc(cd.body)}</textarea>
+    <label class="f" for="links">ปุ่มลิงก์ (บรรทัดละ 1 ปุ่ม: ชื่อ | ลิงก์)</label><textarea class="in" id="links" rows="3" placeholder="Google Maps | https://...">${esc(cd.links)}</textarea>
+    <label class="f" for="copy">ข้อความปุ่มคัดลอก (ไม่ใส่ก็ได้)</label><input class="in" id="copy" value="${esc(cd.copy || '')}">
+    <div class="btns" style="margin-top:18px"><button class="btn block green" id="save">บันทึก</button>${isNew ? '' : '<button class="btn block danger" id="delete">ลบการ์ดนี้</button>'}</div>`,
+          (sh) => {
+            sh.querySelector('#save').addEventListener('click', async () => {
+              const o = {
+                ...cd,
+                title: val(sh, 'title').trim(),
+                body: val(sh, 'body'),
+                links: val(sh, 'links'),
+                copy: val(sh, 'copy').trim(),
+              }
+              if (!o.title) {
+                toast('ใส่หัวข้อก่อน')
+                return
+              }
+              if (await put('info', cd.id, o)) closeSheet()
+            })
+            const d = sh.querySelector('#delete')
+            if (d)
+              d.addEventListener('click', async () => {
+                if (confirm('ลบการ์ดนี้?')) {
+                  await put('info', cd.id, { deleted: true })
+                  closeSheet()
+                }
+              })
+          },
+        )
+      }
+      function calSheet(day) {
+        const items = planAll().filter((p) => (day == null || p.day === day) && p.kind !== 'move')
+        openSheet(
+          `<h3>ลงปฏิทิน${day != null ? ' ' + (day === 0 ? 'วันเตรียมตัว' : 'D' + day) : 'ทั้งทริป'}</h3><div class="small muted">${items.length} รายการ แจ้งเตือนก่อน 30 นาที</div>
+    <button class="btn block green" id="ics" style="margin-top:14px">ไฟล์ปฏิทิน iPhone (.ics)</button>
+    <div class="note">ไฟล์ .ics เข้าปฏิทิน iPhone ได้เมื่อเปิดแอปนี้ใน Safari จากลิงก์ของตัวเอง ในแอป Claude ระบบบล็อกการส่งไฟล์เข้าปฏิทิน ทางที่ง่ายสุดตอนนี้คือพิมพ์บอก Claude ในแชตว่า "เพิ่มแผนลงปฏิทิน iPhone" รายการด้านล่างเป็นทางเลือกสำหรับ Google Calendar</div>
+    <div class="list">${items
+      .slice(0, 40)
+      .map(
+        (p) =>
+          `<a class="li" href="${gcal(p)}" target="_blank" rel="noopener" style="text-decoration:none"><span class="num tiny" style="width:42px">${p.t}</span><span class="grow"><span class="ttl">${esc(p.title)}</span><span class="meta">${p.day === 0 ? 'เตรียม' : p.day === 5 ? 'กลับ' : 'D' + p.day} เพิ่มลง Google Calendar</span></span></a>`,
+      )
+      .join('')}</div>`,
+          (sh) => {
+            sh.querySelector('#ics').addEventListener('click', () =>
+              saveFile(
+                day != null ? `seoul-day${day}.ics` : 'seoul-trip.ics',
+                buildIcs(items),
+                'text/calendar',
+              ),
+            )
+          },
+          false,
+        )
+      }
+      function photoView(id) {
+        const ph = S.photos.find((x) => x.id === id)
+        if (!ph) return
+        openSheet(
+          `<img class="bigimg" src="${ph.data}" alt=""><div class="tiny" style="margin-top:8px">${ph.by ? 'เพิ่มโดย ' + esc(names()[ph.by]) : ''}</div><button class="btn block danger" id="delete" style="margin-top:12px">ลบรูปนี้</button>`,
+          (sh) => {
+            sh.querySelector('#delete').addEventListener('click', async () => {
+              if (confirm('ลบรูปนี้?')) {
+                await del('photos', id)
+                closeSheet()
+              }
+            })
+          },
+          false,
+        )
+      }
+      let photoTarget = null
+      $('#photoIn').addEventListener('change', async (ev) => {
+        const f = ev.target.files[0]
+        ev.target.value = ''
+        if (!f || !photoTarget) return
+        toast('กำลังย่อรูป...')
+        try {
+          const url = await new Promise((res, rej) => {
+            const r = new FileReader()
+            r.onload = () => res(r.result)
+            r.onerror = rej
+            r.readAsDataURL(f)
+          })
+          const img = await new Promise((res, rej) => {
+            const i = new Image()
+            i.onload = () => res(i)
+            i.onerror = rej
+            i.src = url
+          })
+          let max = 1000,
+            q = 0.72,
+            data = ''
+          for (let k = 0; k < 7; k++) {
+            const s = Math.min(1, max / Math.max(img.width, img.height))
+            const cv = document.createElement('canvas')
+            cv.width = Math.round(img.width * s)
+            cv.height = Math.round(img.height * s)
+            cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height)
+            data = cv.toDataURL('image/jpeg', q)
+            if (data.length < 180000) break
+            max = Math.round(max * 0.82)
+            q = Math.max(0.5, q - 0.06)
+          }
+          if (await put('photos', uid(), { item: photoTarget, data, ts: Date.now(), by: me }))
+            toast('เพิ่มรูปแล้ว')
+        } catch (e) {
+          toast('เปิดรูปนี้ไม่ได้')
+        }
+      })
+      function settingsSheet() {
+        const n = names()
+        openSheet(
+          `<h3>ชื่อผู้เดินทาง</h3><label class="f" for="na">คนที่ 1</label><input class="in" id="na" value="${esc(n.A)}"><label class="f" for="nb">คนที่ 2</label><input class="in" id="nb" value="${esc(n.B)}">
+    <label class="f">เครื่องนี้เป็นของ</label>${chipGroup(
+      'me',
+      [
+        ['A', n.A],
+        ['B', n.B],
+      ],
+      me,
+    )}<div class="tiny" style="margin-top:6px">ใช้เป็นค่าเริ่มต้นของ "ใครจ่าย" การติ๊ก และการบันทึกนอน/ตื่น</div>
+    <div class="btns" style="margin-top:18px"><button class="btn block green" id="save">บันทึก</button></div>`,
+          (sh) => {
+            bindChips(sh)
+            sh.querySelector('#save').addEventListener('click', async () => {
+              me = chipVal(sh, 'me') || 'A'
+              LS.set('me', me)
+              const m = { ...S.meta, nameA: val(sh, 'na').trim(), nameB: val(sh, 'nb').trim() }
+              delete m.id
+              await put('meta', 'settings', m)
+              closeSheet()
+            })
+          },
+        )
+      }
+      function rateSheet() {
+        openSheet(
+          `<h3>เรตเงิน</h3><label class="f" for="r">₩1,000 เท่ากับกี่บาท</label><input class="in amount-in" id="r" inputmode="decimal" value="${rate()}"><div class="note">ดูเรตจริงในแอป YouTrip ตอนแลก รายการเก่าจะแสดงเงินบาทตามเรตใหม่</div>
+    <div class="btns" style="margin-top:18px"><button class="btn block green" id="save">บันทึก</button></div>`,
+          (sh) => {
+            sh.querySelector('#save').addEventListener('click', async () => {
+              const r = parseFloat(val(sh, 'r'))
+              if (!(r > 0)) {
+                toast('ใส่ตัวเลขที่มากกว่า 0')
+                return
+              }
+              const m = { ...S.meta, rate: r }
+              delete m.id
+              if (await put('meta', 'settings', m)) {
+                closeSheet()
+                toast('เปลี่ยนเรตแล้ว')
+              }
+            })
+          },
+        )
+      }
+      function firebaseSheet() {
+        const fb = LS.get('fb', null) || {}
+        openSheet(
+          `<h3>ตั้งค่า Firebase</h3><ol class="small" style="padding-left:20px;margin:6px 0"><li>เข้า console.firebase.google.com สร้างโปรเจกต์ฟรี</li><li>เปิด Firestore Database แบบ test mode</li><li>เพิ่ม Web app แล้วคัดลอก firebaseConfig มาวาง</li><li>ตั้งรหัสทริปที่เดายาก ใช้รหัสเดียวกันทั้งสองเครื่อง</li></ol>
+    <label class="f" for="cfg">firebaseConfig</label><textarea class="in" id="cfg" rows="6">${fb.config ? esc(JSON.stringify(fb.config, null, 1)) : ''}</textarea>
+    <label class="f" for="code">รหัสทริป</label><input class="in" id="code" value="${esc(fb.code || '')}" placeholder="เช่น seoul26-trib-saow-8842">
+    <div class="note">ใช้ได้เมื่อเปิดจากลิงก์ของคุณเอง ในเดโมบน Claude จะซิงก์ผ่าน Claude แทน test mode ใช้ได้ 30 วัน พอดีทริป</div>
+    <div class="btns" style="margin-top:18px"><button class="btn block green" id="save">เชื่อมต่อ</button>${fb.code ? '<button class="btn block" id="off">เลิกใช้ Firebase</button>' : ''}</div>`,
+          (sh) => {
+            sh.querySelector('#save').addEventListener('click', async () => {
+              const body = val(sh, 'cfg')
+                .replace(/^[^{]*/, '')
+                .replace(/[^}]*$/, '')
+              let cfg
+              try {
+                cfg = JSON.parse(body)
+              } catch (e1) {
+                try {
+                  cfg = JSON.parse(
+                    body
+                      .replace(/'/g, '"')
+                      .replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":')
+                      .replace(/,\s*}/g, '}'),
+                  )
+                } catch (e2) {
+                  toast('อ่าน config ไม่ได้')
+                  return
+                }
+              }
+              const code = val(sh, 'code')
+                .trim()
+                .replace(/[^\w\-]/g, '')
+              if (!cfg.projectId || !code) {
+                toast('ต้องมี projectId และรหัสทริป')
+                return
+              }
+              LS.set('fb', { config: cfg, code })
+              if (syncState.kind === 'claude') {
+                closeSheet()
+                toast('บันทึกแล้ว จะใช้เมื่อเปิดจากลิงก์ของคุณเอง')
+                return
+              }
+              try {
+                await startFirebase(cfg, code)
+                closeSheet()
+                toast('เชื่อมต่อ Firebase แล้ว')
+              } catch (e) {
+                toast('เชื่อมต่อไม่สำเร็จ')
+              }
+            })
+            const o = sh.querySelector('#off')
+            if (o)
+              o.addEventListener('click', () => {
+                LS.set('fb', null)
+                location.reload()
+              })
+          },
+        )
+      }
+      function restoreSheet() {
+        openSheet(
+          `<h3>นำเข้าข้อมูล</h3><div class="small muted">เลือกไฟล์จาก "สำรองข้อมูล"</div><input type="file" id="f" accept="application/json,.json" class="in" style="margin-top:12px">
+    <div class="btns" style="margin-top:18px"><button class="btn block green" id="go">นำเข้า</button></div>`,
+          (sh) => {
+            sh.querySelector('#go').addEventListener('click', async () => {
+              const file = sh.querySelector('#f').files[0]
+              if (!file) {
+                toast('เลือกไฟล์ก่อน')
+                return
+              }
+              try {
+                const data = JSON.parse(await file.text())
+                let k = 0
+                for (const c of COLS) {
+                  for (const row of data[c] || []) {
+                    const { id, ...rest } = row
+                    if (id) {
+                      await store.set(c, id, rest)
+                      k++
+                    }
+                  }
+                }
+                closeSheet()
+                toast(`นำเข้าแล้ว ${k} รายการ`)
+              } catch (e) {
+                toast('ไฟล์ไม่ถูกต้อง หรือพื้นที่ไม่พอ')
+              }
+            })
+          },
+        )
+      }
+      function backupJson() {
+        const out = { app: 'seoul26', v: 2, at: new Date().toISOString() }
+        COLS.forEach((c) => {
+          out[c] =
+            c === 'meta'
+              ? [{ ...S.meta, id: 'settings' }]
+              : Array.isArray(S[c])
+                ? S[c]
+                : Object.values(S[c])
+        })
+        saveFile('seoul26-backup.json', JSON.stringify(out), 'application/json')
+      }
+      function exportCsv() {
+        const n = names(),
+          q = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"',
+          items = planAll()
+        const rows = [
+          [
+            'วัน',
+            'รายการ',
+            'แผน',
+            'หมวด',
+            'ใครจ่าย',
+            'ส่วนของ ' + n.A,
+            'ส่วนของ ' + n.B,
+            'KRW',
+            'THB',
+            'จ่ายด้วย',
+          ],
+        ]
+        ;[...S.expenses]
+          .sort((a, b) => a.day - b.day || a.ts - b.ts)
+          .forEach((e) => {
+            const s = shares(e),
+              it = items.find((p) => p.id === e.item)
+            rows.push([
+              e.day ? 'D' + e.day : 'ก่อนเดินทาง',
+              e.title,
+              it ? it.title : '',
+              (CATS.find((c) => c.id === e.cat) || {}).name,
+              n[e.payer],
+              Math.round(s.A),
+              Math.round(s.B),
+              e.krw,
+              Math.round((e.krw * rate()) / 1000),
+              e.method,
+            ])
+          })
+        saveFile(
+          'seoul26-expenses.csv',
+          '\ufeff' + rows.map((r) => r.map(q).join(',')).join('\n'),
+          'text/csv',
+        )
+      }
+
+      /* ================= EVENTS ================= */
+      document.addEventListener('click', async (ev) => {
+        const t = ev.target.closest('[data-tab],[data-act],[data-day],[data-sim],[data-goday]')
+        if (!t) return
+        if (t.closest('#sheet') && !t.dataset.act) return
+        if (t.dataset.tab) {
+          setTab(t.dataset.tab)
+          return
+        }
+        if (t.dataset.goday) {
+          planDay = Number(t.dataset.goday)
+          LS.set('planDay', planDay)
+          setTab('plan')
+          return
+        }
+        if (t.dataset.day !== undefined && !t.dataset.act) {
+          planDay = Number(t.dataset.day)
+          LS.set('planDay', planDay)
+          render()
+          return
+        }
+        if (t.dataset.sim !== undefined && !t.dataset.act) {
+          const s0 = SIMS.find((x) => x[0] === t.dataset.sim)
+          setSim(s0 && s0[2] ? s0[2] : '')
+          return
+        }
+        const a = t.dataset.act,
+          id = t.dataset.id
+        const items = () => planAll()
+        if (a === 'addexp') expenseSheet(null, t.dataset.item)
+        else if (a === 'editexp') expenseSheet(S.expenses.find((e) => e.id === id))
+        else if (a === 'addpool') poolSheet()
+        else if (a === 'delpool') {
+          if (confirm('ลบรายการลงเงินนี้?')) await del('pool', id)
+        } else if (a === 'wallet') walletSheet(t.dataset.w)
+        else if (a === 'stop') stopSheet(id)
+        else if (a === 'edititem') itemSheet(items().find((p) => p.id === id))
+        else if (a === 'newitem') itemSheet(null, Number(t.dataset.day))
+        else if (a === 'addphoto') {
+          photoTarget = id
+          $('#photoIn').click()
+          if ($('#sheet').classList.contains('open')) closeSheet()
+        } else if (a === 'quickdone') {
+          const p = items().find((x) => x.id === id)
+          if (
+            await put('stops', id, {
+              status: 'done',
+              at: hmOf(now(), p.tz),
+              by: me,
+              ts: Date.now(),
+            })
+          )
+            toast('เช็กอินแล้ว ' + hmOf(now(), p.tz))
+        } else if (a === 'simstep') setSim(now() + Number(t.dataset.m) * 60e3)
+        else if (a === 'simreset') setSim('')
+        else if (a === 'gonow') {
+          const el = document.querySelector('.it.now')
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        } else if (a === 'nav') {
+          const p = items().find((x) => x.id === id)
+          const q = p.addr || p.q
+          openSheet(
+            `<h3>นำทางไป ${esc(p.title)}</h3>${p.addr ? `<div class="small muted">${esc(p.addr)}</div>` : ''}
+      <div class="btns"><a class="btn block green" href="${naver(p.q || p.addr)}" target="_blank" rel="noopener">Naver Map (แนะนำในเกาหลี)</a><a class="btn block" href="${gmap(q)}" target="_blank" rel="noopener">Google Maps</a><a class="btn block" href="https://maps.apple.com/?q=${encodeURIComponent(q)}" target="_blank" rel="noopener">Apple Maps</a>
+      ${p.phone ? `<a class="btn block" href="tel:${esc(p.phone.replace(/[^\d+]/g, ''))}">โทร ${esc(p.phone)}</a>` : ''}${p.url ? `<a class="btn block" href="${esc(p.url)}" target="_blank" rel="noopener">เว็บไซต์</a>` : ''}</div>
+      <div class="note">ในเกาหลี Google Maps นำทางเดินและรถไม่ได้เต็มที่ ใช้ Naver Map จะแม่นกว่า</div>`,
+            null,
+            false,
+          )
+        } else if (a === 'more') {
+          const p = items().find((x) => x.id === id)
+          openSheet(
+            `<h3>${esc(p.title)}</h3><div class="tiny">${p.t} ${p.tz === 'TH' ? 'เวลาไทย' : 'เวลาเกาหลี'}</div>
+      <div class="btns"><button class="btn block green" data-act="addphoto" data-id="${p.id}">เพิ่มรูป</button><button class="btn block" data-act="cal1" data-id="${p.id}">ลงปฏิทิน</button><button class="btn block" data-act="edititem" data-id="${p.id}">แก้ไขรายการ</button></div>`,
+            null,
+            false,
+          )
+        } else if (a === 'viewphoto') photoView(id)
+        else if (a === 'tick') {
+          const c = S.checks[id] || {}
+          if (c.done) await del('checks', id)
+          else await put('checks', id, { done: true, by: me, ts: Date.now() })
+        } else if (a === 'editcheck') checkSheet(checkAll().find((x) => x.id === id))
+        else if (a === 'newcheck') checkSheet(null, t.dataset.g)
+        else if (a === 'editinfo') infoSheet(infoAll().find((x) => x.id === id))
+        else if (a === 'newinfo') infoSheet()
+        else if (a === 'settings') settingsSheet()
+        else if (a === 'rate') rateSheet()
+        else if (a === 'firebase') firebaseSheet()
+        else if (a === 'restore') restoreSheet()
+        else if (a === 'backup') backupJson()
+        else if (a === 'csv') exportCsv()
+        else if (a === 'dlapp') saveFile('seoul26.html', PAGE_SOURCE, 'text/html')
+        else if (a === 'calsheet')
+          calSheet(t.dataset.day !== undefined ? Number(t.dataset.day) : null)
+        else if (a === 'cal1') {
+          const p = items().find((x) => x.id === id)
+          openSheet(
+            `<h3>${esc(p.title)}</h3><div class="small muted">${p.t} ${p.tz === 'TH' ? 'เวลาไทย' : 'เวลาเกาหลี'} แจ้งเตือนก่อน 30 นาที</div><div class="btns" style="margin-top:14px"><button class="btn block green" id="ics">ปฏิทิน iPhone (.ics)</button><a class="btn block" href="${gcal(p)}" target="_blank" rel="noopener">Google Calendar</a></div><div class="note">ปฏิทิน iPhone ต้องเปิดแอปนี้ใน Safari จากลิงก์ของตัวเอง ในแอป Claude ระบบไม่ยอมให้ส่งไฟล์เข้าปฏิทิน ถ้าใช้ในแอป Claude ให้พิมพ์บอก Claude ในแชตว่า "เพิ่มลงปฏิทิน iPhone" Claude เพิ่มให้ได้โดยตรง</div>`,
+            (sh) =>
+              sh
+                .querySelector('#ics')
+                .addEventListener('click', () =>
+                  saveFile(p.id + '.ics', buildIcs([p]), 'text/calendar'),
+                ),
+            false,
+          )
+        } else if (a === 'copy') {
+          try {
+            await navigator.clipboard.writeText(t.dataset.v)
+            toast('คัดลอกแล้ว')
+          } catch (e) {
+            toast(t.dataset.v)
+          }
+        } else if (a === 'theme') {
+          const o = ['', 'light', 'dark']
+          LS.set('theme', o[(o.indexOf(LS.get('theme', '')) + 1) % 3])
+          applyTheme()
+          render()
+        } else if (a === 'resetplan') {
+          if (confirm('ล้างการแก้ไขแผนทั้งหมด กลับไปใช้แผนเดิม?')) {
+            for (const k of Object.keys(S.plan)) await del('plan', k)
+            toast('คืนค่าแผนเดิมแล้ว')
+          }
+        } else if (a === 'bed' || a === 'wake') {
+          const tt = now(),
+            nd = nightDate(tt),
+            key = sleepKey(nd, me),
+            rec = { ...(S.sleep[key] || {}) }
+          delete rec.id
+          if (a === 'bed') {
+            rec.bed = tt
+            delete rec.wake
+          } else {
+            rec.wake = tt
+            if (!rec.bed) rec.bed = null
+          }
+          if (await put('sleep', key, rec))
+            toast(a === 'bed' ? 'ฝันดี บันทึกเวลาเข้านอนแล้ว' : 'อรุณสวัสดิ์ บันทึกเวลาตื่นแล้ว')
+        }
+      })
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeSheet()
+      })
+      document.addEventListener('change', (e) => {
+        if (e.target.id === 'simdt' && e.target.value) {
+          const [d, hm] = e.target.value.split('T')
+          setSim(msAt(d, hm, 'KR'))
+        }
+      })
+      function applyTheme() {
+        const th = LS.get('theme', '')
+        if (th) document.documentElement.setAttribute('data-theme', th)
+        else document.documentElement.removeAttribute('data-theme')
+      }
+
+      /* ================= BOOT ================= */
+      applyTheme()
+      connect(LocalStore())
+      render()
+      setInterval(() => {
+        renderTop()
+        if (tab === 'today' && !$('#sheet').classList.contains('open')) render()
+      }, 30000)
+      ;(async () => {
+        const fb = LS.get('fb', null)
+        if (window.claude && typeof window.claude.use === 'function') {
+          try {
+            const [db, dl, user] = await Promise.all([
+              window.claude.use('db'),
+              window.claude.use('downloads'),
+              window.claude.use('user'),
+            ])
+            downloadsCap = dl
+            if (db) {
+              connect(RemoteStore('claude', (c) => db.collection(c)))
+              if (user) {
+                try {
+                  if ((await user.can('data.write')) === false) {
+                    readOnly = true
+                    renderTop()
+                  }
+                } catch (e) {}
+              }
+              return
+            }
+          } catch (e) {}
+        }
+        if (fb && fb.config && fb.code) {
+          try {
+            await startFirebase(fb.config, fb.code)
+          } catch (e) {
+            syncState.err = true
+            renderTop()
+            toast('เชื่อมต่อ Firebase ไม่สำเร็จ ใช้ข้อมูลในเครื่องไปก่อน')
+          }
+        }
+      })()
+    </script>
+  </body>
+</html>

@@ -17,6 +17,7 @@ import { zoneCity } from '@/lib/time-zones'
 import { useItemMutations, useItems, useTrip } from '@/lib/trips'
 import { useFormat } from '@/lib/use-format'
 import { ItemRow, type RowStatus } from './item-row'
+import { SleepCard } from './sleep-card'
 
 interface Timed extends TripItemDto {
   startsAtDate: Date
@@ -277,6 +278,8 @@ export function TodayView({
                 </div>
               </Card>
             )}
+
+            <SleepCard items={items} meId={meId} now={now} />
 
             <Card>
               <div className="mb-2 flex items-baseline justify-between">

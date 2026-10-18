@@ -9,6 +9,16 @@ import type {
   NewItemRow,
 } from '../modules/items/items.repository'
 import type {
+  ChecklistRepository,
+  ChecklistRow,
+  TickRow,
+} from '../modules/checklist/checklist.repository'
+import type {
+  InfoCardFields,
+  InfoCardRow,
+  InfoCardsRepository,
+} from '../modules/info-cards/info-cards.repository'
+import type {
   InviteRow,
   InviteWithTrip,
   MembersRepository,
@@ -231,4 +241,95 @@ export class InMemoryMembers implements MembersRepository {
     const invite = this.invites.get(inviteId)
     if (invite) invite.useCount += 1
   }
+}
+
+export class InMemoryChecklist implements ChecklistRepository {
+  rows = new Map<string, ChecklistRow>()
+  tickRows: TickRow[] = []
+
+  async list(tripId: string) {
+    return [...this.rows.values()].filter((r) => r.tripId === tripId)
+  }
+  async ticks(tripId: string) {
+    return this.tickRows.filter((t) => this.rows.get(t.itemId)?.tripId === tripId)
+  }
+  async find(itemId: string) {
+    return this.rows.get(itemId) ?? null
+  }
+  async nextSortOrder(tripId: string, groupKey: string) {
+    return [...this.rows.values()].filter((r) => r.tripId === tripId && r.groupKey === groupKey)
+      .length
+  }
+  async create(values: { tripId: string; groupKey: string; title: string; sortOrder: number }) {
+    const now = new Date()
+    const row: ChecklistRow = { id: uuid(), ...values, createdAt: now, updatedAt: now }
+    this.rows.set(row.id, row)
+    return row
+  }
+  async update(itemId: string, changes: { groupKey?: string; title?: string }) {
+    const row = this.rows.get(itemId)
+    if (!row) return null
+    const next = { ...row, ...changes }
+    this.rows.set(itemId, next)
+    return next
+  }
+  async delete(itemId: string) {
+    this.rows.delete(itemId)
+  }
+  async tick(itemId: string, userId: string, at: Date) {
+    if (!this.tickRows.some((t) => t.itemId === itemId && t.userId === userId)) {
+      this.tickRows.push({ itemId, userId, name: nameOf(userId), tickedAt: at })
+    }
+  }
+  async untick(itemId: string, userId: string) {
+    this.tickRows = this.tickRows.filter((t) => !(t.itemId === itemId && t.userId === userId))
+  }
+}
+
+export class InMemoryInfoCards implements InfoCardsRepository {
+  rows = new Map<string, InfoCardRow>()
+
+  async list(tripId: string) {
+    return [...this.rows.values()].filter((r) => r.tripId === tripId)
+  }
+  async find(cardId: string) {
+    return this.rows.get(cardId) ?? null
+  }
+  async nextSortOrder(tripId: string) {
+    return (await this.list(tripId)).length
+  }
+  async create(values: InfoCardFields & { tripId: string; sortOrder: number }) {
+    const now = new Date()
+    const row: InfoCardRow = { id: uuid(), ...values, createdAt: now, updatedAt: now }
+    this.rows.set(row.id, row)
+    return row
+  }
+  async update(cardId: string, changes: Partial<InfoCardFields>) {
+    const row = this.rows.get(cardId)
+    if (!row) return null
+    const next = { ...row, ...changes }
+    this.rows.set(cardId, next)
+    return next
+  }
+  async delete(cardId: string) {
+    this.rows.delete(cardId)
+  }
+}
+
+/** A trip owned by `owner` with an editor and a viewer, for module tests. */
+export async function seededTrip() {
+  const { TripsService } = await import('../modules/trips/trips.service')
+  const repo = new InMemoryTrips()
+  const audit = new FakeAudit()
+  const trips = new TripsService(repo, audit)
+  const { id } = await trips.create(users.owner, {
+    name: 'Seoul',
+    startDate: '2026-10-22',
+    endDate: '2026-10-27',
+    homeTimeZone: 'Asia/Bangkok',
+    baseCurrency: 'THB',
+  })
+  repo.addMember(id, 'editor', 'editor')
+  repo.addMember(id, 'viewer', 'viewer')
+  return { tripId: id, trips, repo, audit }
 }

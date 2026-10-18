@@ -9,6 +9,11 @@ import type {
   NewItemRow,
 } from '../modules/items/items.repository'
 import type {
+  InviteRow,
+  InviteWithTrip,
+  MembersRepository,
+} from '../modules/members/members.repository'
+import type {
   MemberRow,
   NewTripRow,
   TripRow,
@@ -162,5 +167,68 @@ export class InMemoryItems implements ItemsRepository {
   }
   async deleteCheckIn(itemId: string, userId: string) {
     this.checkIns = this.checkIns.filter((c) => !(c.itemId === itemId && c.userId === userId))
+  }
+}
+
+export class InMemoryMembers implements MembersRepository {
+  invites = new Map<string, InviteRow>()
+  constructor(private readonly trips: InMemoryTrips) {}
+
+  async roleOf(tripId: string, userId: string) {
+    return this.trips.roles.get(tripId)?.get(userId) ?? null
+  }
+  async setRole(tripId: string, userId: string, role: TripRole) {
+    this.trips.roles.get(tripId)?.set(userId, role)
+  }
+  async remove(tripId: string, userId: string) {
+    this.trips.roles.get(tripId)?.delete(userId)
+  }
+  async add(tripId: string, userId: string, role: TripRole) {
+    if (!this.trips.roles.get(tripId)?.has(userId)) this.trips.roles.get(tripId)?.set(userId, role)
+  }
+  async createInvite(values: {
+    tripId: string
+    token: string
+    role: 'editor' | 'viewer'
+    createdBy: string
+    expiresAt: Date
+  }): Promise<InviteRow> {
+    const row: InviteRow = {
+      id: uuid(),
+      ...values,
+      createdAt: new Date(),
+      revokedAt: null,
+      useCount: 0,
+    }
+    this.invites.set(row.id, row)
+    return row
+  }
+  async activeInvites(tripId: string, now: Date) {
+    return [...this.invites.values()].filter(
+      (i) => i.tripId === tripId && !i.revokedAt && i.expiresAt > now,
+    )
+  }
+  async findInvite(inviteId: string) {
+    return this.invites.get(inviteId) ?? null
+  }
+  async findInviteByToken(token: string): Promise<InviteWithTrip | null> {
+    const invite = [...this.invites.values()].find((i) => i.token === token)
+    const trip = invite && this.trips.trips.get(invite.tripId)
+    if (!invite || !trip) return null
+    return {
+      invite,
+      tripName: trip.name,
+      startDate: trip.startDate,
+      endDate: trip.endDate,
+      invitedBy: invite.createdBy ? nameOf(invite.createdBy) : null,
+    }
+  }
+  async revokeInvite(inviteId: string, at: Date) {
+    const invite = this.invites.get(inviteId)
+    if (invite) invite.revokedAt = at
+  }
+  async countInviteUse(inviteId: string) {
+    const invite = this.invites.get(inviteId)
+    if (invite) invite.useCount += 1
   }
 }

@@ -1,13 +1,19 @@
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
+import { safeNext } from '@/lib/safe-next'
 import { getMe } from '@/lib/server-api'
 import { LoginButtons } from './login-buttons'
 
 export const metadata: Metadata = { title: 'Sign in' }
 
-export default async function LoginPage() {
-  if (await getMe()) redirect('/')
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>
+}) {
+  const next = safeNext((await searchParams).next)
+  if (await getMe()) redirect(next)
   const t = await getTranslations('login')
   const googleEnabled = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)
   const devLoginEnabled = process.env.DEV_LOGIN_ENABLED === 'true'
@@ -19,7 +25,7 @@ export default async function LoginPage() {
         <h1 className="mt-8 text-3xl font-bold tracking-tight">{t('title')}</h1>
         <p className="mt-3 text-lg text-muted-foreground">{t('subtitle')}</p>
       </div>
-      <LoginButtons googleEnabled={googleEnabled} devLoginEnabled={devLoginEnabled} />
+      <LoginButtons googleEnabled={googleEnabled} devLoginEnabled={devLoginEnabled} next={next} />
     </main>
   )
 }

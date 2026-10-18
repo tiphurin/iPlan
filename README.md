@@ -21,14 +21,14 @@ A mobile-first web app for **planning trips** with friends (itinerary across tim
 ```
 iPlan/
 ├─ apps/
-│  ├─ web/          Next.js UI; mounts the API at /api/*           (planned)
+│  ├─ web/          Next.js UI (mobile-first, th/en); serves the API at /api/*
 │  └─ api/          Hono app: modules/<m>/{routes,service,repository,mapper}
 ├─ packages/
 │  ├─ config/       Shared tsconfig and ESLint config
 │  ├─ core/         Pure domain logic: money, split, budget, schedule, time zones
 │  ├─ db/           Drizzle schema, migrations, demo seed
 │  ├─ contracts/    Zod request/response schemas and error codes
-│  └─ i18n/         Locales and Intl formatters                         (planned)
+│  └─ i18n/         Locales and Intl formatters (Buddhist era for Thai)
 ├─ docs/            HANDOFF.md (background), INFRA.md (accounts, secrets)
 └─ .github/workflows/ci.yml
 ```
@@ -75,16 +75,18 @@ corepack enable
 yarn install
 cp .env.example .env
 yarn db:setup       # Postgres in Docker + migrations + demo data
-yarn check          # format, lint, typecheck, test, build
+yarn dev            # http://localhost:3000, API docs at /api/docs
 ```
 
-The web app and API (`yarn dev`) arrive with the PRs that add them.
+Tap **Dev login** on the sign-in page (no Google account needed locally).
+
+**On your iPhone:** connect to the same Wi-Fi, then open the "Network" URL that `yarn dev` prints (e.g. `http://192.168.1.20:3000`). Add it to the Home Screen from the Share menu for the full-screen app. Local network origins are trusted only outside production.
 
 ## Scripts
 
 | Command                             | What it does                            |
 | ----------------------------------- | --------------------------------------- |
-| `yarn dev`                          | Run every app in watch mode             |
+| `yarn dev`                          | Web app + API on http://localhost:3000  |
 | `yarn build`                        | Build all packages and apps             |
 | `yarn lint`                         | ESLint in every package                 |
 | `yarn typecheck`                    | `tsc --noEmit` in every package         |

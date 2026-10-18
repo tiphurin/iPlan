@@ -1,0 +1,58 @@
+{
+  "common": {
+    "appName": "iPlan",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "comingSoon": "Coming soon"
+  },
+  "nav": {
+    "trips": "Trips",
+    "today": "Today",
+    "money": "Money",
+    "settings": "Settings"
+  },
+  "login": {
+    "title": "Trips and money in one place",
+    "subtitle": "Plan trips, split costs and track your monthly budget",
+    "google": "Continue with Google",
+    "googleMissing": "Google sign-in is not configured yet (see docs/INFRA.md)",
+    "devTitle": "Local testing",
+    "devOwner": "Sign in as Demo Owner",
+    "devFriend": "Sign in as Demo Friend"
+  },
+  "home": {
+    "greeting": "Hi {name}",
+    "subtitle": "Your trips"
+  },
+  "today": {
+    "title": "Today"
+  },
+  "money": {
+    "title": "Money",
+    "comingSoonBody": "Income, deductions, fixed costs and monthly budgets arrive in upcoming PRs."
+  },
+  "settings": {
+    "title": "Settings",
+    "signedInAs": "Signed in as {email}",
+    "language": "Language",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "signOut": "Sign out"
+  },
+  "errors": {
+    "UNAUTHORIZED": "Please sign in",
+    "FORBIDDEN": "You don't have permission to do that",
+    "NOT_FOUND": "Not found",
+    "VALIDATION_FAILED": "Please check the highlighted fields",
+    "CONFLICT": "Something changed meanwhile, please try again",
+    "RATE_LIMITED": "Too many requests, please wait a moment",
+    "INTERNAL": "Something went wrong, please try again",
+    "DEV_LOGIN_DISABLED": "Dev login is turned off",
+    "DEMO_DATA_MISSING": "No demo data yet: run yarn db:seed",
+    "NETWORK": "Can't connect. Check your internet connection."
+  }
+}

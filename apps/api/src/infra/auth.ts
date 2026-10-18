@@ -4,12 +4,42 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { admin } from 'better-auth/plugins/admin'
 import type { ApiEnv } from '../env'
 
+/**
+ * During local development the app is also opened from a phone on the same
+ * Wi-Fi (http://192.168.x.x:3000). Trust such private-network origins, but
+ * only outside production.
+ */
+export function isPrivateDevOrigin(origin: string | null | undefined): boolean {
+  if (!origin) return false
+  let url: URL
+  try {
+    url = new URL(origin)
+  } catch {
+    return false
+  }
+  if (url.protocol !== 'http:') return false
+  const host = url.hostname
+  return (
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host.endsWith('.local') ||
+    /^10\.\d+\.\d+\.\d+$/.test(host) ||
+    /^192\.168\.\d+\.\d+$/.test(host) ||
+    /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(host)
+  )
+}
+
 export function createAuth(db: Database, env: ApiEnv) {
   return betterAuth({
     baseURL: env.authUrl,
     basePath: '/api/auth',
     secret: env.authSecret,
-    trustedOrigins: [env.authUrl],
+    trustedOrigins: env.production
+      ? [env.authUrl]
+      : (request) => {
+          const origin = request?.headers.get('origin')
+          return [env.authUrl, isPrivateDevOrigin(origin) ? origin : null]
+        },
     database: drizzleAdapter(db, {
       provider: 'pg',
       schema: {

@@ -22,12 +22,12 @@ A mobile-first web app for **planning trips** with friends (itinerary across tim
 iPlan/
 ├─ apps/
 │  ├─ web/          Next.js UI; mounts the API at /api/*           (planned)
-│  └─ api/          Hono app: modules/<m>/{routes,service,repository,mapper} (planned)
+│  └─ api/          Hono app: modules/<m>/{routes,service,repository,mapper}
 ├─ packages/
 │  ├─ config/       Shared tsconfig and ESLint config
 │  ├─ core/         Pure domain logic: money, split, budget, schedule, time zones
 │  ├─ db/           Drizzle schema, migrations, demo seed
-│  ├─ contracts/    Zod request/response schemas shared by web and API  (planned)
+│  ├─ contracts/    Zod request/response schemas and error codes
 │  └─ i18n/         Locales and Intl formatters                         (planned)
 ├─ docs/            HANDOFF.md (background), INFRA.md (accounts, secrets)
 └─ .github/workflows/ci.yml

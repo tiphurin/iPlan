@@ -31,3 +31,8 @@ export const getMe = cache(async () => {
     throw error
   }
 })
+
+/** Time the request was rendered; seeds live clocks so server and client HTML match. */
+export function requestTime(): number {
+  return Date.now()
+}

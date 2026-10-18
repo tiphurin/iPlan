@@ -15,6 +15,8 @@ const TABS = [
 ] as const satisfies readonly { href: Route; key: string; icon: unknown }[]
 
 function isActive(pathname: string, href: string) {
+  // A trip's live view belongs to the Today tab.
+  if (pathname.endsWith('/today')) return href === '/today'
   if (href === '/') return pathname === '/' || pathname.startsWith('/trips')
   return pathname === href || pathname.startsWith(`${href}/`)
 }

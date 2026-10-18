@@ -80,6 +80,20 @@ yarn dev            # http://localhost:3000, API docs at /api/docs
 
 Tap **Dev login** on the sign-in page (no Google account needed locally).
 
+### What to try (demo)
+
+The seed creates a fictional **Seoul (demo)** trip that starts yesterday, so today is the arrival day in Seoul.
+
+| Screen             | Try                                                                                                                                    |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **Trips**          | Trips grouped into On the trip / Upcoming / Past; ➕ creates a trip                                                                    |
+| **Trip**           | Swipe the day tabs; times show in each item's own zone (Bangkok → Seoul); tap an item to edit, duplicate or delete; ➕ adds an item    |
+| **Today**          | What's on now with a progress bar, time left, countdown to the next item, **Check in** (shows minutes ahead/behind plan), day progress |
+| **Time simulator** | Flask button on Today: jump ±1h, +1 day or to the next item to see the live view at any moment of the trip                             |
+| **Settings**       | Thai / English, System / Light / Dark                                                                                                  |
+
+Sign in as **Demo Friend** to see the same trip with the _editor_ role. `yarn db:seed` resets the demo data.
+
 **On your iPhone:** connect to the same Wi-Fi, then open the "Network" URL that `yarn dev` prints (e.g. `http://192.168.1.20:3000`). Add it to the Home Screen from the Share menu for the full-screen app. Local network origins are trusted only outside production.
 
 ## Scripts

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  currentTripDay,
   delayMinutes,
   durationParts,
   punctuality,
@@ -82,5 +83,27 @@ describe('punctuality', () => {
   it('measures sleep', () => {
     expect(sleepMinutes(at('15:30'), new Date('2026-10-23T22:15:00Z'))).toBe(405)
     expect(sleepMinutes(at('10:00'), at('09:00'))).toBe(0)
+  })
+})
+
+describe('currentTripDay', () => {
+  const trip = [
+    { dayDate: '2026-10-22', startsAt: new Date('2026-10-22T00:00:00Z') },
+    // 02:25 Bangkok departure still belongs to the 22nd.
+    { dayDate: '2026-10-22', startsAt: new Date('2026-10-22T19:25:00Z') },
+    { dayDate: '2026-10-23', startsAt: new Date('2026-10-23T01:45:00Z') },
+    { dayDate: '2026-10-24', startsAt: new Date('2026-10-23T22:30:00Z') },
+  ]
+
+  it('stays on the day of the overnight flight until the next day starts', () => {
+    expect(currentTripDay(trip, new Date('2026-10-22T20:00:00Z'))).toBe('2026-10-22')
+    expect(currentTripDay(trip, new Date('2026-10-23T02:00:00Z'))).toBe('2026-10-23')
+    expect(currentTripDay(trip, new Date('2026-10-23T23:00:00Z'))).toBe('2026-10-24')
+  })
+
+  it('uses the first day before the trip and the last day after it', () => {
+    expect(currentTripDay(trip, new Date('2026-10-01T00:00:00Z'))).toBe('2026-10-22')
+    expect(currentTripDay(trip, new Date('2026-12-01T00:00:00Z'))).toBe('2026-10-24')
+    expect(currentTripDay([], new Date())).toBeNull()
   })
 })

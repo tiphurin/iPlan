@@ -14,6 +14,8 @@ export const ErrorCode = z.enum([
   'INTERNAL',
   'DEV_LOGIN_DISABLED',
   'DEMO_DATA_MISSING',
+  'INVITE_INVALID',
+  'OWNER_CANNOT_LEAVE',
 ])
 export type ErrorCode = z.infer<typeof ErrorCode>
 

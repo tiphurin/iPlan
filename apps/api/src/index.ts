@@ -7,6 +7,8 @@ import { DrizzleItemsRepository } from './modules/items/items.repository'
 import { ItemsService } from './modules/items/items.service'
 import { DrizzleMeRepository } from './modules/me/me.repository'
 import { MeService } from './modules/me/me.service'
+import { DrizzleMembersRepository } from './modules/members/members.repository'
+import { MembersService } from './modules/members/members.service'
 import { DrizzleTripsRepository } from './modules/trips/trips.repository'
 import { TripsService } from './modules/trips/trips.service'
 import { AuditRepository } from './shared/audit'
@@ -27,6 +29,7 @@ export function buildApp(env = readEnv()): App {
       me: new MeService(new DrizzleMeRepository(db)),
       trips,
       items: new ItemsService(new DrizzleItemsRepository(db), trips, audit),
+      members: new MembersService(new DrizzleMembersRepository(db), trips, audit),
     },
   })
 }

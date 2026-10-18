@@ -60,7 +60,9 @@
     "INTERNAL": "Something went wrong, please try again",
     "DEV_LOGIN_DISABLED": "Dev login is turned off",
     "DEMO_DATA_MISSING": "No demo data yet: run yarn db:seed",
-    "NETWORK": "Can't connect. Check your internet connection."
+    "NETWORK": "Can't connect. Check your internet connection.",
+    "INVITE_INVALID": "This invite link is invalid or has expired",
+    "OWNER_CANNOT_LEAVE": "The owner can't leave. Delete the trip instead."
   },
   "trips": {
     "empty": "No trips yet",
@@ -154,5 +156,35 @@
     "hm": "{h}h {m}m",
     "m": "{m} min",
     "lessThanMinute": "under a minute"
+  },
+  "members": {
+    "title": "Members",
+    "you": "You",
+    "changeRole": "Change role",
+    "remove": "Remove",
+    "confirmRemove": "Remove {name} from the trip?",
+    "leave": "Leave trip",
+    "confirmLeave": "Leave this trip?",
+    "invites": "Invite links",
+    "invitesHint": "Send the link to friends so they can join. It works for several people until it expires.",
+    "createInvite": "Create invite link",
+    "inviteAs": "Invite as",
+    "share": "Share",
+    "copy": "Copy",
+    "copied": "Copied",
+    "revoke": "Revoke",
+    "expires": "Expires {date}",
+    "used": "Used {count, plural, one {# time} other {# times}}",
+    "noInvites": "No active links",
+    "manage": "Manage members"
+  },
+  "join": {
+    "title": "Trip invitation",
+    "invitedBy": "{name} invited you",
+    "as": "You'll join as: {role}",
+    "accept": "Join trip",
+    "already": "You're already in this trip ({role})",
+    "open": "Open trip",
+    "invalid": "This link is invalid or has expired. Ask the trip owner for a new one."
   }
 }

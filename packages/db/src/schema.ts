@@ -138,6 +138,25 @@ export const tripMember = pgTable(
   ],
 )
 
+/** Shareable join link. Reusable until it expires or is revoked. */
+export const tripInvite = pgTable(
+  'trip_invite',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tripId: uuid('trip_id')
+      .notNull()
+      .references(() => trip.id, { onDelete: 'cascade' }),
+    token: text('token').notNull().unique(),
+    role: tripRole('role').notNull(),
+    createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
+    createdAt,
+    expiresAt: timestamptz('expires_at').notNull(),
+    revokedAt: timestamptz('revoked_at'),
+    useCount: integer('use_count').notNull().default(0),
+  },
+  (t) => [index('trip_invite_trip_idx').on(t.tripId)],
+)
+
 export const tripItemKind = pgEnum('trip_item_kind', [
   'place',
   'move',

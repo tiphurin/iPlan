@@ -5,7 +5,8 @@ import type { MeRepository, UserRow } from './modules/me/me.repository'
 import { ItemsService } from './modules/items/items.service'
 import { MeService } from './modules/me/me.service'
 import { TripsService } from './modules/trips/trips.service'
-import { FakeAudit, InMemoryItems, InMemoryTrips } from './testing/fakes'
+import { MembersService } from './modules/members/members.service'
+import { FakeAudit, InMemoryItems, InMemoryMembers, InMemoryTrips } from './testing/fakes'
 
 const owner: UserRow = {
   id: 'u1',
@@ -35,13 +36,15 @@ const auth: AuthGateway = {
 }
 
 const audit = new FakeAudit()
-const trips = new TripsService(new InMemoryTrips(), audit)
+const tripRepo = new InMemoryTrips()
+const trips = new TripsService(tripRepo, audit)
 const app = createApp({
   auth,
   services: {
     me: new MeService(users),
     trips,
     items: new ItemsService(new InMemoryItems(), trips, audit),
+    members: new MembersService(new InMemoryMembers(tripRepo), trips, audit),
   },
 })
 const signedIn = { cookie: 'session=u1' }

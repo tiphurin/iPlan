@@ -12,7 +12,7 @@ import { forbidden, notFound, validationFailed } from '../../shared/errors'
 import { toTripDetailDto, toTripDto } from './trips.mapper'
 import type { NewTripRow, TripWithRole, TripsRepository } from './trips.repository'
 
-const RANK: Record<TripRole, number> = { viewer: 0, editor: 1, owner: 2 }
+export const RANK: Record<TripRole, number> = { viewer: 0, editor: 1, owner: 2 }
 export const MAX_TRIP_DAYS = 60
 
 /** Lets other modules (items, expenses...) check trip permissions. */

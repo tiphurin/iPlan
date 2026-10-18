@@ -1,5 +1,6 @@
 'use client'
 
+import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -13,9 +14,12 @@ type Pending = 'google' | 'dev@iplan.local' | 'friend@iplan.local' | null
 export function LoginButtons({
   googleEnabled,
   devLoginEnabled,
+  next,
 }: {
   googleEnabled: boolean
   devLoginEnabled: boolean
+  /** Where to go after signing in (already validated as a local path). */
+  next: string
 }) {
   const t = useTranslations()
   const router = useRouter()
@@ -37,7 +41,7 @@ export function LoginButtons({
     run('google', async () => {
       const { url } = await apiFetch('/api/auth/sign-in/social', {
         method: 'POST',
-        body: { provider: 'google', callbackURL: '/' },
+        body: { provider: 'google', callbackURL: next },
         schema: z.object({ url: z.url() }),
       })
       window.location.href = url
@@ -46,7 +50,7 @@ export function LoginButtons({
   const dev = (email: 'dev@iplan.local' | 'friend@iplan.local') =>
     run(email, async () => {
       await apiFetch('/api/dev/login', { method: 'POST', body: { email } })
-      router.replace('/')
+      router.replace(next as Route)
       router.refresh()
     })
 

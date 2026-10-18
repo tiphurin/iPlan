@@ -1,3 +1,4 @@
+export * from './checklist'
 export * from './errors'
 export * from './me'
 export * from './members'

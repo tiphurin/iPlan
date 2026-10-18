@@ -5,7 +5,7 @@
 import { localDateKey } from '@iplan/core'
 import { eq, sql } from 'drizzle-orm'
 import { createDb } from './client'
-import { DEMO_USERS, buildDemoTrip } from './demo'
+import { DEMO_CHECKLIST, DEMO_INFO_CARDS, DEMO_USERS, buildDemoTrip } from './demo'
 import { loadRootEnv, requireDatabaseUrl } from './env'
 import * as schema from './schema'
 
@@ -39,6 +39,27 @@ async function main() {
       .insert(schema.tripItem)
       .values(demo.items.map((item) => ({ ...item, tripId: demo.trip.id })))
       .returning({ id: schema.tripItem.id, startsAt: schema.tripItem.startsAt })
+
+    const checklist = await tx
+      .insert(schema.checklistItem)
+      .values(
+        DEMO_CHECKLIST.map(({ groupKey, title }, i) => ({
+          tripId: demo.trip.id,
+          groupKey,
+          title,
+          sortOrder: i,
+        })),
+      )
+      .returning({ id: schema.checklistItem.id })
+    const ticked = checklist.filter((_, i) => DEMO_CHECKLIST[i]?.ticked)
+    if (ticked.length > 0) {
+      await tx
+        .insert(schema.checklistTick)
+        .values(ticked.map((c, i) => ({ itemId: c.id, userId: i % 2 ? friend.id : owner.id })))
+    }
+    await tx
+      .insert(schema.infoCard)
+      .values(DEMO_INFO_CARDS.map((card, i) => ({ ...card, tripId: demo.trip.id, sortOrder: i })))
 
     // Check in to finished items with a little drift so late/early shows up.
     const drift = [3, -2, 12, 0, 7, -6]

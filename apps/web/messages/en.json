@@ -90,7 +90,9 @@
     "dayN": "Day {n}",
     "noItems": "Nothing planned for this day yet",
     "addItem": "Add to plan",
-    "openToday": "Today view"
+    "openToday": "Today view",
+    "checklist": "Checklist",
+    "info": "Info"
   },
   "kinds": {
     "place": "Place",
@@ -186,5 +188,50 @@
     "already": "You're already in this trip ({role})",
     "open": "Open trip",
     "invalid": "This link is invalid or has expired. Ask the trip owner for a new one."
+  },
+  "checklist": {
+    "title": "Checklist",
+    "progress": "{done} of {total} done",
+    "add": "Add item",
+    "addPlaceholder": "Add to {group}…",
+    "empty": "Nothing on the list yet",
+    "tickedBy": "Ticked by {names}",
+    "editMode": "Edit",
+    "done": "Done",
+    "newGroup": "New group",
+    "groups": {
+      "documents": "Documents",
+      "bookings": "Bookings",
+      "money": "Money & phone",
+      "packing": "Packing",
+      "clothes": "Clothes",
+      "airport": "Travel day",
+      "daily": "During the trip",
+      "return": "Going home"
+    }
+  },
+  "info": {
+    "title": "Trip info",
+    "add": "Add card",
+    "empty": "No info yet. Add flights, hotel, emergency numbers or tips.",
+    "kind": "Type",
+    "cardTitle": "Title",
+    "body": "Details",
+    "kinds": {
+      "flight": "Flights",
+      "hotel": "Stay",
+      "health": "Health & appointments",
+      "lounge": "Lounges",
+      "emergency": "Emergency",
+      "tip": "Tips",
+      "other": "Other"
+    }
+  },
+  "sleep": {
+    "title": "Sleep",
+    "slept": "Slept {time}",
+    "wakeLate": "Woke {min} min later than planned",
+    "wakeEarly": "Woke {min} min earlier than planned",
+    "wakeOnTime": "Woke on time"
   }
 }

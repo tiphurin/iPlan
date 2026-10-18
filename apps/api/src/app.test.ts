@@ -6,7 +6,16 @@ import { ItemsService } from './modules/items/items.service'
 import { MeService } from './modules/me/me.service'
 import { TripsService } from './modules/trips/trips.service'
 import { MembersService } from './modules/members/members.service'
-import { FakeAudit, InMemoryItems, InMemoryMembers, InMemoryTrips } from './testing/fakes'
+import { ChecklistService } from './modules/checklist/checklist.service'
+import { InfoCardsService } from './modules/info-cards/info-cards.service'
+import {
+  FakeAudit,
+  InMemoryChecklist,
+  InMemoryInfoCards,
+  InMemoryItems,
+  InMemoryMembers,
+  InMemoryTrips,
+} from './testing/fakes'
 
 const owner: UserRow = {
   id: 'u1',
@@ -45,6 +54,8 @@ const app = createApp({
     trips,
     items: new ItemsService(new InMemoryItems(), trips, audit),
     members: new MembersService(new InMemoryMembers(tripRepo), trips, audit),
+    checklist: new ChecklistService(new InMemoryChecklist(), trips, audit),
+    infoCards: new InfoCardsService(new InMemoryInfoCards(), trips, audit),
   },
 })
 const signedIn = { cookie: 'session=u1' }

@@ -265,10 +265,27 @@ export function isRailLine(line: string | undefined): boolean {
   return RAIL_LINES.some((p) => p.line === line)
 }
 
-/** Rides that run between stations, so a start and end station make sense. */
-const STATION_MODES = new Set(['METRO', 'TRAIN', 'SHINKANSEN', 'THSR'])
-export function hasStations(line: string | undefined): boolean {
-  return Boolean(line) && (STATION_MODES.has(line ?? '') || isRailLine(line))
+/**
+ * What the start and end of a ride are, so the boxes suggest the right things:
+ * a rail line's own stations, every station of the city's network (city rail
+ * before a line is picked), railway stations, airports, or any place.
+ */
+export type EndpointKind = 'line' | 'city' | 'station' | 'airport' | 'place'
+const STATION_MODES = new Set(['TRAIN', 'SHINKANSEN', 'THSR'])
+export function endpointKind(line: string | undefined): EndpointKind | null {
+  if (!line?.trim()) return null
+  if (isRailLine(line)) return 'line'
+  if (line === 'METRO') return 'city'
+  if (STATION_MODES.has(line)) return 'station'
+  if (line === 'FLY') return 'airport'
+  return 'place'
+}
+
+/** The rail lines of a country's cities, with their badges (for the city-wide station list). */
+export function countryLines(country: Country): { line: string; badge: string }[] {
+  return RAIL_GROUPS[country].flatMap((g) =>
+    g.lines.map((p) => ({ line: p.line, badge: p.badge ?? p.line })),
+  )
 }
 
 /** Where to look for stations: the line's city, else the country's first city. */
@@ -291,6 +308,11 @@ export function findPreset(line: string | undefined, color: string | undefined) 
   return ALL_PRESETS.find(
     (p) => p.line === line && p.color.toLowerCase() === (color ?? '').toLowerCase(),
   )
+}
+
+/** The preset for a saved line id, whatever its colour ("MRT-PP" → MRT Purple). */
+export function presetOf(line: string | undefined): LinePreset | undefined {
+  return ALL_PRESETS.find((p) => p.line === line)
 }
 
 /** The country a saved line belongs to, if it is a country-only app or rail line. */

@@ -103,6 +103,11 @@ export default async function ProfilePage() {
           locale={resolveLocale(locale)}
           theme={resolveTheme(store.get(THEME_COOKIE)?.value)}
         />
+
+        {/* Which release is live: set from the git tag by the Release workflow. */}
+        <p className="pb-2 text-center text-xs text-faint">
+          iPlan {process.env.NEXT_PUBLIC_APP_VERSION ?? 'dev'}
+        </p>
       </div>
     </>
   )

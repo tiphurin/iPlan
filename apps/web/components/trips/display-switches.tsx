@@ -1,6 +1,7 @@
 'use client'
 
 import type { TripDetailDto } from '@iplan/contracts'
+import { Banknote, Clock } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/cn'
@@ -11,8 +12,8 @@ import { useFormat } from '@/lib/use-format'
 const SYMBOL: Record<string, string> = { THB: '฿', KRW: '₩', JPY: '¥', USD: '$', EUR: '€' }
 
 /**
- * Live clocks that double as the time switch (tap the zone the plan should use)
- * and a labelled currency switch. Shown under the trip bar, not stuck to it.
+ * Two compact switches: live clocks that pick which zone the plan shows, and
+ * the currency for amounts. The chosen side is a raised pill on a grey track.
  */
 export function DisplaySwitches({
   trip,
@@ -41,68 +42,60 @@ export function DisplaySwitches({
     local !== undefined && local !== trip.baseCurrency && Boolean(trip.fxRates[local])
   const option = (on: boolean) =>
     cn(
-      'flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm transition-colors',
+      'flex min-h-10 items-center gap-1.5 rounded-full px-3 text-sm transition-colors',
       on ? 'seg-on font-semibold' : 'text-muted-foreground',
     )
+  const track = 'inline-flex items-center gap-0.5 rounded-full bg-muted p-1'
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-faint">{t('timeMode')}</span>
-        <div
-          role="radiogroup"
-          aria-label={t('timeMode')}
-          className="flex rounded-full border bg-card p-0.5"
-        >
+    <div className="flex flex-wrap items-center gap-2">
+      <div role="radiogroup" aria-label={t('timeMode')} className={track}>
+        <Clock aria-hidden className="mx-1.5 size-4 text-faint" />
+        {(
+          [
+            ['local', away],
+            ['home', trip.homeTimeZone],
+          ] as const
+        ).map(([mode, zone]) => (
+          <button
+            key={mode}
+            type="button"
+            role="radio"
+            aria-checked={display.time === mode}
+            onClick={() => setDisplay({ time: mode })}
+            className={option(display.time === mode)}
+          >
+            <span className="text-[11px] font-semibold tracking-wide opacity-70">
+              {zoneShort(zone)}
+            </span>
+            <span className="num" suppressHydrationWarning>
+              {f.time(new Date(now), zone)}
+            </span>
+          </button>
+        ))}
+      </div>
+      {hasMoney && local && (
+        <div role="radiogroup" aria-label={t('moneyMode')} className={track}>
+          <Banknote aria-hidden className="mx-1.5 size-4 text-faint" />
           {(
             [
-              ['local', away],
-              ['home', trip.homeTimeZone],
+              ['local', local],
+              ['base', trip.baseCurrency],
             ] as const
-          ).map(([mode, zone]) => (
+          ).map(([mode, code]) => (
             <button
               key={mode}
               type="button"
               role="radio"
-              aria-checked={display.time === mode}
-              onClick={() => setDisplay({ time: mode })}
-              className={option(display.time === mode)}
+              aria-checked={display.money === mode}
+              aria-label={t(`currency.${code}`, { code })}
+              onClick={() => setDisplay({ money: mode })}
+              className={option(display.money === mode)}
             >
-              <span className="text-xs opacity-80">{zoneShort(zone)}</span>
-              <span className="num" suppressHydrationWarning>
-                {f.time(new Date(now), zone)}
-              </span>
+              <span className="font-display">{SYMBOL[code] ?? ''}</span>
+              {code}
             </button>
           ))}
-        </div>
-      </div>
-      {hasMoney && local && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-faint">{t('moneyMode')}</span>
-          <div
-            role="radiogroup"
-            aria-label={t('moneyMode')}
-            className="flex rounded-full border bg-card p-0.5"
-          >
-            {(
-              [
-                ['local', local],
-                ['base', trip.baseCurrency],
-              ] as const
-            ).map(([mode, code]) => (
-              <button
-                key={mode}
-                type="button"
-                role="radio"
-                aria-checked={display.money === mode}
-                onClick={() => setDisplay({ money: mode })}
-                className={option(display.money === mode)}
-              >
-                <span className="font-display">{SYMBOL[code] ?? ''}</span>
-                {t(`currency.${code}`, { code })}
-              </button>
-            ))}
-          </div>
         </div>
       )}
     </div>

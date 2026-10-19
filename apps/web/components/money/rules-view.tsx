@@ -75,7 +75,7 @@ export function RulesView({
           </Select>
         </Field>
         <Field label={t('finance.rule.name')} error={errors.name}>
-          <Input name="name" required maxLength={60} defaultValue={rule?.name} />
+          noLeadingSpace <Input name="name" required maxLength={60} defaultValue={rule?.name} />
         </Field>
         <Field label={t('finance.rule.amount')} error={errors.amount}>
           <Input

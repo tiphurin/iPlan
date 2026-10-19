@@ -157,7 +157,7 @@ export function TripView({
   )
 
   return (
-    <TripDisplayProvider tripId={trip.id}>
+    <TripDisplayProvider tripId={trip.id} home={trip.homeTimeZone} away={away}>
       <TripTopBar trip={trip} view="plan" day={day} below={dayStrip} />
       <div className="px-4 pt-3 pb-2">
         <p className="text-sm text-muted-foreground">

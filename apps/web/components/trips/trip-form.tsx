@@ -90,6 +90,7 @@ export function TripForm({
       )}
       <Field label={t('trips.name')} error={errors.name}>
         <Input
+          noLeadingSpace
           name="name"
           required
           maxLength={80}
@@ -100,6 +101,7 @@ export function TripForm({
       </Field>
       <Field label={t('trips.destination')} hint={t('common.optional')} error={errors.destination}>
         <Input
+          noLeadingSpace
           name="destination"
           maxLength={120}
           value={destination}

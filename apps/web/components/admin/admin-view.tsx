@@ -254,7 +254,6 @@ function Users({
                 update.mutate({ id: u.id, status: 'active', groupIds, features, circleIds })
               }
               onAccess={(access) => update.mutate({ id: u.id, ...access })}
-              onGroups={(groupIds) => update.mutate({ id: u.id, groupIds })}
               onCircles={(circleIds) => update.mutate({ id: u.id, circleIds })}
               onRole={(role) => update.mutate({ id: u.id, role })}
               onSuspend={() => suspend(u)}
@@ -277,7 +276,6 @@ function UserCard({
   joined,
   onApprove,
   onAccess,
-  onGroups,
   onCircles,
   onRole,
   onSuspend,
@@ -292,7 +290,6 @@ function UserCard({
   onApprove: (groupIds: string[], features: FeatureKey[], circleIds: string[]) => void
   /** Features and groups always change together so the two controls agree. */
   onAccess: (access: { groupIds: string[]; features: FeatureKey[] }) => void
-  onGroups: (groupIds: string[]) => void
   onCircles: (circleIds: string[]) => void
   onRole: (role: 'user' | 'admin') => void
   onSuspend: () => void
@@ -319,11 +316,28 @@ function UserCard({
       icon: <Icon aria-hidden className="size-5" style={{ color: FEATURES[key].color }} />,
     }
   })
-  const selected = pending ? picked : u.groupIds
+  // Features and groups are one picture: what the person can use. Groups shown are the
+  // ones that picture amounts to (all features ticked = "Full access"), even for accounts
+  // set up before the two were kept in sync.
+  const savedGroups = pending ? picked : u.groupIds
+  const features = effectiveFeatures(savedGroups, pending ? pickedFeatures : u.features, groups)
+  const selected = planAccess(features, groups, savedGroups).groupIds
+  const apply = (wanted: FeatureKey[]) => {
+    const plan = planAccess(wanted, groups, savedGroups)
+    if (pending) {
+      setPicked(plan.groupIds)
+      setPickedFeatures(plan.features)
+    } else onAccess(plan)
+  }
+  // A group chip adds or removes that group's features; the rest follows from them.
   const toggle = (id: string) => {
-    const next = selected.includes(id) ? selected.filter((g) => g !== id) : [...selected, id]
-    if (pending) setPicked(next)
-    else onGroups(next)
+    const group = groups.find((g) => g.id === id)
+    if (!group) return
+    apply(
+      selected.includes(id)
+        ? features.filter((k) => !group.features.includes(k))
+        : [...new Set([...features, ...group.features])],
+    )
   }
   return (
     <Card className={cn('space-y-3 p-3', u.banned && 'border-danger/40 bg-danger/5')}>
@@ -359,15 +373,9 @@ function UserCard({
             label={t('admin.userFeatures')}
             placeholder={t('admin.noFeatures')}
             options={featureOptions}
-            value={effectiveFeatures(selected, pending ? pickedFeatures : u.features, groups)}
+            value={features}
             disabled={busy}
-            onChange={(next) => {
-              const plan = planAccess(next as FeatureKey[], groups, selected)
-              if (pending) {
-                setPicked(plan.groupIds)
-                setPickedFeatures(plan.features)
-              } else onAccess(plan)
-            }}
+            onChange={(next) => apply(next as FeatureKey[])}
           />
         </div>
       )}

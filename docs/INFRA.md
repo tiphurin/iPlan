@@ -87,7 +87,7 @@ Do these in order; each step only needs the previous ones. Nothing here asks for
    3. Credentials → Create OAuth client ID → Web application. Redirect URI: `https://<project>.vercel.app/api/auth/callback/google` (add `http://localhost:3000/api/auth/callback/google` for local testing). Copy client ID and secret.
 4. **Vercel** (Continue with GitHub, Hobby)
    1. Add New → Project → import `tiphurin/iPlan`. **Root Directory: `apps/web`**. Framework: Next.js. `apps/web/vercel.json` sets the install and build commands and the Singapore region.
-   2. Settings → Git → Production Branch: the branch you deploy from (e.g. `main` once merged there).
+   2. Production deploys come only from version tags through the Release workflow; finish the one-time steps in [DEPLOY.md](DEPLOY.md) (Vercel token and ids as GitHub secrets).
    3. Settings → Environment Variables, for **Production** (and Preview, pointing `DATABASE_URL` at the Neon `preview` branch):
 
       | Variable                                    | Value                                           |

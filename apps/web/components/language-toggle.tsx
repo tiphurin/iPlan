@@ -33,7 +33,7 @@ export function LanguageToggle({
       role="radiogroup"
       aria-label="Language / ภาษา"
       className={cn(
-        'inline-flex shrink-0 rounded-full border bg-card p-0.5 text-xs font-semibold',
+        'inline-flex shrink-0 rounded-full bg-muted p-0.5 text-xs font-semibold',
         pending && 'opacity-60',
         className,
       )}

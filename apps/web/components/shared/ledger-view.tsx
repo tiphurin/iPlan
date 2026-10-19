@@ -415,8 +415,9 @@ export function LedgerView({
         </div>
       ) : (
         <div className="px-4">
-          <div className="md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] md:items-start md:gap-6">
-            <div className="space-y-4 md:sticky md:top-4">
+          {/* One column on every screen: month, summary, then the days, top to bottom. */}
+          <div className="mx-auto max-w-2xl space-y-5">
+            <div className="space-y-4">
               <div className="flex items-center justify-between gap-2">
                 <Button
                   variant="ghost"
@@ -459,7 +460,7 @@ export function LedgerView({
               {errorBox}
             </div>
 
-            <div className="mt-6 md:mt-0">
+            <div>
               {monthEntries.length === 0 ? (
                 <div className="flex flex-col items-center rounded-2xl border bg-card px-6 py-10 text-center">
                   <p className="text-lg font-semibold">{t('shared.emptyMonth')}</p>
@@ -525,6 +526,7 @@ export function LedgerView({
         >
           <Input
             autoFocus
+            noLeadingSpace
             value={name}
             maxLength={80}
             aria-label={t('shared.newName')}

@@ -119,7 +119,7 @@ export function ItemForm({
     }
 
     // Start from stored extras (unknown keys survive), then apply the form's fields.
-    const managed = new Set<string>([...DETAIL_FIELDS, 'arrivalTimeZone', 'lat', 'lng'])
+    const managed = new Set<string>([...DETAIL_FIELDS, 'via', 'arrivalTimeZone', 'lat', 'lng'])
     const details: TripItemDetails = Object.fromEntries(
       Object.entries(item?.details ?? {}).filter(([key]) => !managed.has(key)),
     )
@@ -127,6 +127,8 @@ export function ItemForm({
       const value = text(form, key)
       if (value) details[key] = value
     }
+    const via = form.getAll('via').map(String).filter(Boolean)
+    if (kind === 'move' && via.length) details.via = via
     if (kind === 'flight' && arrivalZone !== zone) details.arrivalTimeZone = arrivalZone
     // Coordinates come with a picked place suggestion; typing an address clears them.
     const lat = Number(text(form, 'lat'))
@@ -213,6 +215,7 @@ export function ItemForm({
 
       <Field label={t('item.title')} error={errors.title}>
         <Input
+          noLeadingSpace
           name="title"
           required
           maxLength={120}
@@ -317,6 +320,7 @@ export function ItemForm({
       {kind === 'move' && (
         <LinePicker
           line={item?.details.line}
+          via={item?.details.via}
           color={item?.details.lineColor}
           from={item?.kind === 'move' ? item.details.from : undefined}
           to={item?.kind === 'move' ? item.details.to : undefined}

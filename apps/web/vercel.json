@@ -3,5 +3,11 @@
   "framework": "nextjs",
   "installCommand": "cd ../.. && yarn install --frozen-lockfile",
   "buildCommand": "bash ../../scripts/vercel-build.sh",
-  "regions": ["sin1"]
+  "regions": ["sin1"],
+  "git": {
+    "deploymentEnabled": {
+      "main": false,
+      "feature/iPlan/main": false
+    }
+  }
 }

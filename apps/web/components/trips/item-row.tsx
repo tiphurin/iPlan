@@ -61,7 +61,7 @@ export function ItemRow({
               className="rounded-full px-2 py-0.5 font-semibold text-white"
               style={{ backgroundColor: item.details.lineColor ?? '#64748b' }}
             >
-              {lineBadge(item.details.line)}
+              {[item.details.line, ...(item.details.via ?? [])].map(lineBadge).join(' › ')}
             </span>
           )}
           {item.kind === 'move' && (item.details.from || item.details.to) && (

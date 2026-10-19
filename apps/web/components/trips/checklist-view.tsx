@@ -182,6 +182,7 @@ export function ChecklistView({
                 <li className="p-2">
                   <form onSubmit={(e) => onAdd(e, group)} className="flex gap-2">
                     <Input
+                      noLeadingSpace
                       name="title"
                       maxLength={200}
                       placeholder={t('addPlaceholder', { group: groupLabel(group) })}

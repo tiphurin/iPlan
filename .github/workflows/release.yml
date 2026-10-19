@@ -1,0 +1,86 @@
+name: Release
+
+# Production deploys happen only from a version tag, e.g. `git tag v0.3.0 && git push origin v0.3.0`.
+# Pushing a branch never touches production (apps/web/vercel.json turns off branch auto-deploys);
+# pull requests still get Vercel preview links. See docs/DEPLOY.md.
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to (re)deploy, e.g. v0.3.0'
+        required: true
+
+concurrency:
+  group: release-production
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  # Exact CLI version, published more than 30 days before it was pinned (dependency rule).
+  VERCEL_CLI: vercel@59.23.2
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
+          fetch-depth: 0
+
+      - name: Check the tag
+        run: |
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Tag must look like v1.2.3, got $TAG"; exit 1; }
+          git merge-base --is-ancestor "$TAG" origin/feature/iPlan/main \
+            || { echo "$TAG is not on feature/iPlan/main; tag a merged commit."; exit 1; }
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+
+      - name: Same checks as CI
+        run: |
+          yarn format:check
+          yarn lint
+          yarn typecheck
+          yarn test
+
+      - name: Build for production
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          # Shown on the Profile page so you can see which version is live.
+          NEXT_PUBLIC_APP_VERSION: ${{ env.TAG }}
+          # scripts/vercel-build.sh migrates only when this is production.
+          VERCEL_ENV: production
+        run: |
+          npx --yes "$VERCEL_CLI" pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+          # Runs apps/web/vercel.json's build: scripts/vercel-build.sh migrates Neon, then builds.
+          npx --yes "$VERCEL_CLI" build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Deploy to production
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          url=$(npx --yes "$VERCEL_CLI" deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}")
+          echo "Deployed $TAG to $url" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Smoke test
+        if: ${{ vars.APP_URL != '' }}
+        run: curl --fail --silent --show-error --retry 5 --retry-delay 10 "${{ vars.APP_URL }}/api/health"
+
+      - name: GitHub release notes
+        if: ${{ github.event_name == 'push' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$TAG" --generate-notes --verify-tag || echo "Release already exists"

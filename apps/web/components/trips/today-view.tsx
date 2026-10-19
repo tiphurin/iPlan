@@ -66,7 +66,11 @@ const SOON_MIN = 15
 
 export function TodayView(props: TodayProps) {
   return (
-    <TripDisplayProvider tripId={props.initialTrip.id}>
+    <TripDisplayProvider
+      tripId={props.initialTrip.id}
+      home={props.initialTrip.homeTimeZone}
+      away={awayZone(props.initialItems, props.initialTrip.homeTimeZone)}
+    >
       <TodayBody {...props} />
     </TripDisplayProvider>
   )
@@ -74,7 +78,7 @@ export function TodayView(props: TodayProps) {
 
 function TodayBody({ initialTrip, initialItems, meId, serverNow }: TodayProps) {
   const t = useTranslations()
-  const { display } = useTripDisplay()
+  const { zoneFor } = useTripDisplay()
   const f = useFormat()
   const { data: trip } = useTrip(initialTrip.id, initialTrip)
   const { data: items } = useItems(initialTrip.id, initialItems)
@@ -115,8 +119,9 @@ function TodayBody({ initialTrip, initialItems, meId, serverNow }: TodayProps) {
   const current = status.current ? timed.find((i) => i.id === status.current?.item.id) : undefined
   const next = nextAnywhere ? timed.find((i) => i.id === nextAnywhere.item.id) : undefined
   const placeZone = current?.timeZone ?? next?.timeZone ?? trip.homeTimeZone
-  const clockZone = display.time === 'home' ? trip.homeTimeZone : placeZone
   const away = awayZone(items, trip.homeTimeZone)
+  // KR | TH decides the clock for everything on this page, even before leaving home.
+  const clockZone = zoneFor(placeZone)
 
   const dayLine = timeline(
     dayItems.map((i) => ({ ...i, startsAt: i.startsAtDate, endsAt: i.endsAtDate })),
@@ -161,7 +166,11 @@ function TodayBody({ initialTrip, initialItems, meId, serverNow }: TodayProps) {
           size="icon"
           aria-label={t('todayView.simulator')}
           aria-expanded={showSimulator}
-          onClick={() => setShowSimulator((v) => !v)}
+          onClick={() => {
+            // Closing the simulator goes back to the real clock and the item happening now.
+            if (showSimulator) setOffset(0)
+            setShowSimulator(!showSimulator)
+          }}
         >
           <FlaskConical aria-hidden className="size-5" />
         </Button>
@@ -259,9 +268,7 @@ function TodayBody({ initialTrip, initialItems, meId, serverNow }: TodayProps) {
                     {current.endsAt &&
                       ` – ${f.time(
                         current.endsAt,
-                        display.time === 'home'
-                          ? trip.homeTimeZone
-                          : (current.details.arrivalTimeZone ?? current.timeZone),
+                        zoneFor(current.details.arrivalTimeZone ?? current.timeZone),
                       )}`}
                   </p>
                   <div className="mt-4 h-[9px] overflow-hidden rounded-full bg-white/25">
@@ -350,10 +357,7 @@ function TodayBody({ initialTrip, initialItems, meId, serverNow }: TodayProps) {
                       )}
                     >
                       {soon ? t('todayView.getReady') : t('todayView.next')} ·{' '}
-                      {f.time(
-                        next.startsAt,
-                        display.time === 'home' ? trip.homeTimeZone : next.timeZone,
-                      )}
+                      {f.time(next.startsAt, zoneFor(next.timeZone))}
                     </p>
                     <p className="truncate font-semibold">{next.title}</p>
                   </div>

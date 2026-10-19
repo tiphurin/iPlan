@@ -31,7 +31,14 @@
   },
   "home": {
     "greeting": "สวัสดี {name}",
-    "subtitle": "ทริปของคุณ"
+    "subtitle": "ทริปของคุณ",
+    "onTrip": "กำลังเที่ยวอยู่",
+    "openToday": "เปิดหน้าวันนี้",
+    "thisMonth": "การเงินเดือนนี้",
+    "budgetAlerts": "{count, plural, other {# หมวดใกล้/เกินงบ}}",
+    "seeMoney": "ดูการเงิน",
+    "nextTrip": "ทริปถัดไป",
+    "inDays": "{count, plural, other {อีก # วัน}}"
   },
   "today": {
     "title": "วันนี้"
@@ -371,6 +378,7 @@
       "health": "สุขภาพ",
       "fun": "บันเทิง",
       "other": "อื่นๆ"
-    }
+    },
+    "trend": "แนวโน้ม 6 เดือน"
   }
 }

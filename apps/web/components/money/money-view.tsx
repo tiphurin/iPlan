@@ -1,15 +1,18 @@
 'use client'
 
-import type { MonthDto, MonthLineDto } from '@iplan/contracts'
+import { FinanceOverviewDto, type MonthDto, type MonthLineDto } from '@iplan/contracts'
 import { type Month, addMonths } from '@iplan/core'
 import { formatMonth } from '@iplan/i18n'
 import { ChevronLeft, ChevronRight, Plus, Repeat, Tags } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
+import { apiFetch } from '@/lib/api-client'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Donut } from '@/components/charts/donut'
+import { TrendBars } from '@/components/charts/trend-bars'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, SectionTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -28,6 +31,12 @@ export function MoneyView({ month, initial }: { month: string; initial: MonthDto
   const categoryName = useCategoryName()
   const { data } = useMonth(month, initial)
   const [adjusting, setAdjusting] = useState<MonthLineDto | null>(null)
+  const from = addMonths(month as Month, -5)
+  const { data: overview } = useQuery({
+    queryKey: ['finance', 'overview', from, month],
+    queryFn: () =>
+      apiFetch(`/api/finance/overview?from=${from}&to=${month}`, { schema: FinanceOverviewDto }),
+  })
   const s = data.summary
   const go = (delta: number) =>
     router.push(`/money?month=${addMonths(month as Month, delta)}` as Route)
@@ -124,6 +133,29 @@ export function MoneyView({ month, initial }: { month: string; initial: MonthDto
           {fmt(s.deductionsMinor, THB)} = {t('net')} {fmt(s.netIncomeMinor, THB)}
         </p>
       </Card>
+
+      {overview && (
+        <section>
+          <SectionTitle>{t('trend')}</SectionTitle>
+          <Card>
+            <TrendBars
+              points={overview.months.map((m) => ({
+                key: m.month,
+                label: formatMonth(m.month, { locale: f.locale }).split(' ')[0] ?? m.month,
+                income: Number(m.totalIncomeMinor),
+                expense: Number(m.totalExpensesMinor),
+                balance: Number(m.balanceMinor),
+              }))}
+              labels={{
+                income: t('totalIncome'),
+                expense: t('totalExpenses'),
+                balance: t('balance'),
+              }}
+              format={(v) => fmt(BigInt(Math.round(v)), THB)}
+            />
+          </Card>
+        </section>
+      )}
 
       <nav className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none]">
         <Link

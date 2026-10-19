@@ -31,7 +31,14 @@
   },
   "home": {
     "greeting": "Hi {name}",
-    "subtitle": "Your trips"
+    "subtitle": "Your trips",
+    "onTrip": "On a trip now",
+    "openToday": "Open Today",
+    "thisMonth": "This month",
+    "budgetAlerts": "{count, plural, one {# category near or over budget} other {# categories near or over budget}}",
+    "seeMoney": "See money",
+    "nextTrip": "Next trip",
+    "inDays": "{count, plural, one {in # day} other {in # days}}"
   },
   "today": {
     "title": "Today"
@@ -371,6 +378,7 @@
       "health": "Health",
       "fun": "Fun",
       "other": "Other"
-    }
+    },
+    "trend": "6-month trend"
   }
 }

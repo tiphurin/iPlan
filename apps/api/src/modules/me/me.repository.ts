@@ -5,7 +5,10 @@ export type UserRow = typeof schema.user.$inferSelect
 
 export interface MeRepository {
   findById(id: string): Promise<UserRow | null>
-  update(id: string, changes: Partial<Pick<UserRow, 'name' | 'locale'>>): Promise<UserRow | null>
+  update(
+    id: string,
+    changes: Partial<Pick<UserRow, 'name' | 'locale' | 'avatarKey'>>,
+  ): Promise<UserRow | null>
 }
 
 export class DrizzleMeRepository implements MeRepository {
@@ -18,7 +21,7 @@ export class DrizzleMeRepository implements MeRepository {
 
   async update(
     id: string,
-    changes: Partial<Pick<UserRow, 'name' | 'locale'>>,
+    changes: Partial<Pick<UserRow, 'name' | 'locale' | 'avatarKey'>>,
   ): Promise<UserRow | null> {
     const [row] = await this.db
       .update(schema.user)

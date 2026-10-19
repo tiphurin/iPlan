@@ -9,15 +9,16 @@ import { Button } from '@/components/ui/button'
 import { apiFetch } from '@/lib/api-client'
 import { ApiError } from '@/lib/api-error'
 
-type Pending = 'google' | 'dev@iplan.local' | 'friend@iplan.local' | null
+type Pending = string | null
 
 export function LoginButtons({
   googleEnabled,
-  devLoginEnabled,
+  devUsers,
   next,
 }: {
   googleEnabled: boolean
-  devLoginEnabled: boolean
+  /** null when dev login is off; otherwise everyone in the local database. */
+  devUsers: { name: string; email: string; status: string }[] | null
   /** Where to go after signing in (already validated as a local path). */
   next: string
 }) {
@@ -47,7 +48,7 @@ export function LoginButtons({
       window.location.href = url
     })
 
-  const dev = (email: 'dev@iplan.local' | 'friend@iplan.local') =>
+  const dev = (email: string) =>
     run(email, async () => {
       await apiFetch('/api/dev/login', { method: 'POST', body: { email } })
       router.replace(next as Route)
@@ -67,27 +68,29 @@ export function LoginButtons({
       {!googleEnabled && (
         <p className="text-center text-xs text-muted-foreground">{t('login.googleMissing')}</p>
       )}
-      {devLoginEnabled && (
+      {devUsers && (
         <div className="space-y-2 rounded-2xl border border-dashed p-3">
           <p className="text-center text-xs font-medium text-muted-foreground">
             {t('login.devTitle')}
           </p>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => dev('dev@iplan.local')}
-            disabled={pending !== null}
-          >
-            {t('login.devOwner')}
-          </Button>
-          <Button
-            size="lg"
-            variant="ghost"
-            onClick={() => dev('friend@iplan.local')}
-            disabled={pending !== null}
-          >
-            {t('login.devFriend')}
-          </Button>
+          {devUsers.length === 0 && (
+            <p className="text-center text-xs text-muted-foreground">{t('login.devEmpty')}</p>
+          )}
+          {devUsers.map((u) => (
+            <Button
+              key={u.email}
+              size="lg"
+              variant="secondary"
+              onClick={() => dev(u.email)}
+              disabled={pending !== null}
+              className="justify-between font-medium"
+            >
+              <span className="truncate">{u.name}</span>
+              <span className="truncate text-xs font-normal text-muted-foreground">
+                {u.status === 'pending' ? t('login.devPending') : u.email}
+              </span>
+            </Button>
+          ))}
         </div>
       )}
     </div>

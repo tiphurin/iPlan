@@ -1,10 +1,12 @@
 import { z } from 'zod'
+import { FeatureKey, UserStatus } from './features'
 import { UserRole } from './me'
 
 export const AdminStatsDto = z.object({
   users: z.number().int(),
   newUsers30d: z.number().int(),
   suspendedUsers: z.number().int(),
+  pendingUsers: z.number().int(),
   activeSessions: z.number().int(),
   trips: z.number().int(),
   tripItems: z.number().int(),
@@ -22,6 +24,8 @@ export const AdminUserDto = z.object({
   email: z.string(),
   image: z.string().nullable(),
   role: UserRole,
+  status: UserStatus,
+  groupIds: z.array(z.uuid()),
   banned: z.boolean(),
   banReason: z.string().nullable(),
   createdAt: z.iso.datetime(),
@@ -37,11 +41,16 @@ export type AdminUserListDto = z.infer<typeof AdminUserListDto>
 
 export const AdminUserQuery = z.object({
   q: z.string().trim().max(100).optional(),
+  status: UserStatus.optional(),
   page: z.coerce.number().int().min(1).default(1),
 })
 
 export const AdminUpdateUserInput = z.object({
   role: UserRole.optional(),
+  /** Approve (active) or send back to the waiting list (pending). */
+  status: UserStatus.optional(),
+  /** Replaces the user's groups. */
+  groupIds: z.array(z.uuid()).max(50).optional(),
   /** true suspends (signs out everywhere, blocks sign-in); false lifts it. */
   banned: z.boolean().optional(),
   banReason: z.string().trim().max(200).nullable().optional(),
@@ -67,3 +76,23 @@ export const AuditQuery = z.object({
   page: z.coerce.number().int().min(1).default(1),
   action: z.string().trim().max(60).optional(),
 })
+
+export const UserGroupDto = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  description: z.string().nullable(),
+  features: z.array(FeatureKey),
+  memberCount: z.number().int(),
+  createdAt: z.iso.datetime(),
+})
+export type UserGroupDto = z.infer<typeof UserGroupDto>
+
+const groupFields = {
+  name: z.string().trim().min(1).max(60),
+  description: z.string().trim().max(200).nullable().optional(),
+  features: z.array(FeatureKey).max(20),
+}
+export const CreateUserGroupInput = z.object(groupFields)
+export type CreateUserGroupInput = z.infer<typeof CreateUserGroupInput>
+export const UpdateUserGroupInput = z.object(groupFields).partial()
+export type UpdateUserGroupInput = z.infer<typeof UpdateUserGroupInput>

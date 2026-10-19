@@ -4,20 +4,21 @@ import type { TripDetailDto, TripItemDto } from '@iplan/contracts'
 import { currentTripDay, delayMinutes, punctuality, scheduleStatus, timeline } from '@iplan/core'
 import { Check, FastForward, FlaskConical, RotateCcw, Undo2 } from 'lucide-react'
 import type { Route } from 'next'
-import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import { BackLink } from '@/components/back-link'
 import { Button } from '@/components/ui/button'
-import { Card, SectionTitle } from '@/components/ui/card'
+import { Card, Hero, SectionTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/cn'
 import { KIND_STYLE } from '@/lib/item-kinds'
 import { zoneCity } from '@/lib/time-zones'
 import { useItemMutations, useItems, useTrip } from '@/lib/trips'
 import { useFormat } from '@/lib/use-format'
-import { ItemRow, type RowStatus } from './item-row'
+import { dayColor } from '@/lib/day-colors'
+import { tripDays } from '@/lib/trip-dates'
 import { SleepCard } from './sleep-card'
+import { type RowStatus, Timeline } from './timeline'
 
 interface Timed extends TripItemDto {
   startsAtDate: Date
@@ -142,7 +143,7 @@ export function TodayView({
         <p className="text-sm text-muted-foreground">
           {day ? f.day(day) : t('today.title')} · {zoneCity(clockZone)}
         </p>
-        <p className="text-5xl font-bold tracking-tight tabular-nums" suppressHydrationWarning>
+        <p className="num text-5xl font-bold" suppressHydrationWarning>
           {f.time(now, clockZone)}
         </p>
         {offset !== 0 && (
@@ -187,132 +188,126 @@ export function TodayView({
         </Card>
       )}
 
-      <div className="space-y-4 px-4">
-        {before && tripStart !== undefined && (
-          <Card className="text-center">
-            <p className="text-muted-foreground">{t('todayView.beforeTrip')}</p>
-            <p className="text-3xl font-bold tabular-nums">
-              {f.duration(tripStart - now.getTime())}
-            </p>
-          </Card>
-        )}
-        {after && (
-          <Card className="text-center text-muted-foreground">{t('todayView.afterTrip')}</Card>
-        )}
+      <div className="px-4 md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-start md:gap-6">
+        <div className="space-y-4 md:sticky md:top-4">
+          {before && tripStart !== undefined && (
+            <Card className="text-center">
+              <p className="text-muted-foreground">{t('todayView.beforeTrip')}</p>
+              <p className="text-3xl font-bold tabular-nums">
+                {f.duration(tripStart - now.getTime())}
+              </p>
+            </Card>
+          )}
+          {after && (
+            <Card className="text-center text-muted-foreground">{t('todayView.afterTrip')}</Card>
+          )}
 
-        {!before && !after && (
-          <>
-            {current && status.current ? (
-              <Card className="border-primary/40 bg-primary/5">
-                <div className="flex items-start gap-3">
-                  <KindBadge item={current} />
+          {!before && !after && (
+            <>
+              {current && status.current ? (
+                <Hero tone="green">
+                  <p className="text-sm opacity-90">{t('todayView.now')}</p>
+                  <p className="my-1 font-display text-[28px] leading-tight font-bold">
+                    {current.title}
+                  </p>
+                  <p className="text-[15px] tabular-nums opacity-95">
+                    {f.time(current.startsAt, current.timeZone)}
+                    {current.endsAt &&
+                      ` – ${f.time(current.endsAt, current.details.arrivalTimeZone ?? current.timeZone)}`}
+                  </p>
+                  <div className="mt-4 h-[9px] overflow-hidden rounded-full bg-white/25">
+                    <div
+                      className="h-full rounded-full bg-white transition-[width] duration-700"
+                      style={{ width: `${Math.round(status.current.progress * 100)}%` }}
+                    />
+                  </div>
+                  <p className="mt-2 text-sm opacity-90" suppressHydrationWarning>
+                    {t('todayView.remaining', { time: f.duration(status.current.remainingMs) })}
+                  </p>
+                  <div className="mt-4 flex items-center gap-3">
+                    {myCheckIn ? (
+                      <>
+                        <p className="flex flex-1 items-center gap-1.5 text-sm font-semibold">
+                          <Check aria-hidden className="size-4" />
+                          {delayText}
+                        </p>
+                        <button
+                          type="button"
+                          className="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white/15 px-4 text-sm"
+                          onClick={() => mutations.undoCheckIn.mutate(current.id)}
+                          disabled={mutations.undoCheckIn.isPending}
+                        >
+                          <Undo2 aria-hidden className="size-4" />
+                          {t('todayView.undoCheckIn')}
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white font-semibold text-[#00873e] disabled:opacity-60"
+                        onClick={() => mutations.checkIn.mutate({ id: current.id, at: now })}
+                        disabled={mutations.checkIn.isPending}
+                      >
+                        <Check aria-hidden className="size-5" />
+                        {t('todayView.checkIn')}
+                      </button>
+                    )}
+                  </div>
+                </Hero>
+              ) : (
+                <Card>
+                  <p className="font-semibold">
+                    {status.next || next ? t('todayView.free') : t('todayView.dayDone')}
+                  </p>
+                  {(status.next || next) && (
+                    <p className="text-sm text-muted-foreground">{t('todayView.freeHint')}</p>
+                  )}
+                </Card>
+              )}
+
+              {next && (
+                <Card className="flex items-center gap-3">
+                  <KindBadge item={next} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold tracking-wide text-primary uppercase">
-                      {t('todayView.now')}
+                    <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                      {t('todayView.next')} · {f.time(next.startsAt, next.timeZone)}
                     </p>
-                    <p className="text-xl leading-snug font-semibold">{current.title}</p>
-                    <p className="text-sm text-muted-foreground tabular-nums">
-                      {f.time(current.startsAt, current.timeZone)}
-                      {current.endsAt &&
-                        ` – ${f.time(current.endsAt, current.details.arrivalTimeZone ?? current.timeZone)}`}
+                    <p className="truncate font-semibold">{next.title}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">{t('todayView.startsIn')}</p>
+                    <p className="text-xl font-bold tabular-nums" suppressHydrationWarning>
+                      {f.clock(next.startsAtDate.getTime() - now.getTime())}
                     </p>
                   </div>
-                </div>
-                <Progress value={status.current.progress} className="mt-4" />
-                <p className="mt-2 text-sm text-muted-foreground" suppressHydrationWarning>
-                  {t('todayView.remaining', { time: f.duration(status.current.remainingMs) })}
-                </p>
-                <div className="mt-4 flex items-center gap-3">
-                  {myCheckIn ? (
-                    <>
-                      <p className="flex flex-1 items-center gap-1.5 text-sm font-medium text-success">
-                        <Check aria-hidden className="size-4" />
-                        {delayText}
-                      </p>
-                      <Button
-                        variant="ghost"
-                        onClick={() => mutations.undoCheckIn.mutate(current.id)}
-                        disabled={mutations.undoCheckIn.isPending}
-                      >
-                        <Undo2 aria-hidden className="size-4" />
-                        {t('todayView.undoCheckIn')}
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      size="lg"
-                      onClick={() => mutations.checkIn.mutate({ id: current.id, at: now })}
-                      disabled={mutations.checkIn.isPending}
-                    >
-                      <Check aria-hidden className="size-5" />
-                      {t('todayView.checkIn')}
-                    </Button>
-                  )}
-                </div>
-              </Card>
-            ) : (
+                </Card>
+              )}
+
+              <SleepCard items={items} meId={meId} now={now} />
+
               <Card>
-                <p className="font-semibold">
-                  {status.next || next ? t('todayView.free') : t('todayView.dayDone')}
-                </p>
-                {(status.next || next) && (
-                  <p className="text-sm text-muted-foreground">{t('todayView.freeHint')}</p>
-                )}
-              </Card>
-            )}
-
-            {next && (
-              <Card className="flex items-center gap-3">
-                <KindBadge item={next} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    {t('todayView.next')} · {f.time(next.startsAt, next.timeZone)}
-                  </p>
-                  <p className="truncate font-semibold">{next.title}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">{t('todayView.startsIn')}</p>
-                  <p className="text-xl font-bold tabular-nums" suppressHydrationWarning>
-                    {f.clock(next.startsAtDate.getTime() - now.getTime())}
+                <div className="mb-2 flex items-baseline justify-between">
+                  <p className="text-sm font-medium">{t('todayView.dayProgress')}</p>
+                  <p className="text-sm text-muted-foreground tabular-nums">
+                    {t('todayView.doneOf', { done: status.completed, total: status.total })}
                   </p>
                 </div>
+                <Progress value={status.dayProgress} />
               </Card>
-            )}
-
-            <SleepCard items={items} meId={meId} now={now} />
-
-            <Card>
-              <div className="mb-2 flex items-baseline justify-between">
-                <p className="text-sm font-medium">{t('todayView.dayProgress')}</p>
-                <p className="text-sm text-muted-foreground tabular-nums">
-                  {t('todayView.doneOf', { done: status.completed, total: status.total })}
-                </p>
-              </div>
-              <Progress value={status.dayProgress} />
-            </Card>
-          </>
-        )}
-
+            </>
+          )}
+        </div>
         {dayItems.length > 0 && (
-          <section>
+          <section className="mt-4 md:mt-0">
             <SectionTitle>{day && f.day(day)}</SectionTitle>
-            <ol className="space-y-2">
-              {dayItems.map((item) => (
-                <li key={item.id}>
-                  <Link
-                    href={`/trips/${trip.id}/items/${item.id}` as Route}
-                    className="block active:opacity-80"
-                  >
-                    <ItemRow
-                      item={item}
-                      homeTimeZone={trip.homeTimeZone}
-                      status={rowStatus(item.id)}
-                      meId={meId}
-                    />
-                  </Link>
-                </li>
-              ))}
-            </ol>
+            <Timeline
+              items={dayItems}
+              tripId={trip.id}
+              homeTimeZone={trip.homeTimeZone}
+              color={dayColor(day ? tripDays(trip.startDate, trip.endDate).indexOf(day) : 1)}
+              meId={meId}
+              statusOf={rowStatus}
+            />
           </section>
         )}
       </div>

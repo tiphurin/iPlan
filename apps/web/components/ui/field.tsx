@@ -7,7 +7,7 @@ import type {
 import { cn } from '@/lib/cn'
 
 const control =
-  'w-full min-h-11 rounded-xl border bg-card px-3 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 aria-invalid:border-danger'
+  'w-full min-h-[46px] rounded-xl border bg-background px-3 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 aria-invalid:border-danger'
 
 export function Field({
   label,
@@ -24,7 +24,7 @@ export function Field({
 }) {
   return (
     <label className={cn('block space-y-1.5', className)}>
-      <span className="text-sm font-medium">
+      <span className="text-sm text-muted-foreground">
         {label}
         {hint && <span className="ml-1 font-normal text-muted-foreground">({hint})</span>}
       </span>

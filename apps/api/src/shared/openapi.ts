@@ -24,5 +24,6 @@ export const errorResponses = {
   401: { description: 'Not signed in', content: json },
   403: { description: 'Not allowed', content: json },
   404: { description: 'Not found', content: json },
+  409: { description: 'Conflicts with existing data', content: json },
   422: { description: 'Invalid input', content: json },
 } as const

@@ -21,6 +21,8 @@ export default async function JoinPage({ params }: { params: Promise<{ token: st
     if (error instanceof ApiError && error.status === 401) {
       redirect(`/login?next=${encodeURIComponent(`/join/${token}`)}`)
     }
+    // Invited people still wait for an admin before they can join.
+    if (error instanceof ApiError && error.code === 'ACCOUNT_PENDING') redirect('/pending')
     if (!(error instanceof ApiError)) throw error
   }
 

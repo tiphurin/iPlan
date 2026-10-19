@@ -55,6 +55,7 @@ Never commit a secret. `.env.example` lists every variable with a note on where 
 | `BETTER_AUTH_SECRET`                        | 32+ characters                     | `openssl rand -base64 32`                            |
 | `BETTER_AUTH_URL`                           | `http://localhost:3000`            | `https://<project>.vercel.app`                       |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | optional                           | Google Cloud → Credentials → OAuth client            |
+| `ADMIN_EMAILS`                              | optional                           | Your Google email (comma-separated for several)      |
 | `DEV_LOGIN_ENABLED`                         | `true`                             | `false`                                              |
 | `STORAGE_DRIVER`                            | `local` (files in `.data/uploads`) | `s3`                                                 |
 | `S3_ENDPOINT`                               | `http://localhost:9000`            | B2 bucket page → Endpoint (prefix `https://`)        |
@@ -92,6 +93,7 @@ Do these in order; each step only needs the previous ones. Nothing here asks for
       | `BETTER_AUTH_SECRET`                        | output of `openssl rand -base64 32`             |
       | `BETTER_AUTH_URL`                           | `https://<project>.vercel.app`                  |
       | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | from step 3                                     |
+      | `ADMIN_EMAILS`                              | your Google email, e.g. `you@gmail.com`         |
       | `DEV_LOGIN_ENABLED`                         | `false`                                         |
       | `STORAGE_DRIVER`                            | `s3`                                            |
       | `S3_ENDPOINT`                               | `https://` + the B2 endpoint                    |
@@ -101,9 +103,12 @@ Do these in order; each step only needs the previous ones. Nothing here asks for
       | `S3_FORCE_PATH_STYLE`                       | `false`                                         |
 
    4. Deploy. Production builds run `yarn db:migrate` first (`scripts/vercel-build.sh`); preview builds never migrate.
-5. **First sign-in and admin**
-   1. Open `https://<project>.vercel.app`, sign in with Google.
-   2. Make yourself admin once, in Neon → SQL Editor: `update "user" set role = 'admin' where email = 'you@example.com';`
+5. **First sign-in, admin and approvals**
+   1. Open `https://<project>.vercel.app` and sign in with the Google account listed in `ADMIN_EMAILS`. It becomes an active admin straight away.
+   2. Everyone else who signs in with Google lands on a "waiting for approval" screen and cannot read or change anything.
+   3. Approve them in **Admin → Approvals**: pick their groups (e.g. _Travelers_ = trips only, _Full access_ = trips + personal money + shared money), then **Approve**. **Reject** suspends the account.
+   4. **Admin → Groups** creates groups and ticks which features each one turns on; **Admin → Users** changes groups later, makes someone an admin, or suspends them.
+   5. Bring your real data over: export the trip from your local app (trip → backup JSON) and import it in production; nothing personal goes through git.
 6. **Uptime ping** (optional): GitHub → repo Settings → Secrets and variables → Actions → Variables → `APP_URL` = `https://<project>.vercel.app`. The weekly `Uptime` workflow then emails you if `/api/health` fails.
 
 The app refuses to start in production if `DEV_LOGIN_ENABLED` is true or `STORAGE_DRIVER` is not `s3`, so a missing setting shows up immediately in the Vercel logs.

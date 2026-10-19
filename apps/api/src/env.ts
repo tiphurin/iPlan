@@ -12,6 +12,8 @@ const EnvSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   DEV_LOGIN_ENABLED: flag,
+  /** Comma-separated. These Google accounts become active admins on first sign-in. */
+  ADMIN_EMAILS: z.string().default(''),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
   LOCAL_STORAGE_DIR: z.string().default('.data/uploads'),
@@ -29,6 +31,8 @@ export interface ApiEnv {
   authUrl: string
   google: { clientId: string; clientSecret: string } | null
   devLoginEnabled: boolean
+  /** Lower-cased. */
+  adminEmails: string[]
   production: boolean
   storage:
     | { driver: 'local'; localDir: string }
@@ -83,6 +87,14 @@ export function readEnv(source: Record<string, string | undefined> = process.env
         ? { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET }
         : null,
     devLoginEnabled: env.DEV_LOGIN_ENABLED,
+    adminEmails: parseEmailList(env.ADMIN_EMAILS),
     production,
   }
+}
+
+export function parseEmailList(value: string): string[] {
+  return value
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter((email) => email.includes('@'))
 }

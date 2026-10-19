@@ -79,6 +79,11 @@ function displayYear(year: number, { locale, era = 'buddhist' }: FormatOptions):
   return locale === 'th' && era === 'buddhist' ? year + 543 : year
 }
 
+/** Short weekday names starting on Sunday, for calendar headers. */
+export function weekdayNames(locale: Locale): readonly string[] {
+  return WEEKDAYS[locale]
+}
+
 /** "ส. 17 ต.ค." / "Sat 17 Oct" for a trip day (YYYY-MM-DD). */
 export function formatDayLabel(dateKey: string, { locale }: FormatOptions): string {
   const d = parseDateKey(dateKey)

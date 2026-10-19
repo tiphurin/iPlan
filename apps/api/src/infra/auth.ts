@@ -51,12 +51,26 @@ export function createAuth(db: Database, env: ApiEnv) {
     }),
     // Password sign-in exists only so the local "Dev login" button can work.
     emailAndPassword: { enabled: env.devLoginEnabled, disableSignUp: true },
+    // Seeded people (yarn db:seed:private) sign in with Google into their existing account.
+    account: { accountLinking: { enabled: true, trustedProviders: ['google'] } },
     socialProviders: env.google
       ? { google: { clientId: env.google.clientId, clientSecret: env.google.clientSecret } }
       : {},
     user: {
       additionalFields: {
         locale: { type: 'string', defaultValue: 'th', input: false },
+        status: { type: 'string', defaultValue: 'pending', input: false },
+      },
+    },
+    databaseHooks: {
+      user: {
+        create: {
+          // Owners listed in ADMIN_EMAILS skip the waiting list.
+          before: async (user) =>
+            env.adminEmails.includes(user.email.toLowerCase())
+              ? { data: { ...user, role: 'admin', status: 'active' } }
+              : { data: user },
+        },
       },
     },
     session: {
@@ -85,6 +99,7 @@ export interface AuthGateway {
     email: string
     role?: string | null | undefined
     banned?: boolean | null | undefined
+    status?: string | null | undefined
   } | null>
 }
 
@@ -93,7 +108,16 @@ export function authGateway(auth: Auth): AuthGateway {
     handler: (request) => auth.handler(request),
     getSessionUser: async (headers) => {
       const result = await auth.api.getSession({ headers })
-      return result?.user ?? null
+      if (!result) return null
+      const { user } = result
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        banned: user.banned,
+        status: user.status,
+      }
     },
   }
 }

@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import { safeNext } from '@/lib/safe-next'
-import { getMe } from '@/lib/server-api'
+import { z } from 'zod'
+import { getMe, serverApi } from '@/lib/server-api'
 import { LoginButtons } from './login-buttons'
 
 export const metadata: Metadata = { title: 'Sign in' }
@@ -17,6 +18,12 @@ export default async function LoginPage({
   const t = await getTranslations('login')
   const googleEnabled = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)
   const devLoginEnabled = process.env.DEV_LOGIN_ENABLED === 'true'
+  const devUsers = devLoginEnabled
+    ? await serverApi(
+        '/api/dev/users',
+        z.array(z.object({ name: z.string(), email: z.string(), status: z.string() })),
+      ).catch(() => [])
+    : []
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-between px-6 pt-[max(4rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))]">
       <div>
@@ -25,7 +32,11 @@ export default async function LoginPage({
         <h1 className="mt-8 text-3xl font-bold tracking-tight">{t('title')}</h1>
         <p className="mt-3 text-lg text-muted-foreground">{t('subtitle')}</p>
       </div>
-      <LoginButtons googleEnabled={googleEnabled} devLoginEnabled={devLoginEnabled} next={next} />
+      <LoginButtons
+        googleEnabled={googleEnabled}
+        devUsers={devLoginEnabled ? devUsers : null}
+        next={next}
+      />
     </main>
   )
 }

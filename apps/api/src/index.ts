@@ -2,8 +2,10 @@ import { createDb } from '@iplan/db'
 import { type App, createApp } from './app'
 import { readEnv } from './env'
 import { authGateway, createAuth } from './infra/auth'
-import { devLogin } from './infra/dev-login'
+import { devLogin, devUsers } from './infra/dev-login'
 import { createStorage } from './infra/storage'
+import { DrizzleAccessRepository } from './modules/access/access.repository'
+import { AccessService } from './modules/access/access.service'
 import { DrizzleAdminRepository } from './modules/admin/admin.repository'
 import { AdminService } from './modules/admin/admin.service'
 import { DrizzleBackupRepository } from './modules/backup/backup.repository'
@@ -20,6 +22,8 @@ import { DrizzleInfoCardsRepository } from './modules/info-cards/info-cards.repo
 import { InfoCardsService } from './modules/info-cards/info-cards.service'
 import { DrizzleItemsRepository } from './modules/items/items.repository'
 import { ItemsService } from './modules/items/items.service'
+import { DrizzleLedgersRepository } from './modules/ledgers/ledgers.repository'
+import { LedgersService } from './modules/ledgers/ledgers.service'
 import { DrizzleMeRepository } from './modules/me/me.repository'
 import { MeService } from './modules/me/me.service'
 import { DrizzleMembersRepository } from './modules/members/members.repository'
@@ -40,12 +44,18 @@ export function buildApp(env = readEnv()): App {
   const storage = createStorage(env)
   const tripRepo = new DrizzleTripsRepository(db)
   const trips = new TripsService(tripRepo, audit)
+  const accessRepo = new DrizzleAccessRepository(db)
+  const access = new AccessService(accessRepo, audit)
   return createApp({
     auth: authGateway(auth),
-    ...(env.devLoginEnabled && { devLogin: (email) => devLogin(auth, email) }),
+    ...(env.devLoginEnabled && {
+      devLogin: { signIn: (email) => devLogin(auth, email), users: () => devUsers(db) },
+    }),
     storage,
+    adminEmails: env.adminEmails,
     services: {
-      me: new MeService(new DrizzleMeRepository(db)),
+      access,
+      me: new MeService(new DrizzleMeRepository(db), access, storage),
       trips,
       items: new ItemsService(new DrizzleItemsRepository(db), trips, audit),
       members: new MembersService(new DrizzleMembersRepository(db), trips, audit),
@@ -59,7 +69,8 @@ export function buildApp(env = readEnv()): App {
         audit,
       ),
       finance: new FinanceService(new DrizzleFinanceRepository(db), audit),
-      admin: new AdminService(new DrizzleAdminRepository(db), audit),
+      ledgers: new LedgersService(new DrizzleLedgersRepository(db), audit),
+      admin: new AdminService(new DrizzleAdminRepository(db), accessRepo, audit),
       backup: new BackupService(
         {
           trips: tripRepo,

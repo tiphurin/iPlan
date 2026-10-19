@@ -1,17 +1,24 @@
 import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { BottomNav } from '@/components/bottom-nav'
+import { AppNav } from '@/components/bottom-nav'
 import { getMe } from '@/lib/server-api'
 
-/** Everything behind sign-in: content above a fixed bottom tab bar. */
+/**
+ * Everything behind sign-in and approval. Phones: one column above a bottom tab
+ * bar. Tablets and desktop: a left sidebar and a wider, multi-column page.
+ */
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  if (!(await getMe())) redirect('/login')
+  const me = await getMe()
+  if (!me) redirect('/login')
+  if (me.status !== 'active') redirect('/pending')
   return (
     <>
-      <main className="mx-auto min-h-dvh max-w-xl pb-[calc(5rem+env(safe-area-inset-bottom))]">
-        {children}
-      </main>
-      <BottomNav />
+      <AppNav features={me.features} isAdmin={me.role === 'admin'} />
+      <div className="md:pl-20 lg:pl-60">
+        <main className="mx-auto min-h-dvh max-w-xl pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:max-w-5xl md:px-4 md:pb-12">
+          {children}
+        </main>
+      </div>
     </>
   )
 }

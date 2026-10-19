@@ -70,3 +70,9 @@ export async function prepareUpload(file: File, kind: UploadKind): Promise<Prepa
   const thumb = await render(img, THUMB)
   return { file: main.blob, thumb: thumb.blob, width: main.width, height: main.height }
 }
+
+/** Square-ish 400 px profile picture, EXIF stripped. */
+export async function prepareAvatar(file: File): Promise<Blob> {
+  const img = await loadImage(file)
+  return (await render(img, { maxEdge: 400, quality: 0.85 })).blob
+}

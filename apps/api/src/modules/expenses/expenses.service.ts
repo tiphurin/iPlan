@@ -7,20 +7,17 @@ import {
 } from '@iplan/contracts'
 import {
   MoneyError,
-  SplitError,
   computeBalances,
   convertMoney,
   parseMoney,
   settle,
-  splitEqual,
-  splitExact,
-  splitPercent,
   toDecimalString,
   money,
 } from '@iplan/core'
 import type { AuditLog } from '../../shared/audit'
 import type { SessionUser } from '../../shared/context'
 import { notFound, validationFailed } from '../../shared/errors'
+import { computeShares, splitParticipants } from '../../shared/split-shares'
 import type { TripRow, TripsRepository } from '../trips/trips.repository'
 import type { TripAccess } from '../trips/trips.service'
 import { type NameOf, baseShares, toExpenseDto } from './expenses.mapper'
@@ -89,52 +86,12 @@ export class ExpensesService {
     if (Object.keys(problems).length > 0) throw validationFailed(problems)
 
     const split = input.split
-    const participants = split.mode === 'equal' ? split.participants : Object.keys(split.shares)
+    const participants = splitParticipants(split)
     const outsiders = participants.filter((id) => !memberIds.has(id))
     if (outsiders.length > 0)
       throw validationFailed({ split: 'Only trip members can share a cost' })
 
-    let shares: Omit<ShareRow, 'expenseId'>[]
-    try {
-      if (split.mode === 'equal') {
-        const parts = splitEqual(amount, split.participants)
-        shares = Object.entries(parts).map(([userId, amountMinor]) => ({
-          userId,
-          amountMinor,
-          percentBp: null,
-        }))
-      } else if (split.mode === 'exact') {
-        const parts = splitExact(
-          amount,
-          Object.fromEntries(
-            Object.entries(split.shares).map(([id, value]) => [
-              id,
-              parseMoney(value, input.currency).amount,
-            ]),
-          ),
-        )
-        shares = Object.entries(parts).map(([userId, amountMinor]) => ({
-          userId,
-          amountMinor,
-          percentBp: null,
-        }))
-      } else {
-        const bp = Object.fromEntries(
-          Object.entries(split.shares).map(([id, pct]) => [id, Math.round(pct * 100)]),
-        )
-        const parts = splitPercent(amount, bp)
-        shares = Object.entries(parts).map(([userId, amountMinor]) => ({
-          userId,
-          amountMinor,
-          percentBp: bp[userId] ?? null,
-        }))
-      }
-    } catch (error) {
-      if (error instanceof SplitError || error instanceof MoneyError) {
-        throw validationFailed({ split: error.message })
-      }
-      throw error
-    }
+    const shares: Omit<ShareRow, 'expenseId'>[] = computeShares(amount, input.currency, split)
 
     const base = convertMoney(money(amount, input.currency), {
       from: input.currency,

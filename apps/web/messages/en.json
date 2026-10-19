@@ -12,13 +12,18 @@
     "duplicate": "Duplicate",
     "add": "Add",
     "optional": "optional",
-    "confirmDelete": "Delete this item?"
+    "confirmDelete": "Delete this item?",
+    "close": "Close"
   },
   "nav": {
     "trips": "Trips",
     "today": "Today",
     "money": "Money",
-    "settings": "Settings"
+    "settings": "Settings",
+    "home": "Home",
+    "profile": "Profile",
+    "main": "Main menu",
+    "admin": "Admin"
   },
   "login": {
     "title": "Trips and money in one place",
@@ -26,8 +31,8 @@
     "google": "Continue with Google",
     "googleMissing": "Google sign-in is not configured yet (see docs/INFRA.md)",
     "devTitle": "Local testing",
-    "devOwner": "Sign in as Demo Owner",
-    "devFriend": "Sign in as Demo Friend"
+    "devEmpty": "No users yet; run yarn db:reset",
+    "devPending": "waiting for approval"
   },
   "home": {
     "greeting": "Hi {name}",
@@ -72,7 +77,10 @@
     "NETWORK": "Can't connect. Check your internet connection.",
     "INVITE_INVALID": "This invite link is invalid or has expired",
     "OWNER_CANNOT_LEAVE": "The owner can't leave. Delete the trip instead.",
-    "CANNOT_CHANGE_SELF": "You can't demote or suspend yourself"
+    "CANNOT_CHANGE_SELF": "You can't demote or suspend yourself",
+    "ACCOUNT_PENDING": "This account is waiting for approval",
+    "FEATURE_DISABLED": "This feature is not enabled for you",
+    "USER_NOT_FOUND": "No approved user with that email"
   },
   "trips": {
     "empty": "No trips yet",
@@ -103,7 +111,13 @@
     "openToday": "Today view",
     "checklist": "Checklist",
     "info": "Info",
-    "expenses": "Expenses"
+    "expenses": "Expenses",
+    "newShort": "New trip",
+    "onDay": "Day {n} now",
+    "startsIn": "{count, plural, =0 {Starts today} one {In # day} other {In # days}}",
+    "ended": "Ended",
+    "dayShort": "D{n}",
+    "itemCount": "{count, plural, one {# item} other {# items}}"
   },
   "kinds": {
     "place": "Place",
@@ -382,7 +396,10 @@
       "fun": "Fun",
       "other": "Other"
     },
-    "trend": "6-month trend"
+    "trend": "6-month trend",
+    "allDays": "All days",
+    "setupTitle": "Set up income and fixed costs",
+    "setupHint": "Salary, tax, social security, rent, phone, installments — enter once, used every month"
   },
   "admin": {
     "title": "Admin",
@@ -411,14 +428,31 @@
       "transactions": "Money transactions",
       "attachments": "Files",
       "storageBytes": "File storage (of 10 GB)",
-      "databaseBytes": "Database size (of 0.5 GB)"
+      "databaseBytes": "Database size (of 0.5 GB)",
+      "pendingUsers": "Waiting for approval"
     },
     "filter": "Filter by action",
     "prev": "Previous",
     "next": "Next",
     "page": "Page {page} of {pages}",
     "empty": "Nothing here",
-    "open": "Open admin"
+    "open": "Open admin",
+    "tabs": {
+      "approvals": "Approvals",
+      "users": "Users",
+      "groups": "Groups",
+      "overview": "Overview",
+      "audit": "Audit log"
+    },
+    "approvalsHint": "People who signed in with Google wait here. Pick their groups, then approve.",
+    "noPending": "Nobody is waiting",
+    "groups": "Groups (decide which features they get)",
+    "approve": "Approve",
+    "reject": "Reject",
+    "groupsHint": "Each group turns on features; a user gets every feature of every group they are in.",
+    "memberCount": "{count, plural, one {# member} other {# members}}",
+    "confirmDeleteGroup": "Delete \"{name}\"? Its members lose its features.",
+    "newGroup": "New group name"
   },
   "backup": {
     "title": "Calendar & backup",
@@ -525,6 +559,127 @@
         "title": "API docs",
         "body": "OpenAPI reference for every endpoint"
       }
+    }
+  },
+  "features": {
+    "trips": "Trips",
+    "finance": "My money",
+    "tripsHint": "Plan trips, split costs",
+    "financeHint": "Your own monthly income and spending",
+    "shared": "Shared money",
+    "sharedHint": "Split costs with a partner or friends",
+    "tripsShort": "Trips",
+    "financeShort": "Money",
+    "sharedShort": "Shared"
+  },
+  "dashboard": {
+    "greeting": "Hi {name}",
+    "apps": "Features",
+    "noFeatures": "No features enabled yet",
+    "noFeaturesHint": "Ask an admin to give you access",
+    "onTrip": "On a trip",
+    "dayN": "Day {n}",
+    "next": "Next",
+    "openToday": "Open today",
+    "nextTrip": "Next trip",
+    "inDays": "{count, plural, =0 {Today} one {In # day} other {In # days}}",
+    "planTrip": "Plan a new trip",
+    "planTripHint": "Day plans, checklist and costs",
+    "balanceThisMonth": "Left this month",
+    "income": "Income",
+    "spending": "Spending",
+    "budgetAlerts": "{count, plural, one {# category near or over budget} other {# categories near or over budget}}",
+    "locked": "Not enabled · ask an admin",
+    "startShared": "Start sharing costs",
+    "startSharedHint": "e.g. \"Me & partner\": who paid, split evenly or not",
+    "sharedOwedToYou": "Others owe you",
+    "sharedYouOwe": "You owe others",
+    "sharedSettled": "Shared money · all settled"
+  },
+  "calendar": {
+    "previous": "Previous month",
+    "next": "Next month",
+    "open": "Open calendar",
+    "title": "Calendar"
+  },
+  "timeline": {
+    "fixed": "Fixed",
+    "verify": "To verify",
+    "optional": "Optional",
+    "budget": "Budget"
+  },
+  "profile": {
+    "adminHint": "Approvals, groups and feature access",
+    "pending": "{count} waiting",
+    "changePhoto": "Change profile photo",
+    "removePhoto": "Remove photo"
+  },
+  "pending": {
+    "title": "Waiting for approval",
+    "body": "{email} is signed in, but an admin needs to approve it and choose your features first.",
+    "hint": "Once approved, tap \"Check again\" or reopen the app.",
+    "check": "Check again"
+  },
+  "shared": {
+    "subtitle": "Costs you share, kept apart from your own money",
+    "empty": "No shared ledgers yet",
+    "emptyHint": "Create one like \"Me & partner\", then add them by email",
+    "newTitle": "New shared ledger",
+    "newName": "Ledger name",
+    "newPlaceholder": "e.g. Me & partner, Flat",
+    "create": "Create",
+    "entryCount": "{count, plural, one {# entry} other {# entries}}",
+    "settled": "All settled",
+    "owedToYou": "You are owed {amount}",
+    "youOwe": "You owe {amount}",
+    "you": "You",
+    "yourBalance": "Your balance",
+    "othersOweYou": "Others owe you this",
+    "youOweOthers": "You owe this",
+    "thisMonth": "This month: {total} together · your part {mine}",
+    "toSettle": "To settle",
+    "markPaid": "Paid",
+    "confirmSettle": "Record this as paid back?",
+    "members": "Members",
+    "gets": "gets back {amount}",
+    "owes": "owes {amount}",
+    "confirmRemove": "Remove {name} from this ledger?",
+    "addByEmail": "Their email (must be approved)",
+    "delete": "Delete this ledger",
+    "confirmDelete": "Delete \"{name}\" and all its entries?",
+    "history": "History",
+    "noEntries": "Nothing yet. Tap \"Add\" for the first cost.",
+    "settlementTitle": "{from} paid back {to}",
+    "paidBy": "{name} paid",
+    "addCost": "Add cost",
+    "editCost": "Edit cost",
+    "amount": "Amount",
+    "what": "What for",
+    "date": "Date",
+    "whoPaid": "Who paid",
+    "howSplit": "How to split",
+    "modeEqual": "Equally",
+    "modeExact": "Amounts",
+    "modePercent": "Percent",
+    "paysAll": "{name} covers all",
+    "leftToAssign": "{amount} still to assign",
+    "overAssigned": "{amount} too much",
+    "percentMust": "Must add up to 100% (now {sum}%)",
+    "checkSplit": "Check the split",
+    "previewPayer": "Share of {name} (already paid)",
+    "previewOwes": "{name} owes {payer}",
+    "note": "Note",
+    "undoSettle": "Undo this payment",
+    "confirmUndoSettle": "Undo? The debt comes back.",
+    "categories": {
+      "food": "Food",
+      "groceries": "Groceries",
+      "home": "Home & rent",
+      "bills": "Bills",
+      "transport": "Transport",
+      "fun": "Fun",
+      "travel": "Travel",
+      "other": "Other"
     }
   }
 }

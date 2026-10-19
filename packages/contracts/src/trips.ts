@@ -75,6 +75,11 @@ export const TripItemDetails = z
     terminal: z.string().max(40).optional(),
     arrivalTimeZone: z.string().optional(),
     budget: z.object({ amount: z.string(), currency: z.string() }).optional(),
+    /** Can't be moved (an appointment, a booked slot). */
+    fixed: z.boolean().optional(),
+    /** Opening hours or booking still to check. */
+    verify: z.boolean().optional(),
+    optional: z.boolean().optional(),
   })
   .loose()
 export type TripItemDetails = z.infer<typeof TripItemDetails>

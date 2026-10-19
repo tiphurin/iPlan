@@ -11,6 +11,16 @@ import type {
 import type { AttachmentEntity } from '@iplan/contracts'
 import type { StorageProvider } from '../infra/storage'
 import type {
+  EntryWithShares,
+  LedgerRole,
+  LedgerRow,
+  LedgersRepository,
+  MemberRow as LedgerMemberRow,
+  NewEntryRow as NewLedgerEntryRow,
+  ShareRow as LedgerShareRow,
+} from '../modules/ledgers/ledgers.repository'
+import type { AccessRepository, GroupFields, GroupRow } from '../modules/access/access.repository'
+import type {
   AdminRepository,
   AuditRow,
   StatsRow,
@@ -61,6 +71,11 @@ import type {
 
 let counter = 0
 export const uuid = () => `00000000-0000-4000-8000-${String(++counter).padStart(12, '0')}`
+
+export const GROUP_IDS = {
+  travelers: '00000000-0000-4000-8000-0000000000a1',
+  full: '00000000-0000-4000-8000-0000000000a2',
+} as const
 
 export const users = {
   owner: { id: 'owner', name: 'Owner', email: 'owner@test', role: 'user' },
@@ -600,6 +615,8 @@ export class InMemoryAdmin implements AdminRepository {
     banReason: null,
     banExpires: null,
     locale: 'th',
+    status: u.id === 'stranger' ? 'pending' : 'active',
+    avatarKey: null,
     trips: 1,
   }))
   sessions = new Set(['owner', 'editor', 'viewer'])
@@ -610,6 +627,7 @@ export class InMemoryAdmin implements AdminRepository {
       users: this.people.length,
       newUsers30d: 0,
       suspendedUsers: this.people.filter((p) => p.banned).length,
+      pendingUsers: this.people.filter((p) => p.status === 'pending').length,
       activeSessions: this.sessions.size,
       trips: 1,
       tripItems: 0,
@@ -620,9 +638,11 @@ export class InMemoryAdmin implements AdminRepository {
       databaseBytes: 0,
     }
   }
-  async users(query: string | undefined) {
+  async users(query: string | undefined, _page: number, status?: string) {
     const rows = this.people.filter(
-      (p) => !query || p.name.includes(query) || p.email.includes(query),
+      (p) =>
+        (!query || p.name.includes(query) || p.email.includes(query)) &&
+        (!status || p.status === status),
     )
     return { rows, total: rows.length }
   }
@@ -631,7 +651,7 @@ export class InMemoryAdmin implements AdminRepository {
   }
   async updateUser(
     id: string,
-    changes: { role?: string; banned?: boolean; banReason?: string | null },
+    changes: { role?: string; status?: string; banned?: boolean; banReason?: string | null },
   ) {
     const person = this.people.find((p) => p.id === id)
     if (person) Object.assign(person, changes)
@@ -641,6 +661,167 @@ export class InMemoryAdmin implements AdminRepository {
   }
   async audit() {
     return { rows: this.log, total: this.log.length }
+  }
+}
+
+/** Ledgers kept in memory; people come from the shared `users` fixtures. */
+export class InMemoryLedgers implements LedgersRepository {
+  rows: LedgerRow[] = []
+  memberRows: { ledgerId: string; userId: string; role: LedgerRole; at: number }[] = []
+  entryRows: EntryWithShares[] = []
+  /** Pending users exist but can't be added. */
+  directory = new Map<string, { id: string; status: string }>([
+    ...Object.values(users).map((u) => [u.email, { id: u.id, status: 'active' }] as const),
+    ['pending@test', { id: 'pending', status: 'pending' }],
+  ])
+  private seq = 0
+  private uuid() {
+    return `00000000-0000-4000-8000-${String(++this.seq).padStart(12, '0')}`
+  }
+
+  async listForUser(userId: string) {
+    return this.memberRows
+      .filter((m) => m.userId === userId)
+      .flatMap((m) => {
+        const ledger = this.rows.find((r) => r.id === m.ledgerId)
+        return ledger ? [{ ledger, role: m.role }] : []
+      })
+  }
+  async find(id: string) {
+    return this.rows.find((r) => r.id === id) ?? null
+  }
+  async members(ledgerId: string): Promise<LedgerMemberRow[]> {
+    return this.memberRows
+      .filter((m) => m.ledgerId === ledgerId)
+      .sort((a, b) => a.at - b.at)
+      .map((m) => ({
+        userId: m.userId,
+        name: nameOf(m.userId),
+        email: `${m.userId}@test`,
+        image: null,
+        role: m.role,
+      }))
+  }
+  async create(values: { name: string; currency: string; createdBy: string }) {
+    const id = this.uuid()
+    this.rows.push({ id, ...values, createdAt: new Date(), updatedAt: new Date() })
+    await this.addMember(id, values.createdBy, 'owner')
+    return id
+  }
+  async rename(id: string, name: string) {
+    const row = this.rows.find((r) => r.id === id)
+    if (row) row.name = name
+  }
+  async delete(id: string) {
+    this.rows = this.rows.filter((r) => r.id !== id)
+    this.memberRows = this.memberRows.filter((m) => m.ledgerId !== id)
+    this.entryRows = this.entryRows.filter((e) => e.ledgerId !== id)
+  }
+  async addMember(ledgerId: string, userId: string, role: LedgerRole) {
+    this.memberRows.push({ ledgerId, userId, role, at: this.memberRows.length })
+  }
+  async removeMember(ledgerId: string, userId: string) {
+    this.memberRows = this.memberRows.filter(
+      (m) => !(m.ledgerId === ledgerId && m.userId === userId),
+    )
+  }
+  async findUserByEmail(email: string) {
+    return this.directory.get(email) ?? null
+  }
+  async entries(ledgerId: string) {
+    return this.entryRows
+      .filter((e) => e.ledgerId === ledgerId)
+      .sort((a, b) => b.date.localeCompare(a.date))
+  }
+  async entry(id: string) {
+    return this.entryRows.find((e) => e.id === id) ?? null
+  }
+  async insertEntry(values: NewLedgerEntryRow, shares: LedgerShareRow[]) {
+    const id = this.uuid()
+    this.entryRows.push({
+      id,
+      ledgerId: values.ledgerId,
+      kind: values.kind ?? 'expense',
+      title: values.title,
+      category: values.category ?? 'other',
+      amountMinor: values.amountMinor,
+      date: values.date,
+      paidBy: values.paidBy,
+      splitMode: values.splitMode,
+      note: values.note ?? null,
+      createdBy: values.createdBy ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      shares,
+    })
+    return id
+  }
+  async updateEntry(id: string, values: Partial<NewLedgerEntryRow>, shares: LedgerShareRow[]) {
+    const row = this.entryRows.find((e) => e.id === id)
+    if (row) Object.assign(row, values, { shares })
+  }
+  async deleteEntry(id: string) {
+    this.entryRows = this.entryRows.filter((e) => e.id !== id)
+  }
+}
+
+/** Groups start like the migration: "Travelers" (trips) and "Full access" (trips + finance). */
+export class InMemoryAccess implements AccessRepository {
+  groupRows: { id: string; name: string; description: string | null; createdAt: Date }[] = [
+    { id: GROUP_IDS.travelers, name: 'Travelers', description: null, createdAt: new Date(0) },
+    { id: GROUP_IDS.full, name: 'Full access', description: null, createdAt: new Date(0) },
+  ]
+  features = new Map<string, string[]>([
+    [GROUP_IDS.travelers, ['trips']],
+    [GROUP_IDS.full, ['trips', 'finance']],
+  ])
+  members = new Map<string, string[]>([
+    ['owner', [GROUP_IDS.full]],
+    ['editor', [GROUP_IDS.full]],
+    ['viewer', [GROUP_IDS.full]],
+  ])
+  private seq = 0
+
+  async featuresFor(userId: string) {
+    const groups = this.members.get(userId) ?? []
+    return [...new Set(groups.flatMap((g) => this.features.get(g) ?? []))]
+  }
+  async groups(): Promise<GroupRow[]> {
+    return this.groupRows.map((g) => ({
+      ...g,
+      features: this.features.get(g.id) ?? [],
+      memberCount: [...this.members.values()].filter((ids) => ids.includes(g.id)).length,
+    }))
+  }
+  async group(id: string) {
+    return (await this.groups()).find((g) => g.id === id) ?? null
+  }
+  async createGroup(fields: GroupFields, features: string[]) {
+    const id = `00000000-0000-4000-8000-${String(++this.seq).padStart(12, '0')}`
+    this.groupRows.push({ id, ...fields, createdAt: new Date() })
+    this.features.set(id, features)
+    return id
+  }
+  async updateGroup(id: string, fields: Partial<GroupFields>, features?: string[]) {
+    const row = this.groupRows.find((g) => g.id === id)
+    if (row) Object.assign(row, fields)
+    if (features) this.features.set(id, features)
+  }
+  async deleteGroup(id: string) {
+    this.groupRows = this.groupRows.filter((g) => g.id !== id)
+    this.features.delete(id)
+    for (const [userId, ids] of this.members) {
+      this.members.set(
+        userId,
+        ids.filter((g) => g !== id),
+      )
+    }
+  }
+  async groupIdsFor(userIds: string[]) {
+    return new Map(userIds.map((id) => [id, [...(this.members.get(id) ?? [])]]))
+  }
+  async setUserGroups(userId: string, groupIds: string[]) {
+    this.members.set(userId, groupIds)
   }
 }
 

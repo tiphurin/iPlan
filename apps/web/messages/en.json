@@ -56,7 +56,8 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "signOut": "Sign out",
-    "adminLink": "Admin"
+    "adminLink": "Admin",
+    "showcase": "See all features"
   },
   "errors": {
     "UNAUTHORIZED": "Please sign in",
@@ -458,6 +459,72 @@
       "adjusted": "Adjusted",
       "note": "Note",
       "time": "Time"
+    }
+  },
+  "showcase": {
+    "title": "All features",
+    "subtitle": "Everything in the app; tap to try it with the demo data",
+    "items": {
+      "today": {
+        "title": "Live Today",
+        "body": "Current item, progress, countdown, check-in vs plan, time simulator"
+      },
+      "plan": {
+        "title": "Day-by-day plan across time zones",
+        "body": "Times in each item's city, subway line colours, cross-zone flights"
+      },
+      "item": {
+        "title": "Place details",
+        "body": "Google/Apple/Naver Maps, add to Google Calendar, photos"
+      },
+      "members": {
+        "title": "Members and invite links",
+        "body": "Owner / editor / viewer roles, iPhone share sheet"
+      },
+      "checklist": {
+        "title": "Checklist",
+        "body": "Grouped, shows who ticked"
+      },
+      "info": {
+        "title": "Info cards",
+        "body": "Flights, stay, tap-to-call emergency numbers"
+      },
+      "expenses": {
+        "title": "Trip expenses",
+        "body": "Equal / exact / percent splits, shared pool, settle-up, daily budget, donut"
+      },
+      "slips": {
+        "title": "Slips and photos",
+        "body": "Resized on the phone before upload, pinch to zoom, private files"
+      },
+      "money": {
+        "title": "Monthly money",
+        "body": "Salary, tax, social security, PVD, fixed costs, one-month fixes, category budgets"
+      },
+      "trend": {
+        "title": "Dashboard and trends",
+        "body": "Home summary, 6-month income vs spending"
+      },
+      "exports": {
+        "title": "Excel / PDF / CSV",
+        "body": "Expenses and monthly money; PDF with correct Thai"
+      },
+      "calendar": {
+        "title": "Calendar and backup",
+        "body": ".ics for iPhone, backup file and trip import"
+      },
+      "admin": {
+        "title": "Admin",
+        "body": "Search users, roles, suspend, audit log, stats"
+      },
+      "settings": {
+        "title": "Language and theme",
+        "body": "Thai / English, system / light / dark"
+      },
+      "api": {
+        "title": "API docs",
+        "body": "OpenAPI reference for every endpoint"
+      }
     }
   }
 }

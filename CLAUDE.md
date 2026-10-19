@@ -8,7 +8,7 @@ iPlan: a mobile-first web app for (1) planning trips and splitting trip costs be
 
 - Talk to the owner in Thai. Code, commits, identifiers in English.
 - Explain the plan and get approval BEFORE writing code. Use plan mode for anything non-trivial.
-- Work on a feature branch off `develop` and open a Pull Request into `develop` at https://github.com/tiphurin/iPlan — never push to `main`.
+- Work on a feature branch off the latest `feature/iPlan/main` and open a Pull Request into `feature/iPlan/main` at https://github.com/tiphurin/iPlan — never push to `main`. One focused commit per PR; don't stack open PRs (keep follow-up work local until the previous PR merges, then rebase it).
 - Everything must run on free tiers **without a credit card on file**. Flag any step that would need a card or paid plan before doing it.
 - The repo is public: never commit personal data (booking references, seats, real names in seed data, addresses of private appointments).
 - Money is shown in the original currency plus a THB conversion where relevant.
@@ -18,14 +18,15 @@ iPlan: a mobile-first web app for (1) planning trips and splitting trip costs be
 ## Architecture (approved 17 Oct 2026)
 
 - Turborepo + Yarn 1.22 (classic) workspaces monorepo, same Yarn the owner uses in other projects; never enable Corepack or change the global Yarn, TypeScript strict everywhere (TS 6.0.x until typescript-eslint supports 7).
-- `apps/web`: Next.js App Router. Server Components for reads (BFF only, no business logic), Client Components for interaction (TanStack Query, React Hook Form + Zod). Tailwind v4 + shadcn/ui. Recharts lazy-loaded. next-intl (th/en). PWA manifest.
+- `apps/web`: Next.js App Router. Server Components for reads (BFF only, no business logic), Client Components for interaction (TanStack Query, plain forms validated by the API's Zod contracts). Tailwind v4 with small shadcn-style components in `components/ui`. Charts are plain SVG. next-intl (th/en). PWA manifest.
 - `apps/api`: Hono, mounted into Next.js at `/api/*` (same origin, one Vercel deployment) but never imports from Next. Per module: `<m>.routes.ts` (Zod + OpenAPI) → `<m>.service.ts` (business logic + authorization) → `<m>.repository.ts` (Drizzle only) with `<m>.mapper.ts` converting DB row ↔ domain ↔ DTO. Better Auth (Google + admin plugin + dev-only login locally). API returns error codes; the web translates them.
-- Storage behind a `StorageProvider` interface (S3 API): MinIO locally, Backblaze B2 in production. DB stores object keys, never full URLs. Images are resized to WebP in the browser before upload (slips 2000px/q0.85, photos 1600px/q0.80, thumbnails 400px), EXIF stripped.
+- Storage behind a `StorageProvider` interface: local disk (`.data/uploads`) in development, S3 API (Backblaze B2) in production. Uploads go through the API (type sniffed from bytes, 5 MB max); downloads are permission-checked (B2: 5-minute signed URL). DB stores object keys, never full URLs. Images are resized to WebP in the browser before upload (slips 2000px/q0.85, photos 1600px/q0.80, thumbnails 400px), EXIF stripped.
 - `packages/core` pure domain logic (money in minor units, split/settle, monthly budget with overrides, schedule progress/delay) with Vitest.
 - `packages/db` Drizzle schema + migrations + seed. `packages/contracts` shared Zod schemas. `packages/i18n` locales + Intl formatters. `packages/config` shared lint/tsconfig.
-- Local: docker compose (Postgres + MinIO), dev-only login, `yarn db:seed` demo data, `/showcase` route demoing every feature.
+- Local: docker compose (Postgres), dev-only login, `yarn db:seed` demo data, `/showcase` route linking every feature.
 - Hosting: Vercel Hobby (web + api), Neon (Postgres), Backblaze B2 (files), Google Cloud (OAuth client only). No Cloudflare.
-- Exports: Excel via exceljs in the browser; PDF via print-friendly pages (correct Thai rendering); CSV, JSON backup, .ics.
+- Exports: Excel via write-excel-file in the browser (loaded on demand); PDF via print-friendly pages under `/print` (correct Thai rendering); CSV, JSON backup (`iplan.trip` v1), .ics.
+- Dates, times and money are formatted from fixed tables in `packages/i18n`, never `Intl`, so server and browser render identical Thai text.
 
 ## Engineering rules
 

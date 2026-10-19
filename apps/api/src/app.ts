@@ -139,6 +139,7 @@ export const FEATURE_PATHS: Record<FeatureKey, readonly string[]> = {
     '/items/*',
     '/checklist/*',
     '/expenses/*',
+    '/pool-contributions/*',
     '/info/*',
     '/invites/*',
     '/join/*',

@@ -20,6 +20,7 @@ export interface MemberRow {
 
 /** What a trip already holds, so date and currency changes can't orphan it. */
 export interface TripContents {
+  /** Expenses plus pool contributions: anything converted into the trip currency. */
   expenseCount: number
   /** Earliest and latest day used by any plan item or expense (null when empty). */
   firstDay: string | null
@@ -119,7 +120,7 @@ export class DrizzleTripsRepository implements TripsRepository {
   }
 
   async contents(tripId: string): Promise<TripContents> {
-    const [[items], [expenses]] = await Promise.all([
+    const [[items], [expenses], [pool]] = await Promise.all([
       this.db
         .select({ first: min(schema.tripItem.dayDate), last: max(schema.tripItem.dayDate) })
         .from(schema.tripItem)
@@ -132,12 +133,16 @@ export class DrizzleTripsRepository implements TripsRepository {
         })
         .from(schema.expense)
         .where(eq(schema.expense.tripId, tripId)),
+      this.db
+        .select({ n: count() })
+        .from(schema.tripPoolContribution)
+        .where(eq(schema.tripPoolContribution.tripId, tripId)),
     ])
     const days = [items?.first, items?.last, expenses?.first, expenses?.last]
       .filter((d): d is string => typeof d === 'string')
       .sort()
     return {
-      expenseCount: expenses?.n ?? 0,
+      expenseCount: (expenses?.n ?? 0) + (pool?.n ?? 0),
       firstDay: days[0] ?? null,
       lastDay: days.at(-1) ?? null,
     }

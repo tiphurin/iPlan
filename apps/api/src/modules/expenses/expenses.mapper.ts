@@ -1,6 +1,6 @@
-import { type ExpenseDto, POOL_ID } from '@iplan/contracts'
+import { type ExpenseDto, POOL_ID, type PoolContributionDto } from '@iplan/contracts'
 import { splitByWeights } from '@iplan/core'
-import type { ExpenseWithShares } from './expenses.repository'
+import type { ContributionRow, ExpenseWithShares } from './expenses.repository'
 
 export type NameOf = (id: string) => string
 
@@ -37,6 +37,21 @@ export function toExpenseDto(found: ExpenseWithShares, nameOf: NameOf): ExpenseD
       percentBp: s.percentBp,
     })),
     createdAt: expense.createdAt.toISOString(),
+  }
+}
+
+export function toContributionDto(row: ContributionRow, nameOf: NameOf): PoolContributionDto {
+  return {
+    id: row.id,
+    userId: row.userId,
+    name: nameOf(row.userId),
+    amountMinor: row.amountMinor.toString(),
+    currency: row.currency,
+    fxRate: row.fxRate,
+    baseAmountMinor: row.baseAmountMinor.toString(),
+    date: row.date,
+    note: row.note,
+    createdAt: row.createdAt.toISOString(),
   }
 }
 

@@ -4,6 +4,7 @@ import {
   chartMax,
   dayBars,
   personBars,
+  poolHeadline,
   settleHeadline,
   viewerShare,
 } from './expense-charts'
@@ -104,6 +105,68 @@ describe('settleHeadline', () => {
       kind: 'many',
       count: 2,
       totalMinor: '350',
+    })
+  })
+})
+
+describe('personBars with the pool', () => {
+  it('keeps members who only put money into the pool', () => {
+    const bars = personBars([
+      {
+        id: 'a',
+        name: 'Ann',
+        paidMinor: '0',
+        shareMinor: '0',
+        contributedMinor: '500',
+        netMinor: '500',
+      },
+      {
+        id: 'pool',
+        name: 'Pool',
+        paidMinor: '0',
+        shareMinor: '0',
+        contributedMinor: '0',
+        netMinor: '-500',
+      },
+    ])
+    expect(bars.map((b) => [b.id, b.contributed, b.net])).toEqual([
+      ['a', 500, 500],
+      ['pool', 0, -500],
+    ])
+  })
+})
+
+describe('poolHeadline', () => {
+  const m = (userId: string, contributedBaseMinor: string) => ({
+    userId,
+    name: userId.toUpperCase(),
+    contributedBaseMinor,
+    percentBp: 0,
+  })
+  it('handles an empty pool, one person and equal amounts', () => {
+    expect(poolHeadline([])).toEqual({ kind: 'empty' })
+    expect(poolHeadline([m('a', '100')])).toEqual({ kind: 'only', userId: 'a', name: 'A' })
+    expect(poolHeadline([m('a', '100'), m('b', '100')])).toEqual({ kind: 'equal' })
+  })
+  it('says who put in more and by how much', () => {
+    expect(poolHeadline([m('b', '500000'), m('a', '700000')])).toEqual({
+      kind: 'more',
+      top: { userId: 'a', name: 'A' },
+      other: { userId: 'b', name: 'B' },
+      diffMinor: '200000',
+      most: false,
+    })
+    expect(poolHeadline([m('a', '300'), m('b', '200'), m('c', '100')])).toMatchObject({
+      top: { userId: 'a' },
+      other: { userId: 'b' },
+      diffMinor: '100',
+      most: true,
+    })
+    // Tied at the top: compare with the smallest.
+    expect(poolHeadline([m('a', '300'), m('b', '300'), m('c', '100')])).toMatchObject({
+      other: { userId: 'c' },
+      diffMinor: '200',
+      most: false,
     })
   })
 })

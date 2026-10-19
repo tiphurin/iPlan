@@ -1,5 +1,7 @@
 # Deploying iPlan
 
+_ภาษาไทยแบบทีละขั้น (รวมการสมัครทุกบริการ): [DEPLOY.th.md](DEPLOY.th.md)_
+
 Production changes only when you push a **version tag** (`v1.2.3`) from `feature/iPlan/main`.
 Merging a pull request does not deploy; pull requests still get a Vercel preview link.
 

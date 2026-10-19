@@ -18,7 +18,7 @@ export interface BackupSources {
   items: Pick<ItemsRepository, 'listByTrip'>
   checklist: Pick<ChecklistRepository, 'list'>
   infoCards: Pick<InfoCardsRepository, 'list'>
-  expenses: Pick<ExpensesRepository, 'list'>
+  expenses: Pick<ExpensesRepository, 'list' | 'listContributions'>
 }
 
 type ItemRow = Awaited<ReturnType<BackupSources['items']['listByTrip']>>[number]
@@ -77,11 +77,12 @@ export class BackupService {
 
   async export(actor: SessionUser, tripId: string): Promise<TripBackup> {
     const { trip } = await this.access.requireAccess(actor, tripId, 'viewer')
-    const [items, checklist, infoCards, expenses, members] = await Promise.all([
+    const [items, checklist, infoCards, expenses, contributions, members] = await Promise.all([
       this.sources.items.listByTrip(tripId),
       this.sources.checklist.list(tripId),
       this.sources.infoCards.list(tripId),
       this.sources.expenses.list(tripId),
+      this.sources.expenses.listContributions(tripId),
       this.sources.trips.members(tripId),
     ])
     const nameOf = (id: string) => members.find((m) => m.userId === id)?.name ?? id
@@ -102,6 +103,7 @@ export class BackupService {
             ? null
             : toDecimalString(money(trip.dailyBudgetMinor, trip.baseCurrency)),
         color: trip.color,
+        poolMode: trip.poolMode,
       },
       items: items.map((i) => ({
         dayDate: i.dayDate,
@@ -129,6 +131,14 @@ export class BackupService {
             toDecimalString(money(s.amountMinor, expense.currency)),
           ]),
         ),
+      })),
+      poolContributions: contributions.map((c) => ({
+        date: c.date,
+        member: nameOf(c.userId),
+        amount: toDecimalString(money(c.amountMinor, c.currency)),
+        currency: c.currency,
+        fxRate: c.fxRate,
+        note: c.note,
       })),
     }
   }
@@ -190,6 +200,7 @@ export class BackupService {
         ),
         dailyBudgetMinor,
         color: isTripColor(data.trip.color) ? data.trip.color : null,
+        poolMode: data.trip.poolMode ?? 'actual',
         createdBy: actor.id,
       },
       items: data.items.map((i, index) => ({

@@ -4,6 +4,8 @@ import { readEnv } from './env'
 import { authGateway, createAuth } from './infra/auth'
 import { devLogin } from './infra/dev-login'
 import { createStorage } from './infra/storage'
+import { DrizzleAdminRepository } from './modules/admin/admin.repository'
+import { AdminService } from './modules/admin/admin.service'
 import { DrizzleAttachmentsRepository } from './modules/attachments/attachments.repository'
 import { AttachmentsService } from './modules/attachments/attachments.service'
 import { DrizzleChecklistRepository } from './modules/checklist/checklist.repository'
@@ -54,6 +56,7 @@ export function buildApp(env = readEnv()): App {
         audit,
       ),
       finance: new FinanceService(new DrizzleFinanceRepository(db), audit),
+      admin: new AdminService(new DrizzleAdminRepository(db), audit),
     },
   })
 }

@@ -3,6 +3,8 @@ import type { ErrorResponse } from '@iplan/contracts'
 import { Scalar } from '@scalar/hono-api-reference'
 import type { AuthGateway } from './infra/auth'
 import type { StorageProvider } from './infra/storage'
+import { adminRoutes } from './modules/admin/admin.routes'
+import type { AdminService } from './modules/admin/admin.service'
 import { attachmentRoutes } from './modules/attachments/attachments.routes'
 import type { AttachmentsService } from './modules/attachments/attachments.service'
 import { DEV_LOGIN_EMAILS, type DevLoginEmail } from './infra/dev-login'
@@ -41,6 +43,7 @@ export interface AppDeps {
     expenses: ExpensesService
     attachments: AttachmentsService
     finance: FinanceService
+    admin: AdminService
   }
 }
 
@@ -96,14 +99,16 @@ export function createApp(deps: AppDeps) {
   // Resolve the session once per request for everything else.
   app.use('*', async (c, next) => {
     const found = await deps.auth.getSessionUser(c.req.raw.headers)
-    const user: SessionUser | null = found
-      ? {
-          id: found.id,
-          name: found.name,
-          email: found.email,
-          role: found.role === 'admin' ? 'admin' : 'user',
-        }
-      : null
+    // A suspended account is treated as signed out even if a session survives.
+    const user: SessionUser | null =
+      found && !found.banned
+        ? {
+            id: found.id,
+            name: found.name,
+            email: found.email,
+            role: found.role === 'admin' ? 'admin' : 'user',
+          }
+        : null
     c.set('user', user)
     await next()
   })
@@ -124,6 +129,7 @@ export function createApp(deps: AppDeps) {
   app.route('/', expenseRoutes(deps.services.expenses))
   app.route('/', attachmentRoutes(deps.services.attachments, deps.storage))
   app.route('/', financeRoutes(deps.services.finance))
+  app.route('/', adminRoutes(deps.services.admin))
 
   app.doc31('/openapi.json', {
     openapi: '3.1.0',

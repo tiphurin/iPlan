@@ -6,6 +6,7 @@ import { ItemsService } from './modules/items/items.service'
 import { MeService } from './modules/me/me.service'
 import { TripsService } from './modules/trips/trips.service'
 import { MembersService } from './modules/members/members.service'
+import { AdminService } from './modules/admin/admin.service'
 import { AttachmentsService } from './modules/attachments/attachments.service'
 import { ChecklistService } from './modules/checklist/checklist.service'
 import { FinanceService } from './modules/finance/finance.service'
@@ -13,6 +14,7 @@ import { ExpensesService } from './modules/expenses/expenses.service'
 import { InfoCardsService } from './modules/info-cards/info-cards.service'
 import {
   FakeAudit,
+  InMemoryAdmin,
   InMemoryAttachments,
   InMemoryChecklist,
   InMemoryExpenses,
@@ -55,7 +57,7 @@ const audit = new FakeAudit()
 const tripRepo = new InMemoryTrips()
 const trips = new TripsService(tripRepo, audit)
 const storage = new MemoryStorage()
-const app = createApp({
+const deps = {
   auth,
   storage,
   services: {
@@ -68,8 +70,10 @@ const app = createApp({
     expenses: new ExpensesService(new InMemoryExpenses(tripRepo), trips, tripRepo, audit),
     attachments: new AttachmentsService(new InMemoryAttachments(), storage, trips, audit),
     finance: new FinanceService(new InMemoryFinance(), audit),
+    admin: new AdminService(new InMemoryAdmin(), audit),
   },
-})
+}
+const app = createApp(deps)
 const signedIn = { cookie: 'session=u1' }
 
 describe('API app', () => {
@@ -108,6 +112,15 @@ describe('API app', () => {
     const body = (await res.json()) as { error: { code: string; fields: Record<string, string> } }
     expect(body.error.code).toBe('VALIDATION_FAILED')
     expect(Object.keys(body.error.fields)).toEqual(['locale'])
+  })
+
+  it('treats a suspended account as signed out', async () => {
+    const banned = createApp({
+      auth: { ...auth, getSessionUser: async () => ({ ...owner, banned: true }) },
+      storage,
+      services: deps.services,
+    })
+    expect((await banned.request('/api/me', { headers: signedIn })).status).toBe(401)
   })
 
   it('hides dev login unless enabled', async () => {

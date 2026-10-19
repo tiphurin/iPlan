@@ -14,6 +14,7 @@ import { ApiError } from '@/lib/api-error'
 import { fmt } from '@/lib/expenses'
 import { useCategories, useCategoryName, useFinanceMutations, useRules } from '@/lib/finance'
 import { useFormat } from '@/lib/use-format'
+import { confirmDialog } from '@/lib/confirm'
 
 const KINDS: RecurringKind[] = ['income', 'deduction', 'fixed']
 const KIND_LABEL = { income: 'income', deduction: 'deductions', fixed: 'fixed' } as const
@@ -161,8 +162,9 @@ export function RulesView({
                         size="icon"
                         className="text-danger"
                         aria-label={t('common.delete')}
-                        onClick={() =>
-                          window.confirm(t('common.confirmDelete')) && deleteRule.mutate(rule.id)
+                        onClick={async () =>
+                          (await confirmDialog(t('common.confirmDelete'), { danger: true })) &&
+                          deleteRule.mutate(rule.id)
                         }
                       >
                         <Trash2 aria-hidden className="size-4" />

@@ -18,8 +18,11 @@ import { tripDays } from '@/lib/trip-dates'
 import { useItemMutations } from '@/lib/trips'
 import { goBack } from '@/lib/history'
 import { useFormat } from '@/lib/use-format'
+import { ColorSwatches } from '@/components/ui/color-swatches'
 import { LinePicker } from './line-picker'
 import { PlaceSearch } from './place-search'
+import { confirmDialog } from '@/lib/confirm'
+import { useUnsavedChanges } from '@/lib/unsaved'
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? '').trim()
 
@@ -59,6 +62,8 @@ export function ItemForm({
   const [arrivalZone, setArrivalZone] = useState(storedEndZone ?? zone)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const formRef = useRef<HTMLFormElement>(null)
+  // Warn before leaving with unsaved edits; saving or deleting clears it first.
+  const { markSaved } = useUnsavedChanges(formRef)
   const [startValue, setStartValue] = useState(
     item ? toLocalInput(new Date(item.startsAt), item.timeZone) : `${defaultDay}T09:00`,
   )
@@ -68,6 +73,10 @@ export function ItemForm({
   /** Remounts the end picker when its text is converted to another zone. */
   const [endKey, setEndKey] = useState(0)
   const [formError, setFormError] = useState<string | null>(null)
+  // A place's own colour in the plan; empty = follow the ride that brought you there.
+  const [spotColor, setSpotColor] = useState(
+    item && item.kind !== 'move' ? (item.details.lineColor ?? '') : '',
+  )
   const busy = Object.values(mutations).some((m) => m.isPending)
   const zones = [...new Set<string>([...TIME_ZONES, zone, arrivalZone, trip.homeTimeZone])].filter(
     isValidTimeZone,
@@ -155,6 +164,7 @@ export function ItemForm({
         ? await mutations.update.mutateAsync({ id: item.id, ...input })
         : await mutations.create.mutateAsync(input)
       // Back to where you were (scroll kept); a fresh visit lands on the item instead.
+      markSaved()
       goBack(router, `/trips/${trip.id}?day=${input.dayDate}&focus=${saved.id}`)
       router.refresh()
     } catch (error) {
@@ -168,13 +178,15 @@ export function ItemForm({
   async function onDuplicate() {
     if (!item) return
     await mutations.duplicate.mutateAsync(item.id)
+    markSaved()
     goBack(router, backToDay)
     router.refresh()
   }
 
   async function onDelete() {
-    if (!item || !window.confirm(t('common.confirmDelete'))) return
+    if (!item || !(await confirmDialog(t('common.confirmDelete'), { danger: true }))) return
     await mutations.remove.mutateAsync(item.id)
+    markSaved()
     goBack(router, backToDay)
     router.refresh()
   }
@@ -269,7 +281,22 @@ export function ItemForm({
         </Field>
       </div>
 
-      <TravelTime start={startValue} end={endValue} zone={zone} endZone={endZone} />
+      <TravelTime
+        start={startValue}
+        end={endValue}
+        zone={zone}
+        endZone={endZone}
+        onDuration={(minutes) => {
+          // A duration chip sets the end time from the start (in the end's zone for flights).
+          try {
+            const start = fromLocalInput(startValue, zone).getTime()
+            setEndValue(toLocalInput(new Date(start + minutes * 60_000), endZone))
+            setEndKey((k) => k + 1)
+          } catch {
+            // No valid start yet: nothing to add to.
+          }
+        }}
+      />
 
       {kind === 'flight' && (
         <>
@@ -315,6 +342,21 @@ export function ItemForm({
             </Field>
           </div>
         </>
+      )}
+
+      {kind !== 'move' && (
+        <div>
+          <p className="mb-1.5 text-sm text-muted-foreground">{t('item.planColor')}</p>
+          {spotColor && <input type="hidden" name="lineColor" value={spotColor} />}
+          <ColorSwatches
+            value={spotColor}
+            onChange={setSpotColor}
+            label={t('item.planColor')}
+            autoLabel={t('item.planColorAuto')}
+            customLabel={t('lines.moreColors')}
+          />
+          <p className="mt-1 text-xs text-faint">{t('item.planColorHint')}</p>
+        </div>
       )}
 
       {kind === 'move' && (
@@ -385,35 +427,112 @@ export function ItemForm({
   )
 }
 
-/** "Travel time 5 h 35 min" from local start/end in their zones (handles crossing zones). */
+const DURATIONS = [15, 30, 60, 90, 120] as const
+
+/**
+ * How long it takes, worked out from the start and end times (crossing zones
+ * too), plus chips that set the end for you: start + 15 min, 30 min, 1 h, ...
+ */
 function TravelTime({
   start,
   end,
   zone,
   endZone,
+  onDuration,
 }: {
   start: string
   end: string
   zone: string
   endZone: string
+  onDuration: (minutes: number) => void
 }) {
   const t = useTranslations('item')
   const f = useFormat()
-  if (!start || !end) return null
-  let ms: number
+  const [custom, setCustom] = useState(false)
+  const [hours, setHours] = useState('')
+  const [minutes, setMinutes] = useState('')
+  let ms: number | null = null
   try {
-    ms = fromLocalInput(end, endZone).getTime() - fromLocalInput(start, zone).getTime()
+    if (start && end) {
+      ms = fromLocalInput(end, endZone).getTime() - fromLocalInput(start, zone).getTime()
+    }
   } catch {
-    return null
+    ms = null
   }
   return (
-    <p
-      className={cn(
-        'rounded-xl px-3 py-2 text-sm',
-        ms < 0 ? 'bg-danger/10 text-danger' : 'bg-muted text-muted-foreground',
+    <div className="space-y-2">
+      {ms !== null && (
+        <p
+          className={cn(
+            'rounded-xl px-3 py-2 text-sm',
+            ms < 0 ? 'bg-danger/10 text-danger' : 'bg-muted text-muted-foreground',
+          )}
+        >
+          {ms < 0 ? t('endBeforeStart') : t('duration', { time: f.duration(ms) })}
+        </p>
       )}
-    >
-      {ms < 0 ? t('endBeforeStart') : t('duration', { time: f.duration(ms) })}
-    </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm text-muted-foreground">{t('setDuration')}</span>
+        {DURATIONS.map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => onDuration(m)}
+            className={cn(
+              'min-h-10 rounded-full border px-3 text-sm',
+              ms === m * 60_000 ? 'chip-on' : 'bg-card',
+            )}
+          >
+            {f.duration(m * 60_000)}
+          </button>
+        ))}
+        <button
+          type="button"
+          aria-expanded={custom}
+          onClick={() => setCustom((c) => !c)}
+          className={cn(
+            'min-h-10 rounded-full border border-dashed px-3 text-sm',
+            custom ? 'chip-on border-solid' : 'bg-card',
+          )}
+        >
+          {t('customDuration')}
+        </button>
+      </div>
+      {custom && (
+        <div className="flex flex-wrap items-end gap-2 rounded-2xl border p-3">
+          {(
+            [
+              ['durationHours', hours, setHours, 99],
+              ['durationMinutes', minutes, setMinutes, 59],
+            ] as const
+          ).map(([key, value, set, max]) => (
+            <label key={key} className="grid gap-1 text-sm text-muted-foreground">
+              {t(key)}
+              <Input
+                inputMode="numeric"
+                className="w-20 text-center tabular-nums"
+                value={value}
+                maxLength={2}
+                placeholder="0"
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, '')
+                  set(digits === '' ? '' : String(Math.min(max, Number(digits))))
+                }}
+              />
+            </label>
+          ))}
+          <Button
+            variant="secondary"
+            disabled={!Number(hours) && !Number(minutes)}
+            onClick={() => {
+              onDuration(Number(hours || 0) * 60 + Number(minutes || 0))
+              setCustom(false)
+            }}
+          >
+            {t('applyDuration')}
+          </Button>
+        </div>
+      )}
+    </div>
   )
 }

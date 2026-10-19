@@ -6,7 +6,7 @@ import { cn } from '@/lib/cn'
 import { coverColor, daysBetween } from '@/lib/trip-color'
 import { tripPhase } from '@/lib/trip-dates'
 
-/** Coloured trip card like the prototype's place covers. Server component. */
+/** Trip card like the prototype's place covers: the cover photo, else its colour. Server component. */
 export async function TripCover({
   trip,
   locale,
@@ -30,14 +30,34 @@ export async function TripCover({
       )}
       style={{ backgroundColor: coverColor(trip) }}
     >
-      <span
-        aria-hidden
-        className="absolute -top-7 -right-5 size-[120px] rounded-full border-[16px] border-white/20"
-      />
-      <span
-        aria-hidden
-        className="absolute top-10 right-14 size-[46px] rounded-full border-8 border-white/16"
-      />
+      {trip.coverUrl ? (
+        <>
+          {/* The colour behind shows while the photo loads (or if it fails). */}
+          {/* eslint-disable-next-line @next/next/no-img-element -- permission-checked API image */}
+          <img
+            src={trip.coverUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 size-full object-cover"
+          />
+          <span
+            aria-hidden
+            className="absolute inset-0 bg-linear-to-t from-black/70 via-black/25 to-black/10"
+          />
+        </>
+      ) : (
+        <>
+          <span
+            aria-hidden
+            className="absolute -top-7 -right-5 size-[120px] rounded-full border-[16px] border-white/20"
+          />
+          <span
+            aria-hidden
+            className="absolute top-10 right-14 size-[46px] rounded-full border-8 border-white/16"
+          />
+        </>
+      )}
       <span className="absolute top-3 left-4 rounded-full bg-black/25 px-2.5 py-0.5 text-xs font-medium">
         {phase === 'ongoing'
           ? t('onDay', { n: dayN })

@@ -1,5 +1,7 @@
 'use client'
 
+import { useUnsavedChanges } from '@/lib/unsaved'
+import { confirmDialog } from '@/lib/confirm'
 import {
   LedgerCategory,
   type LedgerDetailDto,
@@ -20,7 +22,7 @@ import { Trash2 } from 'lucide-react'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { BackLink } from '@/components/back-link'
 import { Button } from '@/components/ui/button'
 import { Chip, Segmented } from '@/components/ui/chip'
@@ -60,6 +62,9 @@ export function EntryForm({
 }) {
   const t = useTranslations()
   const router = useRouter()
+  const formRef = useRef<HTMLFormElement>(null)
+  // Warn before leaving with unsaved edits; saving or deleting clears it first.
+  const { markSaved } = useUnsavedChanges(formRef)
   const m = useLedgerMutations(ledger.id)
   const presetDate = validDateKey(defaultDate)
   const cur = ledger.currency
@@ -73,7 +78,14 @@ export function EntryForm({
   const [category, setCategory] = useState<LedgerCategory>(entry?.category ?? 'food')
   const [date, setDate] = useState(entry?.date ?? presetDate ?? todayKey('Asia/Bangkok'))
   const [paidBy, setPaidBy] = useState(entry?.paidBy ?? meId)
-  const [mode, setMode] = useState<Mode>(entry?.splitMode ?? 'equal')
+  // "No split": the payer keeps the whole cost (saved as an equal split with only them).
+  const [mode, setMode] = useState<Mode | 'none'>(
+    entry?.splitMode === 'equal' &&
+      entry.shares.length === 1 &&
+      entry.shares[0]?.userId === entry.paidBy
+      ? 'none'
+      : (entry?.splitMode ?? 'equal'),
+  )
   const [participants, setParticipants] = useState<string[]>(
     entry?.splitMode === 'equal' ? entry.shares.map((s) => s.userId) : ids,
   )
@@ -113,6 +125,7 @@ export function EntryForm({
   const preview = useMemo((): { shares: Shares } | { problem: string } | null => {
     if (total === null) return null
     try {
+      if (mode === 'none') return { shares: splitEqual(total, [paidBy]) }
       if (mode === 'equal') return { shares: splitEqual(total, participants) }
       if (mode === 'exact') {
         const parts = Object.fromEntries(
@@ -142,7 +155,7 @@ export function EntryForm({
     } catch {
       return { problem: t('shared.checkSplit') }
     }
-  }, [total, mode, participants, exact, percent, cur, t])
+  }, [total, mode, participants, paidBy, exact, percent, cur, t])
 
   /** With two people, typing one share fills in the other. */
   function setExactFor(id: string, value: string) {
@@ -169,6 +182,7 @@ export function EntryForm({
   }
 
   function splitInput(): SplitInput {
+    if (mode === 'none') return { mode: 'equal', participants: [paidBy] }
     if (mode === 'equal') return { mode, participants }
     if (mode === 'exact') {
       return {
@@ -202,6 +216,7 @@ export function EntryForm({
     try {
       if (entry) await m.updateEntry.mutateAsync({ id: entry.id, ...body })
       else await m.addEntry.mutateAsync(body)
+      markSaved()
       router.replace(walletMonthHref(ledger.id, date.slice(0, 7)) as Route)
       router.refresh()
     } catch (err) {
@@ -213,8 +228,9 @@ export function EntryForm({
   }
 
   async function onDelete() {
-    if (!entry || !window.confirm(t('common.confirmDelete'))) return
+    if (!entry || !(await confirmDialog(t('common.confirmDelete'), { danger: true }))) return
     await m.deleteEntry.mutateAsync(entry.id)
+    markSaved()
     router.replace(walletMonthHref(ledger.id, entry.date.slice(0, 7)) as Route)
     router.refresh()
   }
@@ -238,7 +254,7 @@ export function EntryForm({
       <h1 className="px-4 pb-3 text-[28px] font-bold">
         {entry ? t('shared.editCost') : t('shared.addCost')}
       </h1>
-      <form onSubmit={onSubmit} className="space-y-5 px-4 md:max-w-xl" noValidate>
+      <form ref={formRef} onSubmit={onSubmit} className="space-y-5 px-4 md:max-w-xl" noValidate>
         {error && (
           <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">
             {error}
@@ -305,8 +321,14 @@ export function EntryForm({
               { value: 'equal', label: t('shared.modeEqual') },
               { value: 'exact', label: t('shared.modeExact') },
               { value: 'percent', label: t('shared.modePercent') },
+              { value: 'none', label: t('shared.modeNone') },
             ]}
           />
+          {mode === 'none' && (
+            <p className="text-sm text-muted-foreground">
+              {t('shared.noneHint', { name: nameOf(paidBy) })}
+            </p>
+          )}
           {mode === 'equal' && (
             <div className="flex flex-wrap gap-2">
               {members.map((x) => {

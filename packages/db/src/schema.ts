@@ -245,6 +245,8 @@ export const trip = pgTable('trip', {
   dailyBudgetMinor: bigint('daily_budget_minor', { mode: 'bigint' }),
   /** Cover colour (hex from the shared palette); null picks one from the trip id. */
   color: text('color'),
+  /** Storage key of the cover photo (never a URL); null shows the colour. */
+  coverKey: text('cover_key'),
   createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
   createdAt,
   updatedAt,

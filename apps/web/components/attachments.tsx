@@ -11,6 +11,7 @@ import { SectionTitle } from '@/components/ui/card'
 import { apiFetch } from '@/lib/api-client'
 import { ApiError, toApiError } from '@/lib/api-error'
 import { type UploadKind, prepareUpload } from '@/lib/image'
+import { confirmDialog } from '@/lib/confirm'
 
 const key = (entityType: string, entityId: string) => ['attachments', entityType, entityId] as const
 
@@ -173,8 +174,9 @@ export function Attachments({
                   size="icon"
                   aria-label={t('attachments.delete')}
                   className="text-red-400 hover:bg-white/10"
-                  onClick={() =>
-                    window.confirm(t('common.confirmDelete')) && remove.mutate(open.id)
+                  onClick={async () =>
+                    (await confirmDialog(t('common.confirmDelete'), { danger: true })) &&
+                    remove.mutate(open.id)
                   }
                 >
                   <Trash2 aria-hidden className="size-5" />

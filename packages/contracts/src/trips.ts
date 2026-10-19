@@ -7,7 +7,7 @@ const Currency = CurrencyCode.default('THB')
 /** Links open in the browser, so only web addresses (no javascript: or data:). */
 export const WebUrl = z.url({ protocol: /^https?$/ })
 
-/** Trip cover colours: calm tones that keep white text readable in light and dark mode. */
+/** Suggested cover colours: calm tones that keep white text readable in light and dark mode. */
 export const TRIP_COLORS = [
   '#00a84d',
   '#0e7490',
@@ -18,11 +18,15 @@ export const TRIP_COLORS = [
   '#d6453d',
   '#475569',
 ] as const
-export const TripColor = z.enum(TRIP_COLORS)
+/** Any cover colour as #rrggbb (the palette above or one picked freely), stored lower-case. */
+export const TripColor = z
+  .string()
+  .regex(/^#[0-9a-fA-F]{6}$/)
+  .transform((c) => c.toLowerCase())
 export type TripColor = z.infer<typeof TripColor>
 
 export function isTripColor(value: unknown): value is TripColor {
-  return typeof value === 'string' && (TRIP_COLORS as readonly string[]).includes(value)
+  return typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value)
 }
 
 export const TripRole = z.enum(['owner', 'editor', 'viewer'])
@@ -42,6 +46,8 @@ export const TripDto = z.object({
   dailyBudgetMinor: z.string().nullable(),
   /** Chosen cover colour; null means one is picked from the trip id. */
   color: z.string().nullable(),
+  /** Cover photo served by the API (versioned for caching); null shows the colour. */
+  coverUrl: z.string().nullable(),
   /** The caller's role in this trip. */
   role: TripRole,
   memberCount: z.number().int(),
@@ -66,7 +72,7 @@ const tripFields = {
   endDate: DateKey,
   homeTimeZone: z.string().min(1).default('Asia/Bangkok'),
   baseCurrency: Currency,
-  /** Cover colour from TRIP_COLORS; null clears it. */
+  /** Cover colour (#rrggbb); null clears it. */
   color: TripColor.nullable().optional(),
 }
 

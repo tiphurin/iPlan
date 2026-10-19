@@ -11,6 +11,7 @@ import { Hero } from '@/components/ui/card'
 import { fmt } from '@/lib/expenses'
 import { entryMonth, useLedgerMutations, walletMonthHref } from '@/lib/ledgers'
 import { useFormat } from '@/lib/use-format'
+import { confirmDialog } from '@/lib/confirm'
 
 /** A recorded pay-back; it can only be deleted (then the debt comes back). */
 export function SettlementView({
@@ -55,7 +56,7 @@ export function SettlementView({
           size="lg"
           className="text-danger"
           onClick={async () => {
-            if (!window.confirm(t('shared.confirmUndoSettle'))) return
+            if (!(await confirmDialog(t('shared.confirmUndoSettle'), { danger: true }))) return
             await m.deleteEntry.mutateAsync(entry.id)
             router.replace(back)
             router.refresh()

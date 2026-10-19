@@ -1,7 +1,7 @@
 'use client'
 
 import type { TripDetailDto, TripItemDto } from '@iplan/contracts'
-import { CalendarPlus, Check, ExternalLink, MapPin, Pencil, Phone, Wallet } from 'lucide-react'
+import { CalendarPlus, Check, ExternalLink, MapPin, Pencil, Phone } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -14,6 +14,7 @@ import { mapLinks } from '@/lib/maps'
 import { zoneShort } from '@/lib/time-zones'
 import { useTripDisplay } from '@/lib/trip-display'
 import { useFormat } from '@/lib/use-format'
+import { ItemExpenses } from './item-expenses'
 import { MoneyLine, type SpentInfo } from './timeline'
 
 /**
@@ -54,7 +55,7 @@ export function ItemSheet({
           {item.details.flightNumber && ` · ${item.details.flightNumber}`}
         </p>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid gap-2">
           {canEdit && (
             <Link
               href={`/trips/${trip.id}/items/${item.id}` as Route}
@@ -62,15 +63,6 @@ export function ItemSheet({
             >
               <Pencil aria-hidden className="size-4" />
               {t('itemSheet.edit')}
-            </Link>
-          )}
-          {canSpend && (
-            <Link
-              href={`/trips/${trip.id}/expenses/new?item=${item.id}` as Route}
-              className={buttonVariants({ variant: 'secondary' })}
-            >
-              <Wallet aria-hidden className="size-4 text-l1" />
-              {t('itemSheet.expense')}
             </Link>
           )}
         </div>
@@ -82,6 +74,15 @@ export function ItemSheet({
             budget={item.details.budget}
             spentMinor={spent?.byItem?.get(item.id)}
             spent={spent}
+          />
+        )}
+
+        {canSpend && (
+          <ItemExpenses
+            tripId={trip.id}
+            itemId={item.id}
+            members={trip.members}
+            canEdit={canSpend}
           />
         )}
 

@@ -6,7 +6,7 @@ import { Trash2 } from 'lucide-react'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useRef, useState } from 'react'
 import { Attachments } from '@/components/attachments'
 import { Button } from '@/components/ui/button'
 import { DateField } from '@/components/ui/date-fields'
@@ -14,6 +14,8 @@ import { Field, Input, Select, Textarea } from '@/components/ui/field'
 import { ApiError } from '@/lib/api-error'
 import { cn } from '@/lib/cn'
 import { useCategoryName, useFinanceMutations } from '@/lib/finance'
+import { confirmDialog } from '@/lib/confirm'
+import { useUnsavedChanges } from '@/lib/unsaved'
 
 export function TransactionForm({
   categories,
@@ -26,6 +28,9 @@ export function TransactionForm({
 }) {
   const t = useTranslations()
   const router = useRouter()
+  const formRef = useRef<HTMLFormElement>(null)
+  // Warn before leaving with unsaved edits; saving or deleting clears it first.
+  const { markSaved } = useUnsavedChanges(formRef)
   const categoryName = useCategoryName()
   const { saveTransaction, deleteTransaction } = useFinanceMutations()
   const [kind, setKind] = useState<'income' | 'expense'>(transaction?.kind ?? 'expense')
@@ -49,6 +54,7 @@ export function TransactionForm({
       { ...(transaction && { id: transaction.id }), input },
       {
         onSuccess: () => {
+          markSaved()
           router.push(backTo(input.date))
           router.refresh()
         },
@@ -61,14 +67,15 @@ export function TransactionForm({
   }
 
   async function onDelete() {
-    if (!transaction || !window.confirm(t('common.confirmDelete'))) return
+    if (!transaction || !(await confirmDialog(t('common.confirmDelete'), { danger: true }))) return
     await deleteTransaction.mutateAsync(transaction.id)
+    markSaved()
     router.push(backTo(transaction.date))
     router.refresh()
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 px-4" noValidate>
+    <form ref={formRef} onSubmit={onSubmit} className="space-y-4 px-4" noValidate>
       {formError && (
         <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">
           {formError}

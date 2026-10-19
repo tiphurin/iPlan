@@ -23,6 +23,7 @@ import { Card } from '@/components/ui/card'
 import { Field, Input, Select, Textarea } from '@/components/ui/field'
 import { apiFetch } from '@/lib/api-client'
 import { ApiError } from '@/lib/api-error'
+import { confirmDialog } from '@/lib/confirm'
 
 const key = (tripId: string) => ['trips', tripId, 'info'] as const
 const KINDS: InfoCardKind[] = ['flight', 'hotel', 'health', 'lounge', 'emergency', 'tip', 'other']
@@ -174,8 +175,9 @@ export function InfoView({
                     size="icon"
                     className="text-danger"
                     aria-label={t('common.delete')}
-                    onClick={() =>
-                      window.confirm(t('common.confirmDelete')) && remove.mutate(card.id)
+                    onClick={async () =>
+                      (await confirmDialog(t('common.confirmDelete'), { danger: true })) &&
+                      remove.mutate(card.id)
                     }
                   >
                     <Trash2 aria-hidden className="size-4" />

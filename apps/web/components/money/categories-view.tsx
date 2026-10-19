@@ -10,6 +10,7 @@ import { SectionTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/field'
 import { ApiError } from '@/lib/api-error'
 import { useCategories, useCategoryName, useFinanceMutations } from '@/lib/finance'
+import { confirmDialog } from '@/lib/confirm'
 
 export function CategoriesView({ initial }: { initial: FinanceCategoryDto[] }) {
   const t = useTranslations()
@@ -99,8 +100,9 @@ export function CategoriesView({ initial }: { initial: FinanceCategoryDto[] }) {
                       size="icon"
                       className="text-danger"
                       aria-label={t('common.delete')}
-                      onClick={() =>
-                        window.confirm(t('common.confirmDelete')) && deleteCategory.mutate(c.id)
+                      onClick={async () =>
+                        (await confirmDialog(t('common.confirmDelete'), { danger: true })) &&
+                        deleteCategory.mutate(c.id)
                       }
                     >
                       <Trash2 aria-hidden className="size-4" />

@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { getMe, serverApi } from '@/lib/server-api'
 import { LanguageToggle } from '@/components/language-toggle'
 import { LoginButtons } from './login-buttons'
+import { LogoMark } from '@/components/logo'
 
 export const metadata: Metadata = { title: 'Sign in' }
 
@@ -31,8 +32,8 @@ export default async function LoginPage({
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-between px-6 pt-[max(4rem,env(safe-area-inset-top))] pb-[max(2rem,env(safe-area-inset-bottom))]">
       <div>
         <div className="flex items-start justify-between">
-          {/* eslint-disable-next-line @next/next/no-img-element -- static SVG icon */}
-          <img src="/icon.svg" alt="" className="size-16 rounded-2xl shadow-lg" />
+          {}
+          <LogoMark size={64} />
           <LanguageToggle />
         </div>
         <h1 className="mt-8 text-3xl font-bold tracking-tight">{t('title')}</h1>

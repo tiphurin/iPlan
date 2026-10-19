@@ -1,13 +1,11 @@
-import { Wallet } from 'lucide-react'
 import type { Route } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { Attachments } from '@/components/attachments'
 import { BackLink } from '@/components/back-link'
 import { PageHeader } from '@/components/page-header'
-import { buttonVariants } from '@/components/ui/button'
 import { ItemDetail } from '@/components/trips/item-detail'
+import { ItemExpenses } from '@/components/trips/item-expenses'
 import { ItemForm } from '@/components/trips/item-form'
 import { ItemRow } from '@/components/trips/item-row'
 import { loadTrip } from '@/lib/load-trip'
@@ -38,15 +36,15 @@ export default async function ItemPage({ params }: Props) {
         </div>
       )}
       <ItemDetail item={item} />
-      {canEdit && item.kind !== 'wake' && item.kind !== 'sleep' && (
+      {item.kind !== 'wake' && item.kind !== 'sleep' && (
         <div className="px-4 pb-4">
-          <Link
-            href={`/trips/${tripId}/expenses/new?item=${item.id}` as Route}
-            className={buttonVariants({ variant: 'secondary', size: 'lg' })}
-          >
-            <Wallet aria-hidden className="size-5 text-l1" />
-            {t('expenses.addHere')}
-          </Link>
+          <ItemExpenses
+            tripId={tripId}
+            itemId={item.id}
+            members={trip.members}
+            canEdit={canEdit}
+            fromItemPage
+          />
         </div>
       )}
       <div className="px-4 pb-4">

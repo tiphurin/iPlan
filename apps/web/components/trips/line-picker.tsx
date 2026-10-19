@@ -3,6 +3,7 @@
 import { Check, Pencil } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
+import { ColorSwatches } from '@/components/ui/color-swatches'
 import { Field, Input } from '@/components/ui/field'
 import { cn } from '@/lib/cn'
 import {
@@ -11,7 +12,6 @@ import {
   RAIL_GROUPS,
   countryOfLine,
   countryOfZone,
-  findPreset,
   countryLines,
   endpointKind,
   isRailLine,
@@ -22,7 +22,7 @@ import {
 import { CountryChips } from './country-chips'
 import { EndpointField } from './endpoint-field'
 
-const METRO = { line: 'METRO', color: '#1f2a37' }
+const METRO = { line: 'METRO', color: '#64748b' }
 
 /** Message key suffix per kind of start/end: "fromStation", "placeholderAirport", … */
 const ENDPOINT_TEXT = {
@@ -32,21 +32,6 @@ const ENDPOINT_TEXT = {
   airport: 'Airport',
   place: 'Place',
 } as const
-
-/** Quick colours for a custom line; the last swatch opens the full colour picker. */
-const SWATCHES = [
-  '#d6453d',
-  '#ef7c1c',
-  '#e0a100',
-  '#00a84d',
-  '#0e7490',
-  '#0090d2',
-  '#0052a4',
-  '#6366f1',
-  '#996cac',
-  '#e5007e',
-  '#4a5563',
-]
 
 /**
  * How you travel, step by step: the country (suggested from the item's time
@@ -78,7 +63,8 @@ export function LinePicker({
   const [picked, setPicked] = useState<Country | undefined>(countryOfLine(line))
   const country = picked ?? countryOfZone(timeZone)
   const [value, setValue] = useState({ line: line ?? '', color: color ?? '#00a84d' })
-  const [custom, setCustom] = useState(Boolean(line) && !findPreset(line, color))
+  // Presets keep their own name even with another colour; anything else is a custom line.
+  const [custom, setCustom] = useState(Boolean(line) && !presetOf(line))
   // The rail lines of this ride, in order; the first one gives the badge and colour.
   const [rail, setRailState] = useState<string[]>(
     isRailLine(line) && line ? [line, ...(via ?? []).filter(isRailLine)] : [],
@@ -96,7 +82,7 @@ export function LinePicker({
       ? metroOn
       : isRailLine(p.line)
         ? rail.includes(p.line)
-        : value.line === p.line && value.color === p.color)
+        : value.line === p.line)
   const toggle = (p: LinePreset) => {
     setCustom(false)
     // Lines add up (a transfer); tapping a chosen line removes just that one.
@@ -208,6 +194,18 @@ export function LinePicker({
           </div>
         </div>
       ))}
+      {/* Any way of getting around but a rail line (which keeps its official colour) can be recoloured. */}
+      {!custom && value.line && !isRailLine(value.line) && (
+        <div>
+          <p className="mb-1.5 text-sm text-muted-foreground">{t('lineColor')}</p>
+          <ColorSwatches
+            value={value.color}
+            onChange={(c) => setValue((v) => ({ ...v, color: c }))}
+            label={t('lineColor')}
+            customLabel={t('moreColors')}
+          />
+        </div>
+      )}
       {endpoint && (
         <div className="grid gap-3 sm:grid-cols-2">
           {/* Another line or mode starts the ends over; saved ones belong to the saved line. */}
@@ -253,50 +251,12 @@ export function LinePicker({
           </Field>
           <div>
             <p className="mb-1.5 text-sm text-muted-foreground">{t('color')}</p>
-            <div role="radiogroup" aria-label={t('color')} className="flex flex-wrap gap-2">
-              {SWATCHES.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  role="radio"
-                  aria-checked={value.color.toLowerCase() === c}
-                  aria-label={c}
-                  onClick={() => setValue((v) => ({ ...v, color: c }))}
-                  className="flex size-11 items-center justify-center rounded-full"
-                >
-                  <span
-                    className={cn(
-                      'flex size-8 items-center justify-center rounded-full text-white',
-                      value.color.toLowerCase() === c &&
-                        'ring-2 ring-foreground ring-offset-2 ring-offset-card',
-                    )}
-                    style={{ backgroundColor: c }}
-                  >
-                    {value.color.toLowerCase() === c && <Check aria-hidden className="size-4" />}
-                  </span>
-                </button>
-              ))}
-              <label
-                className="relative flex size-11 cursor-pointer items-center justify-center rounded-full"
-                title={t('moreColors')}
-              >
-                <span
-                  aria-hidden
-                  className={cn(
-                    'size-8 rounded-full bg-[conic-gradient(red,yellow,lime,cyan,blue,magenta,red)]',
-                    !SWATCHES.includes(value.color.toLowerCase()) &&
-                      'ring-2 ring-foreground ring-offset-2 ring-offset-card',
-                  )}
-                />
-                <input
-                  type="color"
-                  aria-label={t('moreColors')}
-                  className="absolute inset-0 cursor-pointer opacity-0"
-                  value={value.color}
-                  onChange={(e) => setValue((v) => ({ ...v, color: e.target.value }))}
-                />
-              </label>
-            </div>
+            <ColorSwatches
+              value={value.color}
+              onChange={(c) => setValue((v) => ({ ...v, color: c }))}
+              label={t('color')}
+              customLabel={t('moreColors')}
+            />
           </div>
         </div>
       )}

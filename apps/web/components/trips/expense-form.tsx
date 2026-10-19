@@ -22,9 +22,11 @@ import { Field, Input, Select, Textarea } from '@/components/ui/field'
 import { ApiError } from '@/lib/api-error'
 import { cn } from '@/lib/cn'
 import { goBack } from '@/lib/history'
-import { MODE_PRESETS } from '@/lib/lines'
+import { type Country, countryOfMode, countryOfZone, modesFor } from '@/lib/lines'
+import { awayZone } from '@/lib/time-zones'
 import { fmt, useExpenseMutations } from '@/lib/expenses'
 import { tripDays } from '@/lib/trip-dates'
+import { CountryChips } from './country-chips'
 import { useFormat } from '@/lib/use-format'
 
 const tryParse = (value: string, currency: string) => {
@@ -92,6 +94,17 @@ export function ExpenseForm({
   )
   const [day, setDay] = useState(expense?.dayDate ?? defaultDay)
   const [itemId, setItemId] = useState(expense?.itemId ?? defaultItemId ?? '')
+  // Transport kinds follow the country: the linked place's, else where the trip goes.
+  const [pickedCountry, setPickedCountry] = useState<Country | undefined>(
+    countryOfMode(expense?.subcategory ?? defaultSubcategory),
+  )
+  const country =
+    pickedCountry ??
+    countryOfZone(
+      items.find((i) => i.id === itemId)?.timeZone ??
+        awayZone(items, trip.homeTimeZone) ??
+        trip.homeTimeZone,
+    )
   const [participants, setParticipants] = useState<string[]>(
     expense?.splitMode === 'equal'
       ? expense.shares.map((s) => s.userId)
@@ -412,25 +425,36 @@ export function ExpenseForm({
         </div>
         {category === 'transport' && (
           <div className="mt-3">
-            <p className="mb-1.5 text-sm text-muted-foreground">{t('lines.how')}</p>
+            <p className="mb-1.5 text-sm text-muted-foreground">{t('lines.country')}</p>
+            <CountryChips
+              value={country}
+              onChange={(c) => {
+                setPickedCountry(c)
+                const own = countryOfMode(subcategory)
+                if (own && own !== c) setSubcategory(null)
+              }}
+            />
+            <p className="mt-3 mb-1.5 text-sm text-muted-foreground">{t('lines.how')}</p>
             <div className="flex flex-wrap gap-2">
-              {MODE_PRESETS.filter((m) => m.mode && m.mode !== 'walk').map((m) => (
-                <button
-                  key={m.line}
-                  type="button"
-                  aria-pressed={subcategory === m.mode}
-                  onClick={() => setSubcategory(subcategory === m.mode ? null : (m.mode ?? null))}
-                  className={cn(
-                    'inline-flex min-h-10 items-center gap-1.5 rounded-full border px-3 text-sm',
-                    subcategory === m.mode
-                      ? 'border-foreground bg-foreground text-background'
-                      : 'bg-card',
-                  )}
-                >
-                  <span aria-hidden>{m.emoji}</span>
-                  {t(`lines.${m.label}`)}
-                </button>
-              ))}
+              {modesFor(country)
+                .filter((m) => m.mode && m.mode !== 'walk')
+                .map((m) => (
+                  <button
+                    key={m.line}
+                    type="button"
+                    aria-pressed={subcategory === m.mode}
+                    onClick={() => setSubcategory(subcategory === m.mode ? null : (m.mode ?? null))}
+                    className={cn(
+                      'inline-flex min-h-10 items-center gap-1.5 rounded-full border px-3 text-sm',
+                      subcategory === m.mode
+                        ? 'border-foreground bg-foreground text-background'
+                        : 'bg-card',
+                    )}
+                  >
+                    <span aria-hidden>{m.emoji}</span>
+                    {t(`lines.${m.label}`)}
+                  </button>
+                ))}
             </div>
           </div>
         )}

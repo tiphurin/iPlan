@@ -6,7 +6,9 @@ import { getLocale, getTranslations } from 'next-intl/server'
 import { PrintBar } from '@/components/print-button'
 import { loadTrip } from '@/lib/load-trip'
 import { fmtServer } from '@/lib/money-format'
+import { DayBars } from '@/components/charts/day-bars'
 import { CATEGORY_COLORS, Donut } from '@/components/charts/donut'
+import { dayBars } from '@/lib/expense-charts'
 import { getMe, serverApi } from '@/lib/server-api'
 import { tripDays } from '@/lib/trip-dates'
 import { zoneCity } from '@/lib/time-zones'
@@ -118,36 +120,25 @@ export default async function PrintTripPage({ params }: { params: Promise<{ trip
               />
             )}
             <div className="space-y-1.5">
-              <p className="font-semibold">{t('expenses.byDay')}</p>
-              {summary.byDay.map((d) => {
-                const peak = Math.max(
-                  1,
-                  ...summary.byDay.map((x) =>
-                    Math.max(Number(x.spentMinor), Number(x.budgetMinor ?? 0)),
-                  ),
-                )
-                const over = d.budgetMinor !== null && BigInt(d.spentMinor) > BigInt(d.budgetMinor)
-                return (
-                  <div key={d.dayDate}>
-                    <div className="flex justify-between text-[11px]">
-                      <span>{d.dayDate.slice(5)}</span>
-                      <span>
-                        {fmtServer(d.spentMinor, base)}
-                        {d.budgetMinor !== null && ` / ${fmtServer(d.budgetMinor, base)}`}
-                      </span>
-                    </div>
-                    <div className="h-2 rounded bg-[#eee]">
-                      <div
-                        className="h-full rounded"
-                        style={{
-                          width: `${(Number(d.spentMinor) / peak) * 100}%`,
-                          backgroundColor: over ? '#d6453d' : '#00a84d',
-                        }}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
+              <p className="font-semibold">{t('expenses.charts.daily')}</p>
+              <DayBars
+                static
+                bars={dayBars(summary.byDay).map((b) => ({
+                  ...b,
+                  detail: `${formatDayLabel(b.key, { locale })} · ${fmtServer(String(b.spent), base)}${b.over ? ` · ${t('expenses.overBy', { amount: fmtServer(String(b.spent - (b.budget ?? 0)), base) })}` : ''}`,
+                }))}
+                labels={{
+                  title: t('expenses.charts.daily'),
+                  spent: t('expenses.charts.spent'),
+                  budget: trip.dailyBudgetMinor
+                    ? t('expenses.charts.budgetLine', {
+                        amount: fmtServer(trip.dailyBudgetMinor, base),
+                      })
+                    : null,
+                  over: t('expenses.charts.over'),
+                  hint: '',
+                }}
+              />
             </div>
           </div>
           {summary.transfers.map((tr) => (

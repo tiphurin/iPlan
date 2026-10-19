@@ -48,4 +48,18 @@ describe('places', () => {
     }) as unknown as typeof fetch)
     expect(await broken.search('gyeong')).toEqual([])
   })
+
+  it('asks only for railway stations when searching a start or end station', async () => {
+    const urls: string[] = []
+    const spy = (async (url: string) => {
+      urls.push(url)
+      return new Response(JSON.stringify({ features: [feature] }))
+    }) as unknown as typeof fetch
+    const service = new PlacesService(spy)
+    await service.search('siam', { lat: 13.74, lng: 100.53 }, 'station')
+    await service.search('siam')
+    expect(urls[0]).toContain('osm_tag=railway%3Astation')
+    expect(urls[0]).toContain('lat=13.74')
+    expect(urls[1]).not.toContain('osm_tag')
+  })
 })

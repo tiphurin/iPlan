@@ -20,3 +20,22 @@ export function googleCalendarUrl(
   if (item.details.address) params.set('location', item.details.address)
   return `https://calendar.google.com/calendar/render?${params.toString()}`
 }
+
+/**
+ * Calendar apps that sync through iCloud or Google fetch the feed from the
+ * internet, so a link to this computer (localhost, a Wi-Fi address, plain http)
+ * can't be subscribed there until the app is deployed.
+ */
+export function isPrivateFeed(url: string): boolean {
+  try {
+    const { protocol, hostname } = new URL(url)
+    return (
+      protocol !== 'https:' ||
+      hostname === 'localhost' ||
+      hostname.endsWith('.local') ||
+      /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(hostname)
+    )
+  } catch {
+    return true
+  }
+}

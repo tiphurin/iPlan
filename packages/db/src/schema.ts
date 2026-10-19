@@ -243,6 +243,8 @@ export const trip = pgTable('trip', {
   fxRates: jsonb('fx_rates').$type<Record<string, string>>().notNull().default({}),
   /** Planned spending per day in base-currency minor units. */
   dailyBudgetMinor: bigint('daily_budget_minor', { mode: 'bigint' }),
+  /** Cover colour (hex from the shared palette); null picks one from the trip id. */
+  color: text('color'),
   createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
   createdAt,
   updatedAt,

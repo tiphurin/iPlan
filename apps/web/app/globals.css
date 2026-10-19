@@ -13,13 +13,14 @@
 }
 
 :root {
-  --background: #f5f6f8;
-  --foreground: #14171d;
+  /* Light: white page, hairline-bordered surfaces, colour only where it means something. */
+  --background: #ffffff;
+  --foreground: #111418;
   --card: #ffffff;
-  --muted: #eef0f4;
-  --muted-foreground: #5e6572;
-  --faint: #979ea9;
-  --border: #e3e6eb;
+  --muted: #f3f4f6;
+  --muted-foreground: #626975;
+  --faint: #9aa1ab;
+  --border: #e9ebef;
   --primary: #00873e;
   --primary-foreground: #ffffff;
   --success: #0b8a45;
@@ -34,9 +35,9 @@
   --lw: #9aa3ae;
   --lc: #4a5563;
   --hero-ink: #1f2a37;
-  /* Cards float on a soft shadow instead of a hard outline. */
-  --card-edge: rgba(20, 23, 29, 0.04);
-  --card-shadow: 0 1px 2px rgba(20, 23, 29, 0.04), 0 4px 14px rgba(20, 23, 29, 0.05);
+  /* Flat cards: a hairline, no drop shadow. */
+  --card-edge: #e9ebef;
+  --card-shadow: none;
   color-scheme: light;
 }
 
@@ -153,7 +154,7 @@
   }
 }
 
-/* Cards and grouped lists: soft shadow in light mode, hairline in dark mode. */
+/* Cards and grouped lists: one hairline, no shadow, in both modes. */
 .rounded-2xl.bg-card,
 .rounded-hero.bg-card {
   border-color: var(--card-edge);
@@ -169,6 +170,23 @@ main:has([data-back-link]) [data-header-lang] {
   font-family: var(--font-display);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+
+/* Selected segment: a raised white pill on the grey track (iOS style). */
+@utility seg-on {
+  background-color: var(--card);
+  color: var(--foreground);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.06),
+    0 1px 6px rgb(0 0 0 / 0.04);
+}
+
+/* Selected chip: tinted with the brand colour instead of a solid black pill. */
+@utility chip-on {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
+  font-weight: 600;
 }
 
 @utility scrollbar-none {

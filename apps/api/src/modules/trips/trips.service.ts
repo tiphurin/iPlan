@@ -81,6 +81,7 @@ export class TripsService implements TripAccess {
       endDate: input.endDate,
       homeTimeZone: input.homeTimeZone,
       baseCurrency: input.baseCurrency,
+      color: input.color ?? null,
       createdBy: actor.id,
     }
     checkTripFields(values)
@@ -103,6 +104,7 @@ export class TripsService implements TripAccess {
     if (input.startDate !== undefined) changes.startDate = input.startDate
     if (input.endDate !== undefined) changes.endDate = input.endDate
     if (input.homeTimeZone !== undefined) changes.homeTimeZone = input.homeTimeZone
+    if (input.color !== undefined) changes.color = input.color
     if (input.baseCurrency !== undefined && input.baseCurrency !== trip.baseCurrency) {
       changes.baseCurrency = input.baseCurrency
     }

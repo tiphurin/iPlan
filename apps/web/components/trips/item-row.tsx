@@ -5,6 +5,7 @@ import { Check } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/cn'
 import { KIND_STYLE } from '@/lib/item-kinds'
+import { lineBadge } from '@/lib/lines'
 import { zoneCity } from '@/lib/time-zones'
 import { useFormat } from '@/lib/use-format'
 
@@ -60,7 +61,12 @@ export function ItemRow({
               className="rounded-full px-2 py-0.5 font-semibold text-white"
               style={{ backgroundColor: item.details.lineColor ?? '#64748b' }}
             >
-              {item.details.line}
+              {lineBadge(item.details.line)}
+            </span>
+          )}
+          {item.kind === 'move' && (item.details.from || item.details.to) && (
+            <span>
+              {item.details.from || '?'} → {item.details.to || '?'}
             </span>
           )}
           {item.details.flightNumber && <span>{item.details.flightNumber}</span>}

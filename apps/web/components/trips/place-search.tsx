@@ -88,8 +88,9 @@ export function PlaceSearch({
       {coords && <p className="px-1 text-xs text-success">{t('pinned')}</p>}
       {open && query.length >= 2 && (data?.length ?? 0) > 0 && (
         <ul className="divide-y overflow-hidden rounded-2xl border bg-card">
-          {data?.map((place) => (
-            <li key={`${place.lat},${place.lng}`}>
+          {/* Two places can share a point (a mall and a shop inside it), so the key adds the index. */}
+          {data?.map((place, i) => (
+            <li key={`${i}:${place.lat},${place.lng}`}>
               <button
                 type="button"
                 onClick={() => {

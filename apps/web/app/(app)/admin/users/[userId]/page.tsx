@@ -107,7 +107,7 @@ export default async function AdminUserDataPage({
                 {t('features.finance')} · {formatMonth(month, { locale: locale as Locale })}
               </SectionTitle>
               <Hero tone="ink" decor={false}>
-                <p className="text-sm opacity-90">{t('finance.balance')}</p>
+                <p className="text-sm text-muted-foreground">{t('finance.balance')}</p>
                 <p className="my-1 font-display text-[32px] leading-none font-bold">
                   {fmtServer(money.summary.balanceMinor)}
                 </p>

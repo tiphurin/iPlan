@@ -9,7 +9,7 @@ import { BackLink } from '@/components/back-link'
 import { Button } from '@/components/ui/button'
 import { Hero } from '@/components/ui/card'
 import { fmt } from '@/lib/expenses'
-import { useLedgerMutations } from '@/lib/ledgers'
+import { entryMonth, useLedgerMutations, walletMonthHref } from '@/lib/ledgers'
 import { useFormat } from '@/lib/use-format'
 
 /** A recorded pay-back; it can only be deleted (then the debt comes back). */
@@ -26,12 +26,16 @@ export function SettlementView({
   const f = useFormat()
   const router = useRouter()
   const m = useLedgerMutations(ledger.id)
+  const back = walletMonthHref(
+    ledger.id,
+    entryMonth(entry, new Map(ledger.entries.map((e) => [e.id, e]))),
+  ) as Route
   const nameOf = (id: string) =>
     id === meId ? t('shared.you') : (ledger.members.find((x) => x.userId === id)?.name ?? '—')
   return (
     <>
       <div className="px-4 pt-[max(0.5rem,env(safe-area-inset-top))] md:pt-6">
-        <BackLink href={`/shared/${ledger.id}` as Route} label={ledger.name} />
+        <BackLink history href={back} label={ledger.name} />
       </div>
       <div className="space-y-4 px-4 md:max-w-xl">
         <Hero tone="green">
@@ -53,7 +57,7 @@ export function SettlementView({
           onClick={async () => {
             if (!window.confirm(t('shared.confirmUndoSettle'))) return
             await m.deleteEntry.mutateAsync(entry.id)
-            router.replace(`/shared/${ledger.id}` as Route)
+            router.replace(back)
             router.refresh()
           }}
         >

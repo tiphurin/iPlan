@@ -315,7 +315,13 @@ export function ItemForm({
       )}
 
       {kind === 'move' && (
-        <LinePicker line={item?.details.line} color={item?.details.lineColor} timeZone={zone} />
+        <LinePicker
+          line={item?.details.line}
+          color={item?.details.lineColor}
+          from={item?.kind === 'move' ? item.details.from : undefined}
+          to={item?.kind === 'move' ? item.details.to : undefined}
+          timeZone={zone}
+        />
       )}
 
       {kind === 'place' && (

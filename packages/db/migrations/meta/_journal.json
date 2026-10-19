@@ -99,6 +99,13 @@
       "when": 1792417263567,
       "tag": "0013_user_features",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792422968332,
+      "tag": "0014_trip_color",
+      "breakpoints": true
     }
   ]
 }

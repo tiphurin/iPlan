@@ -109,7 +109,7 @@ export function MonthCalendar({
                       className={cn(
                         'relative flex h-12 w-full flex-col items-center justify-center rounded-xl text-[15px] tabular-nums transition-colors',
                         !enabled && 'text-faint',
-                        isSelected && 'bg-foreground font-semibold text-background',
+                        isSelected && 'bg-primary font-semibold text-primary-foreground',
                         !isSelected && date === today && 'font-bold text-primary',
                       )}
                       style={

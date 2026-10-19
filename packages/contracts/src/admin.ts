@@ -141,6 +141,7 @@ export const AdminTripDto = z.object({
   destination: z.string().nullable(),
   startDate: z.iso.date(),
   endDate: z.iso.date(),
+  color: z.string().nullable(),
   ownerName: z.string().nullable(),
   memberCount: z.number().int(),
 })

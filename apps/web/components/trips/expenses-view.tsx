@@ -2,12 +2,25 @@
 
 import type { ExpenseDto, ExpenseSummaryDto, TripDetailDto } from '@iplan/contracts'
 import { money, toDecimalString } from '@iplan/core'
-import { Download, FileSpreadsheet, FileText, Settings2, X } from 'lucide-react'
+import {
+  ArrowRight,
+  CircleCheck,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  Landmark,
+  Settings2,
+  X,
+} from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { type FormEvent, useState } from 'react'
+import { Avatar } from '@/components/avatar'
+import { BalanceBars } from '@/components/charts/balance-bars'
+import { DayBars } from '@/components/charts/day-bars'
 import { CATEGORY_COLORS, Donut } from '@/components/charts/donut'
+import { PersonBars } from '@/components/charts/person-bars'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, SectionTitle } from '@/components/ui/card'
 import { Segmented } from '@/components/ui/chip'
@@ -15,6 +28,7 @@ import { Field, Input } from '@/components/ui/field'
 import { Fab } from '@/components/ui/fab'
 import { cn } from '@/lib/cn'
 import { exportTripExcel } from '@/lib/excel'
+import { balanceRows, dayBars, personBars, settleHeadline, viewerShare } from '@/lib/expense-charts'
 import { fmt, useExpenseMutations, useExpenseSummary, useExpenses } from '@/lib/expenses'
 import { useTrip } from '@/lib/trips'
 import { useFormat } from '@/lib/use-format'
@@ -23,10 +37,13 @@ export function ExpensesView({
   initialTrip,
   initialExpenses,
   initialSummary,
+  meId,
 }: {
   initialTrip: TripDetailDto
   initialExpenses: ExpenseDto[]
   initialSummary: ExpenseSummaryDto
+  /** The viewer, to show their own share of the total. */
+  meId: string | null
 }) {
   const t = useTranslations()
   const f = useFormat()
@@ -46,6 +63,26 @@ export function ExpensesView({
   )
   const days = [...new Set(expenses.map((e) => e.dayDate))].sort()
   const [tab, setTab] = useState<'list' | 'settle' | 'budget'>('list')
+  const myShare = viewerShare(summary.parties, meId)
+  const partyName = (id: string, name: string) => (id === 'pool' ? t('expenses.form.pool') : name)
+  /** Member photo, or a bank icon for the shared pool. */
+  const partyIcon = (id: string, name: string, size: number) =>
+    id === 'pool' ? (
+      <span
+        aria-hidden
+        className="flex items-center justify-center rounded-full bg-primary/10 text-primary"
+        style={{ width: size, height: size }}
+      >
+        <Landmark className="size-[55%]" />
+      </span>
+    ) : (
+      <Avatar
+        name={name}
+        image={trip.members.find((m) => m.userId === id)?.image ?? null}
+        size={size}
+      />
+    )
+  const headline = settleHeadline(summary.transfers)
 
   function saveSettings(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -77,6 +114,11 @@ export function ExpensesView({
         <p className="text-4xl font-bold tracking-tight tabular-nums">
           {fmt(summary.totalMinor, base)}
         </p>
+        {myShare !== null && (
+          <p className="text-sm text-muted-foreground tabular-nums">
+            {t('expenses.yourShare', { amount: fmt(myShare, base) })}
+          </p>
+        )}
         <div className="mt-3 flex flex-wrap gap-2">
           <a
             href={`/api/trips/${trip.id}/expenses.csv`}
@@ -206,6 +248,81 @@ export function ExpensesView({
 
       {tab === 'list' && (
         <>
+          {expenses.length > 0 && (
+            <section aria-label={t('expenses.charts.label')}>
+              {/* Phones: a swipeable row of chart cards; md+: two columns. */}
+              <div className="-mx-4 flex snap-x items-start md:items-stretch snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 pb-1 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 [&>*]:w-[86%] [&>*]:shrink-0 [&>*]:snap-start md:[&>*]:w-auto">
+                <Card>
+                  <h3 className="mb-2 text-sm font-semibold">{t('expenses.charts.daily')}</h3>
+                  <DayBars
+                    bars={dayBars(summary.byDay).map((b) => ({
+                      ...b,
+                      detail: t(
+                        b.budget === null
+                          ? 'expenses.charts.dayDetail'
+                          : b.over
+                            ? 'expenses.charts.dayDetailOver'
+                            : 'expenses.charts.dayDetailLeft',
+                        {
+                          day: f.day(b.key),
+                          amount: fmt(BigInt(b.spent), base),
+                          diff: fmt(BigInt(Math.abs((b.budget ?? 0) - b.spent)), base),
+                        },
+                      ),
+                    }))}
+                    labels={{
+                      title: t('expenses.charts.daily'),
+                      spent: t('expenses.charts.spent'),
+                      budget: trip.dailyBudgetMinor
+                        ? t('expenses.charts.budgetLine', {
+                            amount: fmt(trip.dailyBudgetMinor, base),
+                          })
+                        : null,
+                      over: t('expenses.charts.over'),
+                      hint: t('expenses.charts.hint'),
+                    }}
+                  />
+                </Card>
+                {summary.byCategory.length > 0 && (
+                  <Card>
+                    <h3 className="mb-3 text-sm font-semibold">
+                      {t('expenses.charts.categories')}
+                    </h3>
+                    <Donut
+                      center={t('expenses.byCategory')}
+                      slices={summary.byCategory.map((c) => ({
+                        key: c.category,
+                        label: `${t(`expenses.categories.${c.category}`)} · ${fmt(c.spentMinor, base)}`,
+                        value: Number(c.spentMinor),
+                        color: CATEGORY_COLORS[c.category] ?? '#94a3b8',
+                      }))}
+                    />
+                  </Card>
+                )}
+                <Card className="md:col-span-2">
+                  <h3 className="mb-3 text-sm font-semibold">{t('expenses.charts.people')}</h3>
+                  <PersonBars
+                    people={personBars(summary.parties).map((p) => ({
+                      ...p,
+                      name: partyName(p.id, p.name),
+                      paidText: fmt(BigInt(p.paid), base),
+                      shareText: fmt(BigInt(p.share), base),
+                      netText:
+                        p.net > 0
+                          ? t('expenses.charts.getsBack', { amount: fmt(BigInt(p.net), base) })
+                          : p.net < 0
+                            ? t('expenses.charts.owes', { amount: fmt(BigInt(-p.net), base) })
+                            : t('expenses.charts.even'),
+                    }))}
+                    labels={{
+                      paid: t('expenses.charts.paid'),
+                      share: t('expenses.charts.share'),
+                    }}
+                  />
+                </Card>
+              </div>
+            </section>
+          )}
           <section className="space-y-4">
             {expenses.length === 0 && (
               <Card className="text-muted-foreground">{t('expenses.empty')}</Card>
@@ -255,61 +372,100 @@ export function ExpensesView({
 
       {tab === 'settle' && (
         <>
-          <section className="space-y-2">
-            <p className="text-sm text-muted-foreground">{t('expenses.settleHint')}</p>
-            {summary.transfers.length === 0 ? (
-              <Card className="text-center text-success">✓ {t('expenses.settled')}</Card>
-            ) : (
-              summary.transfers.map((tr) => (
-                <Card key={`${tr.from}-${tr.to}`} className="flex items-center gap-3">
-                  <span className="min-w-0 flex-1 text-[15px]">
-                    <b>{tr.from === 'pool' ? t('expenses.form.pool') : tr.fromName}</b>{' '}
-                    {t('expenses.paysTo')}{' '}
-                    <b>{tr.to === 'pool' ? t('expenses.form.pool') : tr.toName}</b>
-                  </span>
-                  <span className="num text-lg">{fmt(tr.amountMinor, base)}</span>
-                </Card>
-              ))
+          <Card
+            className={cn(
+              'flex items-center gap-3',
+              headline.kind === 'settled' && 'border-success/40 bg-success/5',
             )}
-          </section>
-          <section>
-            <SectionTitle>{t('expenses.people')}</SectionTitle>
-            <p className="mb-2 text-sm text-muted-foreground">{t('expenses.peopleHint')}</p>
-            <div className="overflow-hidden rounded-2xl border bg-card">
-              <table className="w-full text-[13px] tabular-nums [&_td:not(:first-child)]:whitespace-nowrap">
-                <thead className="bg-muted/60 text-xs text-muted-foreground">
-                  <tr>
-                    <th className="px-3 py-2 text-left font-medium" />
-                    <th className="px-2 py-2 text-right font-medium">{t('expenses.paid')}</th>
-                    <th className="px-2 py-2 text-right font-medium">{t('expenses.share')}</th>
-                    <th className="px-3 py-2 text-right font-medium">{t('expenses.net')}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {summary.parties.map((p) => {
-                    const net = BigInt(p.netMinor)
-                    return (
-                      <tr key={p.id}>
-                        <td className="px-3 py-2 font-medium">
-                          {p.id === 'pool' ? t('expenses.form.pool') : p.name}
-                        </td>
-                        <td className="px-2 py-2 text-right">{fmt(p.paidMinor, base)}</td>
-                        <td className="px-2 py-2 text-right">{fmt(p.shareMinor, base)}</td>
-                        <td
-                          className={cn(
-                            'px-3 py-2 text-right font-semibold',
-                            net > 0n ? 'text-success' : net < 0n ? 'text-danger' : '',
-                          )}
-                        >
-                          {net > 0n ? '+' : ''}
-                          {fmt(p.netMinor, base)}
-                        </td>
-                      </tr>
-                    )
+          >
+            {headline.kind === 'settled' ? (
+              <>
+                <CircleCheck aria-hidden className="size-8 shrink-0 text-success" />
+                <p className="text-lg font-semibold">{t('expenses.settled')}</p>
+              </>
+            ) : headline.kind === 'single' ? (
+              <>
+                <span className="flex shrink-0 items-center">
+                  {partyIcon(headline.transfer.from, headline.transfer.fromName, 34)}
+                  <ArrowRight aria-hidden className="mx-0.5 size-4 text-faint" />
+                  {partyIcon(headline.transfer.to, headline.transfer.toName, 34)}
+                </span>
+                <p className="min-w-0 flex-1 text-lg font-semibold">
+                  {t('expenses.settleView.one', {
+                    from: partyName(headline.transfer.from, headline.transfer.fromName),
+                    to: partyName(headline.transfer.to, headline.transfer.toName),
+                    amount: fmt(headline.transfer.amountMinor, base),
                   })}
-                </tbody>
-              </table>
-            </div>
+                </p>
+              </>
+            ) : (
+              <p className="text-lg font-semibold">
+                {t('expenses.settleView.many', {
+                  count: headline.count,
+                  amount: fmt(headline.totalMinor, base),
+                })}
+              </p>
+            )}
+          </Card>
+
+          {/* One transfer is already spelled out in the headline. */}
+          {summary.transfers.length > 1 && (
+            <section>
+              <SectionTitle>{t('expenses.settleView.transfers')}</SectionTitle>
+              <ul className="divide-y overflow-hidden rounded-2xl border bg-card">
+                {summary.transfers.map((tr) => {
+                  const from = partyName(tr.from, tr.fromName)
+                  const to = partyName(tr.to, tr.toName)
+                  return (
+                    <li key={`${tr.from}-${tr.to}`} className="flex items-center gap-3 px-4 py-3">
+                      <span className="flex shrink-0 items-center">
+                        {partyIcon(tr.from, tr.fromName, 34)}
+                        <ArrowRight aria-hidden className="mx-0.5 size-4 text-faint" />
+                        {partyIcon(tr.to, tr.toName, 34)}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm text-muted-foreground">
+                          {from} → {to}
+                        </span>
+                        <span className="num block text-lg font-semibold">
+                          {fmt(tr.amountMinor, base)}
+                        </span>
+                      </span>
+                    </li>
+                  )
+                })}
+              </ul>
+            </section>
+          )}
+
+          <section>
+            <SectionTitle>{t('expenses.settleView.balances')}</SectionTitle>
+            <p className="mb-2 text-sm text-muted-foreground">{t('expenses.settleHint')}</p>
+            <Card>
+              <BalanceBars
+                rows={balanceRows(summary.parties).map((r) => ({
+                  ...r,
+                  name: partyName(r.id, r.name),
+                  icon: partyIcon(r.id, r.name, 30),
+                  netText:
+                    r.net > 0
+                      ? t('expenses.charts.getsBack', { amount: fmt(BigInt(r.net), base) })
+                      : r.net < 0
+                        ? t('expenses.charts.owes', { amount: fmt(BigInt(-r.net), base) })
+                        : t('expenses.charts.even'),
+                  detail: r.isPool
+                    ? t('expenses.settleView.poolDetail', { paid: fmt(BigInt(r.paid), base) })
+                    : t('expenses.settleView.detail', {
+                        paid: fmt(BigInt(r.paid), base),
+                        share: fmt(BigInt(r.share), base),
+                      }),
+                }))}
+                labels={{
+                  owes: t('expenses.settleView.owes'),
+                  getsBack: t('expenses.settleView.getsBack'),
+                }}
+              />
+            </Card>
           </section>
         </>
       )}
@@ -326,6 +482,11 @@ export function ExpensesView({
           </Card>
           <section>
             <SectionTitle>{t('expenses.byDay')}</SectionTitle>
+            <p className="mb-2 text-sm text-muted-foreground">
+              {trip.dailyBudgetMinor
+                ? t('expenses.budgetExplain', { amount: fmt(trip.dailyBudgetMinor, base) })
+                : t('expenses.budgetExplainNone')}
+            </p>
             <Card className="space-y-3">
               {summary.byDay.map((d) => {
                 const spent = Number(d.spentMinor)
@@ -375,23 +536,6 @@ export function ExpensesView({
               })}
             </Card>
           </section>
-
-          {summary.byCategory.length > 0 && (
-            <section>
-              <SectionTitle>{t('expenses.byCategory')}</SectionTitle>
-              <Card>
-                <Donut
-                  center={t('expenses.byCategory')}
-                  slices={summary.byCategory.map((c) => ({
-                    key: c.category,
-                    label: `${t(`expenses.categories.${c.category}`)} · ${fmt(c.spentMinor, base)}`,
-                    value: Number(c.spentMinor),
-                    color: CATEGORY_COLORS[c.category] ?? '#94a3b8',
-                  }))}
-                />
-              </Card>
-            </section>
-          )}
         </>
       )}
 

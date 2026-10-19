@@ -42,7 +42,7 @@ export function DisplaySwitches({
   const option = (on: boolean) =>
     cn(
       'flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm transition-colors',
-      on ? 'bg-foreground font-semibold text-background' : 'text-muted-foreground',
+      on ? 'seg-on font-semibold' : 'text-muted-foreground',
     )
 
   return (

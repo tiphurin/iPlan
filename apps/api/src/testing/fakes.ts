@@ -152,6 +152,7 @@ export class InMemoryTrips implements TripsRepository {
       baseCurrency: values.baseCurrency ?? 'THB',
       fxRates: values.fxRates ?? {},
       dailyBudgetMinor: values.dailyBudgetMinor ?? null,
+      color: values.color ?? null,
       createdBy: values.createdBy ?? null,
       createdAt: now,
       updatedAt: now,

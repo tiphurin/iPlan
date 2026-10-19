@@ -119,11 +119,11 @@ export function MoneyView({ month, initial }: { month: string; initial: MonthDto
       <div className="space-y-5 md:grid md:grid-cols-2 md:items-start md:gap-6 md:space-y-0">
         <div className="space-y-5">
           <Hero tone="ink">
-            <p className="text-sm opacity-90">{t('balance')}</p>
+            <p className="text-sm text-muted-foreground">{t('balance')}</p>
             <p
               className={cn(
                 'my-1 font-display text-[36px] leading-none font-bold tabular-nums',
-                BigInt(s.balanceMinor) < 0n && 'text-[#f06a61]',
+                BigInt(s.balanceMinor) < 0n && 'text-danger',
               )}
             >
               {fmt(s.balanceMinor, THB)}
@@ -131,16 +131,16 @@ export function MoneyView({ month, initial }: { month: string; initial: MonthDto
             <div className="mt-4 space-y-3">
               {(
                 [
-                  ['totalIncome', income, s.totalIncomeMinor, '#22c46a'],
-                  ['totalExpenses', spending, s.totalExpensesMinor, '#f06a61'],
+                  ['totalIncome', income, s.totalIncomeMinor, 'var(--success)'],
+                  ['totalExpenses', spending, s.totalExpensesMinor, 'var(--danger)'],
                 ] as const
               ).map(([key, value, minor, color]) => (
                 <div key={key}>
                   <div className="mb-1 flex justify-between text-sm">
-                    <span className="opacity-90">{t(key)}</span>
+                    <span className="text-muted-foreground">{t(key)}</span>
                     <span className="num">{fmt(minor, THB)}</span>
                   </div>
-                  <div className="h-[9px] rounded-full bg-white/15">
+                  <div className="h-[9px] rounded-full bg-muted">
                     <div
                       className="h-full rounded-full"
                       style={{ width: `${(value / scale) * 100}%`, backgroundColor: color }}
@@ -149,7 +149,7 @@ export function MoneyView({ month, initial }: { month: string; initial: MonthDto
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-xs opacity-80">
+            <p className="mt-3 text-xs text-muted-foreground">
               {t('gross')} {fmt(s.grossIncomeMinor, THB)} − {t('deductions')}{' '}
               {fmt(s.deductionsMinor, THB)} = {t('net')} {fmt(s.netIncomeMinor, THB)}
             </p>

@@ -2,12 +2,13 @@
 
 import { CalendarFeedDto } from '@iplan/contracts'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { CalendarPlus, Copy, Download, RefreshCw } from 'lucide-react'
+import { CalendarPlus, Copy, Download, RefreshCw, TriangleAlert } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { apiFetch } from '@/lib/api-client'
+import { isPrivateFeed } from '@/lib/calendar'
 import { cn } from '@/lib/cn'
 
 /** "Add to calendar": subscribe on iPhone or Google so later plan changes sync by themselves. */
@@ -46,6 +47,12 @@ export function CalendarSync({ tripId, className }: { tripId: string; className?
       </button>
       <Sheet open={open} onClose={() => setOpen(false)} title={t('title')}>
         <p className="mb-3 text-sm text-muted-foreground">{t('hint')}</p>
+        {data && isPrivateFeed(data.url) && (
+          <p className="mb-3 flex gap-2 rounded-xl bg-warning/12 px-3 py-2 text-sm text-warning">
+            <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
+            {t('localOnly')}
+          </p>
+        )}
         <div className="space-y-2">
           <a href={data?.webcalUrl} aria-disabled={!data} className={big}>
             <span className="flex size-9 items-center justify-center rounded-xl bg-[#ff3b30] font-display text-sm font-bold text-white">

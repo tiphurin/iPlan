@@ -34,6 +34,7 @@ import { Chip } from '@/components/ui/chip'
 import { MultiSelect } from '@/components/ui/multi-select'
 import { Avatar } from '@/components/avatar'
 import { FEATURES } from '@/features'
+import { effectiveFeatures, planAccess } from '@/lib/feature-access'
 import { Input, Select } from '@/components/ui/field'
 import { Progress } from '@/components/ui/progress'
 import { apiFetch } from '@/lib/api-client'
@@ -252,7 +253,7 @@ function Users({
               onApprove={(groupIds, features, circleIds) =>
                 update.mutate({ id: u.id, status: 'active', groupIds, features, circleIds })
               }
-              onFeatures={(features) => update.mutate({ id: u.id, features })}
+              onAccess={(access) => update.mutate({ id: u.id, ...access })}
               onGroups={(groupIds) => update.mutate({ id: u.id, groupIds })}
               onCircles={(circleIds) => update.mutate({ id: u.id, circleIds })}
               onRole={(role) => update.mutate({ id: u.id, role })}
@@ -275,7 +276,7 @@ function UserCard({
   busy,
   joined,
   onApprove,
-  onFeatures,
+  onAccess,
   onGroups,
   onCircles,
   onRole,
@@ -289,7 +290,8 @@ function UserCard({
   busy: boolean
   joined: string
   onApprove: (groupIds: string[], features: FeatureKey[], circleIds: string[]) => void
-  onFeatures: (features: FeatureKey[]) => void
+  /** Features and groups always change together so the two controls agree. */
+  onAccess: (access: { groupIds: string[]; features: FeatureKey[] }) => void
   onGroups: (groupIds: string[]) => void
   onCircles: (circleIds: string[]) => void
   onRole: (role: 'user' | 'admin') => void
@@ -334,7 +336,7 @@ function UserCard({
             {me && <span className="ml-1 text-xs text-muted-foreground">({t('admin.you')})</span>}
           </p>
           {u.role !== 'user' && (
-            <span className="mt-0.5 inline-block rounded-full bg-foreground px-2 py-px text-[11px] font-semibold text-background">
+            <span className="mt-0.5 inline-block rounded-full bg-muted px-2 py-px text-[11px] font-semibold text-foreground">
               {u.role === 'superadmin' ? t('admin.roleSuperadmin') : t('admin.roleAdmin')}
             </span>
           )}
@@ -357,12 +359,14 @@ function UserCard({
             label={t('admin.userFeatures')}
             placeholder={t('admin.noFeatures')}
             options={featureOptions}
-            value={pending ? pickedFeatures : u.features}
+            value={effectiveFeatures(selected, pending ? pickedFeatures : u.features, groups)}
             disabled={busy}
             onChange={(next) => {
-              const keys = next as FeatureKey[]
-              if (pending) setPickedFeatures(keys)
-              else onFeatures(keys)
+              const plan = planAccess(next as FeatureKey[], groups, selected)
+              if (pending) {
+                setPicked(plan.groupIds)
+                setPickedFeatures(plan.features)
+              } else onAccess(plan)
             }}
           />
         </div>

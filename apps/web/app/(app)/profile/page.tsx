@@ -45,7 +45,7 @@ export default async function ProfilePage() {
             <p className="truncate text-sm text-muted-foreground">{me.email}</p>
             <p className="mt-1 flex flex-wrap gap-1.5">
               {isAdminRole(me.role) && (
-                <span className="rounded-full bg-foreground px-2 py-0.5 text-xs font-semibold text-background">
+                <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-foreground">
                   {me.role === 'superadmin' ? t('admin.roleSuperadmin') : t('admin.roleAdmin')}
                 </span>
               )}

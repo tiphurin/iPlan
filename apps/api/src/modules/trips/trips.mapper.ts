@@ -12,6 +12,7 @@ export function toTripDto({ trip, role, memberCount }: TripWithRole): TripDto {
     baseCurrency: trip.baseCurrency,
     fxRates: trip.fxRates,
     dailyBudgetMinor: trip.dailyBudgetMinor?.toString() ?? null,
+    color: trip.color,
     role,
     memberCount,
   }

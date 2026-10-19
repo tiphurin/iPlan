@@ -188,3 +188,5 @@ Vercel builds the Next.js app (which includes the API), Neon provides Postgres, 
 ## License
 
 [MIT](LICENSE)
+
+Place search (Photon) and the rail station lists in `apps/web/lib/stations.json` use data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, available under the ODbL. Rebuild the station lists with `node scripts/fetch-stations.mjs`.

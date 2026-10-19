@@ -28,7 +28,12 @@ import { DateField } from '@/components/ui/date-fields'
 import { Field, Input, Textarea } from '@/components/ui/field'
 import { ApiError } from '@/lib/api-error'
 import { fmt } from '@/lib/expenses'
-import { LEDGER_CATEGORY_COLORS, useLedgerMutations } from '@/lib/ledgers'
+import {
+  LEDGER_CATEGORY_COLORS,
+  useLedgerMutations,
+  validDateKey,
+  walletMonthHref,
+} from '@/lib/ledgers'
 
 type Mode = SplitInput['mode']
 const PERCENT_PRESETS = [50, 60, 70, 75] as const
@@ -45,14 +50,18 @@ export function EntryForm({
   ledger,
   meId,
   entry,
+  defaultDate,
 }: {
   ledger: LedgerDetailDto
   meId: string
   entry?: LedgerEntryDto
+  /** Pre-filled date for a new cost ("?date=", from the month being viewed); checked here. */
+  defaultDate?: string | undefined
 }) {
   const t = useTranslations()
   const router = useRouter()
   const m = useLedgerMutations(ledger.id)
+  const presetDate = validDateKey(defaultDate)
   const cur = ledger.currency
   const members = ledger.members
   const ids = members.map((x) => x.userId)
@@ -62,7 +71,7 @@ export function EntryForm({
   const [amount, setAmount] = useState(entry ? major(BigInt(entry.amountMinor), cur) : '')
   const [title, setTitle] = useState(entry?.title ?? '')
   const [category, setCategory] = useState<LedgerCategory>(entry?.category ?? 'food')
-  const [date, setDate] = useState(entry?.date ?? todayKey('Asia/Bangkok'))
+  const [date, setDate] = useState(entry?.date ?? presetDate ?? todayKey('Asia/Bangkok'))
   const [paidBy, setPaidBy] = useState(entry?.paidBy ?? meId)
   const [mode, setMode] = useState<Mode>(entry?.splitMode ?? 'equal')
   const [participants, setParticipants] = useState<string[]>(
@@ -193,7 +202,7 @@ export function EntryForm({
     try {
       if (entry) await m.updateEntry.mutateAsync({ id: entry.id, ...body })
       else await m.addEntry.mutateAsync(body)
-      router.replace(`/shared/${ledger.id}` as Route)
+      router.replace(walletMonthHref(ledger.id, date.slice(0, 7)) as Route)
       router.refresh()
     } catch (err) {
       if (err instanceof ApiError) {
@@ -206,7 +215,7 @@ export function EntryForm({
   async function onDelete() {
     if (!entry || !window.confirm(t('common.confirmDelete'))) return
     await m.deleteEntry.mutateAsync(entry.id)
-    router.replace(`/shared/${ledger.id}` as Route)
+    router.replace(walletMonthHref(ledger.id, entry.date.slice(0, 7)) as Route)
     router.refresh()
   }
 
@@ -216,7 +225,15 @@ export function EntryForm({
   return (
     <>
       <div className="px-4 pt-[max(0.5rem,env(safe-area-inset-top))] md:pt-6">
-        <BackLink href={`/shared/${ledger.id}` as Route} label={ledger.name} />
+        <BackLink
+          history
+          href={
+            (entry || presetDate
+              ? walletMonthHref(ledger.id, (entry?.date ?? presetDate ?? '').slice(0, 7))
+              : `/shared/${ledger.id}`) as Route
+          }
+          label={ledger.name}
+        />
       </div>
       <h1 className="px-4 pb-3 text-[28px] font-bold">
         {entry ? t('shared.editCost') : t('shared.addCost')}

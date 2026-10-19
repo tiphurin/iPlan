@@ -89,7 +89,7 @@ export function TripTopBar({
                 aria-current={view === key ? 'page' : undefined}
                 className={cn(
                   'flex min-h-10 items-center justify-center gap-1.5 rounded-full text-sm font-semibold',
-                  view === key ? 'bg-foreground text-background' : 'text-muted-foreground',
+                  view === key ? 'seg-on' : 'text-muted-foreground',
                 )}
               >
                 <Icon aria-hidden className="size-4" />

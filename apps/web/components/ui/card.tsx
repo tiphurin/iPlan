@@ -21,35 +21,62 @@ export function SectionTitle({
   )
 }
 
-/** Coloured feature card with a big number, like the prototype's hero. */
+/**
+ * Feature card with a big number. "soft" (default) is a plain surface with a thin
+ * tone-coloured accent; "solid" fills it with the tone, for live status like Today.
+ */
 export function Hero({
   tone = 'green',
+  variant = 'soft',
   decor = true,
   className,
   children,
   ...props
-}: HTMLAttributes<HTMLDivElement> & { tone?: HeroTone; decor?: boolean }) {
+}: HTMLAttributes<HTMLDivElement> & {
+  tone?: HeroTone
+  variant?: 'soft' | 'solid'
+  decor?: boolean
+}) {
+  const solid = variant === 'solid'
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-hero p-[18px] text-white',
-        HERO_TONES[tone],
+        'relative overflow-hidden rounded-hero p-[18px]',
+        solid ? ['text-white', HERO_TONES[tone]] : 'border bg-card text-foreground',
         className,
       )}
+      style={solid ? undefined : { borderColor: 'var(--card-edge)' }}
       {...props}
     >
-      {decor && (
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -top-9 -right-9 size-36 rounded-full border-[18px] border-white/18"
-        />
-      )}
+      {decor &&
+        (solid ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-9 -right-9 size-36 rounded-full border-[18px] border-white/18"
+          />
+        ) : (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-10 -right-10 size-32 rounded-full opacity-[0.07]"
+            style={{ backgroundColor: HERO_ACCENT[tone] }}
+          />
+        ))}
       <div className="relative">{children}</div>
     </div>
   )
 }
 
 export type HeroTone = 'green' | 'blue' | 'sky' | 'purple' | 'orange' | 'red' | 'ink'
+
+const HERO_ACCENT: Record<HeroTone, string> = {
+  green: '#00a84d',
+  blue: '#0052a4',
+  sky: '#0090d2',
+  purple: '#996cac',
+  orange: '#ef7c1c',
+  red: '#d6453d',
+  ink: 'var(--foreground)',
+}
 
 const HERO_TONES: Record<HeroTone, string> = {
   green: 'bg-[#00a84d]',

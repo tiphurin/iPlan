@@ -23,8 +23,8 @@ const search = createRoute({
 export function placesRoutes(service: PlacesService) {
   return createRouter().openapi(search, async (c) => {
     requireUser(c)
-    const { q, lat, lng } = c.req.valid('query')
+    const { q, lat, lng, kind } = c.req.valid('query')
     const near = lat !== undefined && lng !== undefined ? { lat, lng } : undefined
-    return c.json(await service.search(q, near), 200)
+    return c.json(await service.search(q, near, kind), 200)
   })
 }

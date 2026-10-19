@@ -3,7 +3,7 @@ import { type Locale, formatDateRange, todayKey } from '@iplan/i18n'
 import { Users } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { cn } from '@/lib/cn'
-import { tripColor, daysBetween } from '@/lib/trip-color'
+import { coverColor, daysBetween } from '@/lib/trip-color'
 import { tripPhase } from '@/lib/trip-dates'
 
 /** Coloured trip card like the prototype's place covers. Server component. */
@@ -28,7 +28,7 @@ export async function TripCover({
         phase === 'past' && 'opacity-75 grayscale-[35%]',
         className,
       )}
-      style={{ backgroundColor: tripColor(trip.id) }}
+      style={{ backgroundColor: coverColor(trip) }}
     >
       <span
         aria-hidden

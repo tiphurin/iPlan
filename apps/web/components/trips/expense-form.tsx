@@ -446,9 +446,7 @@ export function ExpenseForm({
                     onClick={() => setSubcategory(subcategory === m.mode ? null : (m.mode ?? null))}
                     className={cn(
                       'inline-flex min-h-10 items-center gap-1.5 rounded-full border px-3 text-sm',
-                      subcategory === m.mode
-                        ? 'border-foreground bg-foreground text-background'
-                        : 'bg-card',
+                      subcategory === m.mode ? 'chip-on' : 'bg-card',
                     )}
                   >
                     <span aria-hidden>{m.emoji}</span>

@@ -343,6 +343,37 @@ export const expenseShare = pgTable(
 )
 
 // ---------------------------------------------------------------------------
+// Attachments (slips, photos, PDFs)
+// ---------------------------------------------------------------------------
+
+export const attachmentKind = pgEnum('attachment_kind', ['slip', 'photo', 'file'])
+
+/** File metadata; bytes live in object storage under `storage_key` (never a public URL). */
+export const attachment = pgTable(
+  'attachment',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: text('owner_id').references(() => user.id, { onDelete: 'set null' }),
+    /** Trip the file belongs to, for permission checks; null for personal finance files. */
+    tripId: uuid('trip_id').references(() => trip.id, { onDelete: 'cascade' }),
+    entityType: text('entity_type').notNull(),
+    entityId: uuid('entity_id').notNull(),
+    kind: attachmentKind('kind').notNull(),
+    storageKey: text('storage_key').notNull().unique(),
+    thumbKey: text('thumb_key'),
+    contentType: text('content_type').notNull(),
+    sizeBytes: integer('size_bytes').notNull(),
+    width: integer('width'),
+    height: integer('height'),
+    createdAt,
+  },
+  (t) => [
+    index('attachment_entity_idx').on(t.entityType, t.entityId),
+    index('attachment_trip_idx').on(t.tripId),
+  ],
+)
+
+// ---------------------------------------------------------------------------
 // Audit
 // ---------------------------------------------------------------------------
 

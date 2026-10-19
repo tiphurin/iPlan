@@ -287,5 +287,16 @@
       "health": "Health",
       "other": "Other"
     }
+  },
+  "attachments": {
+    "title": "Slips & photos",
+    "add": "Attach slip or photo",
+    "uploading": "Uploading…",
+    "empty": "No files yet",
+    "open": "Open original",
+    "delete": "Delete file",
+    "close": "Close",
+    "pdf": "PDF",
+    "saveFirst": "Save first, then attach slips"
   }
 }

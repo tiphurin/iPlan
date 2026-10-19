@@ -3,6 +3,9 @@ import { type App, createApp } from './app'
 import { readEnv } from './env'
 import { authGateway, createAuth } from './infra/auth'
 import { devLogin } from './infra/dev-login'
+import { createStorage } from './infra/storage'
+import { DrizzleAttachmentsRepository } from './modules/attachments/attachments.repository'
+import { AttachmentsService } from './modules/attachments/attachments.service'
 import { DrizzleChecklistRepository } from './modules/checklist/checklist.repository'
 import { ChecklistService } from './modules/checklist/checklist.service'
 import { DrizzleExpensesRepository } from './modules/expenses/expenses.repository'
@@ -27,11 +30,13 @@ export function buildApp(env = readEnv()): App {
   const db = createDb(env.databaseUrl)
   const auth = createAuth(db, env)
   const audit = new AuditRepository(db)
+  const storage = createStorage(env)
   const tripRepo = new DrizzleTripsRepository(db)
   const trips = new TripsService(tripRepo, audit)
   return createApp({
     auth: authGateway(auth),
     ...(env.devLoginEnabled && { devLogin: (email) => devLogin(auth, email) }),
+    storage,
     services: {
       me: new MeService(new DrizzleMeRepository(db)),
       trips,
@@ -40,6 +45,12 @@ export function buildApp(env = readEnv()): App {
       checklist: new ChecklistService(new DrizzleChecklistRepository(db), trips, audit),
       infoCards: new InfoCardsService(new DrizzleInfoCardsRepository(db), trips, audit),
       expenses: new ExpensesService(new DrizzleExpensesRepository(db), trips, tripRepo, audit),
+      attachments: new AttachmentsService(
+        new DrizzleAttachmentsRepository(db),
+        storage,
+        trips,
+        audit,
+      ),
     },
   })
 }

@@ -1,3 +1,4 @@
+export * from './attachments'
 export * from './checklist'
 export * from './errors'
 export * from './expenses'

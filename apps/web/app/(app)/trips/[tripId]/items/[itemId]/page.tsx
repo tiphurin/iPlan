@@ -1,6 +1,7 @@
 import type { Route } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
+import { Attachments } from '@/components/attachments'
 import { BackLink } from '@/components/back-link'
 import { PageHeader } from '@/components/page-header'
 import { ItemDetail } from '@/components/trips/item-detail'
@@ -30,6 +31,9 @@ export default async function ItemPage({ params }: Props) {
         </div>
       )}
       <ItemDetail item={item} />
+      <div className="px-4 pb-4">
+        <Attachments entityType="trip_item" entityId={item.id} canEdit={canEdit} kind="photo" />
+      </div>
       {canEdit && (
         <ItemForm
           trip={trip}

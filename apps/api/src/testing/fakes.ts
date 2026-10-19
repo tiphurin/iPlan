@@ -8,6 +8,13 @@ import type {
   ItemsRepository,
   NewItemRow,
 } from '../modules/items/items.repository'
+import type { AttachmentEntity } from '@iplan/contracts'
+import type { StorageProvider } from '../infra/storage'
+import type {
+  AttachmentRow,
+  AttachmentsRepository,
+  NewAttachmentRow,
+} from '../modules/attachments/attachments.repository'
 import type {
   ChecklistRepository,
   ChecklistRow,
@@ -399,5 +406,58 @@ export class InMemoryExpenses implements ExpensesRepository {
     changes: { fxRates?: Record<string, string>; dailyBudgetMinor?: bigint | null },
   ) {
     await this.trips.update(tripId, changes)
+  }
+}
+
+export class MemoryStorage implements StorageProvider {
+  files = new Map<string, Uint8Array<ArrayBuffer>>()
+  async put(key: string, body: Uint8Array) {
+    this.files.set(key, new Uint8Array(body))
+  }
+  async get(key: string) {
+    return this.files.get(key) ?? null
+  }
+  async delete(key: string) {
+    this.files.delete(key)
+  }
+}
+
+export class InMemoryAttachments implements AttachmentsRepository {
+  rows = new Map<string, AttachmentRow>()
+  /** entityId → tripId for entities that "exist". */
+  entities = new Map<string, string>()
+
+  async tripOf(_entityType: AttachmentEntity, entityId: string) {
+    return this.entities.get(entityId) ?? null
+  }
+  async list(entityType: AttachmentEntity, entityId: string) {
+    return [...this.rows.values()].filter(
+      (r) => r.entityType === entityType && r.entityId === entityId,
+    )
+  }
+  async find(id: string) {
+    return this.rows.get(id) ?? null
+  }
+  async create(values: NewAttachmentRow) {
+    const row: AttachmentRow = {
+      id: uuid(),
+      ownerId: values.ownerId ?? null,
+      tripId: values.tripId ?? null,
+      entityType: values.entityType,
+      entityId: values.entityId,
+      kind: values.kind,
+      storageKey: values.storageKey,
+      thumbKey: values.thumbKey ?? null,
+      contentType: values.contentType,
+      sizeBytes: values.sizeBytes,
+      width: values.width ?? null,
+      height: values.height ?? null,
+      createdAt: new Date(),
+    }
+    this.rows.set(row.id, row)
+    return row
+  }
+  async delete(id: string) {
+    this.rows.delete(id)
   }
 }

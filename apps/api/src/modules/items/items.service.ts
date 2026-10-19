@@ -16,8 +16,8 @@ import type { ItemRow, ItemsRepository, NewItemRow } from './items.repository'
 /** Furthest a check-in may be from now (the time simulator stays within the trip). */
 const MAX_CHECK_IN_SKEW_MS = 45 * 86_400_000
 
-function checkItem(
-  trip: TripRow,
+export function checkItem(
+  trip: Pick<TripRow, 'startDate' | 'endDate'>,
   item: Pick<NewItemRow, 'dayDate' | 'startsAt' | 'endsAt' | 'timeZone' | 'details'>,
 ) {
   const problems: Record<string, string> = {}
@@ -33,6 +33,13 @@ function checkItem(
     problems['details.arrivalTimeZone'] = 'Unknown time zone'
   }
   if (Object.keys(problems).length > 0) throw validationFailed(problems)
+}
+
+/** Only flights have an arrival zone; other kinds show their end in the start's zone. */
+function detailsForKind(kind: NewItemRow['kind'], details: NewItemRow['details']) {
+  if (kind === 'flight' || !details || !('arrivalTimeZone' in details)) return details
+  const { arrivalTimeZone: _dropped, ...rest } = details
+  return rest
 }
 
 export class ItemsService {
@@ -78,7 +85,7 @@ export class ItemsService {
       endsAt: input.endsAt ? new Date(input.endsAt) : null,
       timeZone: input.timeZone,
       notes: input.notes ?? null,
-      details: input.details ?? {},
+      details: detailsForKind(input.kind, input.details ?? {}),
       sortOrder: await this.items.nextSortOrder(tripId, input.dayDate),
     }
     checkItem(trip, values)
@@ -108,6 +115,9 @@ export class ItemsService {
     if (input.timeZone !== undefined) changes.timeZone = input.timeZone
     if (input.notes !== undefined) changes.notes = input.notes
     if (input.details !== undefined) changes.details = input.details
+    const details = changes.details ?? item.details
+    const cleaned = detailsForKind(changes.kind ?? item.kind, details)
+    if (cleaned !== details) changes.details = cleaned
     checkItem(trip, {
       dayDate: changes.dayDate ?? item.dayDate,
       startsAt: changes.startsAt ?? item.startsAt,
@@ -175,7 +185,7 @@ export class ItemsService {
     if (Math.abs(at.getTime() - now.getTime()) > MAX_CHECK_IN_SKEW_MS) {
       throw validationFailed({ at: 'Check-in time is too far from now' })
     }
-    await this.items.upsertCheckIn(itemId, actor.id, at)
+    await this.items.upsertCheckIn(itemId, actor.id, at, input.skipped === true)
     return this.dto(item)
   }
 

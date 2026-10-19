@@ -5,10 +5,13 @@ import type {
   InviteDto,
   InvitePreviewDto,
   InviteRole,
+  InviteUserInput,
 } from '@iplan/contracts'
 import type { AuditLog } from '../../shared/audit'
 import type { SessionUser } from '../../shared/context'
 import { AppError, forbidden, notFound } from '../../shared/errors'
+import type { InvitationsService } from '../invitations/invitations.service'
+import type { TripsRepository } from '../trips/trips.repository'
 import { RANK, type TripAccess } from '../trips/trips.service'
 import { toInviteDto, toInvitePreviewDto } from './members.mapper'
 import type { InviteWithTrip, MembersRepository } from './members.repository'
@@ -22,7 +25,27 @@ export class MembersService {
     private readonly trips: TripAccess,
     private readonly audit: AuditLog,
     private readonly newToken: () => string = () => randomBytes(18).toString('base64url'),
+    private readonly invitations?: InvitationsService,
+    private readonly directory?: Pick<TripsRepository, 'members'>,
   ) {}
+
+  /** Owner invites someone from their circles; they join after accepting. */
+  async invitePerson(actor: SessionUser, tripId: string, input: InviteUserInput) {
+    const { trip } = await this.trips.requireAccess(actor, tripId, 'owner')
+    if (!this.invitations || !this.directory) throw new Error('Invitations are not configured')
+    const members = await this.directory.members(tripId)
+    return this.invitations.invite(
+      actor,
+      { kind: 'trip', id: tripId, name: trip.name, memberIds: members.map((m) => m.userId) },
+      input.userId,
+      input.role,
+    )
+  }
+
+  async pendingPeople(actor: SessionUser, tripId: string) {
+    await this.trips.requireAccess(actor, tripId, 'viewer')
+    return (await this.invitations?.pending('trip', tripId)) ?? []
+  }
 
   /** Owner changes someone's role. The owner's own role never changes here. */
   async updateRole(actor: SessionUser, tripId: string, userId: string, role: InviteRole) {

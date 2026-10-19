@@ -13,13 +13,13 @@
 }
 
 :root {
-  --background: #f2f4f7;
+  --background: #f5f6f8;
   --foreground: #14171d;
   --card: #ffffff;
-  --muted: #e9edf2;
-  --muted-foreground: #5a6371;
-  --faint: #8a93a0;
-  --border: #dde2e8;
+  --muted: #eef0f4;
+  --muted-foreground: #5e6572;
+  --faint: #979ea9;
+  --border: #e3e6eb;
   --primary: #00873e;
   --primary-foreground: #ffffff;
   --success: #0b8a45;
@@ -34,6 +34,9 @@
   --lw: #9aa3ae;
   --lc: #4a5563;
   --hero-ink: #1f2a37;
+  /* Cards float on a soft shadow instead of a hard outline. */
+  --card-edge: rgba(20, 23, 29, 0.04);
+  --card-shadow: 0 1px 2px rgba(20, 23, 29, 0.04), 0 4px 14px rgba(20, 23, 29, 0.05);
   color-scheme: light;
 }
 
@@ -58,6 +61,8 @@
   --lw: #6f7884;
   --lc: #8893a1;
   --hero-ink: #26303d;
+  --card-edge: var(--border);
+  --card-shadow: none;
   color-scheme: dark;
 }
 
@@ -83,6 +88,8 @@
     --lw: #6f7884;
     --lc: #8893a1;
     --hero-ink: #26303d;
+    --card-edge: var(--border);
+    --card-shadow: none;
     color-scheme: dark;
   }
 }
@@ -146,6 +153,18 @@
   }
 }
 
+/* Cards and grouped lists: soft shadow in light mode, hairline in dark mode. */
+.rounded-2xl.bg-card,
+.rounded-hero.bg-card {
+  border-color: var(--card-edge);
+  box-shadow: var(--card-shadow);
+}
+
+/* One language switch per screen: the back row's wins over the page title's. */
+main:has([data-back-link]) [data-header-lang] {
+  display: none;
+}
+
 @utility num {
   font-family: var(--font-display);
   font-weight: 600;
@@ -162,6 +181,13 @@
 @keyframes pulse-ring {
   50% {
     box-shadow: 0 0 0 10px color-mix(in srgb, var(--node) 10%, transparent);
+  }
+}
+
+@keyframes flash {
+  0%,
+  40% {
+    background-color: color-mix(in srgb, var(--la) 18%, transparent);
   }
 }
 
@@ -186,10 +212,17 @@
     --muted: #f2f2f2;
     --muted-foreground: #444;
     --border: #ccc;
+    --card-shadow: none;
+    --card-edge: #ccc;
     color-scheme: light;
   }
   .no-print {
     display: none !important;
+  }
+  /* Keep chart colours when saving as PDF. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   table {
     break-inside: auto;

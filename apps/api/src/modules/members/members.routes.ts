@@ -4,6 +4,8 @@ import {
   CreateInviteInput,
   InviteDto,
   InvitePreviewDto,
+  InviteUserInput,
+  PendingInviteDto,
   UpdateMemberInput,
 } from '@iplan/contracts'
 import { requireUser } from '../../shared/auth-guard'
@@ -73,6 +75,41 @@ const listInvites = createRoute({
   },
 })
 
+const invitePerson = createRoute({
+  method: 'post',
+  path: '/trips/{tripId}/people',
+  tags: ['Members'],
+  summary: 'Invite someone from your circles (owner); they join after accepting',
+  request: {
+    params: z.object({ tripId: z.uuid() }),
+    body: { content: { 'application/json': { schema: InviteUserInput } }, required: true },
+  },
+  responses: {
+    200: {
+      description: 'Pending invitations',
+      content: { 'application/json': { schema: z.array(PendingInviteDto) } },
+    },
+    401: errorResponses[401],
+    403: errorResponses[403],
+    404: errorResponses[404],
+    409: errorResponses[409],
+  },
+})
+const pendingPeople = createRoute({
+  method: 'get',
+  path: '/trips/{tripId}/people',
+  tags: ['Members'],
+  summary: 'People invited who have not answered yet',
+  request: { params: z.object({ tripId: z.uuid() }) },
+  responses: {
+    200: {
+      description: 'Pending invitations',
+      content: { 'application/json': { schema: z.array(PendingInviteDto) } },
+    },
+    401: errorResponses[401],
+    404: errorResponses[404],
+  },
+})
 const revokeInvite = createRoute({
   method: 'delete',
   path: '/invites/{inviteId}',
@@ -115,6 +152,19 @@ const acceptInvite = createRoute({
 
 export function memberRoutes(service: MembersService) {
   return createRouter()
+    .openapi(invitePerson, async (c) =>
+      c.json(
+        await service.invitePerson(
+          requireUser(c),
+          c.req.valid('param').tripId,
+          c.req.valid('json'),
+        ),
+        200,
+      ),
+    )
+    .openapi(pendingPeople, async (c) =>
+      c.json(await service.pendingPeople(requireUser(c), c.req.valid('param').tripId), 200),
+    )
     .openapi(updateMember, async (c) => {
       const { tripId, userId } = c.req.valid('param')
       await service.updateRole(requireUser(c), tripId, userId, c.req.valid('json').role)

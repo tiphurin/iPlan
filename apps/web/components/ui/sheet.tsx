@@ -3,6 +3,7 @@
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { type ReactNode, useEffect, useId } from 'react'
+import { createPortal } from 'react-dom'
 
 /** Bottom sheet with a scrim; closes on Escape or tapping outside. */
 export function Sheet({
@@ -30,7 +31,8 @@ export function Sheet({
     }
   }, [open, onClose])
   if (!open) return null
-  return (
+  // Portalled to <body> so it never sits inside a <label> or a transformed parent.
+  return createPortal(
     <div className="fixed inset-0 z-50">
       <button
         type="button"
@@ -60,6 +62,7 @@ export function Sheet({
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

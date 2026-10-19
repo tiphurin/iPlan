@@ -56,6 +56,9 @@ Never commit a secret. `.env.example` lists every variable with a note on where 
 | `BETTER_AUTH_URL`                           | `http://localhost:3000`            | `https://<project>.vercel.app`                       |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | optional                           | Google Cloud → Credentials → OAuth client            |
 | `ADMIN_EMAILS`                              | optional                           | Your Google email (comma-separated for several)      |
+| `SUPERADMIN_PASSWORD`                       | `1234`                             | First password of the built-in `admin` account       |
+| `SMTP_USER` / `SMTP_PASSWORD`               | empty (emails go to the log)       | Gmail address / Gmail **App password**               |
+| `MAIL_FROM`                                 | optional                           | e.g. `iPlan <you@gmail.com>`                         |
 | `DEV_LOGIN_ENABLED`                         | `true`                             | `false`                                              |
 | `STORAGE_DRIVER`                            | `local` (files in `.data/uploads`) | `s3`                                                 |
 | `S3_ENDPOINT`                               | `http://localhost:9000`            | B2 bucket page → Endpoint (prefix `https://`)        |
@@ -94,6 +97,8 @@ Do these in order; each step only needs the previous ones. Nothing here asks for
       | `BETTER_AUTH_URL`                           | `https://<project>.vercel.app`                  |
       | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | from step 3                                     |
       | `ADMIN_EMAILS`                              | your Google email, e.g. `you@gmail.com`         |
+      | `SUPERADMIN_PASSWORD`                       | a first password for `admin` (changed at login) |
+      | `SMTP_USER` / `SMTP_PASSWORD`               | Gmail address / Gmail App password              |
       | `DEV_LOGIN_ENABLED`                         | `false`                                         |
       | `STORAGE_DRIVER`                            | `s3`                                            |
       | `S3_ENDPOINT`                               | `https://` + the B2 endpoint                    |
@@ -103,13 +108,19 @@ Do these in order; each step only needs the previous ones. Nothing here asks for
       | `S3_FORCE_PATH_STYLE`                       | `false`                                         |
 
    4. Deploy. Production builds run `yarn db:migrate` first (`scripts/vercel-build.sh`); preview builds never migrate.
-5. **First sign-in, admin and approvals**
-   1. Open `https://<project>.vercel.app` and sign in with the Google account listed in `ADMIN_EMAILS`. It becomes an active admin straight away.
-   2. Everyone else who signs in with Google lands on a "waiting for approval" screen and cannot read or change anything.
-   3. Approve them in **Admin → Approvals**: pick their groups (e.g. _Travelers_ = trips only, _Full access_ = trips + personal money + shared money), then **Approve**. **Reject** suspends the account.
-   4. **Admin → Groups** creates groups and ticks which features each one turns on; **Admin → Users** changes groups later, makes someone an admin, or suspends them.
-   5. Bring your real data over: export the trip from your local app (trip → backup JSON) and import it in production; nothing personal goes through git.
-6. **Uptime ping** (optional): GitHub → repo Settings → Secrets and variables → Actions → Variables → `APP_URL` = `https://<project>.vercel.app`. The weekly `Uptime` workflow then emails you if `/api/health` fails.
+5. **Gmail for notification emails** (free, 500/day, no card)
+   1. Google account → Security → turn on **2-Step Verification**.
+   2. Security → **App passwords** → create one named `iplan`. Copy the 16 letters into `SMTP_PASSWORD`; your Gmail address goes into `SMTP_USER`.
+   3. Without these, iPlan works but only prints emails to the Vercel log.
+6. **First sign-in, admin and approvals**
+   1. Open `https://<project>.vercel.app` → **Admin sign-in** → username `admin` and the `SUPERADMIN_PASSWORD` value. You must choose a new password straight away (later: Profile → Change password). Forgot it? Set a new `SUPERADMIN_PASSWORD` in Vercel and redeploy; that resets it.
+   2. Or sign in with the Google account listed in `ADMIN_EMAILS`; it becomes an (ordinary) admin straight away.
+   3. Everyone else who signs in with Google lands on a "waiting for approval" screen and cannot read or change anything.
+   4. Approve them in **Admin → Approvals**: pick their groups (e.g. _Travelers_ = trips only, _Full access_ = trips + personal money + shared money), then **Approve**. **Reject** suspends the account.
+   5. **Admin → Circles**: put people who should find each other (family, a trip group) in the same circle; only then can they invite each other.
+   6. **Admin → Groups** creates groups and ticks which features each one turns on; **Admin → Users** changes groups later, makes someone an admin, or suspends them.
+   7. Bring your real data over: export the trip from your local app (trip → backup JSON) and import it in production; nothing personal goes through git.
+7. **Uptime ping** (optional): GitHub → repo Settings → Secrets and variables → Actions → Variables → `APP_URL` = `https://<project>.vercel.app`. The weekly `Uptime` workflow then emails you if `/api/health` fails.
 
 The app refuses to start in production if `DEV_LOGIN_ENABLED` is true or `STORAGE_DRIVER` is not `s3`, so a missing setting shows up immediately in the Vercel logs.
 

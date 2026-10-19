@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { InMemoryAttachments, MemoryStorage, seededTrip, users } from '../../testing/fakes'
+import {
+  GROUP_IDS,
+  InMemoryAccess,
+  InMemoryAttachments,
+  MemoryStorage,
+  seededTrip,
+  users,
+} from '../../testing/fakes'
+import { AccessService } from '../access/access.service'
 import { AttachmentsService, sniffType } from './attachments.service'
 
 const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3])
@@ -14,7 +22,16 @@ async function setup() {
   repo.entities.set(EXPENSE, { tripId })
   repo.entities.set(TRANSACTION, { ownerId: 'owner' })
   const storage = new MemoryStorage()
-  return { tripId, storage, service: new AttachmentsService(repo, storage, trips, audit) }
+  const accessRepo = new InMemoryAccess()
+  // stranger can use trips (but isn't a member of this one).
+  accessRepo.members.set('stranger', [GROUP_IDS.travelers])
+  const access = new AccessService(accessRepo, audit)
+  return {
+    tripId,
+    storage,
+    accessRepo,
+    service: new AttachmentsService(repo, storage, trips, audit, access),
+  }
 }
 
 const upload = (bytes: Uint8Array, contentType = 'image/jpeg') => ({
@@ -101,5 +118,32 @@ describe('AttachmentsService', () => {
         entityId: TRANSACTION,
       }),
     ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('needs the feature that owns the file: trips for trip files, finance for slips', async () => {
+    const { accessRepo, service } = await setup()
+    const tripFile = await service.upload(users.editor, upload(JPEG))
+    const slip = await service.upload(users.owner, {
+      ...upload(JPEG),
+      entityType: 'transaction',
+      entityId: TRANSACTION,
+    })
+    // owner keeps trips but loses finance
+    accessRepo.members.set('owner', [GROUP_IDS.travelers])
+    await expect(service.file(users.owner, slip.id, false)).rejects.toMatchObject({
+      code: 'FEATURE_DISABLED',
+    })
+    await expect(service.list(users.owner, 'transaction', TRANSACTION)).rejects.toMatchObject({
+      code: 'FEATURE_DISABLED',
+    })
+    expect(await service.file(users.owner, tripFile.id, false)).toBeTruthy()
+    // editor loses everything
+    accessRepo.members.set('editor', [])
+    await expect(service.file(users.editor, tripFile.id, false)).rejects.toMatchObject({
+      code: 'FEATURE_DISABLED',
+    })
+    await expect(service.remove(users.editor, tripFile.id)).rejects.toMatchObject({
+      code: 'FEATURE_DISABLED',
+    })
   })
 })

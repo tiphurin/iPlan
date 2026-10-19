@@ -29,7 +29,12 @@ export function isPrivateDevOrigin(origin: string | null | undefined): boolean {
   )
 }
 
-export function createAuth(db: Database, env: ApiEnv) {
+export interface AuthHooks {
+  /** A brand-new account (Google sign-in); used to email the admins. */
+  onSignup?: (user: { id: string; name: string; email: string }) => Promise<void>
+}
+
+export function createAuth(db: Database, env: ApiEnv, hooks: AuthHooks = {}) {
   return betterAuth({
     baseURL: env.authUrl,
     basePath: '/api/auth',
@@ -49,8 +54,11 @@ export function createAuth(db: Database, env: ApiEnv) {
         verification: schema.verification,
       },
     }),
-    // Password sign-in exists only so the local "Dev login" button can work.
-    emailAndPassword: { enabled: env.devLoginEnabled, disableSignUp: true },
+    // Password sign-in: the built-in "admin" account everywhere, plus local dev login.
+    // Nobody can sign up with a password; everyone else uses Google.
+    // The bootstrap password (SUPERADMIN_PASSWORD) is hashed directly, so it may be shorter;
+    // it must be replaced at the first sign-in with one of at least 8 characters.
+    emailAndPassword: { enabled: true, disableSignUp: true, minPasswordLength: 8 },
     // Seeded people (yarn db:seed:private) sign in with Google into their existing account.
     account: { accountLinking: { enabled: true, trustedProviders: ['google'] } },
     socialProviders: env.google
@@ -60,6 +68,7 @@ export function createAuth(db: Database, env: ApiEnv) {
       additionalFields: {
         locale: { type: 'string', defaultValue: 'th', input: false },
         status: { type: 'string', defaultValue: 'pending', input: false },
+        mustChangePassword: { type: 'boolean', defaultValue: false, input: false },
       },
     },
     databaseHooks: {
@@ -70,6 +79,9 @@ export function createAuth(db: Database, env: ApiEnv) {
             env.adminEmails.includes(user.email.toLowerCase())
               ? { data: { ...user, role: 'admin', status: 'active' } }
               : { data: user },
+          after: async (user) => {
+            if (hooks.onSignup) await hooks.onSignup(user)
+          },
         },
       },
     },
@@ -100,7 +112,12 @@ export interface AuthGateway {
     role?: string | null | undefined
     banned?: boolean | null | undefined
     status?: string | null | undefined
+    mustChangePassword?: boolean | null | undefined
   } | null>
+  /** Signs in with email + password and returns Better Auth's response (sets the cookie). */
+  signInWithPassword(email: string, password: string): Promise<Response>
+  /** false when the current password is wrong. */
+  changePassword(headers: Headers, currentPassword: string, newPassword: string): Promise<boolean>
 }
 
 export function authGateway(auth: Auth): AuthGateway {
@@ -117,6 +134,17 @@ export function authGateway(auth: Auth): AuthGateway {
         role: user.role,
         banned: user.banned,
         status: user.status,
+        mustChangePassword: user.mustChangePassword,
+      }
+    },
+    signInWithPassword: (email, password) =>
+      auth.api.signInEmail({ body: { email, password }, asResponse: true }),
+    changePassword: async (headers, currentPassword, newPassword) => {
+      try {
+        await auth.api.changePassword({ headers, body: { currentPassword, newPassword } })
+        return true
+      } catch {
+        return false
       }
     },
   }

@@ -19,7 +19,18 @@ import type {
   NewEntryRow as NewLedgerEntryRow,
   ShareRow as LedgerShareRow,
 } from '../modules/ledgers/ledgers.repository'
-import type { AccessRepository, GroupFields, GroupRow } from '../modules/access/access.repository'
+import type {
+  AccessRepository,
+  CircleRow,
+  GroupFields,
+  GroupRow,
+} from '../modules/access/access.repository'
+import type {
+  InvitationKind,
+  InvitationRow,
+  InvitationsRepository,
+} from '../modules/invitations/invitations.repository'
+import type { ContactRow, PeopleRepository } from '../modules/people/people.repository'
 import type {
   AdminRepository,
   AuditRow,
@@ -64,6 +75,7 @@ import type {
 import type {
   MemberRow,
   NewTripRow,
+  TripContents,
   TripRow,
   TripWithRole,
   TripsRepository,
@@ -105,6 +117,11 @@ export class InMemoryTrips implements TripsRepository {
       if (found) result.push(found)
     }
     return result
+  }
+
+  async findAny(tripId: string, role: TripRole): Promise<TripWithRole | null> {
+    const trip = this.trips.get(tripId)
+    return trip ? { trip, role, memberCount: this.roles.get(tripId)?.size ?? 0 } : null
   }
 
   async findForUser(tripId: string, userId: string): Promise<TripWithRole | null> {
@@ -159,6 +176,20 @@ export class InMemoryTrips implements TripsRepository {
   async delete(tripId: string) {
     this.trips.delete(tripId)
     this.roles.delete(tripId)
+  }
+
+  /** Item and expense stores to read trip contents from (set by tests that need it). */
+  linked: { items?: InMemoryItems; expenses?: InMemoryExpenses } = {}
+
+  async contents(tripId: string): Promise<TripContents> {
+    const items = (await this.linked.items?.listByTrip(tripId)) ?? []
+    const expenses = (await this.linked.expenses?.list(tripId)) ?? []
+    const days = [...items.map((i) => i.dayDate), ...expenses.map((e) => e.expense.dayDate)].sort()
+    return {
+      expenseCount: expenses.length,
+      firstDay: days[0] ?? null,
+      lastDay: days.at(-1) ?? null,
+    }
   }
 }
 
@@ -216,9 +247,9 @@ export class InMemoryItems implements ItemsRepository {
   async delete(itemId: string) {
     this.items.delete(itemId)
   }
-  async upsertCheckIn(itemId: string, userId: string, at: Date) {
+  async upsertCheckIn(itemId: string, userId: string, at: Date, skipped = false) {
     this.checkIns = this.checkIns.filter((c) => !(c.itemId === itemId && c.userId === userId))
-    this.checkIns.push({ itemId, userId, name: nameOf(userId), checkedInAt: at })
+    this.checkIns.push({ itemId, userId, name: nameOf(userId), checkedInAt: at, skipped })
   }
   async deleteCheckIn(itemId: string, userId: string) {
     this.checkIns = this.checkIns.filter((c) => !(c.itemId === itemId && c.userId === userId))
@@ -404,6 +435,7 @@ export class InMemoryExpenses implements ExpensesRepository {
         ...values,
         itemId: values.itemId ?? null,
         category: values.category ?? 'other',
+        subcategory: values.subcategory ?? null,
         note: values.note ?? null,
         createdBy: values.createdBy ?? null,
         createdAt,
@@ -513,7 +545,25 @@ export class InMemoryFinance implements FinanceRepository {
       createdAt: new Date(),
     }))
     this.cats.push(...created)
-    return created
+    // Like the real one: returns all of the owner's categories.
+    return this.categories(rows[0]?.ownerId ?? '')
+  }
+  async createCategory(r: Parameters<FinanceRepository['createCategory']>[0]) {
+    const row: CategoryRow = {
+      id: uuid(),
+      ownerId: r.ownerId,
+      kind: r.kind,
+      name: r.name,
+      color: r.color ?? '#94a3b8',
+      budgetMinor: r.budgetMinor ?? null,
+      sortOrder: r.sortOrder ?? 0,
+      createdAt: new Date(),
+    }
+    this.cats.push(row)
+    return row
+  }
+  async userExists(id: string) {
+    return Object.values(users).some((u) => u.id === id)
   }
   async updateCategory(id: string, ownerId: string, changes: Partial<CategoryRow>) {
     const row = this.cats.find((c) => c.id === id && c.ownerId === ownerId)
@@ -617,6 +667,9 @@ export class InMemoryAdmin implements AdminRepository {
     locale: 'th',
     status: u.id === 'stranger' ? 'pending' : 'active',
     avatarKey: null,
+    nickname: null,
+    mustChangePassword: false,
+    bootstrapSecretHash: null,
     trips: 1,
   }))
   sessions = new Set(['owner', 'editor', 'viewer'])
@@ -658,6 +711,12 @@ export class InMemoryAdmin implements AdminRepository {
   }
   async revokeSessions(userId: string) {
     this.sessions.delete(userId)
+  }
+  async allTrips() {
+    return []
+  }
+  async allLedgers() {
+    return []
   }
   async audit() {
     return { rows: this.log, total: this.log.length }
@@ -749,6 +808,8 @@ export class InMemoryLedgers implements LedgersRepository {
       paidBy: values.paidBy,
       splitMode: values.splitMode,
       note: values.note ?? null,
+      settlesMonth: values.settlesMonth ?? null,
+      settlesEntryId: values.settlesEntryId ?? null,
       createdBy: values.createdBy ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -761,7 +822,21 @@ export class InMemoryLedgers implements LedgersRepository {
     if (row) Object.assign(row, values, { shares })
   }
   async deleteEntry(id: string) {
-    this.entryRows = this.entryRows.filter((e) => e.id !== id)
+    await this.deleteEntries([id])
+  }
+  private lock: Promise<unknown> = Promise.resolve()
+  /** Runs callers one after another, like the row lock in the real repository. */
+  async locked<T>(_ledgerId: string, fn: (repo: LedgersRepository) => Promise<T>): Promise<T> {
+    const run: Promise<T> = this.lock.then(() => fn(this))
+    this.lock = run.catch(() => undefined)
+    return run
+  }
+  async deleteEntries(ids: string[]) {
+    // Mirrors ON DELETE CASCADE on settles_entry_id.
+    const gone = new Set(ids)
+    this.entryRows = this.entryRows.filter(
+      (e) => !gone.has(e.id) && !(e.settlesEntryId && gone.has(e.settlesEntryId)),
+    )
   }
 }
 
@@ -784,7 +859,12 @@ export class InMemoryAccess implements AccessRepository {
 
   async featuresFor(userId: string) {
     const groups = this.members.get(userId) ?? []
-    return [...new Set(groups.flatMap((g) => this.features.get(g) ?? []))]
+    return [
+      ...new Set([
+        ...groups.flatMap((g) => this.features.get(g) ?? []),
+        ...(this.direct.get(userId) ?? []),
+      ]),
+    ]
   }
   async groups(): Promise<GroupRow[]> {
     return this.groupRows.map((g) => ({
@@ -822,6 +902,147 @@ export class InMemoryAccess implements AccessRepository {
   }
   async setUserGroups(userId: string, groupIds: string[]) {
     this.members.set(userId, groupIds)
+  }
+  direct = new Map<string, string[]>()
+  async directFeaturesFor(userIds: string[]) {
+    return new Map(userIds.map((id) => [id, [...(this.direct.get(id) ?? [])]]))
+  }
+  async setUserFeatures(userId: string, features: string[]) {
+    this.direct.set(userId, features)
+  }
+  circleRows: { id: string; name: string; createdAt: Date }[] = []
+  circleMembers = new Map<string, string[]>()
+  async circles(): Promise<CircleRow[]> {
+    return this.circleRows.map((c) => ({
+      ...c,
+      memberCount: [...this.circleMembers.values()].filter((ids) => ids.includes(c.id)).length,
+    }))
+  }
+  async createCircle(name: string) {
+    const id = `00000000-0000-4000-8000-${String(++this.seq).padStart(12, '0')}`
+    this.circleRows.push({ id, name, createdAt: new Date() })
+    return id
+  }
+  async renameCircle(id: string, name: string) {
+    const row = this.circleRows.find((c) => c.id === id)
+    if (row) row.name = name
+  }
+  async deleteCircle(id: string) {
+    this.circleRows = this.circleRows.filter((c) => c.id !== id)
+    for (const [userId, ids] of this.circleMembers) {
+      this.circleMembers.set(
+        userId,
+        ids.filter((c) => c !== id),
+      )
+    }
+  }
+  async circleIdsFor(userIds: string[]) {
+    return new Map(userIds.map((id) => [id, [...(this.circleMembers.get(id) ?? [])]]))
+  }
+  async setUserCircles(userId: string, circleIds: string[]) {
+    this.circleMembers.set(userId, circleIds)
+  }
+}
+
+/** People and circles over the shared `users` fixtures (all active except `stranger`). */
+export class InMemoryPeople implements PeopleRepository {
+  constructor(private readonly access: InMemoryAccess) {}
+  contacts = new Map<string, ContactRow>(
+    Object.values(users).map((u) => [
+      u.id,
+      {
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        locale: 'th',
+        status: u.id === 'stranger' ? 'pending' : 'active',
+        banned: false,
+      },
+    ]),
+  )
+  async search(query: string, excludeId: string, circleOf: string | null) {
+    const mine = circleOf ? (this.access.circleMembers.get(circleOf) ?? []) : null
+    return [...this.contacts.values()]
+      .filter((c) => c.id !== excludeId && c.status === 'active')
+      .filter((c) => `${c.name} ${c.email}`.toLowerCase().includes(query.toLowerCase()))
+      .filter(
+        (c) => !mine || (this.access.circleMembers.get(c.id) ?? []).some((id) => mine.includes(id)),
+      )
+      .map((c) => ({ id: c.id, name: c.name, nickname: null, email: c.email, image: null }))
+  }
+  async contact(id: string) {
+    return this.contacts.get(id) ?? null
+  }
+  async adminContacts() {
+    return []
+  }
+}
+
+/** Invitations; accepting adds the membership to the trip or ledger fakes. */
+export class InMemoryInvitations implements InvitationsRepository {
+  rows: InvitationRow[] = []
+  private seq = 0
+  constructor(
+    private readonly trips?: InMemoryTrips,
+    private readonly ledgers?: InMemoryLedgers,
+  ) {}
+  async create(values: Parameters<InvitationsRepository['create']>[0]) {
+    if (
+      this.rows.some(
+        (r) =>
+          r.kind === values.kind && r.targetId === values.targetId && r.userId === values.userId,
+      )
+    ) {
+      return null
+    }
+    const id = `00000000-0000-4000-9000-${String(++this.seq).padStart(12, '0')}`
+    this.rows.push({ id, ...values, createdAt: new Date() })
+    return id
+  }
+  async find(id: string) {
+    return this.rows.find((r) => r.id === id) ?? null
+  }
+  async forTarget(kind: InvitationKind, targetId: string) {
+    return this.rows
+      .filter((r) => r.kind === kind && r.targetId === targetId)
+      .map((r) => ({
+        id: r.id,
+        userId: r.userId,
+        name: nameOf(r.userId),
+        image: null,
+        role: r.role,
+      }))
+  }
+  async forUser(userId: string) {
+    return this.rows
+      .filter((r) => r.userId === userId)
+      .map((r) => ({
+        ...r,
+        targetName: 'Target',
+        invitedByName: r.invitedBy ? nameOf(r.invitedBy) : null,
+      }))
+  }
+  async accept(invitation: InvitationRow) {
+    const gone =
+      invitation.kind === 'ledger'
+        ? this.ledgers && !(await this.ledgers.find(invitation.targetId))
+        : this.trips && !this.trips.roles.has(invitation.targetId)
+    if (gone) {
+      await this.delete(invitation.id)
+      return false
+    }
+    if (invitation.kind === 'ledger') {
+      await this.ledgers?.addMember(invitation.targetId, invitation.userId, 'member')
+    } else {
+      this.trips?.roles
+        .get(invitation.targetId)
+        ?.set(invitation.userId, invitation.role === 'viewer' ? 'viewer' : 'editor')
+    }
+    await this.delete(invitation.id)
+    return true
+  }
+  async delete(id: string) {
+    this.rows = this.rows.filter((r) => r.id !== id)
   }
 }
 

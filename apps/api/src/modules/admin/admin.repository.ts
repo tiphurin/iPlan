@@ -19,6 +19,22 @@ export interface StatsRow {
 }
 
 export type UserRow = typeof schema.user.$inferSelect & { trips: number }
+export interface AdminTripRow {
+  id: string
+  name: string
+  destination: string | null
+  startDate: string
+  endDate: string
+  ownerName: string | null
+  memberCount: number
+}
+export interface AdminLedgerRow {
+  id: string
+  name: string
+  ownerName: string | null
+  memberCount: number
+  entryCount: number
+}
 export type AuditRow = typeof schema.auditLog.$inferSelect & { actorName: string | null }
 
 export interface AdminRepository {
@@ -34,6 +50,8 @@ export interface AdminRepository {
     changes: { role?: string; status?: string; banned?: boolean; banReason?: string | null },
   ): Promise<void>
   revokeSessions(userId: string): Promise<void>
+  allTrips(): Promise<AdminTripRow[]>
+  allLedgers(): Promise<AdminLedgerRow[]>
   audit(page: number, action: string | undefined): Promise<{ rows: AuditRow[]; total: number }>
 }
 
@@ -117,7 +135,11 @@ export class DrizzleAdminRepository implements AdminRepository {
   async users(query: string | undefined, page: number, status?: string) {
     const where = and(
       query
-        ? or(ilike(schema.user.name, `%${query}%`), ilike(schema.user.email, `%${query}%`))
+        ? or(
+            ilike(schema.user.name, `%${query}%`),
+            ilike(schema.user.email, `%${query}%`),
+            ilike(schema.user.nickname, `%${query}%`),
+          )
         : undefined,
       status ? eq(schema.user.status, status) : undefined,
     )
@@ -142,6 +164,40 @@ export class DrizzleAdminRepository implements AdminRepository {
     changes: { role?: string; status?: string; banned?: boolean; banReason?: string | null },
   ) {
     await this.db.update(schema.user).set(changes).where(eq(schema.user.id, id))
+  }
+
+  async allTrips(): Promise<AdminTripRow[]> {
+    return this.db
+      .select({
+        id: schema.trip.id,
+        name: schema.trip.name,
+        destination: schema.trip.destination,
+        startDate: schema.trip.startDate,
+        endDate: schema.trip.endDate,
+        ownerName: sql<
+          string | null
+        >`(select u.name from ${schema.tripMember} m join ${schema.user} u on u.id = m.user_id where m.trip_id = "trip"."id" and m.role = 'owner' limit 1)`,
+        memberCount: sql<number>`(select count(*) from ${schema.tripMember} m where m.trip_id = "trip"."id")::int`,
+      })
+      .from(schema.trip)
+      .orderBy(desc(schema.trip.startDate))
+      .limit(200)
+  }
+
+  async allLedgers(): Promise<AdminLedgerRow[]> {
+    return this.db
+      .select({
+        id: schema.ledger.id,
+        name: schema.ledger.name,
+        ownerName: sql<
+          string | null
+        >`(select u.name from ${schema.ledgerMember} m join ${schema.user} u on u.id = m.user_id where m.ledger_id = "ledger"."id" and m.role = 'owner' limit 1)`,
+        memberCount: sql<number>`(select count(*) from ${schema.ledgerMember} m where m.ledger_id = "ledger"."id")::int`,
+        entryCount: sql<number>`(select count(*) from ${schema.ledgerEntry} e where e.ledger_id = "ledger"."id" and e.kind = 'expense')::int`,
+      })
+      .from(schema.ledger)
+      .orderBy(desc(schema.ledger.createdAt))
+      .limit(200)
   }
 
   async revokeSessions(userId: string) {

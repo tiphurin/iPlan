@@ -1,11 +1,14 @@
 import { createRoute, z } from '@hono/zod-openapi'
 import {
+  EntryPaidInput,
   LedgerDetailDto,
   LedgerDto,
   LedgerEntryDto,
   LedgerEntryInput,
   LedgerInput,
-  LedgerMemberInput,
+  InviteUserInput,
+  MonthStatusInput,
+  PendingInviteDto,
   SettleInput,
 } from '@iplan/contracts'
 import { requireUser } from '../../shared/auth-guard'
@@ -62,14 +65,14 @@ const remove = createRoute({
   request: { params: ledgerId },
   responses: { 204: { description: 'Deleted' }, ...common },
 })
-const addMember = createRoute({
+const invite = createRoute({
   method: 'post',
-  path: '/ledgers/{ledgerId}/members',
+  path: '/ledgers/{ledgerId}/invites',
   tags,
-  summary: 'Add an approved user by email (owner)',
-  request: { params: ledgerId, body: { content: json(LedgerMemberInput), required: true } },
+  summary: 'Invite someone from your circles (owner); they join after accepting',
+  request: { params: ledgerId, body: { content: json(InviteUserInput), required: true } },
   responses: {
-    200: { description: 'Ledger', content: json(LedgerDto) },
+    200: { description: 'Pending invitations', content: json(z.array(PendingInviteDto)) },
     ...common,
     409: errorResponses[409],
   },
@@ -97,6 +100,25 @@ const settleUp = createRoute({
   summary: 'Record a payment back between two members',
   request: { params: ledgerId, body: { content: json(SettleInput), required: true } },
   responses: { 201: { description: 'Entry', content: json(LedgerEntryDto) }, ...common },
+})
+const monthStatus = createRoute({
+  method: 'put',
+  path: '/ledgers/{ledgerId}/months/{month}/status',
+  tags,
+  summary: 'Set a month to unpaid, partly paid or paid',
+  request: {
+    params: z.object({ ledgerId: z.uuid(), month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/) }),
+    body: { content: json(MonthStatusInput), required: true },
+  },
+  responses: { 200: { description: 'Ledger', content: json(LedgerDetailDto) }, ...common },
+})
+const entryPaid = createRoute({
+  method: 'put',
+  path: '/ledger-entries/{entryId}/paid',
+  tags,
+  summary: 'Mark one expense as paid back (or not)',
+  request: { params: entryId, body: { content: json(EntryPaidInput), required: true } },
+  responses: { 200: { description: 'Entry', content: json(LedgerEntryDto) }, ...common },
 })
 const getEntry = createRoute({
   method: 'get',
@@ -142,12 +164,12 @@ export function ledgerRoutes(service: LedgersService) {
       await service.remove(requireUser(c), c.req.valid('param').ledgerId)
       return c.body(null, 204)
     })
-    .openapi(addMember, async (c) =>
+    .openapi(invite, async (c) =>
       c.json(
-        await service.addMember(
+        await service.invite(
           requireUser(c),
           c.req.valid('param').ledgerId,
-          c.req.valid('json').email,
+          c.req.valid('json').userId,
         ),
         200,
       ),
@@ -167,6 +189,23 @@ export function ledgerRoutes(service: LedgersService) {
       c.json(
         await service.settleUp(requireUser(c), c.req.valid('param').ledgerId, c.req.valid('json')),
         201,
+      ),
+    )
+    .openapi(monthStatus, async (c) => {
+      const { ledgerId: id, month } = c.req.valid('param')
+      return c.json(
+        await service.setMonthStatus(requireUser(c), id, month, c.req.valid('json')),
+        200,
+      )
+    })
+    .openapi(entryPaid, async (c) =>
+      c.json(
+        await service.setEntryPaid(
+          requireUser(c),
+          c.req.valid('param').entryId,
+          c.req.valid('json').paidBack,
+        ),
+        200,
       ),
     )
     .openapi(getEntry, async (c) =>

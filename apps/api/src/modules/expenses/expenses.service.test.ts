@@ -9,7 +9,7 @@ async function setup() {
     fxRates: { KRW: '0.0255' },
     dailyBudget: '3000',
   })
-  return { tripId, service }
+  return { tripId, service, repo }
 }
 
 const meal = {
@@ -135,5 +135,50 @@ describe('ExpensesService', () => {
     expect(csv).toContain('Owner (THB)')
     expect(csv).toContain(`"'=HYPERLINK(""x"")"`)
     expect(csv).toContain('892.50')
+  })
+
+  it('keeps people who left the trip on expenses they were already part of', async () => {
+    const { tripId, service, repo } = await setup()
+    const e = await service.create(users.owner, tripId, {
+      ...meal,
+      paidBy: 'editor',
+      split: { mode: 'exact', shares: { owner: '20000', editor: '15000' } },
+    })
+    repo.roles.get(tripId)?.delete('editor')
+    const edited = await service.update(users.owner, e.id, {
+      ...meal,
+      title: 'Late dinner',
+      paidBy: 'editor',
+      split: { mode: 'exact', shares: { owner: '20000', editor: '15000' } },
+    })
+    expect(edited).toMatchObject({ title: 'Late dinner', paidBy: 'editor' })
+    expect(edited.shares.map((s) => s.userId)).toEqual(['owner', 'editor'])
+    // Someone who was never on it still has to be a member.
+    await expect(
+      service.update(users.owner, e.id, {
+        ...meal,
+        split: { mode: 'equal', participants: ['owner', 'stranger'] },
+      }),
+    ).rejects.toMatchObject({ fields: { split: expect.any(String) } })
+    await expect(
+      service.update(users.owner, e.id, { ...meal, paidBy: 'stranger' }),
+    ).rejects.toMatchObject({ fields: { paidBy: 'Not a trip member' } })
+    // A new expense can't add the former member.
+    await expect(
+      service.create(users.owner, tripId, { ...meal, paidBy: 'editor' }),
+    ).rejects.toMatchObject({ fields: { paidBy: 'Not a trip member' } })
+  })
+
+  it('replaces saved rates, so a rate can be removed', async () => {
+    const { tripId, service, repo } = await setup()
+    await service.updateMoneySettings(users.owner, tripId, {
+      fxRates: { KRW: '0.0255', JPY: '0.23', THB: '1' },
+    })
+    expect(repo.trips.get(tripId)?.fxRates).toEqual({ KRW: '0.0255', JPY: '0.23' })
+    await service.updateMoneySettings(users.owner, tripId, { fxRates: { JPY: '0.24' } })
+    expect(repo.trips.get(tripId)?.fxRates).toEqual({ JPY: '0.24' })
+    // Leaving fxRates out keeps them.
+    await service.updateMoneySettings(users.owner, tripId, { dailyBudget: null })
+    expect(repo.trips.get(tripId)?.fxRates).toEqual({ JPY: '0.24' })
   })
 })

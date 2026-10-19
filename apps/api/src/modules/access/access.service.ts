@@ -1,4 +1,6 @@
 import {
+  type CircleDto,
+  type CircleInput,
   type CreateUserGroupInput,
   FEATURE_KEYS,
   type FeatureKey,
@@ -6,9 +8,9 @@ import {
   type UserGroupDto,
 } from '@iplan/contracts'
 import type { AuditLog } from '../../shared/audit'
-import type { SessionAccount, SessionUser } from '../../shared/context'
+import { type SessionAccount, type SessionUser, isAdmin } from '../../shared/context'
 import { AppError, conflict, forbidden, notFound } from '../../shared/errors'
-import { knownFeatures, toUserGroupDto } from './access.mapper'
+import { knownFeatures, toCircleDto, toUserGroupDto } from './access.mapper'
 import type { AccessRepository } from './access.repository'
 
 /** Who may use which feature, and the admin screens that manage groups. */
@@ -20,7 +22,7 @@ export class AccessService {
 
   /** Admins see everything; pending accounts see nothing. */
   async featuresFor(account: SessionAccount): Promise<FeatureKey[]> {
-    if (account.role === 'admin') return [...FEATURE_KEYS]
+    if (isAdmin(account)) return [...FEATURE_KEYS]
     if (account.status !== 'active') return []
     const granted = new Set(knownFeatures(await this.access.featuresFor(account.id)))
     return FEATURE_KEYS.filter((key) => granted.has(key))
@@ -33,8 +35,23 @@ export class AccessService {
     }
   }
 
+  /** True when both people are in at least one common circle (who may invite whom). */
+  async shareCircle(a: string, b: string): Promise<boolean> {
+    const circles = await this.access.circleIdsFor([a, b])
+    const mine = new Set(circles.get(a) ?? [])
+    return (circles.get(b) ?? []).some((id) => mine.has(id))
+  }
+
+  /** Inviting someone needs a shared circle, unless the inviter is an admin. */
+  async requireSharedCircle(actor: SessionUser, userId: string): Promise<void> {
+    if (isAdmin(actor)) return
+    if (!(await this.shareCircle(actor.id, userId))) {
+      throw new AppError('NOT_IN_CIRCLE', 403, 'You can only invite people in your circles')
+    }
+  }
+
   private check(actor: SessionUser) {
-    if (actor.role !== 'admin') throw forbidden('Admin only')
+    if (!isAdmin(actor)) throw forbidden('Admin only')
   }
 
   async groups(actor: SessionUser): Promise<UserGroupDto[]> {
@@ -96,6 +113,66 @@ export class AccessService {
       entityId: id,
       data: { name: group.name },
     })
+  }
+
+  async circles(actor: SessionUser): Promise<CircleDto[]> {
+    this.check(actor)
+    return (await this.access.circles()).map(toCircleDto)
+  }
+
+  async createCircle(actor: SessionUser, input: CircleInput): Promise<CircleDto> {
+    this.check(actor)
+    await this.ensureUniqueCircle(input.name)
+    const id = await this.access.createCircle(input.name)
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'circle.create',
+      entityType: 'circle',
+      entityId: id,
+      data: { name: input.name },
+    })
+    return this.foundCircle(id)
+  }
+
+  async renameCircle(actor: SessionUser, id: string, input: CircleInput): Promise<CircleDto> {
+    this.check(actor)
+    await this.foundCircle(id)
+    await this.ensureUniqueCircle(input.name, id)
+    await this.access.renameCircle(id, input.name)
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'circle.update',
+      entityType: 'circle',
+      entityId: id,
+      data: { name: input.name },
+    })
+    return this.foundCircle(id)
+  }
+
+  async deleteCircle(actor: SessionUser, id: string): Promise<void> {
+    this.check(actor)
+    const circle = await this.foundCircle(id)
+    await this.access.deleteCircle(id)
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'circle.delete',
+      entityType: 'circle',
+      entityId: id,
+      data: { name: circle.name },
+    })
+  }
+
+  private async foundCircle(id: string): Promise<CircleDto> {
+    const row = (await this.access.circles()).find((c) => c.id === id)
+    if (!row) throw notFound('Circle')
+    return toCircleDto(row)
+  }
+
+  private async ensureUniqueCircle(name: string, exceptId?: string) {
+    const clash = (await this.access.circles()).find(
+      (c) => c.name.toLowerCase() === name.toLowerCase() && c.id !== exceptId,
+    )
+    if (clash) throw conflict('A circle with this name already exists')
   }
 
   private async found(id: string): Promise<UserGroupDto> {

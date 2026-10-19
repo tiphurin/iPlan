@@ -1,6 +1,7 @@
+import { isAdminRole } from '@iplan/contracts'
 import { AdminStatsDto } from '@iplan/contracts'
 import { resolveLocale } from '@iplan/i18n'
-import { Shield, Sparkles } from 'lucide-react'
+import { BookOpen, KeyRound, Shield, Sparkles } from 'lucide-react'
 import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
 import { getLocale, getTranslations } from 'next-intl/server'
@@ -11,7 +12,7 @@ import { FEATURES } from '@/features'
 import { getMe, serverApi } from '@/lib/server-api'
 import { THEME_COOKIE, resolveTheme } from '@/lib/theme'
 import { AvatarEditor } from './avatar-editor'
-import { ProfileForm } from './profile-form'
+import { NicknameForm, ProfileForm } from './profile-form'
 
 export const metadata: Metadata = { title: 'Profile' }
 
@@ -23,8 +24,9 @@ export default async function ProfilePage() {
     cookies(),
   ])
   if (!me) return null
-  const pending =
-    me.role === 'admin' ? (await serverApi('/api/admin/stats', AdminStatsDto)).pendingUsers : 0
+  const pending = isAdminRole(me.role)
+    ? (await serverApi('/api/admin/stats', AdminStatsDto)).pendingUsers
+    : 0
   return (
     <>
       <PageHeader title={t('nav.profile')} />
@@ -32,12 +34,19 @@ export default async function ProfilePage() {
         <div className="flex items-center gap-4 rounded-2xl border bg-card p-4">
           <AvatarEditor name={me.name} image={me.image} />
           <div className="min-w-0">
-            <p className="truncate font-display text-xl font-bold">{me.name}</p>
+            <p className="truncate font-display text-xl font-bold">
+              {me.name}
+              {me.nickname && (
+                <span className="ml-1.5 text-base font-medium text-muted-foreground">
+                  ({me.nickname})
+                </span>
+              )}
+            </p>
             <p className="truncate text-sm text-muted-foreground">{me.email}</p>
             <p className="mt-1 flex flex-wrap gap-1.5">
-              {me.role === 'admin' && (
+              {isAdminRole(me.role) && (
                 <span className="rounded-full bg-foreground px-2 py-0.5 text-xs font-semibold text-background">
-                  {t('admin.roleAdmin')}
+                  {me.role === 'superadmin' ? t('admin.roleSuperadmin') : t('admin.roleAdmin')}
                 </span>
               )}
               {me.features.map((key) => (
@@ -53,8 +62,22 @@ export default async function ProfilePage() {
           </div>
         </div>
 
+        <NicknameForm initial={me.nickname} />
+
         <ListGroup>
-          {me.role === 'admin' && (
+          {me.role === 'superadmin' && (
+            <ListRow
+              href="/change-password"
+              icon={<KeyRound aria-hidden className="size-5 text-l5" />}
+              title={t('password.title')}
+            />
+          )}
+          <ListRow
+            href="/guide"
+            icon={<BookOpen aria-hidden className="size-5 text-la" />}
+            title={t('guide.open')}
+          />
+          {isAdminRole(me.role) && (
             <ListRow
               href="/admin"
               icon={<Shield aria-hidden className="size-5 text-l1" />}

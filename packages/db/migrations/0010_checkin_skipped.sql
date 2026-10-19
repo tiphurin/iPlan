@@ -1,0 +1,1 @@
+ALTER TABLE "trip_item_check_in" ADD COLUMN "skipped" boolean DEFAULT false NOT NULL;

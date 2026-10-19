@@ -3,9 +3,10 @@ import type { SessionAccount } from '../../shared/context'
 import { randomUUID } from 'node:crypto'
 import type { StorageProvider } from '../../infra/storage'
 import { AVATAR_MAX_BYTES, AVATAR_TYPES } from '../../shared/avatar'
-import { notFound, validationFailed } from '../../shared/errors'
+import { forbidden, notFound, validationFailed } from '../../shared/errors'
+import { sniffType } from '../../shared/file-type'
 import { toMeDto } from './me.mapper'
-import type { MeRepository } from './me.repository'
+import type { MeRepository, UserChanges, UserRow } from './me.repository'
 
 export interface FeatureSource {
   featuresFor(account: SessionAccount): Promise<FeatureKey[]>
@@ -18,32 +19,49 @@ export class MeService {
     private readonly storage?: StorageProvider,
   ) {}
 
+  private async dto(row: UserRow, actor: SessionAccount): Promise<MeDto> {
+    const [features, hasPassword] = await Promise.all([
+      this.access.featuresFor(actor),
+      this.users.hasPassword(row.id),
+    ])
+    return toMeDto(row, actor, features, hasPassword)
+  }
+
+  /** After the password changed: the bootstrap password no longer has to be replaced. */
+  async passwordChanged(actor: SessionAccount): Promise<MeDto> {
+    const row = await this.users.update(actor.id, { mustChangePassword: false })
+    if (!row) throw notFound('User')
+    return this.dto(row, { ...actor, mustChangePassword: false })
+  }
+
   private requireStorage(): StorageProvider {
     if (!this.storage) throw new Error('Storage is not configured')
     return this.storage
   }
 
-  /** Replaces the profile picture; the old file is deleted afterwards. */
-  async setAvatar(
-    actor: SessionAccount,
-    file: { bytes: Uint8Array; contentType: string },
-  ): Promise<MeDto> {
+  /**
+   * Replaces the profile picture; the old file is deleted afterwards. The type comes
+   * from the bytes themselves, never from what the browser declared.
+   */
+  async setAvatar(actor: SessionAccount, bytes: Uint8Array): Promise<MeDto> {
     const storage = this.requireStorage()
-    if (!(AVATAR_TYPES as readonly string[]).includes(file.contentType)) {
-      throw validationFailed({ file: 'Use a JPEG, PNG or WebP image' })
-    }
-    if (file.bytes.byteLength > AVATAR_MAX_BYTES) {
+    if (actor.status !== 'active') throw forbidden('Waiting for approval')
+    if (bytes.byteLength > AVATAR_MAX_BYTES) {
       throw validationFailed({ file: 'Image is too large' })
+    }
+    const contentType = sniffType(bytes)
+    if (!contentType || !(AVATAR_TYPES as readonly string[]).includes(contentType)) {
+      throw validationFailed({ file: 'Use a JPEG, PNG or WebP image' })
     }
     const before = await this.users.findById(actor.id)
     if (!before) throw notFound('User')
-    const ext = file.contentType.split('/')[1] ?? 'webp'
+    const ext = contentType.split('/')[1] ?? 'webp'
     const key = `avatars/${actor.id}/${randomUUID()}.${ext}`
-    await storage.put(key, file.bytes, file.contentType)
+    await storage.put(key, bytes, contentType)
     const row = await this.users.update(actor.id, { avatarKey: key })
     if (!row) throw notFound('User')
     if (before.avatarKey) await storage.delete(before.avatarKey).catch(() => undefined)
-    return toMeDto(row, actor, await this.access.featuresFor(actor))
+    return this.dto(row, actor)
   }
 
   /** Back to the Google photo (or initials). */
@@ -57,7 +75,7 @@ export class MeService {
         .delete(before.avatarKey)
         .catch(() => undefined)
     }
-    return toMeDto(row, actor, await this.access.featuresFor(actor))
+    return this.dto(row, actor)
   }
 
   /** Storage key and type of someone's uploaded picture, or null. */
@@ -71,18 +89,19 @@ export class MeService {
   async get(actor: SessionAccount): Promise<MeDto> {
     const row = await this.users.findById(actor.id)
     if (!row) throw notFound('User')
-    return toMeDto(row, actor, await this.access.featuresFor(actor))
+    return this.dto(row, actor)
   }
 
   async update(actor: SessionAccount, input: UpdateMeInput): Promise<MeDto> {
-    const changes: { name?: string; locale?: string } = {}
+    const changes: UserChanges = {}
     if (input.name !== undefined) changes.name = input.name
     if (input.locale !== undefined) changes.locale = input.locale
+    if (input.nickname !== undefined) changes.nickname = input.nickname || null
     const row =
       Object.keys(changes).length > 0
         ? await this.users.update(actor.id, changes)
         : await this.users.findById(actor.id)
     if (!row) throw notFound('User')
-    return toMeDto(row, actor, await this.access.featuresFor(actor))
+    return this.dto(row, actor)
   }
 }

@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+  type AnyPgColumn,
   bigint,
   boolean,
   date,
@@ -46,6 +47,11 @@ export const user = pgTable('user', {
   status: text('status').notNull().default('pending'),
   /** Uploaded profile picture (storage key); wins over the Google `image` URL. */
   avatarKey: text('avatar_key'),
+  nickname: text('nickname'),
+  /** Set on the built-in admin when its password comes from SUPERADMIN_PASSWORD. */
+  mustChangePassword: boolean('must_change_password').notNull().default(false),
+  /** SHA-256 of the SUPERADMIN_PASSWORD last applied, so a new value resets the password. */
+  bootstrapSecretHash: text('bootstrap_secret_hash'),
 })
 
 export const session = pgTable(
@@ -139,6 +145,83 @@ export const groupFeature = pgTable(
     featureKey: text('feature_key').notNull(),
   },
   (t) => [primaryKey({ columns: [t.groupId, t.featureKey] })],
+)
+
+/** Features an admin gave one person directly (on top of their groups'). */
+export const userFeature = pgTable(
+  'user_feature',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    featureKey: text('feature_key').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.featureKey] })],
+)
+
+/** Circles: people in the same circle can find each other to invite. */
+export const circle = pgTable('circle', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull().unique(),
+  createdAt,
+})
+
+export const circleMember = pgTable(
+  'circle_member',
+  {
+    circleId: uuid('circle_id')
+      .notNull()
+      .references(() => circle.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt,
+  },
+  (t) => [
+    primaryKey({ columns: [t.circleId, t.userId] }),
+    index('circle_member_user_idx').on(t.userId),
+  ],
+)
+
+/**
+ * Secret per person and trip for calendar subscriptions (calendar apps can't sign in).
+ * Rotating the token cuts off old links.
+ */
+export const calendarFeed = pgTable(
+  'calendar_feed',
+  {
+    token: text('token').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    tripId: uuid('trip_id')
+      .notNull()
+      .references(() => trip.id, { onDelete: 'cascade' }),
+    createdAt,
+  },
+  (t) => [uniqueIndex('calendar_feed_user_trip_idx').on(t.userId, t.tripId)],
+)
+
+export const invitationKind = pgEnum('invitation_kind', ['trip', 'ledger'])
+
+/** A person invited into a trip or shared wallet; becomes a member only after accepting. */
+export const invitation = pgTable(
+  'invitation',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    kind: invitationKind('kind').notNull(),
+    targetId: uuid('target_id').notNull(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    role: text('role').notNull(),
+    invitedBy: text('invited_by').references(() => user.id, { onDelete: 'set null' }),
+    createdAt,
+  },
+  (t) => [
+    uniqueIndex('invitation_target_user_idx').on(t.kind, t.targetId, t.userId),
+    index('invitation_user_idx').on(t.userId),
+  ],
 )
 
 // ---------------------------------------------------------------------------
@@ -255,6 +338,8 @@ export const tripItemCheckIn = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     checkedInAt: timestamptz('checked_in_at').notNull().defaultNow(),
+    /** Skipped on purpose (not late, not done). */
+    skipped: boolean('skipped').notNull().default(false),
   },
   (t) => [primaryKey({ columns: [t.itemId, t.userId] })],
 )
@@ -353,6 +438,8 @@ export const expense = pgTable(
     itemId: uuid('item_id').references(() => tripItem.id, { onDelete: 'set null' }),
     title: text('title').notNull(),
     category: expenseCategory('category').notNull().default('other'),
+    /** Finer kind within the category, e.g. transport: grab, bolt, taxi. */
+    subcategory: text('subcategory'),
     amountMinor: bigint('amount_minor', { mode: 'bigint' }).notNull(),
     currency: text('currency').notNull(),
     /** Base-currency units per 1 unit of `currency` when this was spent. */
@@ -407,7 +494,13 @@ export const financeCategory = pgTable(
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt,
   },
-  (t) => [index('finance_category_owner_idx').on(t.ownerId)],
+  (t) => [
+    index('finance_category_owner_idx').on(t.ownerId),
+    // Built-in categories exist once per person, even when two requests create them at once.
+    uniqueIndex('finance_category_default_idx')
+      .on(t.ownerId, t.name)
+      .where(sql`${t.name} like 'default:%'`),
+  ],
 )
 
 export const recurringKind = pgEnum('recurring_kind', ['income', 'deduction', 'fixed'])
@@ -551,11 +644,20 @@ export const ledgerEntry = pgTable(
     paidBy: text('paid_by').notNull(),
     splitMode: splitMode('split_mode').notNull(),
     note: text('note'),
+    /** Settlement for one month's balance ("YYYY-MM"), set from the month status. */
+    settlesMonth: text('settles_month'),
+    /** Settlement paying back one expense, set by "paid back" on that expense. */
+    settlesEntryId: uuid('settles_entry_id').references((): AnyPgColumn => ledgerEntry.id, {
+      onDelete: 'cascade',
+    }),
     createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
     createdAt,
     updatedAt,
   },
-  (t) => [index('ledger_entry_ledger_date_idx').on(t.ledgerId, t.date)],
+  (t) => [
+    index('ledger_entry_ledger_date_idx').on(t.ledgerId, t.date),
+    index('ledger_entry_settles_entry_idx').on(t.settlesEntryId),
+  ],
 )
 
 export const ledgerShare = pgTable(

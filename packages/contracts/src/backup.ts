@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ExpenseCategory } from './expenses'
+import { ExpenseCategory, MajorAmount, Rate } from './expenses'
 import { InfoCardKind } from './checklist'
 import { TripItemDetails, TripItemKind } from './trips'
 
@@ -18,9 +18,10 @@ export const TripBackup = z.object({
       .string()
       .regex(/^[A-Z]{3}$/)
       .default('THB'),
-    fxRates: z.record(z.string(), z.string()).default({}),
+    /** Base-currency units per 1 unit of each currency, like the trip's saved rates. */
+    fxRates: z.record(z.string().regex(/^[A-Z]{3}$/), Rate).default({}),
     /** Major units of the base currency. */
-    dailyBudget: z.string().nullable().optional(),
+    dailyBudget: MajorAmount.nullable().optional(),
   }),
   items: z
     .array(
@@ -66,7 +67,7 @@ export const TripBackup = z.object({
         dayDate: z.iso.date(),
         title: z.string(),
         category: ExpenseCategory,
-        amount: z.string(),
+        amount: MajorAmount,
         currency: z.string(),
         fxRate: z.string(),
         paidBy: z.string(),

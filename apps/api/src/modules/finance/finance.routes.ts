@@ -12,7 +12,7 @@ import {
   TransactionInput,
 } from '@iplan/contracts'
 import type { Month } from '@iplan/core'
-import { requireUser } from '../../shared/auth-guard'
+import { requireAdmin, requireUser } from '../../shared/auth-guard'
 import { createRouter, errorResponses } from '../../shared/openapi'
 import type { FinanceService } from './finance.service'
 
@@ -23,6 +23,14 @@ const errors = { 401: errorResponses[401], 404: errorResponses[404], 422: errorR
 const done = { 204: { description: 'Done' }, ...errors }
 
 const r = {
+  monthOf: createRoute({
+    method: 'get',
+    path: '/admin/users/{userId}/finance/months/{month}',
+    tags: ['Admin'],
+    summary: "Admin: someone's month (read-only, logged)",
+    request: { params: z.object({ userId: z.string().min(1), month: FinanceMonth }) },
+    responses: { 200: { description: 'Month', content: json(MonthDto) }, ...errors },
+  }),
   month: createRoute({
     method: 'get',
     path: '/finance/months/{month}',
@@ -154,6 +162,10 @@ const r = {
 
 export function financeRoutes(service: FinanceService) {
   return createRouter()
+    .openapi(r.monthOf, async (c) => {
+      const { userId, month } = c.req.valid('param')
+      return c.json(await service.monthOf(requireAdmin(c), userId, month as Month), 200)
+    })
     .openapi(r.month, async (c) =>
       c.json(await service.month(requireUser(c), c.req.valid('param').month as Month), 200),
     )

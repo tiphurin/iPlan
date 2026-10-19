@@ -14,6 +14,22 @@ export const ExpenseCategory = z.enum([
 ])
 export type ExpenseCategory = z.infer<typeof ExpenseCategory>
 
+/** Ways of getting around, used for transport expenses and "move" plan items. */
+export const TRANSPORT_MODES = [
+  'taxi',
+  'grab',
+  'bolt',
+  'lineman',
+  'drive',
+  'train',
+  'bus',
+  'boat',
+  'plane',
+  'walk',
+] as const
+export const TransportMode = z.enum(TRANSPORT_MODES)
+export type TransportMode = z.infer<typeof TransportMode>
+
 export const SplitMode = z.enum(['equal', 'exact', 'percent'])
 export type SplitMode = z.infer<typeof SplitMode>
 
@@ -21,12 +37,15 @@ export type SplitMode = z.infer<typeof SplitMode>
 const Major = z
   .string()
   .trim()
-  .regex(/^\d+(\.\d+)?$/, 'Enter a number')
+  .regex(/^\d{1,12}(\.\d+)?$/, 'Enter a number')
 const Minor = z.string().regex(/^-?\d+$/)
+/** Major-unit amount ("1500.25"), capped like every other amount; backups reuse it. */
+export const MajorAmount = Major
+/** Base-currency units per 1 unit of another currency: positive, bounded so maths stays exact. */
 export const Rate = z
   .string()
   .trim()
-  .regex(/^\d+(\.\d+)?$/, 'Enter a rate')
+  .regex(/^\d{1,9}(\.\d{1,10})?$/, 'Enter a rate')
   .refine((v) => Number(v) > 0, 'Rate must be above zero')
 const Currency = z
   .string()
@@ -51,6 +70,7 @@ export const ExpenseInput = z.object({
   itemId: z.uuid().nullable().optional(),
   title: z.string().trim().min(1).max(120),
   category: ExpenseCategory.default('other'),
+  subcategory: z.string().trim().max(30).nullable().optional(),
   amount: Major,
   currency: Currency,
   /** Base-currency units per 1 unit of `currency`; defaults to the trip's saved rate. */
@@ -76,6 +96,7 @@ export const ExpenseDto = z.object({
   itemId: z.uuid().nullable(),
   title: z.string(),
   category: ExpenseCategory,
+  subcategory: z.string().nullable(),
   amountMinor: Minor,
   currency: z.string(),
   fxRate: z.string(),
@@ -121,6 +142,7 @@ export const ExpenseSummaryDto = z.object({
 export type ExpenseSummaryDto = z.infer<typeof ExpenseSummaryDto>
 
 export const TripMoneySettingsInput = z.object({
+  /** Replaces every saved rate: a currency left out is removed. */
   fxRates: z.record(Currency, Rate).optional(),
   /** Major units of the base currency per day; null removes the budget. */
   dailyBudget: Major.nullable().optional(),

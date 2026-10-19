@@ -3,12 +3,15 @@
 A web app for **planning trips**, **tracking your own monthly money** and **sharing costs** with a partner or friends, in Thai and English. Phone first, and it stretches to tablets and desktop browsers (bottom tabs on phones, a sidebar and multi-column pages on wider screens).
 
 - **Home:** every feature as a tile (ones you don't have yet are shown locked), plus a live card per feature: the trip happening now or the next one, this month's balance, who owes whom.
-- **Trips:** day-by-day plan across time zones drawn as a subway line, a month calendar, a live "Today" view with check-ins, members and invite links, a shared checklist, info cards, trip expenses with splits, slips and photos, calendar export, backup and import.
+- **Trips:** day-by-day plan across time zones drawn as a subway line (each time also shown in home time, plus live home/destination clocks), a month calendar, **calendar subscription** (iPhone or Google; later changes sync by themselves), spending vs budget under each place (foreign currency converted to THB), a live "Today" view with check-ins, members and invite links, a shared checklist, info cards, trip expenses with splits, slips and photos, calendar export, backup and import.
 - **My money (personal):** salary and payslip deductions (tax, social security, provident fund), fixed costs (phone, rent, condo installment), one-month adjustments, one-off spending on a calendar, category budgets, charts.
-- **Shared money:** ledgers such as "me and my partner": who paid, split equally, by amounts (e.g. a 2,000 dinner where the payer covers 1,500) or by percent, running balances and "mark as paid back".
-- **Access:** sign in with Google, then an admin approves you and picks your groups; each group turns features on. Admins can also make other users admins.
-- **Admin:** approvals, users, roles, groups and their features, suspensions, audit log and usage stats.
-- **Profile:** your photo (upload or Google), language, theme, sign out.
+- **Shared wallet:** wallets such as "condo rent": who paid, split equally, by amounts (e.g. a 2,000 dinner where the payer covers 1,500) or by percent; a card per month with its status (not paid / partly paid with the amount / paid), a "paid back" switch per expense, charts (who owes whom, six months, by category).
+- **Invitations:** invite people into a trip or wallet by searching their name, nickname or email; they see it on their home screen (and by email) and join only after accepting. You can only find people who share a **circle** with you.
+- **Access:** sign in with Google, then an admin approves you and picks your groups; each group turns features on. Emails go to admins when someone signs up and to the person when they're approved.
+- **Admins** can switch Trips and Shared wallet lists between "Mine" and "Everyone".
+- **Roles:** the built-in **super admin** (username `admin`) appoints admins, and can view and edit everyone's data; **admins** approve people, manage groups and circles, and can view (read-only) any user's trips, money and wallets. Every look at someone else's data is in the audit log.
+- **Guide:** a picture-by-picture "how to use" page, with extra admin steps for admins.
+- **Profile:** photo (upload or Google), nickname, language (also switchable on every screen), theme, password for the admin account.
 
 Built to run entirely on free tiers with no credit card on file.
 
@@ -41,8 +44,8 @@ iPlan/
 │  │  └─ messages/{th,en}.json  every UI string (CI checks both have the same keys)
 │  └─ api/                      Hono app, never imports Next.js
 │     └─ src/modules/<module>/  <m>.routes.ts → <m>.service.ts → <m>.repository.ts, <m>.mapper.ts
-│        me, access, trips, items, members, checklist, info-cards, expenses, attachments,
-│        finance, ledgers, admin, backup
+│        me, access (groups, circles), people, invitations, trips, items, members, checklist,
+│        info-cards, expenses, attachments, finance, ledgers, admin, backup
 ├─ packages/
 │  ├─ core/        pure domain logic: money (bigint), splits and settlement, budgets, schedule, time zones
 │  ├─ db/          Drizzle schema, migrations, reset + seeds (base, demo, private), legacy converter
@@ -100,7 +103,7 @@ yarn db:reset       # wipe, migrate, add the dev-login accounts (no trips)
 yarn dev            # http://localhost:3000, API docs at /api/docs
 ```
 
-The sign-in page lists every local user under **Dev login**: Demo Owner (admin), Demo Friend (trips only) and New Sign-up (waiting for approval), so each access state can be tried. `yarn db:seed:demo` adds a fictional trip and a year of money for the `/showcase` page.
+Sign in as the built-in admin with **admin / 1234** (from `SUPERADMIN_PASSWORD` in `.env`); you'll be asked to pick a new password first. The sign-in page also lists every local user under **Dev login**: Demo Owner (admin), Demo Friend (trips only) and New Sign-up (waiting for approval), so each access state can be tried. `yarn db:seed:demo` adds a fictional trip and a year of money for the `/showcase` page.
 
 **On your iPhone:** join the same Wi-Fi and open the "Network" URL that `yarn dev` prints (e.g. `http://192.168.1.20:3000`). Share → Add to Home Screen gives the full-screen app.
 

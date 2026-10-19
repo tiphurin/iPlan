@@ -35,6 +35,12 @@ export interface LedgersRepository {
   insertEntry(values: NewEntryRow, shares: ShareRow[]): Promise<string>
   updateEntry(id: string, values: Partial<NewEntryRow>, shares: ShareRow[]): Promise<void>
   deleteEntry(id: string): Promise<void>
+  deleteEntries(ids: string[]): Promise<void>
+  /**
+   * Runs `fn` in one transaction after locking the ledger row, so two people changing
+   * the same wallet's payments at once can't both act on the same old state.
+   */
+  locked<T>(ledgerId: string, fn: (repo: LedgersRepository) => Promise<T>): Promise<T>
 }
 
 export class DrizzleLedgersRepository implements LedgersRepository {
@@ -173,7 +179,23 @@ export class DrizzleLedgersRepository implements LedgersRepository {
     })
   }
 
+  async deleteEntries(ids: string[]) {
+    if (ids.length === 0) return
+    await this.db.delete(schema.ledgerEntry).where(inArray(schema.ledgerEntry.id, ids))
+  }
+
   async deleteEntry(id: string) {
     await this.db.delete(schema.ledgerEntry).where(eq(schema.ledgerEntry.id, id))
+  }
+
+  async locked<T>(ledgerId: string, fn: (repo: LedgersRepository) => Promise<T>): Promise<T> {
+    return this.db.transaction(async (tx) => {
+      await tx
+        .select({ id: schema.ledger.id })
+        .from(schema.ledger)
+        .where(eq(schema.ledger.id, ledgerId))
+        .for('update')
+      return fn(new DrizzleLedgersRepository(tx))
+    })
   }
 }

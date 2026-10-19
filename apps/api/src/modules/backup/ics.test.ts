@@ -38,3 +38,21 @@ describe('ics', () => {
     expect(ics.trim().endsWith('END:VCALENDAR')).toBe(true)
   })
 })
+
+describe('map pins', () => {
+  it('adds GEO and the Apple structured location when coordinates are known', () => {
+    const ics = buildIcs('Trip', [
+      {
+        uid: 'a@iplan',
+        title: 'Palace',
+        start: new Date('2026-10-24T00:00:00Z'),
+        location: 'Gyeongbokgung "main"',
+        geo: { lat: 37.5796, lng: 126.977 },
+      },
+    ])
+    expect(ics).toContain('GEO:37.5796;126.977')
+    expect(ics.replace(/\r\n /g, '')).toContain(
+      'X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-APPLE-RADIUS=100;X-TITLE="Gyeongbokgung  main ":geo:37.5796,126.977',
+    )
+  })
+})

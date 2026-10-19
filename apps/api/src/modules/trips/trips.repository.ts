@@ -1,6 +1,6 @@
 import type { TripRole } from '@iplan/contracts'
 import { type Executor, schema } from '@iplan/db'
-import { and, asc, count, eq, inArray } from 'drizzle-orm'
+import { and, asc, count, eq, inArray, max, min } from 'drizzle-orm'
 
 export type TripRow = typeof schema.trip.$inferSelect
 export type NewTripRow = Omit<typeof schema.trip.$inferInsert, 'id' | 'createdAt' | 'updatedAt'>
@@ -18,14 +18,25 @@ export interface MemberRow {
   role: TripRole
 }
 
+/** What a trip already holds, so date and currency changes can't orphan it. */
+export interface TripContents {
+  expenseCount: number
+  /** Earliest and latest day used by any plan item or expense (null when empty). */
+  firstDay: string | null
+  lastDay: string | null
+}
+
 export interface TripsRepository {
   listForUser(userId: string): Promise<TripWithRole[]>
   /** Null when the trip does not exist or the user is not a member. */
   findForUser(tripId: string, userId: string): Promise<TripWithRole | null>
+  /** Any trip, for admins looking in (role is what the admin gets). */
+  findAny(tripId: string, role: TripRole): Promise<TripWithRole | null>
   members(tripId: string): Promise<MemberRow[]>
   create(values: NewTripRow, ownerId: string): Promise<TripRow>
   update(tripId: string, changes: Partial<NewTripRow>): Promise<TripRow | null>
   delete(tripId: string): Promise<void>
+  contents(tripId: string): Promise<TripContents>
 }
 
 export class DrizzleTripsRepository implements TripsRepository {
@@ -50,6 +61,13 @@ export class DrizzleTripsRepository implements TripsRepository {
       .orderBy(asc(schema.trip.startDate))
     const counts = await this.memberCounts(rows.map((r) => r.trip.id))
     return rows.map((r) => ({ ...r, memberCount: counts.get(r.trip.id) ?? 1 }))
+  }
+
+  async findAny(tripId: string, role: TripRole): Promise<TripWithRole | null> {
+    const [trip] = await this.db.select().from(schema.trip).where(eq(schema.trip.id, tripId))
+    if (!trip) return null
+    const counts = await this.memberCounts([tripId])
+    return { trip, role, memberCount: counts.get(tripId) ?? 0 }
   }
 
   async findForUser(tripId: string, userId: string): Promise<TripWithRole | null> {
@@ -98,5 +116,30 @@ export class DrizzleTripsRepository implements TripsRepository {
 
   async delete(tripId: string): Promise<void> {
     await this.db.delete(schema.trip).where(eq(schema.trip.id, tripId))
+  }
+
+  async contents(tripId: string): Promise<TripContents> {
+    const [[items], [expenses]] = await Promise.all([
+      this.db
+        .select({ first: min(schema.tripItem.dayDate), last: max(schema.tripItem.dayDate) })
+        .from(schema.tripItem)
+        .where(eq(schema.tripItem.tripId, tripId)),
+      this.db
+        .select({
+          n: count(),
+          first: min(schema.expense.dayDate),
+          last: max(schema.expense.dayDate),
+        })
+        .from(schema.expense)
+        .where(eq(schema.expense.tripId, tripId)),
+    ])
+    const days = [items?.first, items?.last, expenses?.first, expenses?.last]
+      .filter((d): d is string => typeof d === 'string')
+      .sort()
+    return {
+      expenseCount: expenses?.n ?? 0,
+      firstDay: days[0] ?? null,
+      lastDay: days.at(-1) ?? null,
+    }
   }
 }

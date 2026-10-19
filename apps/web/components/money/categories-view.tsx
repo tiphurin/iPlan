@@ -8,6 +8,7 @@ import { type FormEvent, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { SectionTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/field'
+import { ApiError } from '@/lib/api-error'
 import { useCategories, useCategoryName, useFinanceMutations } from '@/lib/finance'
 
 export function CategoriesView({ initial }: { initial: FinanceCategoryDto[] }) {
@@ -16,17 +17,34 @@ export function CategoriesView({ initial }: { initial: FinanceCategoryDto[] }) {
   const { data: categories } = useCategories(initial)
   const { saveCategory, deleteCategory } = useFinanceMutations()
   const [color, setColor] = useState('#0ea5e9')
+  /** Problems by category id, or by "new-<kind>" for the add form. */
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const setError = (key: string, message: string | null) =>
+    setErrors((all) => {
+      const rest = Object.fromEntries(Object.entries(all).filter(([k]) => k !== key))
+      return message ? { ...rest, [key]: message } : rest
+    })
+  const messageOf = (e: unknown) =>
+    e instanceof ApiError
+      ? (Object.values(e.fields)[0] ?? t(`errors.${e.code}`))
+      : t('errors.INTERNAL')
 
   function saveBudget(category: FinanceCategoryDto, value: string) {
     const budget = value.replaceAll(',', '').trim() || null
     const current = category.budgetMinor
       ? toDecimalString(money(BigInt(category.budgetMinor), 'THB'))
       : null
-    if (budget === current) return
-    saveCategory.mutate({
-      id: category.id,
-      input: { kind: category.kind, name: category.name, color: category.color, budget },
-    })
+    if (budget === current) return setError(category.id, null)
+    saveCategory.mutate(
+      {
+        id: category.id,
+        input: { kind: category.kind, name: category.name, color: category.color, budget },
+      },
+      {
+        onSuccess: () => setError(category.id, null),
+        onError: (e) => setError(category.id, messageOf(e)),
+      },
+    )
   }
 
   function add(event: FormEvent<HTMLFormElement>, kind: 'income' | 'expense') {
@@ -34,7 +52,16 @@ export function CategoriesView({ initial }: { initial: FinanceCategoryDto[] }) {
     const form = event.currentTarget
     const name = String(new FormData(form).get('name') ?? '').trim()
     if (!name) return
-    saveCategory.mutate({ input: { kind, name, color } }, { onSuccess: () => form.reset() })
+    saveCategory.mutate(
+      { input: { kind, name, color } },
+      {
+        onSuccess: () => {
+          form.reset()
+          setError(`new-${kind}`, null)
+        },
+        onError: (e) => setError(`new-${kind}`, messageOf(e)),
+      },
+    )
   }
 
   return (
@@ -48,35 +75,42 @@ export function CategoriesView({ initial }: { initial: FinanceCategoryDto[] }) {
             {categories
               .filter((c) => c.kind === kind)
               .map((c) => (
-                <li key={c.id} className="flex min-h-12 items-center gap-3 px-4 py-2">
-                  <span
-                    className="size-3 shrink-0 rounded-full"
-                    style={{ backgroundColor: c.color }}
-                  />
-                  <span className="min-w-0 flex-1 truncate">{categoryName(c.name)}</span>
-                  {kind === 'expense' && (
-                    <Input
-                      aria-label={t('finance.category.budget')}
-                      placeholder={t('finance.category.noBudget')}
-                      inputMode="decimal"
-                      className="w-28 text-right tabular-nums"
-                      defaultValue={
-                        c.budgetMinor ? toDecimalString(money(BigInt(c.budgetMinor), 'THB')) : ''
-                      }
-                      onBlur={(e) => saveBudget(c, e.target.value)}
+                <li key={c.id} className="px-4 py-2">
+                  <div className="flex min-h-8 items-center gap-3">
+                    <span
+                      className="size-3 shrink-0 rounded-full"
+                      style={{ backgroundColor: c.color }}
                     />
+                    <span className="min-w-0 flex-1 truncate">{categoryName(c.name)}</span>
+                    {kind === 'expense' && (
+                      <Input
+                        aria-label={t('finance.category.budget')}
+                        placeholder={t('finance.category.noBudget')}
+                        inputMode="decimal"
+                        className="w-28 text-right tabular-nums"
+                        defaultValue={
+                          c.budgetMinor ? toDecimalString(money(BigInt(c.budgetMinor), 'THB')) : ''
+                        }
+                        onBlur={(e) => saveBudget(c, e.target.value)}
+                      />
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-danger"
+                      aria-label={t('common.delete')}
+                      onClick={() =>
+                        window.confirm(t('common.confirmDelete')) && deleteCategory.mutate(c.id)
+                      }
+                    >
+                      <Trash2 aria-hidden className="size-4" />
+                    </Button>
+                  </div>
+                  {errors[c.id] && (
+                    <p role="alert" className="mt-1 text-right text-sm text-danger">
+                      {errors[c.id]}
+                    </p>
                   )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-danger"
-                    aria-label={t('common.delete')}
-                    onClick={() =>
-                      window.confirm(t('common.confirmDelete')) && deleteCategory.mutate(c.id)
-                    }
-                  >
-                    <Trash2 aria-hidden className="size-4" />
-                  </Button>
                 </li>
               ))}
             <li className="p-2">
@@ -93,6 +127,11 @@ export function CategoriesView({ initial }: { initial: FinanceCategoryDto[] }) {
                   <Plus aria-hidden className="size-5" />
                 </Button>
               </form>
+              {errors[`new-${kind}`] && (
+                <p role="alert" className="mt-1 px-2 text-sm text-danger">
+                  {errors[`new-${kind}`]}
+                </p>
+              )}
             </li>
           </ul>
         </section>

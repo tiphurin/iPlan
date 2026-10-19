@@ -2,13 +2,14 @@ import { TripBackup } from '@iplan/contracts'
 import { isValidTimeZone, money, parseMoney, toDecimalString } from '@iplan/core'
 import type { AuditLog } from '../../shared/audit'
 import type { SessionUser } from '../../shared/context'
-import { validationFailed } from '../../shared/errors'
+import { AppError, notFound, validationFailed } from '../../shared/errors'
 import type { ChecklistRepository } from '../checklist/checklist.repository'
 import type { ExpensesRepository } from '../expenses/expenses.repository'
 import type { InfoCardsRepository } from '../info-cards/info-cards.repository'
 import type { ItemsRepository } from '../items/items.repository'
+import { checkItem } from '../items/items.service'
 import type { TripsRepository } from '../trips/trips.repository'
-import type { TripAccess } from '../trips/trips.service'
+import { type TripAccess, checkTripFields } from '../trips/trips.service'
 import type { BackupRepository } from './backup.repository'
 import { buildIcs } from './ics'
 
@@ -18,6 +19,30 @@ export interface BackupSources {
   checklist: Pick<ChecklistRepository, 'list'>
   infoCards: Pick<InfoCardsRepository, 'list'>
   expenses: Pick<ExpensesRepository, 'list'>
+}
+
+type ItemRow = Awaited<ReturnType<BackupSources['items']['listByTrip']>>[number]
+
+function toEvent(item: ItemRow) {
+  const details = item.details as {
+    address?: string
+    flightNumber?: string
+    lat?: number
+    lng?: number
+  }
+  return {
+    uid: `${item.id}@iplan`,
+    title: details.flightNumber ? `${item.title} (${details.flightNumber})` : item.title,
+    start: item.startsAt,
+    end: item.endsAt,
+    location: details.address,
+    geo:
+      typeof details.lat === 'number' && typeof details.lng === 'number'
+        ? { lat: details.lat, lng: details.lng }
+        : undefined,
+    description: item.notes ?? undefined,
+    updatedAt: item.updatedAt,
+  }
 }
 
 /** Calendar export, JSON backup and import of whole trips. */
@@ -32,21 +57,22 @@ export class BackupService {
   async calendar(actor: SessionUser, tripId: string): Promise<{ name: string; ics: string }> {
     const { trip } = await this.access.requireAccess(actor, tripId, 'viewer')
     const items = await this.sources.items.listByTrip(tripId)
-    const ics = buildIcs(
-      trip.name,
-      items.map((item) => {
-        const details = item.details as { address?: string; flightNumber?: string }
-        return {
-          uid: `${item.id}@iplan`,
-          title: details.flightNumber ? `${item.title} (${details.flightNumber})` : item.title,
-          start: item.startsAt,
-          end: item.endsAt,
-          location: details.address,
-          description: item.notes ?? undefined,
-        }
-      }),
-    )
-    return { name: trip.name, ics }
+    return { name: trip.name, ics: buildIcs(trip.name, items.map(toEvent)) }
+  }
+
+  /**
+   * One plan item as an .ics file. Its UID is the same as in the trip feed, so
+   * opening it again on iPhone updates the event instead of adding a copy.
+   */
+  async calendarItem(
+    actor: SessionUser,
+    tripId: string,
+    itemId: string,
+  ): Promise<{ name: string; ics: string }> {
+    const { trip } = await this.access.requireAccess(actor, tripId, 'viewer')
+    const item = (await this.sources.items.listByTrip(tripId)).find((i) => i.id === itemId)
+    if (!item) throw notFound('Item')
+    return { name: item.title, ics: buildIcs(trip.name, [toEvent(item)]) }
   }
 
   async export(actor: SessionUser, tripId: string): Promise<TripBackup> {
@@ -116,12 +142,30 @@ export class BackupService {
     const zones = [data.trip.homeTimeZone, ...data.items.map((i) => i.timeZone)]
     if (zones.some((z) => !isValidTimeZone(z)))
       throw validationFailed({ file: 'Unknown time zone in file' })
-    if (data.trip.endDate < data.trip.startDate)
-      throw validationFailed({ file: 'End date before start date' })
-    const outside = data.items.find(
-      (i) => i.dayDate < data.trip.startDate || i.dayDate > data.trip.endDate,
-    )
-    if (outside) throw validationFailed({ file: `"${outside.title}" is outside the trip dates` })
+    // Same rules as creating a trip and its items by hand (date order, 60-day limit...).
+    const fileProblem = (check: () => void, what: string) => {
+      try {
+        check()
+      } catch (error) {
+        if (!(error instanceof AppError)) throw error
+        const detail = Object.values(error.fields ?? {})[0] ?? error.message
+        throw validationFailed({ file: `${what}: ${detail}` })
+      }
+    }
+    fileProblem(() => checkTripFields(data.trip), 'Trip')
+    for (const i of data.items) {
+      fileProblem(
+        () =>
+          checkItem(data.trip, {
+            dayDate: i.dayDate,
+            startsAt: new Date(i.startsAt),
+            endsAt: i.endsAt ? new Date(i.endsAt) : null,
+            timeZone: i.timeZone,
+            details: i.details ?? {},
+          }),
+        `"${i.title}"`,
+      )
+    }
 
     let dailyBudgetMinor: bigint | null = null
     if (data.trip.dailyBudget) {
@@ -139,7 +183,10 @@ export class BackupService {
         endDate: data.trip.endDate,
         homeTimeZone: data.trip.homeTimeZone,
         baseCurrency: data.trip.baseCurrency,
-        fxRates: data.trip.fxRates,
+        // The base currency is always 1:1, so it is never stored.
+        fxRates: Object.fromEntries(
+          Object.entries(data.trip.fxRates).filter(([code]) => code !== data.trip.baseCurrency),
+        ),
         dailyBudgetMinor,
         createdBy: actor.id,
       },

@@ -1,5 +1,11 @@
 import { createRoute, z } from '@hono/zod-openapi'
-import { CreateUserGroupInput, UpdateUserGroupInput, UserGroupDto } from '@iplan/contracts'
+import {
+  CircleDto,
+  CircleInput,
+  CreateUserGroupInput,
+  UpdateUserGroupInput,
+  UserGroupDto,
+} from '@iplan/contracts'
 import { requireAdmin } from '../../shared/auth-guard'
 import { createRouter, errorResponses } from '../../shared/openapi'
 import type { AccessService } from './access.service'
@@ -52,8 +58,65 @@ const remove = createRoute({
   responses: { 204: { description: 'Deleted' }, ...denied, 404: errorResponses[404] },
 })
 
+const circles = createRoute({
+  method: 'get',
+  path: '/admin/circles',
+  tags,
+  summary: 'Circles: people in one can find each other',
+  responses: { 200: { description: 'Circles', content: json(z.array(CircleDto)) }, ...denied },
+})
+const createCircle = createRoute({
+  method: 'post',
+  path: '/admin/circles',
+  tags,
+  summary: 'Create a circle',
+  request: { body: { content: json(CircleInput), required: true } },
+  responses: {
+    201: { description: 'Circle', content: json(CircleDto) },
+    ...denied,
+    409: errorResponses[409],
+    422: errorResponses[422],
+  },
+})
+const renameCircle = createRoute({
+  method: 'patch',
+  path: '/admin/circles/{id}',
+  tags,
+  summary: 'Rename a circle',
+  request: { params: idParam, body: { content: json(CircleInput), required: true } },
+  responses: {
+    200: { description: 'Circle', content: json(CircleDto) },
+    ...denied,
+    404: errorResponses[404],
+    409: errorResponses[409],
+    422: errorResponses[422],
+  },
+})
+const deleteCircle = createRoute({
+  method: 'delete',
+  path: '/admin/circles/{id}',
+  tags,
+  summary: 'Delete a circle',
+  request: { params: idParam },
+  responses: { 204: { description: 'Deleted' }, ...denied, 404: errorResponses[404] },
+})
+
 export function accessRoutes(service: AccessService) {
   return createRouter()
+    .openapi(circles, async (c) => c.json(await service.circles(requireAdmin(c)), 200))
+    .openapi(createCircle, async (c) =>
+      c.json(await service.createCircle(requireAdmin(c), c.req.valid('json')), 201),
+    )
+    .openapi(renameCircle, async (c) =>
+      c.json(
+        await service.renameCircle(requireAdmin(c), c.req.valid('param').id, c.req.valid('json')),
+        200,
+      ),
+    )
+    .openapi(deleteCircle, async (c) => {
+      await service.deleteCircle(requireAdmin(c), c.req.valid('param').id)
+      return c.body(null, 204)
+    })
     .openapi(list, async (c) => c.json(await service.groups(requireAdmin(c)), 200))
     .openapi(create, async (c) =>
       c.json(await service.createGroup(requireAdmin(c), c.req.valid('json')), 201),

@@ -4,6 +4,7 @@ import {
   type AttachmentDto,
   type AttachmentEntity,
   type AttachmentKind,
+  type FeatureKey,
   MAX_ATTACHMENT_BYTES,
 } from '@iplan/contracts'
 import type { StorageProvider } from '../../infra/storage'
@@ -11,6 +12,7 @@ import type { AuditLog } from '../../shared/audit'
 import type { SessionUser } from '../../shared/context'
 import { notFound, validationFailed } from '../../shared/errors'
 import type { TripAccess } from '../trips/trips.service'
+import { sniffType } from '../../shared/file-type'
 import { toAttachmentDto } from './attachments.mapper'
 import type { AttachmentsRepository } from './attachments.repository'
 
@@ -31,26 +33,15 @@ const EXT: Record<string, string> = {
   'application/pdf': 'pdf',
 }
 
-/** Real file signature, so a renamed file can't pretend to be an image. */
-export function sniffType(bytes: Uint8Array): string | null {
-  const b = (i: number) => bytes[i] ?? -1
-  if (b(0) === 0xff && b(1) === 0xd8 && b(2) === 0xff) return 'image/jpeg'
-  if (b(0) === 0x89 && b(1) === 0x50 && b(2) === 0x4e && b(3) === 0x47) return 'image/png'
-  if (
-    b(0) === 0x52 &&
-    b(1) === 0x49 &&
-    b(2) === 0x46 &&
-    b(3) === 0x46 &&
-    b(8) === 0x57 &&
-    b(9) === 0x45 &&
-    b(10) === 0x42 &&
-    b(11) === 0x50
-  ) {
-    return 'image/webp'
-  }
-  if (b(0) === 0x25 && b(1) === 0x50 && b(2) === 0x44 && b(3) === 0x46) return 'application/pdf'
-  return null
+export { sniffType }
+
+interface FeatureCheck {
+  requireFeature(user: SessionUser, feature: FeatureKey): Promise<void>
 }
+
+/** Trip files need the trips feature; personal finance slips need finance. */
+const featureOf = (entityType: string): FeatureKey =>
+  entityType === 'transaction' ? 'finance' : 'trips'
 
 export class AttachmentsService {
   constructor(
@@ -58,6 +49,7 @@ export class AttachmentsService {
     private readonly storage: StorageProvider,
     private readonly trips: TripAccess,
     private readonly audit: AuditLog,
+    private readonly access: FeatureCheck,
   ) {}
 
   /** Checks access and returns where the files go: `trips/<id>` or `users/<id>`. */
@@ -67,6 +59,7 @@ export class AttachmentsService {
     entityId: string,
     minimum: 'viewer' | 'editor',
   ): Promise<{ tripId: string | null; prefix: string }> {
+    await this.access.requireFeature(actor, featureOf(entityType))
     const scope = await this.attachments.scopeOf(entityType, entityId)
     if (!scope) throw notFound('Item')
     if ('ownerId' in scope) {
@@ -80,9 +73,10 @@ export class AttachmentsService {
 
   private async checkRow(
     actor: SessionUser,
-    row: { tripId: string | null; ownerId: string | null },
+    row: { tripId: string | null; ownerId: string | null; entityType: string },
     minimum: 'viewer' | 'editor',
   ) {
+    await this.access.requireFeature(actor, featureOf(row.entityType))
     if (row.tripId) await this.trips.requireAccess(actor, row.tripId, minimum)
     else if (row.ownerId !== actor.id) throw notFound('Attachment')
   }

@@ -8,7 +8,11 @@ export interface IcsEvent {
   start: Date
   end?: Date | null
   location?: string | undefined
+  /** Map pin; Apple Calendar also shows travel time with it. */
+  geo?: { lat: number; lng: number } | undefined
   description?: string | undefined
+  /** Last change; lets calendars replace an older copy of the same event (same UID). */
+  updatedAt?: Date | undefined
 }
 
 const stamp = (d: Date) =>
@@ -68,7 +72,21 @@ export function buildIcs(calendarName: string, events: IcsEvent[], now = new Dat
       `DTEND:${stamp(end)}`,
       `SUMMARY:${icsText(e.title)}`,
       ...(e.location ? [`LOCATION:${icsText(e.location)}`] : []),
+      ...(e.geo
+        ? [
+            `GEO:${e.geo.lat};${e.geo.lng}`,
+            `X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-APPLE-RADIUS=100;X-TITLE="${(
+              e.location ?? e.title
+            ).replace(/["\r\n]/g, ' ')}":geo:${e.geo.lat},${e.geo.lng}`,
+          ]
+        : []),
       ...(e.description ? [`DESCRIPTION:${icsText(e.description)}`] : []),
+      ...(e.updatedAt
+        ? [
+            `LAST-MODIFIED:${stamp(e.updatedAt)}`,
+            `SEQUENCE:${Math.floor(e.updatedAt.getTime() / 1000)}`,
+          ]
+        : []),
       'END:VEVENT',
     )
   }

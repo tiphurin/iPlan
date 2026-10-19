@@ -18,6 +18,10 @@ export const TripDto = z.object({
   endDate: DateKey,
   homeTimeZone: z.string(),
   baseCurrency: z.string(),
+  /** Base-currency units per 1 unit of each currency: { KRW: "0.0255" }. */
+  fxRates: z.record(z.string(), z.string()),
+  /** Planned spending per day in base minor units. */
+  dailyBudgetMinor: z.string().nullable(),
   /** The caller's role in this trip. */
   role: TripRole,
   memberCount: z.number().int(),

@@ -1,4 +1,4 @@
-import { type Money, formatMoney as formatMoneyCore, localDateKey, zonedParts } from '@iplan/core'
+import { type Money, localDateKey, toDecimalString, zonedParts } from '@iplan/core'
 
 export const LOCALES = ['th', 'en'] as const
 export type Locale = (typeof LOCALES)[number]
@@ -104,8 +104,31 @@ export function formatDateRange(start: string, end: string, options: FormatOptio
   return formatDate(start, options)
 }
 
-export function formatMoney(value: Money, { locale }: FormatOptions): string {
-  return formatMoneyCore(value, locale === 'th' ? 'th-TH' : 'en-GB')
+const SYMBOLS: Record<string, string> = {
+  THB: '฿',
+  KRW: '₩',
+  JPY: '¥',
+  CNY: '¥',
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  VND: '₫',
+}
+
+function group(digits: string): string {
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+/**
+ * "฿1,500.25", "₩35,000", "SGD 12.00". Built by hand (not Intl) so Node and
+ * every browser print the same text.
+ */
+export function formatMoney(value: Money, _options?: FormatOptions): string {
+  const [whole = '0', fraction] = toDecimalString(value).replace('-', '').split('.')
+  const symbol = SYMBOLS[value.currency]
+  const amount = `${group(whole)}${fraction ? `.${fraction}` : ''}`
+  const sign = value.amount < 0n ? '-' : ''
+  return symbol ? `${sign}${symbol}${amount}` : `${sign}${value.currency} ${amount}`
 }
 
 /** Today's date key in a zone, for "is this trip happening today?" checks. */

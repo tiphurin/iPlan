@@ -1,5 +1,6 @@
 export * from './checklist'
 export * from './errors'
+export * from './expenses'
 export * from './me'
 export * from './members'
 export * from './trips'

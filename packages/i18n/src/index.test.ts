@@ -47,7 +47,10 @@ describe('formatters', () => {
   })
 
   it('formats money per locale', () => {
-    expect(formatMoney(money(150025n, 'THB'), en)).toBe('THB 1,500.25')
+    expect(formatMoney(money(150025n, 'THB'), en)).toBe('฿1,500.25')
     expect(formatMoney(money(150025n, 'THB'), th)).toBe('฿1,500.25')
+    expect(formatMoney(money(3500000n, 'KRW'), th)).toBe('₩3,500,000')
+    expect(formatMoney(money(-1200n, 'SGD'), en)).toBe('-SGD 12.00')
+    expect(formatMoney(money(5n, 'THB'), en)).toBe('฿0.05')
   })
 })

@@ -2,10 +2,19 @@
  * Resets the fictional demo data: two users and the "Seoul (demo)" trip.
  * Safe to run repeatedly; it only touches rows with the demo ids.
  */
-import { localDateKey } from '@iplan/core'
+import { convertMoney, localDateKey, money, parseMoney, splitEqual, splitExact } from '@iplan/core'
 import { eq, sql } from 'drizzle-orm'
 import { createDb } from './client'
-import { DEMO_CHECKLIST, DEMO_INFO_CARDS, DEMO_USERS, buildDemoTrip } from './demo'
+import {
+  DEMO_CHECKLIST,
+  DEMO_DAILY_BUDGET_MINOR,
+  DEMO_EXPENSES,
+  DEMO_FX_RATES,
+  DEMO_INFO_CARDS,
+  DEMO_USERS,
+  addDays,
+  buildDemoTrip,
+} from './demo'
 import { loadRootEnv, requireDatabaseUrl } from './env'
 import * as schema from './schema'
 
@@ -29,7 +38,12 @@ async function main() {
     }
 
     await tx.delete(schema.trip).where(eq(schema.trip.id, demo.trip.id))
-    await tx.insert(schema.trip).values({ ...demo.trip, createdBy: owner.id })
+    await tx.insert(schema.trip).values({
+      ...demo.trip,
+      fxRates: DEMO_FX_RATES,
+      dailyBudgetMinor: DEMO_DAILY_BUDGET_MINOR,
+      createdBy: owner.id,
+    })
     await tx.insert(schema.tripMember).values([
       { tripId: demo.trip.id, userId: owner.id, role: 'owner' },
       { tripId: demo.trip.id, userId: friend.id, role: 'editor' },
@@ -60,6 +74,45 @@ async function main() {
     await tx
       .insert(schema.infoCard)
       .values(DEMO_INFO_CARDS.map((card, i) => ({ ...card, tripId: demo.trip.id, sortOrder: i })))
+
+    const ids = { owner: owner.id, friend: friend.id, pool: 'pool' }
+    for (const e of DEMO_EXPENSES) {
+      const amount = parseMoney(e.amount, e.currency).amount
+      const rate = e.currency === 'THB' ? '1' : DEMO_FX_RATES.KRW
+      const shares =
+        e.split === 'equal'
+          ? splitEqual(amount, [owner.id, friend.id])
+          : splitExact(amount, {
+              [owner.id]: parseMoney(e.split.owner, e.currency).amount,
+              [friend.id]: parseMoney(e.split.friend, e.currency).amount,
+            })
+      const [row] = await tx
+        .insert(schema.expense)
+        .values({
+          tripId: demo.trip.id,
+          dayDate: addDays(demo.trip.startDate, e.day),
+          title: e.title,
+          category: e.category,
+          amountMinor: amount,
+          currency: e.currency,
+          fxRate: rate,
+          baseAmountMinor: convertMoney(money(amount, e.currency), {
+            from: e.currency,
+            to: 'THB',
+            rate,
+          }).amount,
+          paidBy: ids[e.paidBy],
+          splitMode: e.split === 'equal' ? 'equal' : 'exact',
+          createdBy: owner.id,
+        })
+        .returning({ id: schema.expense.id })
+      if (!row) continue
+      await tx.insert(schema.expenseShare).values(
+        Object.entries(shares)
+          .filter(([, value]) => e.split === 'equal' || value > 0n)
+          .map(([userId, amountMinor]) => ({ expenseId: row.id, userId, amountMinor })),
+      )
+    }
 
     // Check in to finished items with a little drift so late/early shows up.
     const drift = [3, -2, 12, 0, 7, -6]

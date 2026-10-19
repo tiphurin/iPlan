@@ -92,7 +92,8 @@
     "addItem": "Add to plan",
     "openToday": "Today view",
     "checklist": "Checklist",
-    "info": "Info"
+    "info": "Info",
+    "expenses": "Expenses"
   },
   "kinds": {
     "place": "Place",
@@ -233,5 +234,58 @@
     "wakeLate": "Woke {min} min later than planned",
     "wakeEarly": "Woke {min} min earlier than planned",
     "wakeOnTime": "Woke on time"
+  },
+  "expenses": {
+    "title": "Expenses",
+    "total": "Total spent",
+    "add": "Add expense",
+    "edit": "Edit expense",
+    "empty": "No expenses yet",
+    "settle": "Who pays whom",
+    "settled": "Everyone is square",
+    "pays": "pays",
+    "people": "Per person",
+    "paid": "Paid",
+    "share": "Their share",
+    "net": "Net",
+    "byDay": "Per day vs budget",
+    "byCategory": "By category",
+    "budget": "Budget {amount}",
+    "over": "Over budget",
+    "csv": "Download CSV",
+    "settings": "Exchange rates & budget",
+    "rate": "1 {code} = ? {base}",
+    "dailyBudget": "Daily budget ({base})",
+    "saveSettings": "Save",
+    "addCurrency": "Add currency",
+    "form": {
+      "title": "What for",
+      "amount": "Amount",
+      "currency": "Currency",
+      "rate": "Rate (1 {code} = ? {base})",
+      "paidBy": "Paid by",
+      "pool": "Shared pool",
+      "split": "Split",
+      "equal": "Equally",
+      "exact": "Exact amounts",
+      "percent": "Percent",
+      "remaining": "{amount} left",
+      "over": "{amount} too much",
+      "category": "Category",
+      "day": "Day",
+      "item": "Place in the plan",
+      "none": "None",
+      "note": "Note",
+      "converted": "≈ {amount}"
+    },
+    "categories": {
+      "food": "Food",
+      "transport": "Transport",
+      "shopping": "Shopping",
+      "stay": "Stay",
+      "activity": "Activities",
+      "health": "Health",
+      "other": "Other"
+    }
   }
 }

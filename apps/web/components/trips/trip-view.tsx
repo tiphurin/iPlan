@@ -3,7 +3,7 @@
 import type { TripDetailDto, TripItemDto } from '@iplan/contracts'
 import { currentTripDay } from '@iplan/core'
 import { formatDateRange } from '@iplan/i18n'
-import { ClipboardList, Clock, Info, Pencil, Plus, Users } from 'lucide-react'
+import { ClipboardList, Clock, Info, Pencil, Plus, Users, Wallet } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -78,6 +78,7 @@ export function TripView({
           {(
             [
               ['today', Clock, t('trips.openToday')],
+              ['expenses', Wallet, t('trips.expenses')],
               ['checklist', ClipboardList, t('trips.checklist')],
               ['info', Info, t('trips.info')],
               ['members', Users, t('trips.members', { count: trip.members.length })],

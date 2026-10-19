@@ -374,3 +374,82 @@ export const DEMO_INFO_CARDS: {
     body: 'Tap the T-money card when you get on AND off buses.\nSubway lines are colour-coded; follow the line number.',
   },
 ]
+
+export const DEMO_FX_RATES = { KRW: '0.0255' }
+/** 3,000 THB per day, in satang. */
+export const DEMO_DAILY_BUDGET_MINOR = 300000n
+
+/** Fictional spending; `day` is the trip day index, amounts in major units. */
+export const DEMO_EXPENSES: {
+  day: number
+  title: string
+  category: 'food' | 'transport' | 'shopping' | 'stay' | 'activity' | 'health' | 'other'
+  amount: string
+  currency: 'THB' | 'KRW'
+  paidBy: 'owner' | 'friend' | 'pool'
+  split: 'equal' | { owner: string; friend: string }
+}[] = [
+  {
+    day: 0,
+    title: 'Taxi to the airport',
+    category: 'transport',
+    amount: '450',
+    currency: 'THB',
+    paidBy: 'owner',
+    split: 'equal',
+  },
+  {
+    day: 0,
+    title: 'KRW cash exchange fee',
+    category: 'other',
+    amount: '120',
+    currency: 'THB',
+    paidBy: 'friend',
+    split: 'equal',
+  },
+  {
+    day: 1,
+    title: 'AREX tickets',
+    category: 'transport',
+    amount: '19000',
+    currency: 'KRW',
+    paidBy: 'pool',
+    split: 'equal',
+  },
+  {
+    day: 1,
+    title: 'Dakgalbi lunch',
+    category: 'food',
+    amount: '32000',
+    currency: 'KRW',
+    paidBy: 'owner',
+    split: 'equal',
+  },
+  {
+    day: 1,
+    title: 'Palace entry + hanbok',
+    category: 'activity',
+    amount: '60000',
+    currency: 'KRW',
+    paidBy: 'friend',
+    split: { owner: '40000', friend: '20000' },
+  },
+  {
+    day: 1,
+    title: 'Gwangjang Market dinner',
+    category: 'food',
+    amount: '41000',
+    currency: 'KRW',
+    paidBy: 'owner',
+    split: 'equal',
+  },
+  {
+    day: 2,
+    title: 'Myeongdong cosmetics',
+    category: 'shopping',
+    amount: '88000',
+    currency: 'KRW',
+    paidBy: 'friend',
+    split: { owner: '0', friend: '88000' },
+  },
+]

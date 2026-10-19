@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { SplitError, computeBalances, settle, splitEqual, splitExact, splitPercent } from './split'
+import {
+  SplitError,
+  computeBalances,
+  settle,
+  splitByWeights,
+  splitEqual,
+  splitExact,
+  splitPercent,
+} from './split'
 
 const sum = (shares: Record<string, bigint>) => Object.values(shares).reduce((a, b) => a + b, 0n)
 
@@ -83,5 +91,20 @@ describe('balances and settlement', () => {
   it('rejects inconsistent input', () => {
     expect(() => computeBalances([{ paidBy: 'a', amount: 10n, shares: { a: 5n } }])).toThrow()
     expect(() => settle({ a: 5n })).toThrow(/net to zero/)
+  })
+})
+
+describe('splitByWeights', () => {
+  it('keeps proportions and the exact total', () => {
+    // 35,000 KRW split 20,000 / 15,000 becomes 892.50 THB split by the same ratio.
+    const thb = splitByWeights(89250n, { a: 20000n, b: 15000n })
+    expect(thb).toEqual({ a: 51000n, b: 38250n })
+    const odd = splitByWeights(100n, { a: 1n, b: 1n, c: 1n })
+    expect(Object.values(odd).reduce((x, y) => x + y, 0n)).toBe(100n)
+  })
+
+  it('rejects empty or negative weights', () => {
+    expect(() => splitByWeights(10n, { a: 0n })).toThrow(SplitError)
+    expect(() => splitByWeights(10n, { a: 5n, b: -1n })).toThrow(SplitError)
   })
 })

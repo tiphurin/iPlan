@@ -13,48 +13,76 @@
 }
 
 :root {
-  --background: oklch(0.985 0.002 250);
-  --foreground: oklch(0.21 0.02 260);
-  --card: oklch(1 0 0);
-  --muted: oklch(0.955 0.005 250);
-  --muted-foreground: oklch(0.5 0.02 260);
-  --border: oklch(0.91 0.006 250);
-  --primary: oklch(0.52 0.19 262);
-  --primary-foreground: oklch(0.99 0 0);
-  --success: oklch(0.55 0.15 155);
-  --warning: oklch(0.68 0.15 65);
-  --danger: oklch(0.56 0.21 25);
+  --background: #f2f4f7;
+  --foreground: #14171d;
+  --card: #ffffff;
+  --muted: #e9edf2;
+  --muted-foreground: #5a6371;
+  --faint: #8a93a0;
+  --border: #dde2e8;
+  --primary: #00873e;
+  --primary-foreground: #ffffff;
+  --success: #0b8a45;
+  --warning: #b8680f;
+  --danger: #c93a32;
+  /* Seoul subway line colours, reused for routes, days and charts. */
+  --l1: #0052a4;
+  --l2: #00a84d;
+  --l3: #ef7c1c;
+  --l5: #996cac;
+  --la: #0090d2;
+  --lw: #9aa3ae;
+  --lc: #4a5563;
+  --hero-ink: #1f2a37;
   color-scheme: light;
 }
 
 .dark {
-  --background: oklch(0.17 0.012 260);
-  --foreground: oklch(0.95 0.005 250);
-  --card: oklch(0.22 0.014 260);
-  --muted: oklch(0.26 0.014 260);
-  --muted-foreground: oklch(0.72 0.015 260);
-  --border: oklch(0.32 0.014 260);
-  --primary: oklch(0.7 0.15 262);
-  --primary-foreground: oklch(0.16 0.02 262);
-  --success: oklch(0.74 0.14 155);
-  --warning: oklch(0.8 0.14 75);
-  --danger: oklch(0.72 0.17 25);
+  --background: #0e1115;
+  --foreground: #eceff3;
+  --card: #181c22;
+  --muted: #222831;
+  --muted-foreground: #a3acb8;
+  --faint: #7a8492;
+  --border: #2b323c;
+  --primary: #22c46a;
+  --primary-foreground: #0b0e12;
+  --success: #22c46a;
+  --warning: #f0a04b;
+  --danger: #f06a61;
+  --l1: #3d8be0;
+  --l2: #22c46a;
+  --l3: #ff9640;
+  --l5: #b98acb;
+  --la: #2ab2ee;
+  --lw: #6f7884;
+  --lc: #8893a1;
+  --hero-ink: #26303d;
   color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
   .system {
-    --background: oklch(0.17 0.012 260);
-    --foreground: oklch(0.95 0.005 250);
-    --card: oklch(0.22 0.014 260);
-    --muted: oklch(0.26 0.014 260);
-    --muted-foreground: oklch(0.72 0.015 260);
-    --border: oklch(0.32 0.014 260);
-    --primary: oklch(0.7 0.15 262);
-    --primary-foreground: oklch(0.16 0.02 262);
-    --success: oklch(0.74 0.14 155);
-    --warning: oklch(0.8 0.14 75);
-    --danger: oklch(0.72 0.17 25);
+    --background: #0e1115;
+    --foreground: #eceff3;
+    --card: #181c22;
+    --muted: #222831;
+    --muted-foreground: #a3acb8;
+    --faint: #7a8492;
+    --border: #2b323c;
+    --primary: #22c46a;
+    --primary-foreground: #0b0e12;
+    --success: #22c46a;
+    --warning: #f0a04b;
+    --danger: #f06a61;
+    --l1: #3d8be0;
+    --l2: #22c46a;
+    --l3: #ff9640;
+    --l5: #b98acb;
+    --la: #2ab2ee;
+    --lw: #6f7884;
+    --lc: #8893a1;
+    --hero-ink: #26303d;
     color-scheme: dark;
   }
 }
@@ -65,16 +93,28 @@
   --color-card: var(--card);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-faint: var(--faint);
   --color-border: var(--border);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
-  /* iOS uses Sukhumvit Set for Thai via the system font. */
+  --color-l1: var(--l1);
+  --color-l2: var(--l2);
+  --color-l3: var(--l3);
+  --color-l5: var(--l5);
+  --color-la: var(--la);
+  --color-lw: var(--lw);
+  --color-lc: var(--lc);
+  --color-hero-ink: var(--hero-ink);
+  --radius-hero: 22px;
+  /* Body: IBM Plex Sans Thai; headings and numbers: Bai Jamjuree (both via next/font). */
   --font-sans:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Sukhumvit Set', 'Noto Sans Thai', Roboto,
-    'Helvetica Neue', Arial, sans-serif;
+    var(--font-body), -apple-system, BlinkMacSystemFont, 'Sukhumvit Set', 'Noto Sans Thai',
+    system-ui, sans-serif;
+  --font-display:
+    var(--font-heading), var(--font-body), -apple-system, 'Sukhumvit Set', system-ui, sans-serif;
 }
 
 @layer base {
@@ -89,11 +129,45 @@
   * {
     @apply border-border;
   }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+  :focus-visible {
+    outline: 3px solid var(--la);
+    outline-offset: 2px;
+  }
   /* Keep form inputs at 16px so iOS Safari does not zoom on focus. */
   input,
   select,
   textarea {
     font-size: 16px;
+  }
+}
+
+@utility num {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes pulse-ring {
+  50% {
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--node) 10%, transparent);
+  }
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
   }
 }
 

@@ -16,7 +16,10 @@
     "db:seed": "tsx src/seed.ts",
     "db:setup": "yarn db:migrate && yarn db:seed",
     "db:studio": "drizzle-kit studio",
-    "legacy:convert": "tsx scripts/convert-legacy.ts"
+    "legacy:convert": "tsx scripts/convert-legacy.ts",
+    "db:seed:demo": "tsx src/seed-demo.ts",
+    "db:seed:private": "tsx src/seed-private.ts",
+    "db:reset": "tsx src/reset.ts"
   },
   "dependencies": {
     "@iplan/core": "*",

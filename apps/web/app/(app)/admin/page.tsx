@@ -17,7 +17,7 @@ export default async function AdminPage() {
   return (
     <>
       <div className="px-4 pt-[max(0.5rem,env(safe-area-inset-top))]">
-        <BackLink href="/settings" label={t('settings.title')} />
+        <BackLink href="/profile" label={t('nav.profile')} />
       </div>
       <PageHeader title={t('admin.title')} />
       <AdminView stats={stats} meId={me.id} />

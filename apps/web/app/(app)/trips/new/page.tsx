@@ -8,7 +8,7 @@ export default async function NewTripPage() {
   return (
     <>
       <div className="px-4 pt-[max(0.5rem,env(safe-area-inset-top))]">
-        <BackLink href="/" label={t('nav.trips')} />
+        <BackLink href="/trips" label={t('nav.trips')} />
       </div>
       <PageHeader title={t('trips.new')} />
       <TripForm />

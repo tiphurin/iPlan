@@ -101,7 +101,7 @@ export function MembersView({
       return
     await remove.mutateAsync(userId)
     if (leaving) {
-      router.replace('/')
+      router.replace('/trips')
       router.refresh()
     } else await refreshTrip()
   }

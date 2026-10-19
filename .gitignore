@@ -32,3 +32,7 @@ legacy/
 
 # Local uploads (dev storage driver)
 .data/
+
+# Real trip data never goes into this public repo
+/seoul-trip.html
+packages/db/seed/private/

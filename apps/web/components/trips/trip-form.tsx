@@ -49,7 +49,7 @@ export function TripForm({ trip }: { trip?: TripDetailDto }) {
   async function onDelete() {
     if (!trip || !window.confirm(t('trips.confirmDeleteTrip'))) return
     await remove.mutateAsync()
-    router.replace('/')
+    router.replace('/trips')
     router.refresh()
   }
 

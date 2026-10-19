@@ -12,13 +12,18 @@
     "duplicate": "ทำซ้ำ",
     "add": "เพิ่ม",
     "optional": "ไม่บังคับ",
-    "confirmDelete": "ลบรายการนี้?"
+    "confirmDelete": "ลบรายการนี้?",
+    "close": "ปิด"
   },
   "nav": {
     "trips": "ทริป",
     "today": "วันนี้",
     "money": "การเงิน",
-    "settings": "ตั้งค่า"
+    "settings": "ตั้งค่า",
+    "home": "หน้าหลัก",
+    "profile": "โปรไฟล์",
+    "main": "เมนูหลัก",
+    "admin": "ผู้ดูแล"
   },
   "login": {
     "title": "วางแผนเที่ยวและการเงินในที่เดียว",
@@ -26,8 +31,8 @@
     "google": "เข้าสู่ระบบด้วย Google",
     "googleMissing": "ยังไม่ได้ตั้งค่า Google sign-in (ดู docs/INFRA.md)",
     "devTitle": "สำหรับทดสอบในเครื่อง",
-    "devOwner": "เข้าเป็น Demo Owner",
-    "devFriend": "เข้าเป็น Demo Friend"
+    "devEmpty": "ยังไม่มีผู้ใช้ รัน yarn db:reset",
+    "devPending": "รออนุมัติ"
   },
   "home": {
     "greeting": "สวัสดี {name}",
@@ -72,7 +77,10 @@
     "NETWORK": "เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ต",
     "INVITE_INVALID": "ลิงก์เชิญใช้ไม่ได้หรือหมดอายุแล้ว",
     "OWNER_CANNOT_LEAVE": "เจ้าของทริปออกจากทริปไม่ได้ ให้ลบทริปแทน",
-    "CANNOT_CHANGE_SELF": "ลดสิทธิ์หรือระงับบัญชีตัวเองไม่ได้"
+    "CANNOT_CHANGE_SELF": "ลดสิทธิ์หรือระงับบัญชีตัวเองไม่ได้",
+    "ACCOUNT_PENDING": "บัญชีนี้ยังรอผู้ดูแลอนุมัติ",
+    "FEATURE_DISABLED": "คุณยังไม่ได้รับสิทธิ์ใช้ฟีเจอร์นี้",
+    "USER_NOT_FOUND": "ไม่พบผู้ใช้ที่อนุมัติแล้วด้วยอีเมลนี้"
   },
   "trips": {
     "empty": "ยังไม่มีทริป",
@@ -103,7 +111,13 @@
     "openToday": "ดูแบบวันนี้",
     "checklist": "เช็กลิสต์",
     "info": "ข้อมูล",
-    "expenses": "ค่าใช้จ่าย"
+    "expenses": "ค่าใช้จ่าย",
+    "newShort": "ทริปใหม่",
+    "onDay": "กำลังเที่ยว · วันที่ {n}",
+    "startsIn": "{count, plural, =0 {เริ่มวันนี้} other {อีก # วัน}}",
+    "ended": "จบแล้ว",
+    "dayShort": "D{n}",
+    "itemCount": "{count, plural, other {# รายการ}}"
   },
   "kinds": {
     "place": "สถานที่",
@@ -382,7 +396,10 @@
       "fun": "บันเทิง",
       "other": "อื่นๆ"
     },
-    "trend": "แนวโน้ม 6 เดือน"
+    "trend": "แนวโน้ม 6 เดือน",
+    "allDays": "ทุกวัน",
+    "setupTitle": "ตั้งรายได้และค่าใช้จ่ายประจำ",
+    "setupHint": "เงินเดือน ภาษี ประกันสังคม ค่าเช่า ค่าโทรศัพท์ ค่าผ่อน — ใส่ครั้งเดียว ใช้ทุกเดือน"
   },
   "admin": {
     "title": "ผู้ดูแลระบบ",
@@ -411,14 +428,31 @@
       "transactions": "รายการการเงิน",
       "attachments": "ไฟล์แนบ",
       "storageBytes": "พื้นที่ไฟล์ (จาก 10 GB)",
-      "databaseBytes": "ขนาดฐานข้อมูล (จาก 0.5 GB)"
+      "databaseBytes": "ขนาดฐานข้อมูล (จาก 0.5 GB)",
+      "pendingUsers": "รออนุมัติ"
     },
     "filter": "กรองตาม action",
     "prev": "ก่อนหน้า",
     "next": "ถัดไป",
     "page": "หน้า {page}/{pages}",
     "empty": "ไม่มีข้อมูล",
-    "open": "เปิดหน้าผู้ดูแลระบบ"
+    "open": "เปิดหน้าผู้ดูแลระบบ",
+    "tabs": {
+      "approvals": "รออนุมัติ",
+      "users": "ผู้ใช้",
+      "groups": "กลุ่ม",
+      "overview": "ภาพรวม",
+      "audit": "Audit log"
+    },
+    "approvalsHint": "คนที่ sign in ด้วย Google ครั้งแรกจะรออยู่ที่นี่ เลือกกลุ่มแล้วกดอนุมัติ",
+    "noPending": "ไม่มีคนรออนุมัติ",
+    "groups": "กลุ่ม (กำหนดฟีเจอร์ที่ใช้ได้)",
+    "approve": "อนุมัติ",
+    "reject": "ปฏิเสธ",
+    "groupsHint": "แต่ละกลุ่มเปิดฟีเจอร์ได้หลายอย่าง ผู้ใช้ได้ฟีเจอร์รวมจากทุกกลุ่มที่อยู่",
+    "memberCount": "{count, plural, other {สมาชิก # คน}}",
+    "confirmDeleteGroup": "ลบกลุ่ม \"{name}\"? สมาชิกจะเสียสิทธิ์ฟีเจอร์ของกลุ่มนี้",
+    "newGroup": "ชื่อกลุ่มใหม่"
   },
   "backup": {
     "title": "ปฏิทินและสำรองข้อมูล",
@@ -525,6 +559,127 @@
         "title": "API docs",
         "body": "เอกสาร OpenAPI ของทุก endpoint"
       }
+    }
+  },
+  "features": {
+    "trips": "ทริป",
+    "finance": "การเงินส่วนตัว",
+    "tripsHint": "วางแผนเที่ยว หารค่าใช้จ่าย",
+    "financeHint": "รายรับ รายจ่าย ของตัวเองรายเดือน",
+    "shared": "การเงินร่วม",
+    "sharedHint": "หารค่าใช้จ่ายกับแฟน/เพื่อน",
+    "tripsShort": "ทริป",
+    "financeShort": "การเงิน",
+    "sharedShort": "หารกัน"
+  },
+  "dashboard": {
+    "greeting": "สวัสดี {name}",
+    "apps": "ฟีเจอร์",
+    "noFeatures": "ยังไม่มีฟีเจอร์ที่เปิดให้ใช้",
+    "noFeaturesHint": "ติดต่อผู้ดูแลระบบเพื่อขอสิทธิ์",
+    "onTrip": "กำลังเที่ยว",
+    "dayN": "วันที่ {n}",
+    "next": "ถัดไป",
+    "openToday": "เปิดหน้าวันนี้",
+    "nextTrip": "ทริปถัดไป",
+    "inDays": "{count, plural, =0 {วันนี้} other {อีก # วัน}}",
+    "planTrip": "วางแผนทริปใหม่",
+    "planTripHint": "เพิ่มแผนรายวัน เช็กลิสต์ และค่าใช้จ่าย",
+    "balanceThisMonth": "คงเหลือเดือนนี้",
+    "income": "รายรับ",
+    "spending": "รายจ่าย",
+    "budgetAlerts": "{count, plural, other {# หมวดใกล้/เกินงบ}}",
+    "locked": "ยังไม่ได้รับสิทธิ์ · ขอจากผู้ดูแล",
+    "startShared": "เริ่มหารค่าใช้จ่ายกับคนอื่น",
+    "startSharedHint": "เช่น \"ผมกับแฟน\" บันทึกใครจ่าย หารเท่าหรือไม่เท่าก็ได้",
+    "sharedOwedToYou": "คนอื่นค้างคุณรวม",
+    "sharedYouOwe": "คุณค้างคนอื่นรวม",
+    "sharedSettled": "การเงินร่วม · เคลียร์หมดแล้ว"
+  },
+  "calendar": {
+    "previous": "เดือนก่อน",
+    "next": "เดือนถัดไป",
+    "open": "เปิดปฏิทิน",
+    "title": "ปฏิทิน"
+  },
+  "timeline": {
+    "fixed": "นัดแน่นอน",
+    "verify": "ต้องเช็ก",
+    "optional": "ไม่บังคับ",
+    "budget": "งบ"
+  },
+  "profile": {
+    "adminHint": "อนุมัติผู้ใช้ กลุ่ม และสิทธิ์ฟีเจอร์",
+    "pending": "{count, plural, other {รอ #}}",
+    "changePhoto": "เปลี่ยนรูปโปรไฟล์",
+    "removePhoto": "ใช้รูปเดิม"
+  },
+  "pending": {
+    "title": "รอผู้ดูแลอนุมัติ",
+    "body": "บัญชี {email} เข้าสู่ระบบแล้ว แต่ต้องให้ผู้ดูแลระบบอนุมัติและเลือกฟีเจอร์ให้ก่อน",
+    "hint": "เมื่ออนุมัติแล้ว กด \"ตรวจสอบอีกครั้ง\" หรือเปิดแอปใหม่",
+    "check": "ตรวจสอบอีกครั้ง"
+  },
+  "shared": {
+    "subtitle": "หารค่าใช้จ่ายกับแฟนหรือเพื่อน แยกจากการเงินส่วนตัว",
+    "empty": "ยังไม่มีบัญชีร่วม",
+    "emptyHint": "สร้างบัญชี เช่น \"ผมกับแฟน\" แล้วเพิ่มอีกฝ่ายด้วยอีเมล",
+    "newTitle": "สร้างบัญชีร่วมใหม่",
+    "newName": "ชื่อบัญชีร่วม",
+    "newPlaceholder": "เช่น ผมกับแฟน, ห้องเช่า",
+    "create": "สร้าง",
+    "entryCount": "{count, plural, other {# รายการ}}",
+    "settled": "เคลียร์กันหมดแล้ว",
+    "owedToYou": "อีกฝ่ายค้างคุณ {amount}",
+    "youOwe": "คุณค้าง {amount}",
+    "you": "คุณ",
+    "yourBalance": "ยอดของคุณ",
+    "othersOweYou": "คนอื่นต้องจ่ายคืนคุณ",
+    "youOweOthers": "คุณต้องจ่ายคืนคนอื่น",
+    "thisMonth": "เดือนนี้ใช้ร่วมกัน {total} · ส่วนของคุณ {mine}",
+    "toSettle": "ต้องโอนคืน",
+    "markPaid": "โอนแล้ว",
+    "confirmSettle": "บันทึกว่าโอนคืนแล้ว?",
+    "members": "สมาชิก",
+    "gets": "ได้คืน {amount}",
+    "owes": "ค้าง {amount}",
+    "confirmRemove": "เอา {name} ออกจากบัญชีนี้?",
+    "addByEmail": "อีเมลของอีกฝ่าย (ต้องได้รับอนุมัติแล้ว)",
+    "delete": "ลบบัญชีร่วมนี้",
+    "confirmDelete": "ลบ \"{name}\" และทุกรายการ?",
+    "history": "รายการ",
+    "noEntries": "ยังไม่มีรายการ กด \"เพิ่ม\" เพื่อบันทึกค่าใช้จ่ายแรก",
+    "settlementTitle": "{from} โอนคืน {to}",
+    "paidBy": "{name} จ่าย",
+    "addCost": "เพิ่มค่าใช้จ่าย",
+    "editCost": "แก้ไขค่าใช้จ่าย",
+    "amount": "จำนวนเงิน",
+    "what": "รายการ",
+    "date": "วันที่",
+    "whoPaid": "ใครจ่ายไปก่อน",
+    "howSplit": "หารยังไง",
+    "modeEqual": "หารเท่า",
+    "modeExact": "กำหนดเอง",
+    "modePercent": "เปอร์เซ็นต์",
+    "paysAll": "{name} จ่ายทั้งหมด",
+    "leftToAssign": "ยังเหลืออีก {amount} ที่ยังไม่ได้แบ่ง",
+    "overAssigned": "แบ่งเกินมา {amount}",
+    "percentMust": "รวมต้องได้ 100% (ตอนนี้ {sum}%)",
+    "checkSplit": "ตรวจสอบการแบ่งอีกครั้ง",
+    "previewPayer": "ส่วนของ {name} (จ่ายไปแล้ว)",
+    "previewOwes": "{name} ต้องคืน {payer}",
+    "note": "หมายเหตุ",
+    "undoSettle": "ยกเลิกการโอนคืนนี้",
+    "confirmUndoSettle": "ยกเลิกการโอนคืน? ยอดค้างจะกลับมา",
+    "categories": {
+      "food": "อาหาร",
+      "groceries": "ของใช้/ตลาด",
+      "home": "บ้าน/ค่าเช่า",
+      "bills": "ค่าน้ำไฟ/บิล",
+      "transport": "เดินทาง",
+      "fun": "เที่ยวเล่น",
+      "travel": "ทริป",
+      "other": "อื่นๆ"
     }
   }
 }

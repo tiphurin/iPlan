@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { FakeAudit, InMemoryAdmin, users } from '../../testing/fakes'
+import { FakeAudit, GROUP_IDS, InMemoryAccess, InMemoryAdmin, users } from '../../testing/fakes'
 import { AdminService } from './admin.service'
 
 const admin = { ...users.owner, role: 'admin' as const }
 
 function setup() {
   const repo = new InMemoryAdmin()
+  const access = new InMemoryAccess()
   const audit = new FakeAudit()
-  return { repo, audit, service: new AdminService(repo, audit) }
+  return { repo, access, audit, service: new AdminService(repo, access, audit) }
 }
 
 describe('AdminService', () => {
@@ -46,6 +47,31 @@ describe('AdminService', () => {
     })
     await expect(service.updateUser(admin, 'nobody', { role: 'user' })).rejects.toMatchObject({
       code: 'NOT_FOUND',
+    })
+  })
+
+  it('lists the waiting list and approves into a group', async () => {
+    const { access, audit, service } = setup()
+    const waiting = await service.users(admin, undefined, 1, 'pending')
+    expect(waiting.users.map((u) => u.id)).toEqual(['stranger'])
+    expect(waiting.users[0]).toMatchObject({ status: 'pending', groupIds: [] })
+
+    const approved = await service.updateUser(admin, 'stranger', {
+      status: 'active',
+      groupIds: [GROUP_IDS.travelers],
+    })
+    expect(approved).toMatchObject({ status: 'active', groupIds: [GROUP_IDS.travelers] })
+    expect(await access.featuresFor('stranger')).toEqual(['trips'])
+    expect(audit.entries.at(-1)).toMatchObject({ action: 'admin.approve', entityId: 'stranger' })
+  })
+
+  it('rejects unknown groups and never sends an admin back to the waiting list', async () => {
+    const { service } = setup()
+    await expect(
+      service.updateUser(admin, 'viewer', { groupIds: ['00000000-0000-4000-8000-00000000ffff'] }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+    await expect(service.updateUser(admin, 'owner', { status: 'pending' })).rejects.toMatchObject({
+      code: 'CANNOT_CHANGE_SELF',
     })
   })
 })

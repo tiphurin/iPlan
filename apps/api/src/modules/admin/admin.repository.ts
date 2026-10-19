@@ -7,6 +7,7 @@ export interface StatsRow {
   users: number
   newUsers30d: number
   suspendedUsers: number
+  pendingUsers: number
   activeSessions: number
   trips: number
   tripItems: number
@@ -22,11 +23,15 @@ export type AuditRow = typeof schema.auditLog.$inferSelect & { actorName: string
 
 export interface AdminRepository {
   stats(now: Date): Promise<StatsRow>
-  users(query: string | undefined, page: number): Promise<{ rows: UserRow[]; total: number }>
+  users(
+    query: string | undefined,
+    page: number,
+    status?: string,
+  ): Promise<{ rows: UserRow[]; total: number }>
   user(id: string): Promise<UserRow | null>
   updateUser(
     id: string,
-    changes: { role?: string; banned?: boolean; banReason?: string | null },
+    changes: { role?: string; status?: string; banned?: boolean; banReason?: string | null },
   ): Promise<void>
   revokeSessions(userId: string): Promise<void>
   audit(page: number, action: string | undefined): Promise<{ rows: AuditRow[]; total: number }>
@@ -44,6 +49,7 @@ export class DrizzleAdminRepository implements AdminRepository {
       users,
       newUsers30d,
       suspendedUsers,
+      pendingUsers,
       activeSessions,
       trips,
       tripItems,
@@ -64,6 +70,12 @@ export class DrizzleAdminRepository implements AdminRepository {
       one(
         this.db
           .select({ value: count() })
+          .from(schema.user)
+          .where(eq(schema.user.status, 'pending')),
+      ),
+      one(
+        this.db
+          .select({ value: count() })
           .from(schema.session)
           .where(gt(schema.session.expiresAt, now)),
       ),
@@ -81,6 +93,7 @@ export class DrizzleAdminRepository implements AdminRepository {
       users,
       newUsers30d,
       suspendedUsers,
+      pendingUsers,
       activeSessions,
       trips,
       tripItems,
@@ -101,10 +114,13 @@ export class DrizzleAdminRepository implements AdminRepository {
       .from(schema.user)
   }
 
-  async users(query: string | undefined, page: number) {
-    const where = query
-      ? or(ilike(schema.user.name, `%${query}%`), ilike(schema.user.email, `%${query}%`))
-      : undefined
+  async users(query: string | undefined, page: number, status?: string) {
+    const where = and(
+      query
+        ? or(ilike(schema.user.name, `%${query}%`), ilike(schema.user.email, `%${query}%`))
+        : undefined,
+      status ? eq(schema.user.status, status) : undefined,
+    )
     const [rows, totals] = await Promise.all([
       this.userSelect()
         .where(where)
@@ -123,7 +139,7 @@ export class DrizzleAdminRepository implements AdminRepository {
 
   async updateUser(
     id: string,
-    changes: { role?: string; banned?: boolean; banReason?: string | null },
+    changes: { role?: string; status?: string; banned?: boolean; banReason?: string | null },
   ) {
     await this.db.update(schema.user).set(changes).where(eq(schema.user.id, id))
   }

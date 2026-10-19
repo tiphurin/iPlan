@@ -35,7 +35,7 @@ const updateUser = createRoute({
   method: 'patch',
   path: '/admin/users/{id}',
   tags,
-  summary: 'Change role or suspend / unsuspend',
+  summary: 'Approve, change role or groups, suspend / unsuspend',
   request: {
     params: z.object({ id: z.string().min(1) }),
     body: { content: json(AdminUpdateUserInput), required: true },
@@ -44,6 +44,7 @@ const updateUser = createRoute({
     200: { description: 'User', content: json(AdminUserDto) },
     ...denied,
     404: errorResponses[404],
+    409: errorResponses[409],
   },
 })
 const audit = createRoute({
@@ -59,8 +60,8 @@ export function adminRoutes(service: AdminService) {
   return createRouter()
     .openapi(stats, async (c) => c.json(await service.stats(requireAdmin(c)), 200))
     .openapi(users, async (c) => {
-      const { q, page } = c.req.valid('query')
-      return c.json(await service.users(requireAdmin(c), q, page), 200)
+      const { q, page, status } = c.req.valid('query')
+      return c.json(await service.users(requireAdmin(c), q, page, status), 200)
     })
     .openapi(updateUser, async (c) =>
       c.json(

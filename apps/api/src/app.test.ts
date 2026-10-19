@@ -5,7 +5,9 @@ import type { MeRepository, UserRow } from './modules/me/me.repository'
 import { ItemsService } from './modules/items/items.service'
 import { MeService } from './modules/me/me.service'
 import { TripsService } from './modules/trips/trips.service'
+import { LedgersService } from './modules/ledgers/ledgers.service'
 import { MembersService } from './modules/members/members.service'
+import { AccessService } from './modules/access/access.service'
 import { AdminService } from './modules/admin/admin.service'
 import { AttachmentsService } from './modules/attachments/attachments.service'
 import { BackupService } from './modules/backup/backup.service'
@@ -15,6 +17,8 @@ import { ExpensesService } from './modules/expenses/expenses.service'
 import { InfoCardsService } from './modules/info-cards/info-cards.service'
 import {
   FakeAudit,
+  GROUP_IDS,
+  InMemoryAccess,
   InMemoryAdmin,
   InMemoryAttachments,
   InMemoryBackup,
@@ -23,6 +27,7 @@ import {
   InMemoryFinance,
   InMemoryInfoCards,
   InMemoryItems,
+  InMemoryLedgers,
   InMemoryMembers,
   InMemoryTrips,
   MemoryStorage,
@@ -41,18 +46,30 @@ const owner: UserRow = {
   banReason: null,
   banExpires: null,
   locale: 'th',
+  status: 'active',
+  avatarKey: null,
+}
+
+/** Non-admin accounts used to test approval and feature gates. */
+const others: Record<string, UserRow> = {
+  traveler: { ...owner, id: 'traveler', email: 'traveler@test', role: 'user' },
+  waiting: { ...owner, id: 'waiting', email: 'waiting@test', role: 'user', status: 'pending' },
+  boss: { ...owner, id: 'boss', email: 'Boss@Example.com', role: 'user', status: 'pending' },
 }
 
 const users: MeRepository = {
-  findById: async (id) => (id === owner.id ? owner : null),
+  findById: async (id) => (id === owner.id ? owner : (others[id] ?? null)),
   update: async (id, changes) => (id === owner.id ? { ...owner, ...changes } : null),
 }
 
-/** Treats any request with `Cookie: session=u1` as signed in. */
+/** `Cookie: session=<id>` signs in as that user; `session=u1` is the admin owner. */
 const auth: AuthGateway = {
   handler: async () => new Response('auth', { status: 200 }),
-  getSessionUser: async (headers) =>
-    headers.get('cookie') === 'session=u1' ? { ...owner, role: 'admin' } : null,
+  getSessionUser: async (headers) => {
+    const id = headers.get('cookie')?.replace('session=', '')
+    if (id === owner.id) return owner
+    return id ? (others[id] ?? null) : null
+  },
 }
 
 const audit = new FakeAudit()
@@ -63,11 +80,16 @@ const itemRepo = new InMemoryItems()
 const checklistRepo = new InMemoryChecklist()
 const infoRepo = new InMemoryInfoCards()
 const expenseRepo = new InMemoryExpenses(tripRepo)
+const accessRepo = new InMemoryAccess()
+accessRepo.members.set('traveler', [GROUP_IDS.travelers])
+const access = new AccessService(accessRepo, audit)
 const deps = {
   auth,
   storage,
+  adminEmails: ['boss@example.com'],
   services: {
-    me: new MeService(users),
+    access,
+    me: new MeService(users, access),
     trips,
     items: new ItemsService(itemRepo, trips, audit),
     members: new MembersService(new InMemoryMembers(tripRepo), trips, audit),
@@ -76,7 +98,8 @@ const deps = {
     expenses: new ExpensesService(expenseRepo, trips, tripRepo, audit),
     attachments: new AttachmentsService(new InMemoryAttachments(), storage, trips, audit),
     finance: new FinanceService(new InMemoryFinance(), audit),
-    admin: new AdminService(new InMemoryAdmin(), audit),
+    ledgers: new LedgersService(new InMemoryLedgers(), audit),
+    admin: new AdminService(new InMemoryAdmin(), accessRepo, audit),
     backup: new BackupService(
       {
         trips: tripRepo,
@@ -139,6 +162,39 @@ describe('API app', () => {
       services: deps.services,
     })
     expect((await banned.request('/api/me', { headers: signedIn })).status).toBe(401)
+  })
+
+  it('keeps pending accounts on the waiting list', async () => {
+    const headers = { cookie: 'session=waiting' }
+    const me = await app.request('/api/me', { headers })
+    expect(me.status).toBe(200)
+    expect(await me.json()).toMatchObject({ status: 'pending', features: [] })
+    const trips = await app.request('/api/trips', { headers })
+    expect(trips.status).toBe(403)
+    expect(await trips.json()).toMatchObject({ error: { code: 'ACCOUNT_PENDING' } })
+  })
+
+  it('only opens the features granted to the user', async () => {
+    const headers = { cookie: 'session=traveler' }
+    expect(await (await app.request('/api/me', { headers })).json()).toMatchObject({
+      status: 'active',
+      features: ['trips'],
+    })
+    expect((await app.request('/api/trips', { headers })).status).toBe(200)
+    const finance = await app.request('/api/finance/categories', { headers })
+    expect(finance.status).toBe(403)
+    expect(await finance.json()).toMatchObject({ error: { code: 'FEATURE_DISABLED' } })
+    expect((await app.request('/api/admin/users', { headers })).status).toBe(403)
+  })
+
+  it('treats ADMIN_EMAILS as active admins, ignoring case', async () => {
+    const headers = { cookie: 'session=boss' }
+    expect(await (await app.request('/api/me', { headers })).json()).toMatchObject({
+      role: 'admin',
+      status: 'active',
+      features: ['trips', 'finance', 'shared'],
+    })
+    expect((await app.request('/api/admin/groups', { headers })).status).toBe(200)
   })
 
   it('hides dev login unless enabled', async () => {

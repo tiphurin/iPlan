@@ -6,48 +6,11 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, SectionTitle } from '@/components/ui/card'
+import { Segmented } from '@/components/ui/chip'
 import { apiFetch } from '@/lib/api-client'
-import { cn } from '@/lib/cn'
 import { THEME_COOKIE, THEMES, type Theme, setPreferenceCookie } from '@/lib/theme'
 
-function Segmented<T extends string>({
-  value,
-  options,
-  onChange,
-  label,
-}: {
-  value: T
-  options: readonly { value: T; label: string }[]
-  onChange: (value: T) => void
-  label: string
-}) {
-  return (
-    <div
-      role="radiogroup"
-      aria-label={label}
-      className="grid auto-cols-fr grid-flow-col gap-1 rounded-xl bg-muted p-1"
-    >
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          role="radio"
-          aria-checked={value === option.value}
-          onClick={() => onChange(option.value)}
-          className={cn(
-            'min-h-11 rounded-lg text-sm font-medium transition-colors',
-            value === option.value ? 'bg-card shadow-sm' : 'text-muted-foreground',
-          )}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-export function SettingsForm({ locale, theme: initialTheme }: { locale: Locale; theme: Theme }) {
+export function ProfileForm({ locale, theme: initialTheme }: { locale: Locale; theme: Theme }) {
   const t = useTranslations('settings')
   const router = useRouter()
   const [theme, setTheme] = useState(initialTheme)
@@ -78,9 +41,9 @@ export function SettingsForm({ locale, theme: initialTheme }: { locale: Locale; 
   }
 
   return (
-    <div className="space-y-6 px-4">
-      <section>
-        <SectionTitle>{t('language')}</SectionTitle>
+    <div className="space-y-5">
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold">{t('language')}</h2>
         <Segmented
           label={t('language')}
           value={locale}
@@ -91,8 +54,8 @@ export function SettingsForm({ locale, theme: initialTheme }: { locale: Locale; 
           ]}
         />
       </section>
-      <section>
-        <SectionTitle>{t('theme')}</SectionTitle>
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold">{t('theme')}</h2>
         <Segmented
           label={t('theme')}
           value={theme}
@@ -104,17 +67,16 @@ export function SettingsForm({ locale, theme: initialTheme }: { locale: Locale; 
           ]}
         />
       </section>
-      <Card className="p-2">
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-danger"
-          onClick={signOut}
-          disabled={pending}
-        >
-          <LogOut aria-hidden className="size-5" />
-          {t('signOut')}
-        </Button>
-      </Card>
+      <Button
+        variant="secondary"
+        size="lg"
+        className="text-danger"
+        onClick={signOut}
+        disabled={pending}
+      >
+        <LogOut aria-hidden className="size-5" />
+        {t('signOut')}
+      </Button>
     </div>
   )
 }

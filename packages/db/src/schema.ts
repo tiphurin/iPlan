@@ -42,6 +42,10 @@ export const user = pgTable('user', {
   banExpires: timestamptz('ban_expires'),
   // iPlan
   locale: text('locale').notNull().default('th'),
+  /** 'pending' until an admin approves the account; see user_group for features. */
+  status: text('status').notNull().default('pending'),
+  /** Uploaded profile picture (storage key); wins over the Google `image` URL. */
+  avatarKey: text('avatar_key'),
 })
 
 export const session = pgTable(
@@ -95,6 +99,46 @@ export const verification = pgTable(
     updatedAt,
   },
   (t) => [index('verification_identifier_idx').on(t.identifier)],
+)
+
+// ---------------------------------------------------------------------------
+// Access: admins put approved users into groups; a group grants features
+// ---------------------------------------------------------------------------
+
+export const userGroup = pgTable('user_group', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull().unique(),
+  description: text('description'),
+  createdAt,
+})
+
+export const userGroupMember = pgTable(
+  'user_group_member',
+  {
+    groupId: uuid('group_id')
+      .notNull()
+      .references(() => userGroup.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt,
+  },
+  (t) => [
+    primaryKey({ columns: [t.groupId, t.userId] }),
+    index('user_group_member_user_idx').on(t.userId),
+  ],
+)
+
+/** Feature keys come from @iplan/contracts FEATURE_KEYS; unknown keys are ignored. */
+export const groupFeature = pgTable(
+  'group_feature',
+  {
+    groupId: uuid('group_id')
+      .notNull()
+      .references(() => userGroup.id, { onDelete: 'cascade' }),
+    featureKey: text('feature_key').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.groupId, t.featureKey] })],
 )
 
 // ---------------------------------------------------------------------------
@@ -455,6 +499,76 @@ export const attachment = pgTable(
     index('attachment_entity_idx').on(t.entityType, t.entityId),
     index('attachment_trip_idx').on(t.tripId),
   ],
+)
+
+// ---------------------------------------------------------------------------
+// Shared money (ledgers): costs shared between people outside a trip
+// ---------------------------------------------------------------------------
+
+export const ledgerRole = pgEnum('ledger_role', ['owner', 'member'])
+export const ledgerEntryKind = pgEnum('ledger_entry_kind', ['expense', 'settlement'])
+
+export const ledger = pgTable('ledger', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  currency: text('currency').notNull().default('THB'),
+  createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
+  createdAt,
+  updatedAt,
+})
+
+export const ledgerMember = pgTable(
+  'ledger_member',
+  {
+    ledgerId: uuid('ledger_id')
+      .notNull()
+      .references(() => ledger.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    role: ledgerRole('role').notNull(),
+    joinedAt: timestamptz('joined_at').notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.ledgerId, t.userId] }),
+    index('ledger_member_user_idx').on(t.userId),
+  ],
+)
+
+export const ledgerEntry = pgTable(
+  'ledger_entry',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ledgerId: uuid('ledger_id')
+      .notNull()
+      .references(() => ledger.id, { onDelete: 'cascade' }),
+    kind: ledgerEntryKind('kind').notNull().default('expense'),
+    title: text('title').notNull(),
+    category: text('category').notNull().default('other'),
+    amountMinor: bigint('amount_minor', { mode: 'bigint' }).notNull(),
+    date: date('date').notNull(),
+    /** Member user id. Kept as text so a member who leaves stays on old entries. */
+    paidBy: text('paid_by').notNull(),
+    splitMode: splitMode('split_mode').notNull(),
+    note: text('note'),
+    createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
+    createdAt,
+    updatedAt,
+  },
+  (t) => [index('ledger_entry_ledger_date_idx').on(t.ledgerId, t.date)],
+)
+
+export const ledgerShare = pgTable(
+  'ledger_share',
+  {
+    entryId: uuid('entry_id')
+      .notNull()
+      .references(() => ledgerEntry.id, { onDelete: 'cascade' }),
+    userId: text('user_id').notNull(),
+    amountMinor: bigint('amount_minor', { mode: 'bigint' }).notNull(),
+    percentBp: integer('percent_bp'),
+  },
+  (t) => [primaryKey({ columns: [t.entryId, t.userId] })],
 )
 
 // ---------------------------------------------------------------------------

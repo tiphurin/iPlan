@@ -1,174 +1,121 @@
-import { MonthDto, TripDto } from '@iplan/contracts'
-import { type Locale, formatDateRange, todayKey } from '@iplan/i18n'
-import { ChevronRight, Clock, Plus, Users, Wallet } from 'lucide-react'
+import { type Locale, formatDate, todayKey } from '@iplan/i18n'
+import { FEATURE_KEYS } from '@iplan/contracts'
+import { Lock, Shield } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { getLocale, getTranslations } from 'next-intl/server'
-import { z } from 'zod'
-import { PageHeader } from '@/components/page-header'
-import { ImportTrip } from '@/components/trips/import-trip'
-import { buttonVariants } from '@/components/ui/button'
-import { Card, SectionTitle } from '@/components/ui/card'
-import { cn } from '@/lib/cn'
-import { fmtServer } from '@/lib/money-format'
-import { getMe, serverApi } from '@/lib/server-api'
-import { thisMonth } from '@/lib/this-month'
-import { type TripPhase, tripPhase } from '@/lib/trip-dates'
+import { Suspense } from 'react'
+import { Card } from '@/components/ui/card'
+import { Avatar } from '@/components/avatar'
+import { FEATURES } from '@/features'
+import { DASHBOARD_WIDGETS } from '@/features/widgets'
+import { getMe } from '@/lib/server-api'
 
-const ORDER: TripPhase[] = ['ongoing', 'upcoming', 'past']
-
-export default async function TripsPage() {
-  const [t, me, locale, trips, money] = await Promise.all([
-    getTranslations(),
-    getMe(),
-    getLocale(),
-    serverApi('/api/trips', z.array(TripDto)),
-    serverApi(`/api/finance/months/${thisMonth()}`, MonthDto),
-  ])
-  const grouped = new Map<TripPhase, TripDto[]>()
-  for (const trip of trips) {
-    const phase = tripPhase(trip, todayKey(trip.homeTimeZone))
-    grouped.set(phase, [...(grouped.get(phase) ?? []), trip])
-  }
-
+/** Home: greeting, one tile per granted feature, then each feature's widget (streamed). */
+export default async function DashboardPage() {
+  const [t, me, locale] = await Promise.all([getTranslations(), getMe(), getLocale()])
+  if (!me) return null
+  const features = me.features
   return (
     <>
-      <PageHeader
-        title={t('nav.trips')}
-        subtitle={t('home.greeting', { name: me?.name ?? '' })}
-        action={
-          <Link
-            href="/trips/new"
-            aria-label={t('trips.new')}
-            className={buttonVariants({ size: 'icon', className: 'rounded-full' })}
-          >
-            <Plus aria-hidden className="size-6" />
-          </Link>
-        }
-      />
-      <div className="space-y-6 px-4">
-        <Dashboard trips={grouped} money={money} />
-        {trips.length === 0 && (
-          <Card className="py-10 text-center">
-            <p className="text-lg font-semibold">{t('trips.empty')}</p>
-            <p className="mt-1 text-muted-foreground">{t('trips.emptyHint')}</p>
-            <Link href="/trips/new" className={cn(buttonVariants(), 'mt-5')}>
-              {t('trips.new')}
+      <header className="flex items-center justify-between gap-3 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-2">
+        <div className="flex items-center gap-2 font-display text-[22px] font-bold md:invisible">
+          <span aria-hidden className="size-3.5 rounded-full border-4 border-[#00a84d] bg-card" />
+          iPlan
+        </div>
+        <Link href="/profile" aria-label={t('nav.profile')} className="rounded-full">
+          <Avatar name={me.name} image={me.image} size={40} />
+        </Link>
+      </header>
+      <div className="space-y-5 px-4">
+        <div>
+          <p className="text-sm text-muted-foreground">
+            {formatDate(todayKey('Asia/Bangkok'), { locale: locale as Locale })}
+          </p>
+          <h1 className="text-[26px] leading-tight font-bold">
+            {t('dashboard.greeting', { name: me.name.split(' ')[0] ?? me.name })}
+          </h1>
+        </div>
+
+        <nav aria-label={t('dashboard.apps')} className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+          {FEATURE_KEYS.map((key) => {
+            const f = FEATURES[key]
+            const Icon = f.icon
+            const granted = features.includes(key)
+            const body = (
+              <>
+                <span
+                  className="relative flex size-11 shrink-0 items-center justify-center rounded-xl text-white"
+                  style={{ backgroundColor: granted ? f.color : 'var(--lw)' }}
+                >
+                  <Icon aria-hidden className="size-6" />
+                  {!granted && (
+                    <Lock
+                      aria-hidden
+                      className="absolute -right-1 -bottom-1 size-5 rounded-full bg-card p-0.5 text-muted-foreground"
+                    />
+                  )}
+                </span>
+                <span className="min-w-0">
+                  <span className="block leading-tight font-semibold">
+                    {t(`features.${f.label}`)}
+                  </span>
+                  <span className="block truncate text-xs text-faint">
+                    {granted ? t(`features.${f.label}Hint`) : t('dashboard.locked')}
+                  </span>
+                </span>
+              </>
+            )
+            const cls = 'flex min-h-[76px] items-center gap-3 rounded-2xl border bg-card px-3.5'
+            return granted ? (
+              <Link key={key} href={f.href as Route} className={`${cls} active:bg-muted`}>
+                {body}
+              </Link>
+            ) : (
+              <div key={key} className={`${cls} border-dashed opacity-70`} aria-disabled>
+                {body}
+              </div>
+            )
+          })}
+          {me.role === 'admin' && (
+            <Link
+              href="/admin"
+              className="flex min-h-[76px] items-center gap-3 rounded-2xl border bg-card px-3.5 active:bg-muted"
+            >
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-foreground text-background">
+                <Shield aria-hidden className="size-6" />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-semibold">{t('nav.admin')}</span>
+                <span className="block truncate text-xs text-faint">{t('profile.adminHint')}</span>
+              </span>
             </Link>
+          )}
+        </nav>
+        {features.length === 0 && (
+          <Card className="py-6 text-center">
+            <p className="font-semibold">{t('dashboard.noFeatures')}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t('dashboard.noFeaturesHint')}</p>
           </Card>
         )}
-        {ORDER.map((phase) => {
-          const list = grouped.get(phase)
-          if (!list?.length) return null
-          return (
-            <section key={phase}>
-              <SectionTitle>{t(`trips.${phase}`)}</SectionTitle>
-              <ul className="space-y-3">
-                {(phase === 'past' ? [...list].reverse() : list).map((trip) => (
-                  <li key={trip.id}>
-                    <Link href={`/trips/${trip.id}` as Route} className="block active:opacity-80">
-                      <Card
-                        className={cn(
-                          'flex items-center gap-3',
-                          phase === 'ongoing' && 'border-primary/40 bg-primary/5',
-                        )}
-                      >
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-lg font-semibold">{trip.name}</p>
-                          <p className="truncate text-sm text-muted-foreground">
-                            {formatDateRange(trip.startDate, trip.endDate, {
-                              locale: locale as Locale,
-                            })}
-                            {trip.destination && ` · ${trip.destination}`}
-                          </p>
-                          <p className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground">
-                            <Users aria-hidden className="size-3.5" />
-                            {t('trips.members', { count: trip.memberCount })}
-                            <span className="rounded-full bg-muted px-2 py-0.5">
-                              {t(`trips.role.${trip.role}`)}
-                            </span>
-                          </p>
-                        </div>
-                        <ChevronRight
-                          aria-hidden
-                          className="size-5 shrink-0 text-muted-foreground"
-                        />
-                      </Card>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )
-        })}
-        <ImportTrip />
+
+        <div className="grid gap-5 md:grid-cols-2">
+          {features.map((key) => {
+            const Widget = DASHBOARD_WIDGETS[key]
+            return (
+              <section key={key} aria-label={t(`features.${FEATURES[key].label}`)}>
+                <Suspense
+                  fallback={
+                    <div className="h-36 animate-pulse rounded-hero bg-muted" aria-hidden />
+                  }
+                >
+                  <Widget locale={locale as Locale} />
+                </Suspense>
+              </section>
+            )
+          })}
+        </div>
       </div>
     </>
-  )
-}
-
-async function Dashboard({ trips, money }: { trips: Map<TripPhase, TripDto[]>; money: MonthDto }) {
-  const t = await getTranslations('home')
-  const tf = await getTranslations('finance')
-  const ongoing = trips.get('ongoing')?.[0]
-  const next = trips.get('upcoming')?.[0]
-  const alerts = money.budgets.filter((b) => b.status !== 'ok').length
-  const balance = BigInt(money.summary.balanceMinor)
-  const daysUntil = next
-    ? Math.round(
-        (Date.parse(next.startDate) - Date.parse(todayKey(next.homeTimeZone))) / 86_400_000,
-      )
-    : 0
-  return (
-    <div className="grid grid-cols-2 gap-3">
-      {ongoing ? (
-        <Link
-          href={`/trips/${ongoing.id}/today` as Route}
-          className="col-span-2 block active:opacity-80"
-        >
-          <Card className="flex items-center gap-3 border-primary/40 bg-primary text-primary-foreground">
-            <Clock aria-hidden className="size-8 shrink-0" />
-            <div className="min-w-0 flex-1">
-              <p className="text-sm opacity-90">{t('onTrip')}</p>
-              <p className="truncate text-lg font-semibold">{ongoing.name}</p>
-            </div>
-            <span className="text-sm font-medium">{t('openToday')} →</span>
-          </Card>
-        </Link>
-      ) : next ? (
-        <Link href={`/trips/${next.id}` as Route} className="col-span-2 block active:opacity-80">
-          <Card className="flex items-center gap-3">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm text-muted-foreground">{t('nextTrip')}</p>
-              <p className="truncate text-lg font-semibold">{next.name}</p>
-            </div>
-            <span className="text-2xl font-bold text-primary">
-              {t('inDays', { count: daysUntil })}
-            </span>
-          </Card>
-        </Link>
-      ) : null}
-      <Link href="/money" className="col-span-2 block active:opacity-80">
-        <Card className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Wallet aria-hidden className="size-4" />
-            {t('thisMonth')}
-          </div>
-          <p className={cn('text-3xl font-bold tabular-nums', balance < 0n && 'text-danger')}>
-            {fmtServer(money.summary.balanceMinor)}
-          </p>
-          <div className="flex justify-between text-sm">
-            <span className="text-success">↑ {fmtServer(money.summary.totalIncomeMinor)}</span>
-            <span className="text-danger">↓ {fmtServer(money.summary.totalExpensesMinor)}</span>
-          </div>
-          {alerts > 0 && (
-            <p className="rounded-lg bg-warning/15 px-2.5 py-1.5 text-xs font-medium text-warning">
-              {t('budgetAlerts', { count: alerts })}
-            </p>
-          )}
-          <span className="sr-only">{tf('title')}</span>
-        </Card>
-      </Link>
-    </div>
   )
 }

@@ -2,7 +2,7 @@
 
 import type { ExpenseDto, ExpenseSummaryDto, TripDetailDto } from '@iplan/contracts'
 import { money, toDecimalString } from '@iplan/core'
-import { ArrowRight, Download, FileSpreadsheet, FileText, Plus, Settings2 } from 'lucide-react'
+import { ArrowRight, Download, FileSpreadsheet, FileText, Settings2 } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -11,6 +11,7 @@ import { CATEGORY_COLORS, Donut } from '@/components/charts/donut'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, SectionTitle } from '@/components/ui/card'
 import { Field, Input } from '@/components/ui/field'
+import { Fab } from '@/components/ui/fab'
 import { cn } from '@/lib/cn'
 import { exportTripExcel } from '@/lib/excel'
 import { fmt, useExpenseMutations, useExpenseSummary, useExpenses } from '@/lib/expenses'
@@ -332,16 +333,7 @@ export function ExpensesView({
       </section>
 
       {canEdit && (
-        <Link
-          href={`/trips/${trip.id}/expenses/new` as Route}
-          aria-label={t('expenses.add')}
-          className={cn(
-            buttonVariants({ size: 'icon' }),
-            'fixed right-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-30 size-14 rounded-full shadow-lg',
-          )}
-        >
-          <Plus aria-hidden className="size-7" />
-        </Link>
+        <Fab href={`/trips/${trip.id}/expenses/new` as Route} label={t('expenses.add')} />
       )}
     </div>
   )

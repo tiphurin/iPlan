@@ -6,11 +6,6 @@ import { fromLocalInput } from '@iplan/core'
 
 export const DEMO_TRIP_ID = '00000000-0000-4000-8000-000000000001'
 
-export const DEMO_USERS = [
-  { id: 'demo-owner', name: 'Demo Owner', email: 'dev@iplan.local', role: 'admin' },
-  { id: 'demo-friend', name: 'Demo Friend', email: 'friend@iplan.local', role: 'user' },
-] as const
-
 const BKK = 'Asia/Bangkok'
 const SEL = 'Asia/Seoul'
 

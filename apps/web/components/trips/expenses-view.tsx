@@ -2,7 +2,7 @@
 
 import type { ExpenseDto, ExpenseSummaryDto, TripDetailDto } from '@iplan/contracts'
 import { money, toDecimalString } from '@iplan/core'
-import { ArrowRight, Download, Plus, Settings2 } from 'lucide-react'
+import { ArrowRight, Download, FileSpreadsheet, FileText, Plus, Settings2 } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -12,6 +12,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, SectionTitle } from '@/components/ui/card'
 import { Field, Input } from '@/components/ui/field'
 import { cn } from '@/lib/cn'
+import { exportTripExcel } from '@/lib/excel'
 import { fmt, useExpenseMutations, useExpenseSummary, useExpenses } from '@/lib/expenses'
 import { useTrip } from '@/lib/trips'
 import { useFormat } from '@/lib/use-format'
@@ -74,6 +75,45 @@ export function ExpensesView({
             <Download aria-hidden className="size-4" />
             {t('expenses.csv')}
           </a>
+          <Button
+            variant="secondary"
+            onClick={() =>
+              void exportTripExcel(trip.name, expenses, summary, trip.members, {
+                expenses: t('expenses.title'),
+                people: t('expenses.people'),
+                settle: t('expenses.settle'),
+                columns: {
+                  date: t('export.col.date'),
+                  title: t('export.col.title'),
+                  category: t('export.col.category'),
+                  amount: t('export.col.amount'),
+                  currency: t('export.col.currency'),
+                  rate: t('export.col.rate'),
+                  base: t('export.col.base'),
+                  paidBy: t('export.col.paidBy'),
+                  split: t('export.col.split'),
+                  name: t('export.col.name'),
+                  paid: t('export.col.paid'),
+                  share: t('export.col.share'),
+                  net: t('export.col.net'),
+                  from: t('export.col.from'),
+                  to: t('export.col.to'),
+                },
+                category: (k) => t(`expenses.categories.${k}`),
+                pool: t('expenses.form.pool'),
+              })
+            }
+          >
+            <FileSpreadsheet aria-hidden className="size-4" />
+            {t('export.excel')}
+          </Button>
+          <Link
+            href={`/print/trips/${trip.id}` as Route}
+            className={buttonVariants({ variant: 'secondary' })}
+          >
+            <FileText aria-hidden className="size-4" />
+            {t('export.pdf')}
+          </Link>
           {canEdit && (
             <Button
               variant="secondary"

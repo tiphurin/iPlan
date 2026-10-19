@@ -428,5 +428,36 @@
     "import": "Import trip from file",
     "importing": "Importing…",
     "importHint": "A .iplan.json file becomes a new trip (plan, checklist, info). Expenses aren't imported because members differ."
+  },
+  "export": {
+    "excel": "Excel",
+    "pdf": "PDF",
+    "print": "Print / Save as PDF",
+    "printHint": "On iPhone: Share → Print → pinch the preview → Save to Files",
+    "plan": "Itinerary",
+    "printPlan": "Print plan (PDF)",
+    "generated": "Generated {date}",
+    "col": {
+      "date": "Date",
+      "title": "Title",
+      "category": "Category",
+      "amount": "Amount",
+      "currency": "Currency",
+      "rate": "Rate",
+      "base": "In base currency",
+      "paidBy": "Paid by",
+      "split": "Split",
+      "name": "Name",
+      "paid": "Paid",
+      "share": "Share",
+      "net": "Net",
+      "from": "From",
+      "to": "To",
+      "type": "Type",
+      "planned": "Usual",
+      "adjusted": "Adjusted",
+      "note": "Note",
+      "time": "Time"
+    }
   }
 }

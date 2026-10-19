@@ -91,6 +91,12 @@ export function formatDate(dateKey: string, options: FormatOptions): string {
   return `${d.day} ${MONTHS[options.locale][d.month]} ${displayYear(d.year, options)}`
 }
 
+/** "ต.ค. 2569" / "Oct 2026" for a "YYYY-MM" month. */
+export function formatMonth(month: string, options: FormatOptions): string {
+  const [y, m] = month.split('-').map(Number)
+  return `${MONTHS[options.locale][(m ?? 1) - 1]} ${displayYear(y ?? 0, options)}`
+}
+
 /** "22–27 ต.ค. 2569", "30 ต.ค. – 2 พ.ย. 2569", or two full dates across years. */
 export function formatDateRange(start: string, end: string, options: FormatOptions): string {
   const a = parseDateKey(start)

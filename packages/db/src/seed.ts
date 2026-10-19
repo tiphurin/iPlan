@@ -9,6 +9,10 @@ import {
   DEMO_CHECKLIST,
   DEMO_DAILY_BUDGET_MINOR,
   DEMO_EXPENSES,
+  DEMO_FINANCE_CATEGORIES,
+  DEMO_RULES,
+  DEMO_TRANSACTIONS,
+  addMonthsKey,
   DEMO_FX_RATES,
   DEMO_INFO_CARDS,
   DEMO_USERS,
@@ -113,6 +117,63 @@ async function main() {
           .map(([userId, amountMinor]) => ({ expenseId: row.id, userId, amountMinor })),
       )
     }
+
+    // Personal finance for the demo owner: reset and rebuild.
+    await tx.delete(schema.financeCategory).where(eq(schema.financeCategory.ownerId, owner.id))
+    await tx.delete(schema.recurringRule).where(eq(schema.recurringRule.ownerId, owner.id))
+    await tx
+      .delete(schema.financeTransaction)
+      .where(eq(schema.financeTransaction.ownerId, owner.id))
+    const categories = await tx
+      .insert(schema.financeCategory)
+      .values(
+        DEMO_FINANCE_CATEGORIES.map((c, i) => ({
+          ownerId: owner.id,
+          kind: c.kind,
+          name: `default:${c.key}`,
+          color: c.color,
+          budgetMinor: 'budget' in c ? c.budget : null,
+          sortOrder: i,
+        })),
+      )
+      .returning({ id: schema.financeCategory.id, name: schema.financeCategory.name })
+    const categoryId = (key?: string) =>
+      categories.find((c) => c.name === `default:${key}`)?.id ?? null
+    const month = localDateKey(now, 'Asia/Bangkok').slice(0, 7)
+    const rules = await tx
+      .insert(schema.recurringRule)
+      .values(
+        DEMO_RULES.map((r, i) => ({
+          ownerId: owner.id,
+          kind: r.kind,
+          name: r.name,
+          amountMinor: parseMoney(r.amount, 'THB').amount,
+          startMonth: addMonthsKey(month, -r.from),
+          categoryId: categoryId('category' in r ? r.category : undefined),
+          sortOrder: i,
+        })),
+      )
+      .returning({ id: schema.recurringRule.id, name: schema.recurringRule.name })
+    const salary = rules.find((r) => r.name === 'Salary')
+    if (salary) {
+      // A bonus last month shows how one month can be adjusted.
+      await tx.insert(schema.recurringOverride).values({
+        ruleId: salary.id,
+        month: addMonthsKey(month, -1),
+        amountMinor: parseMoney('67500', 'THB').amount,
+        note: 'Half-year bonus',
+      })
+    }
+    await tx.insert(schema.financeTransaction).values(
+      DEMO_TRANSACTIONS.map((t) => ({
+        ownerId: owner.id,
+        kind: t.kind,
+        title: t.title,
+        amountMinor: parseMoney(t.amount, 'THB').amount,
+        date: `${addMonthsKey(month, -t.ago)}-${String(t.day).padStart(2, '0')}`,
+        categoryId: categoryId(t.category),
+      })),
+    )
 
     // Check in to finished items with a little drift so late/early shows up.
     const drift = [3, -2, 12, 0, 7, -6]

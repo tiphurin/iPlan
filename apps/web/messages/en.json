@@ -298,5 +298,79 @@
     "close": "Close",
     "pdf": "PDF",
     "saveFirst": "Save first, then attach slips"
+  },
+  "finance": {
+    "title": "Money",
+    "income": "Income",
+    "deductions": "Deductions",
+    "fixed": "Fixed costs",
+    "oneOff": "One-off",
+    "budgets": "Budgets",
+    "spending": "Spending by category",
+    "totalIncome": "Income",
+    "totalExpenses": "Spending",
+    "balance": "Left over",
+    "gross": "Gross income",
+    "net": "Net income",
+    "noLines": "Nothing yet",
+    "adjusted": "Adjusted",
+    "planned": "Usually {amount}",
+    "skipped": "Skipped this month",
+    "addTransaction": "Add transaction",
+    "editTransaction": "Edit transaction",
+    "recurring": "Recurring",
+    "categories": "Categories & budgets",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "adjust": {
+      "title": "Only for {month}",
+      "amount": "Amount this month",
+      "note": "Note",
+      "save": "Use this amount this month",
+      "skip": "None this month",
+      "reset": "Back to usual amount",
+      "editAll": "Edit every month"
+    },
+    "rule": {
+      "add": "Add recurring line",
+      "kind": "Type",
+      "name": "Name",
+      "amount": "Amount per month",
+      "start": "From",
+      "end": "Until",
+      "endHint": "leave empty if ongoing",
+      "category": "Category",
+      "none": "None",
+      "until": "until {month}"
+    },
+    "tx": {
+      "kind": "Type",
+      "expense": "Spending",
+      "income": "Income",
+      "title": "What",
+      "amount": "Amount (THB)",
+      "date": "Date",
+      "category": "Category",
+      "note": "Note"
+    },
+    "category": {
+      "add": "Add category",
+      "name": "Name",
+      "budget": "Monthly budget",
+      "noBudget": "No budget"
+    },
+    "defaultCategories": {
+      "salary": "Salary",
+      "bonus": "Bonus",
+      "other-income": "Other income",
+      "food": "Food",
+      "transport": "Transport",
+      "bills": "Bills & phone",
+      "home": "Home",
+      "shopping": "Shopping",
+      "health": "Health",
+      "fun": "Fun",
+      "other": "Other"
+    }
   }
 }

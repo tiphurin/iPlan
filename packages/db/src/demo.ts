@@ -453,3 +453,84 @@ export const DEMO_EXPENSES: {
     split: { owner: '0', friend: '88000' },
   },
 ]
+
+/** Same keys and colours as the API's built-in categories. */
+export const DEMO_FINANCE_CATEGORIES = [
+  { kind: 'income', key: 'salary', color: '#16a34a' },
+  { kind: 'income', key: 'bonus', color: '#0d9488' },
+  { kind: 'income', key: 'other-income', color: '#64748b' },
+  { kind: 'expense', key: 'food', color: '#f97316', budget: 800000n },
+  { kind: 'expense', key: 'transport', color: '#0ea5e9', budget: 300000n },
+  { kind: 'expense', key: 'bills', color: '#eab308' },
+  { kind: 'expense', key: 'home', color: '#8b5cf6' },
+  { kind: 'expense', key: 'shopping', color: '#ec4899', budget: 500000n },
+  { kind: 'expense', key: 'health', color: '#ef4444' },
+  { kind: 'expense', key: 'fun', color: '#22c55e' },
+  { kind: 'expense', key: 'other', color: '#94a3b8' },
+] as const
+
+/** Fictional payslip and fixed costs (baht). `from` is months before this month. */
+export const DEMO_RULES = [
+  { kind: 'income', name: 'Salary', amount: '45000', from: 12, category: 'salary' },
+  { kind: 'deduction', name: 'Withholding tax', amount: '1850', from: 12 },
+  { kind: 'deduction', name: 'Social security', amount: '750', from: 12 },
+  { kind: 'deduction', name: 'Provident fund 5%', amount: '2250', from: 12 },
+  { kind: 'fixed', name: 'Condo installment', amount: '9800', from: 12, category: 'home' },
+  { kind: 'fixed', name: 'Mobile plan', amount: '599', from: 12, category: 'bills' },
+  { kind: 'fixed', name: 'Internet', amount: '649', from: 12, category: 'bills' },
+  { kind: 'fixed', name: 'Gym membership', amount: '1200', from: 12, category: 'fun' },
+] as const
+
+/** One-off spending per month back; `ago` 0 = this month. */
+export const DEMO_TRANSACTIONS: {
+  ago: number
+  day: number
+  kind: 'income' | 'expense'
+  title: string
+  amount: string
+  category: string
+}[] = [
+  { ago: 0, day: 2, kind: 'expense', title: 'Groceries', amount: '1850', category: 'food' },
+  {
+    ago: 0,
+    day: 5,
+    kind: 'expense',
+    title: 'Dinner with friends',
+    amount: '1240',
+    category: 'food',
+  },
+  { ago: 0, day: 8, kind: 'expense', title: 'BTS top-up', amount: '500', category: 'transport' },
+  {
+    ago: 0,
+    day: 10,
+    kind: 'expense',
+    title: 'New running shoes',
+    amount: '3290',
+    category: 'shopping',
+  },
+  {
+    ago: 0,
+    day: 12,
+    kind: 'income',
+    title: 'Sold old camera',
+    amount: '4500',
+    category: 'other-income',
+  },
+  { ago: 1, day: 3, kind: 'expense', title: 'Groceries', amount: '2100', category: 'food' },
+  { ago: 1, day: 14, kind: 'expense', title: 'Dentist', amount: '1500', category: 'health' },
+  { ago: 1, day: 20, kind: 'expense', title: 'Concert ticket', amount: '2800', category: 'fun' },
+  { ago: 1, day: 25, kind: 'expense', title: 'Taxi', amount: '420', category: 'transport' },
+  { ago: 2, day: 6, kind: 'expense', title: 'Groceries', amount: '1950', category: 'food' },
+  { ago: 2, day: 18, kind: 'expense', title: 'Phone case', amount: '590', category: 'shopping' },
+  { ago: 3, day: 9, kind: 'expense', title: 'Groceries', amount: '2300', category: 'food' },
+  { ago: 3, day: 21, kind: 'expense', title: 'Weekend trip', amount: '6400', category: 'fun' },
+  { ago: 4, day: 4, kind: 'expense', title: 'Groceries', amount: '1780', category: 'food' },
+  { ago: 5, day: 11, kind: 'expense', title: 'Groceries', amount: '2050', category: 'food' },
+  { ago: 5, day: 27, kind: 'expense', title: 'Air purifier', amount: '4990', category: 'home' },
+]
+
+export function addMonthsKey(month: string, delta: number): string {
+  const [y, m] = month.split('-').map(Number)
+  const d = new Date(Date.UTC(y ?? 0, (m ?? 1) - 1 + delta, 1))
+  return d.toISOString().slice(0, 7)
+}

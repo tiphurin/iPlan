@@ -5,9 +5,11 @@ import { and, asc, eq } from 'drizzle-orm'
 export type AttachmentRow = typeof schema.attachment.$inferSelect
 export type NewAttachmentRow = Omit<typeof schema.attachment.$inferInsert, 'id' | 'createdAt'>
 
+export type AttachmentScope = { tripId: string } | { ownerId: string }
+
 export interface AttachmentsRepository {
-  /** Trip that owns the entity, or null when the entity doesn't exist. */
-  tripOf(entityType: AttachmentEntity, entityId: string): Promise<string | null>
+  /** Who controls the entity: a trip (shared) or a single owner (personal finance). */
+  scopeOf(entityType: AttachmentEntity, entityId: string): Promise<AttachmentScope | null>
   list(entityType: AttachmentEntity, entityId: string): Promise<AttachmentRow[]>
   find(id: string): Promise<AttachmentRow | null>
   create(values: NewAttachmentRow): Promise<AttachmentRow>
@@ -17,14 +19,22 @@ export interface AttachmentsRepository {
 export class DrizzleAttachmentsRepository implements AttachmentsRepository {
   constructor(private readonly db: Executor) {}
 
-  async tripOf(entityType: AttachmentEntity, entityId: string) {
+  async scopeOf(entityType: AttachmentEntity, entityId: string): Promise<AttachmentScope | null> {
+    if (entityType === 'transaction') {
+      const [row] = await this.db
+        .select({ ownerId: schema.financeTransaction.ownerId })
+        .from(schema.financeTransaction)
+        .where(eq(schema.financeTransaction.id, entityId))
+        .limit(1)
+      return row ? { ownerId: row.ownerId } : null
+    }
     const table = entityType === 'expense' ? schema.expense : schema.tripItem
     const [row] = await this.db
       .select({ tripId: table.tripId })
       .from(table)
       .where(eq(table.id, entityId))
       .limit(1)
-    return row?.tripId ?? null
+    return row ? { tripId: row.tripId } : null
   }
 
   list(entityType: AttachmentEntity, entityId: string) {

@@ -17,7 +17,7 @@ iPlan: a mobile-first web app for (1) planning trips and splitting trip costs be
 
 ## Architecture (approved 17 Oct 2026)
 
-- Turborepo + Yarn 4 workspaces monorepo (`nodeLinker: node-modules`), TypeScript strict everywhere (TS 6.0.x until typescript-eslint supports 7).
+- Turborepo + Yarn 1.22 (classic) workspaces monorepo, same Yarn the owner uses in other projects; never enable Corepack or change the global Yarn, TypeScript strict everywhere (TS 6.0.x until typescript-eslint supports 7).
 - `apps/web`: Next.js App Router. Server Components for reads (BFF only, no business logic), Client Components for interaction (TanStack Query, React Hook Form + Zod). Tailwind v4 + shadcn/ui. Recharts lazy-loaded. next-intl (th/en). PWA manifest.
 - `apps/api`: Hono, mounted into Next.js at `/api/*` (same origin, one Vercel deployment) but never imports from Next. Per module: `<m>.routes.ts` (Zod + OpenAPI) → `<m>.service.ts` (business logic + authorization) → `<m>.repository.ts` (Drizzle only) with `<m>.mapper.ts` converting DB row ↔ domain ↔ DTO. Better Auth (Google + admin plugin + dev-only login locally). API returns error codes; the web translates them.
 - Storage behind a `StorageProvider` interface (S3 API): MinIO locally, Backblaze B2 in production. DB stores object keys, never full URLs. Images are resized to WebP in the browser before upload (slips 2000px/q0.85, photos 1600px/q0.80, thumbnails 400px), EXIF stripped.
@@ -33,6 +33,6 @@ iPlan: a mobile-first web app for (1) planning trips and splitting trip costs be
 - Money: integer minor units (`bigint` in DB), store FX rate at time of spend.
 - Time: `timestamptz` UTC + per-item IANA tz for display.
 - Authorization in the API service layer; DB credentials never reach the browser.
-- Dependencies: stable major lines (Node 22 LTS) and exact versions published at least 30 days ago; `.yarnrc.yml` enforces this with `npmMinimalAgeGate`.
+- Dependencies: stable major lines (Node 22 LTS) and exact versions published at least 30 days ago; check the publish date (`npm view <pkg> time`) before adding or upgrading one, since Yarn 1 has no age gate.
 - No secrets in git. `.env.example` documents every variable.
 - README must cover: stack, project structure, architecture diagram (Mermaid), local run, deploy, free-tier notes.

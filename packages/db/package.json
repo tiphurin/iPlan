@@ -18,12 +18,12 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@iplan/core": "workspace:*",
+    "@iplan/core": "*",
     "drizzle-orm": "0.45.2",
     "pg": "8.23.0"
   },
   "devDependencies": {
-    "@iplan/config": "workspace:*",
+    "@iplan/config": "*",
     "@types/node": "22.20.3",
     "@types/pg": "8.23.1",
     "drizzle-kit": "0.31.10",

@@ -1,5 +1,4 @@
 yarn.lock
-.yarn/
 legacy/
 .next/
 dist/

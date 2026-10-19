@@ -8,7 +8,7 @@ A mobile-first web app for **planning trips** with friends (itinerary across tim
 
 | Layer    | Choice                                                                                                                        |
 | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Monorepo | Turborepo + Yarn 4 workspaces, TypeScript strict                                                                              |
+| Monorepo | Turborepo + Yarn 1.22 workspaces, TypeScript strict                                                                           |
 | Web      | Next.js (App Router), Tailwind CSS v4, shadcn/ui, TanStack Query, React Hook Form + Zod, Recharts, next-intl (Thai / English) |
 | API      | Hono with Zod + OpenAPI, Better Auth (Google sign-in, admin roles)                                                            |
 | Data     | PostgreSQL with Drizzle ORM                                                                                                   |
@@ -68,10 +68,9 @@ Why this shape:
 
 ## Run locally
 
-Requirements: Node 22 (`.nvmrc`), Yarn via Corepack, Docker (Docker Desktop, OrbStack or Colima).
+Requirements: Node 22 (`.nvmrc`), Yarn 1.22 (`npm i -g yarn@1.22.22`), Docker (Docker Desktop, OrbStack or Colima).
 
 ```bash
-corepack enable
 yarn install
 cp .env.example .env
 yarn db:setup       # Postgres in Docker + migrations + demo data
@@ -106,7 +105,7 @@ Sign in as **Demo Friend** to see the same trip with the _editor_ role. `yarn db
 | `yarn typecheck`                    | `tsc --noEmit` in every package         |
 | `yarn test`                         | Vitest in every package                 |
 | `yarn format` / `yarn format:check` | Prettier write / check                  |
-| `yarn check`                        | Everything CI runs                      |
+| `yarn validate`                     | Everything CI runs                      |
 | `yarn db:setup`                     | Start Postgres, migrate, seed demo data |
 | `yarn db:generate`                  | New migration after editing the schema  |
 | `yarn db:seed`                      | Reset demo data                         |

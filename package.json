@@ -2,7 +2,7 @@
   "name": "iplan",
   "private": true,
   "type": "module",
-  "packageManager": "yarn@4.18.0",
+  "packageManager": "yarn@1.22.22",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -18,14 +18,14 @@
     "test": "turbo run test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "yarn format:check && yarn lint && yarn typecheck && yarn test && yarn build",
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
     "db:generate": "yarn workspace @iplan/db db:generate",
     "db:migrate": "yarn workspace @iplan/db db:migrate",
     "db:seed": "yarn workspace @iplan/db db:seed",
     "db:setup": "yarn db:up && yarn workspace @iplan/db db:setup",
-    "db:studio": "yarn workspace @iplan/db db:studio"
+    "db:studio": "yarn workspace @iplan/db db:studio",
+    "validate": "yarn format:check && yarn lint && yarn typecheck && yarn test && yarn build"
   },
   "devDependencies": {
     "@types/node": "22.20.3",

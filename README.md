@@ -150,7 +150,7 @@ The web app translates `code` into Thai or English. Authorization happens in the
 
 ## Deploy
 
-Vercel builds the Next.js app (which includes the API), Neon provides Postgres, Backblaze B2 stores files and Google Cloud provides the OAuth client. Every service is on a free tier without a card. Accounts, the order to set them up, every environment variable and quota dashboards are in [docs/INFRA.md](docs/INFRA.md).
+Vercel builds the Next.js app (which includes the API), Neon provides Postgres, Backblaze B2 stores files and Google Cloud provides the OAuth client. Every service is on a free tier without a card. Follow the **Deploy checklist** in [docs/INFRA.md](docs/INFRA.md): accounts in order, every environment variable, first admin, and the uptime ping. Production builds apply migrations automatically; previews never touch the production schema.
 
 ## Free-tier notes
 

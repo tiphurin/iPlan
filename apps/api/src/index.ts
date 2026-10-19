@@ -33,7 +33,8 @@ export type { App, AppDeps } from './app'
 
 /** Wires real dependencies from environment variables. */
 export function buildApp(env = readEnv()): App {
-  const db = createDb(env.databaseUrl)
+  // Serverless functions each hold their own pool; keep it small against Neon's limits.
+  const db = createDb(env.databaseUrl, { max: env.production ? 3 : 5 })
   const auth = createAuth(db, env)
   const audit = new AuditRepository(db)
   const storage = createStorage(env)

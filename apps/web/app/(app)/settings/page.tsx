@@ -1,6 +1,6 @@
 import { resolveLocale } from '@iplan/i18n'
 import { getLocale, getTranslations } from 'next-intl/server'
-import { Shield } from 'lucide-react'
+import { Shield, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { PageHeader } from '@/components/page-header'
@@ -22,6 +22,12 @@ export default async function SettingsPage() {
         title={t('title')}
         subtitle={me ? t('signedInAs', { email: me.email }) : undefined}
       />
+      <div className="px-4 pb-4">
+        <Link href="/showcase" className={buttonVariants({ variant: 'secondary', size: 'lg' })}>
+          <Sparkles aria-hidden className="size-5" />
+          {t('showcase')}
+        </Link>
+      </div>
       {me?.role === 'admin' && (
         <div className="px-4 pb-4">
           <Link href="/admin" className={buttonVariants({ variant: 'secondary', size: 'lg' })}>

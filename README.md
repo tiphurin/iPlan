@@ -1,35 +1,49 @@
 # iPlan
 
-A mobile-first web app for **planning trips** with friends (itinerary across time zones, live "today" view, checklists, shared expenses and who-owes-whom) and **tracking monthly money** (salary, deductions, fixed costs, one-off spending, slips, budgets and charts).
+A mobile-first web app for **planning trips** with friends and **tracking monthly money**, in Thai and English.
 
-> Status: early development. This README grows with each Pull Request; sections marked _(planned)_ land in later PRs.
+- **Trips:** day-by-day plan across time zones, a live "Today" view with check-ins, members and invite links, a shared checklist, info cards, expenses with splits and who-pays-whom, slips and photos, calendar export, backup and import.
+- **Money:** salary and payslip deductions (tax, social security, provident fund), fixed costs, one-month adjustments, one-off spending, category budgets, charts.
+- **Admin:** users, roles, suspensions, audit log and usage stats.
+
+Built to run entirely on free tiers with no credit card on file.
 
 ## Stack
 
-| Layer    | Choice                                                                                                                        |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Monorepo | Turborepo + Yarn 1.22 workspaces, TypeScript strict                                                                           |
-| Web      | Next.js (App Router), Tailwind CSS v4, shadcn/ui, TanStack Query, React Hook Form + Zod, Recharts, next-intl (Thai / English) |
-| API      | Hono with Zod + OpenAPI, Better Auth (Google sign-in, admin roles)                                                            |
-| Data     | PostgreSQL with Drizzle ORM                                                                                                   |
-| Files    | Any S3-compatible storage (MinIO locally, Backblaze B2 in production)                                                         |
-| Tests    | Vitest; Playwright smoke tests _(planned)_                                                                                    |
-| Hosting  | Vercel Hobby (web + API), Neon (Postgres), Backblaze B2 (files): all free, no card                                            |
+| Layer    | Choice                                                                                                       |
+| -------- | ------------------------------------------------------------------------------------------------------------ |
+| Monorepo | Turborepo + Yarn 1.22 workspaces, TypeScript strict                                                          |
+| Web      | Next.js 16 (App Router), Tailwind CSS v4, TanStack Query, Zod, next-intl (Thai / English), plain SVG charts  |
+| API      | Hono with Zod + OpenAPI (Scalar docs), Better Auth (Google sign-in, admin plugin, dev-only login)            |
+| Data     | PostgreSQL 17 with Drizzle ORM and SQL migrations                                                            |
+| Files    | `StorageProvider`: local disk in development, any S3-compatible bucket in production (Backblaze B2)          |
+| Exports  | Excel via `write-excel-file` (loaded on demand), PDF via print pages, CSV, `.ics`, JSON backup               |
+| Tests    | Vitest (domain logic, every API service with in-memory repositories, HTTP tests)                             |
+| Hosting  | Vercel Hobby (web + API in one deployment), Neon (Postgres), Backblaze B2 (files), Google Cloud (OAuth only) |
 
 ## Project structure
 
 ```
 iPlan/
 ├─ apps/
-│  ├─ web/          Next.js UI (mobile-first, th/en); serves the API at /api/*
-│  └─ api/          Hono app: modules/<m>/{routes,service,repository,mapper}
+│  ├─ web/                      Next.js UI; serves the API at /api/*
+│  │  ├─ app/(app)/             signed-in screens (trips, today, money, settings, admin, showcase)
+│  │  ├─ app/print/             print-friendly pages for PDF export
+│  │  ├─ app/api/[[...route]]/  mounts the Hono app
+│  │  ├─ components/            UI by feature (trips, money, admin, charts, ui)
+│  │  ├─ lib/                   API client, query hooks, image compression, Excel, formatters
+│  │  └─ messages/{th,en}.json  every UI string (CI checks both have the same keys)
+│  └─ api/                      Hono app, never imports Next.js
+│     └─ src/modules/<module>/  <m>.routes.ts → <m>.service.ts → <m>.repository.ts, <m>.mapper.ts
+│        me, trips, items, members, checklist, info-cards, expenses, attachments,
+│        finance, admin, backup
 ├─ packages/
-│  ├─ config/       Shared tsconfig and ESLint config
-│  ├─ core/         Pure domain logic: money, split, budget, schedule, time zones
-│  ├─ db/           Drizzle schema, migrations, demo seed
-│  ├─ contracts/    Zod request/response schemas and error codes
-│  └─ i18n/         Locales and Intl formatters (Buddhist era for Thai)
-├─ docs/            HANDOFF.md (background), INFRA.md (accounts, secrets)
+│  ├─ core/        pure domain logic: money (bigint), splits and settlement, budgets, schedule, time zones
+│  ├─ db/          Drizzle schema, migrations, demo seed, legacy prototype converter
+│  ├─ contracts/   Zod request/response schemas and error codes shared by web and API
+│  ├─ i18n/        locales and formatters (dates, months, money; Buddhist era for Thai)
+│  └─ config/      shared tsconfig and ESLint config
+├─ docs/           HANDOFF.md (background), INFRA.md (accounts, secrets, quotas)
 └─ .github/workflows/ci.yml
 ```
 
@@ -40,13 +54,13 @@ flowchart TB
   B[iPhone Safari / PWA] -->|same origin, cookie session| V
   subgraph V[Vercel Hobby: one deployment]
     subgraph W[apps/web: Next.js]
-      CC[Client Components<br/>forms, charts, timers<br/>TanStack Query]
-      SC[Server Components<br/>SSR / BFF reads]
+      CC[Client Components<br/>forms, charts, live timers<br/>TanStack Query]
+      SC[Server Components<br/>SSR / read-only BFF]
     end
     subgraph A[apps/api: Hono mounted at /api]
       R[routes<br/>Zod + OpenAPI] --> S[service<br/>business rules + authorization]
       S --> RP[repository<br/>Drizzle only]
-      S --> M[mapper<br/>row ↔ domain ↔ DTO]
+      S --> M[mapper<br/>row → DTO]
       AU[Better Auth<br/>Google + admin]
     end
     CC -->|fetch /api/*| R
@@ -54,21 +68,22 @@ flowchart TB
   end
   S --> CORE[[packages/core<br/>money, split, budget, schedule]]
   RP --> PG[(Postgres: Neon)]
-  S -->|presigned URL| OS[(Object storage: Backblaze B2)]
-  B -. direct upload, resized WebP .-> OS
+  S -->|put / signed get| OS[(Backblaze B2)]
   AU --> G[Google OAuth]
 ```
 
 Why this shape:
 
-- **Clear layers without extra servers.** The API is its own package and never imports Next.js, but it runs inside the same Vercel deployment. Web and API share one origin, so the session cookie is first-party. iPhone Safari blocks third-party cookies, which would break login if the API sat on a different free domain.
-- **Business rules live in one place.** Routes validate, services decide (including who may do what), repositories only query, mappers only convert. Pure calculations sit in `packages/core` and are unit-tested.
-- **Money is exact.** Amounts are integer minor units (`bigint`), each expense stores the FX rate used, and the UI shows the original currency plus THB.
-- **Storage is swappable.** Code talks to an S3-compatible interface and the database stores object keys, so moving providers means copying files and changing environment variables.
+- **Clear layers without extra servers.** The API is its own package, but it runs inside the same Vercel deployment as the pages. Web and API share one origin, so the session cookie is first-party; iPhone Safari would block it if the API lived on a different free domain.
+- **Rules live in one place.** Routes validate input, services decide (including who may do what), repositories only query, mappers only convert. Calculations are pure functions in `packages/core`.
+- **Money is exact.** Amounts are integer minor units (`bigint`); every expense keeps the exchange rate it was converted with; screens show the original currency and THB.
+- **Time is unambiguous.** Instants are stored in UTC with an IANA zone per plan item, so a 02:25 Bangkok departure and a 10:00 Seoul arrival both read correctly.
+- **Files are private.** Photos are resized in the browser (slips 2000 px, photos 1600 px, plus a 400 px thumbnail, EXIF and GPS removed) and uploaded through the API, which checks the file's real type. Downloads go through a permission check; in production the API answers with a 5-minute signed B2 URL.
+- **Text is the same everywhere.** Dates, times and money are formatted from fixed tables instead of `Intl`, because Node and browsers ship different Thai data, which would break server-rendered pages.
 
 ## Run locally
 
-Requirements: Node 22 (`.nvmrc`), Yarn 1.22 (`npm i -g yarn@1.22.22`), Docker (Docker Desktop, OrbStack or Colima).
+Requirements: Node 22 (`.nvmrc`), Yarn 1.22 (`npm i -g yarn@1.22.22`), Docker (Docker Desktop, OrbStack or Colima). No cloud accounts are needed.
 
 ```bash
 yarn install
@@ -77,56 +92,79 @@ yarn db:setup       # Postgres in Docker + migrations + demo data
 yarn dev            # http://localhost:3000, API docs at /api/docs
 ```
 
-Tap **Dev login** on the sign-in page (no Google account needed locally).
+Tap **เข้าเป็น Demo Owner** (Dev login) on the sign-in page. Then open **Settings → All features** (`/showcase`): it links to every feature in the demo data.
 
-### What to try (demo)
+**On your iPhone:** join the same Wi-Fi and open the "Network" URL that `yarn dev` prints (e.g. `http://192.168.1.20:3000`). Share → Add to Home Screen gives the full-screen app.
 
-The seed creates a fictional **Seoul (demo)** trip that starts yesterday, so today is the arrival day in Seoul.
+### Demo data
 
-| Screen             | Try                                                                                                                                    |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **Trips**          | Trips grouped into On the trip / Upcoming / Past; ➕ creates a trip                                                                    |
-| **Trip**           | Swipe the day tabs; times show in each item's own zone (Bangkok → Seoul); tap an item to edit, duplicate or delete; ➕ adds an item    |
-| **Today**          | What's on now with a progress bar, time left, countdown to the next item, **Check in** (shows minutes ahead/behind plan), day progress |
-| **Time simulator** | Flask button on Today: jump ±1h, +1 day or to the next item to see the live view at any moment of the trip                             |
-| **Settings**       | Thai / English, System / Light / Dark                                                                                                  |
+`yarn db:seed` (re)creates fictional data:
 
-Sign in as **Demo Friend** to see the same trip with the _editor_ role. `yarn db:seed` resets the demo data.
+| What                | Details                                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
+| Users               | Demo Owner (`dev@iplan.local`, admin) and Demo Friend (`friend@iplan.local`)                   |
+| Trip "Seoul (demo)" | Starts yesterday so today is the arrival day: plan, check-ins, checklist, info cards           |
+| Trip expenses       | THB and KRW expenses with equal and exact splits, a shared pool, a KRW rate and a daily budget |
+| Monthly money       | Payslip lines, fixed costs, a bonus month, six months of one-off spending, category budgets    |
 
-**On your iPhone:** connect to the same Wi-Fi, then open the "Network" URL that `yarn dev` prints (e.g. `http://192.168.1.20:3000`). Add it to the Home Screen from the Share menu for the full-screen app. Local network origins are trusted only outside production.
+### Bring over the old prototype trip
+
+```bash
+yarn legacy:convert legacy/seoul-trip.html [seoul26-backup.json] > ~/seoul.iplan.json
+```
+
+Then **Trips → Import trip from file**. The converter reads the prototype's built-in plan, checklist and info cards plus your edits from its "Backup JSON" file. It runs locally; the output contains personal bookings, so keep it out of git.
 
 ## Scripts
 
-| Command                             | What it does                            |
-| ----------------------------------- | --------------------------------------- |
-| `yarn dev`                          | Web app + API on http://localhost:3000  |
-| `yarn build`                        | Build all packages and apps             |
-| `yarn lint`                         | ESLint in every package                 |
-| `yarn typecheck`                    | `tsc --noEmit` in every package         |
-| `yarn test`                         | Vitest in every package                 |
-| `yarn format` / `yarn format:check` | Prettier write / check                  |
-| `yarn validate`                     | Everything CI runs                      |
-| `yarn db:setup`                     | Start Postgres, migrate, seed demo data |
-| `yarn db:generate`                  | New migration after editing the schema  |
-| `yarn db:seed`                      | Reset demo data                         |
-| `yarn db:down`                      | Stop local Postgres                     |
+| Command                             | What it does                                             |
+| ----------------------------------- | -------------------------------------------------------- |
+| `yarn dev`                          | Web app + API on http://localhost:3000                   |
+| `yarn validate`                     | Everything CI runs: format, lint, typecheck, test, build |
+| `yarn build`                        | Build all packages and apps                              |
+| `yarn lint` / `yarn typecheck`      | ESLint / `tsc --noEmit` in every package                 |
+| `yarn test`                         | Vitest in every package                                  |
+| `yarn format` / `yarn format:check` | Prettier write / check                                   |
+| `yarn db:setup`                     | Start Postgres, migrate, seed demo data                  |
+| `yarn db:generate`                  | New migration after editing `packages/db/src/schema.ts`  |
+| `yarn db:migrate` / `yarn db:seed`  | Apply migrations / reset demo data                       |
+| `yarn db:studio`                    | Browse the database in Drizzle Studio                    |
+| `yarn db:down`                      | Stop local Postgres                                      |
+| `yarn legacy:convert`               | Convert the old prototype into an importable trip file   |
 
-## Deploy _(planned)_
+## API
 
-Vercel builds the Next.js app (which includes the API), Neon provides Postgres, Backblaze B2 stores files. Step-by-step setup and every environment variable are in [docs/INFRA.md](docs/INFRA.md).
+Every endpoint is described at **`/api/docs`** (OpenAPI 3.1, raw document at `/api/openapi.json`). Errors always look like:
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "Invalid input",
+    "fields": { "endDate": "..." }
+  }
+}
+```
+
+The web app translates `code` into Thai or English. Authorization happens in the services: trip data needs membership (viewer / editor / owner), personal finance is visible to its owner only, admin endpoints need the admin role.
+
+## Deploy
+
+Vercel builds the Next.js app (which includes the API), Neon provides Postgres, Backblaze B2 stores files and Google Cloud provides the OAuth client. Every service is on a free tier without a card. Accounts, the order to set them up, every environment variable and quota dashboards are in [docs/INFRA.md](docs/INFRA.md).
 
 ## Free-tier notes
 
 - No service has a card on file, so nothing can be billed; over-quota services pause or throttle instead.
 - Vercel Hobby is for personal, non-commercial use.
 - Neon scales to zero when idle; the first request after a pause takes about a second longer.
-- Backblaze B2 gives 10 GB. Photos are resized in the browser before upload (about 150–400 KB each), which fits tens of thousands of images.
+- Backblaze B2 gives 10 GB. Resized photos are about 150–400 KB, which fits tens of thousands of images. The admin page shows storage and database use against the free quotas.
 
 ## Contributing
 
-- Branch off `develop`, open a Pull Request into `develop`. Nothing is pushed to `main` directly.
+- Branch off the latest `feature/iPlan/main` and open a Pull Request into it; nothing is pushed to `main` directly. Each PR is one focused commit, so **Rebase and merge** or **Squash** both work.
 - Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:` ...).
 - CI must be green: format, lint, typecheck, test, build.
+- New dependencies: exact versions published at least 30 days ago (`npm view <pkg> time`).
 - Never commit secrets or personal data; this repository is public.
 
 ## License

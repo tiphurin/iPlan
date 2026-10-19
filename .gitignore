@@ -1,12 +1,5 @@
 # dependencies
 node_modules/
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-.pnp.*
 
 # builds
 dist/
@@ -36,3 +29,6 @@ test-results/
 
 # Personal trip data: the legacy prototype contains real bookings and stays local only
 legacy/
+
+# Local uploads (dev storage driver)
+.data/

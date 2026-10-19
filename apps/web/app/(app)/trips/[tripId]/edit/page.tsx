@@ -3,6 +3,9 @@ import { getTranslations } from 'next-intl/server'
 import { BackLink } from '@/components/back-link'
 import { PageHeader } from '@/components/page-header'
 import { TripForm } from '@/components/trips/trip-form'
+import { buttonVariants } from '@/components/ui/button'
+import { Card, SectionTitle } from '@/components/ui/card'
+import { CalendarPlus, Download } from 'lucide-react'
 import { loadTrip } from '@/lib/load-trip'
 
 export default async function EditTripPage({ params }: { params: Promise<{ tripId: string }> }) {
@@ -15,6 +18,27 @@ export default async function EditTripPage({ params }: { params: Promise<{ tripI
       </div>
       <PageHeader title={t('trips.editTrip')} />
       <TripForm trip={trip} />
+      <section className="mt-8 px-4">
+        <SectionTitle>{t('backup.title')}</SectionTitle>
+        <Card className="space-y-2">
+          <a
+            href={`/api/trips/${tripId}/calendar.ics`}
+            className={buttonVariants({ variant: 'secondary', size: 'lg' })}
+          >
+            <CalendarPlus aria-hidden className="size-4" />
+            {t('backup.calendar')}
+          </a>
+          <p className="text-center text-xs text-muted-foreground">{t('backup.calendarHint')}</p>
+          <a
+            href={`/api/trips/${tripId}/backup.json`}
+            download
+            className={buttonVariants({ variant: 'secondary', size: 'lg' })}
+          >
+            <Download aria-hidden className="size-4" />
+            {t('backup.download')}
+          </a>
+        </Card>
+      </section>
     </>
   )
 }

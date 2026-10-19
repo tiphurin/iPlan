@@ -418,5 +418,15 @@
     "page": "Page {page} of {pages}",
     "empty": "Nothing here",
     "open": "Open admin"
+  },
+  "backup": {
+    "title": "Calendar & backup",
+    "calendar": "Add whole trip to Calendar (iPhone)",
+    "calendarHint": "Opens in Safari; tap \"Add All\"",
+    "google": "Add to Google Calendar",
+    "download": "Download backup (.json)",
+    "import": "Import trip from file",
+    "importing": "Importing…",
+    "importHint": "A .iplan.json file becomes a new trip (plan, checklist, info). Expenses aren't imported because members differ."
   }
 }

@@ -22,6 +22,7 @@ import type {
   AttachmentsRepository,
   NewAttachmentRow,
 } from '../modules/attachments/attachments.repository'
+import type { BackupRepository, ImportData } from '../modules/backup/backup.repository'
 import type {
   ChecklistRepository,
   ChecklistRow,
@@ -640,5 +641,31 @@ export class InMemoryAdmin implements AdminRepository {
   }
   async audit() {
     return { rows: this.log, total: this.log.length }
+  }
+}
+
+/** Writes imported trips into the other in-memory repositories. */
+export class InMemoryBackup implements BackupRepository {
+  constructor(
+    private readonly trips: InMemoryTrips,
+    private readonly items: InMemoryItems,
+    private readonly checklist: InMemoryChecklist,
+    private readonly infoCards: InMemoryInfoCards,
+  ) {}
+
+  async importTrip(ownerId: string, data: ImportData) {
+    const trip = await this.trips.create(data.trip, ownerId)
+    for (const item of data.items) await this.items.create({ ...item, tripId: trip.id })
+    for (const c of data.checklist) await this.checklist.create({ ...c, tripId: trip.id })
+    for (const c of data.infoCards) {
+      await this.infoCards.create({
+        kind: c.kind,
+        title: c.title,
+        body: c.body ?? '',
+        tripId: trip.id,
+        sortOrder: c.sortOrder ?? 0,
+      })
+    }
+    return trip.id
   }
 }

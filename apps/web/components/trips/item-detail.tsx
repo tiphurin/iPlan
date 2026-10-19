@@ -1,10 +1,11 @@
 'use client'
 
 import type { TripItemDto } from '@iplan/contracts'
-import { ExternalLink, Phone } from 'lucide-react'
+import { CalendarPlus, ExternalLink, Phone } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { buttonVariants } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { googleCalendarUrl } from '@/lib/calendar'
 import { mapLinks } from '@/lib/maps'
 import { useFormat } from '@/lib/use-format'
 
@@ -17,9 +18,21 @@ export function ItemDetail({ item }: { item: TripItemDto }) {
   const hasFacts =
     links || item.details.phone || item.details.url || item.checkIns.length > 0 || item.notes
 
-  if (!hasFacts) return null
+  const calendar = (
+    <a
+      href={googleCalendarUrl(item)}
+      target="_blank"
+      rel="noreferrer"
+      className={buttonVariants({ variant: 'outline' })}
+    >
+      <CalendarPlus aria-hidden className="size-4" />
+      {t('backup.google')}
+    </a>
+  )
+  if (!hasFacts) return <div className="mx-4 mb-4">{calendar}</div>
   return (
     <Card className="mx-4 mb-4 space-y-3">
+      {calendar}
       {links && (
         <div>
           <p className="mb-2 text-sm text-muted-foreground">{t('item.openIn')}</p>

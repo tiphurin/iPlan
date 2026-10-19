@@ -15,7 +15,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/seed.ts",
     "db:setup": "yarn db:migrate && yarn db:seed",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "legacy:convert": "tsx scripts/convert-legacy.ts"
   },
   "dependencies": {
     "@iplan/core": "*",

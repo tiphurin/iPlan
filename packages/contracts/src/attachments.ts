@@ -4,7 +4,7 @@ export const AttachmentKind = z.enum(['slip', 'photo', 'file'])
 export type AttachmentKind = z.infer<typeof AttachmentKind>
 
 /** What a file can be attached to. */
-export const AttachmentEntity = z.enum(['expense', 'trip_item'])
+export const AttachmentEntity = z.enum(['expense', 'trip_item', 'transaction'])
 export type AttachmentEntity = z.infer<typeof AttachmentEntity>
 
 export const ATTACHMENT_TYPES = [

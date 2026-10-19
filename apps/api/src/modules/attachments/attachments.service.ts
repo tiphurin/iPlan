@@ -60,16 +60,31 @@ export class AttachmentsService {
     private readonly audit: AuditLog,
   ) {}
 
-  private async tripFor(
+  /** Checks access and returns where the files go: `trips/<id>` or `users/<id>`. */
+  private async scopeFor(
     actor: SessionUser,
     entityType: AttachmentEntity,
     entityId: string,
     minimum: 'viewer' | 'editor',
+  ): Promise<{ tripId: string | null; prefix: string }> {
+    const scope = await this.attachments.scopeOf(entityType, entityId)
+    if (!scope) throw notFound('Item')
+    if ('ownerId' in scope) {
+      // Personal finance files are visible to their owner only.
+      if (scope.ownerId !== actor.id) throw notFound('Item')
+      return { tripId: null, prefix: `users/${actor.id}` }
+    }
+    await this.trips.requireAccess(actor, scope.tripId, minimum)
+    return { tripId: scope.tripId, prefix: `trips/${scope.tripId}` }
+  }
+
+  private async checkRow(
+    actor: SessionUser,
+    row: { tripId: string | null; ownerId: string | null },
+    minimum: 'viewer' | 'editor',
   ) {
-    const tripId = await this.attachments.tripOf(entityType, entityId)
-    if (!tripId) throw notFound('Item')
-    await this.trips.requireAccess(actor, tripId, minimum)
-    return tripId
+    if (row.tripId) await this.trips.requireAccess(actor, row.tripId, minimum)
+    else if (row.ownerId !== actor.id) throw notFound('Attachment')
   }
 
   private checkFile(part: { bytes: Uint8Array; contentType: string }, field: string): string {
@@ -88,17 +103,22 @@ export class AttachmentsService {
     entityType: AttachmentEntity,
     entityId: string,
   ): Promise<AttachmentDto[]> {
-    await this.tripFor(actor, entityType, entityId, 'viewer')
+    await this.scopeFor(actor, entityType, entityId, 'viewer')
     return (await this.attachments.list(entityType, entityId)).map(toAttachmentDto)
   }
 
   async upload(actor: SessionUser, input: UploadInput): Promise<AttachmentDto> {
-    const tripId = await this.tripFor(actor, input.entityType, input.entityId, 'editor')
+    const { tripId, prefix } = await this.scopeFor(
+      actor,
+      input.entityType,
+      input.entityId,
+      'editor',
+    )
     const contentType = this.checkFile(input.file, 'file')
     const thumbType = input.thumb ? this.checkFile(input.thumb, 'thumb') : null
     const id = randomUUID()
-    const storageKey = `trips/${tripId}/${id}.${EXT[contentType]}`
-    const thumbKey = thumbType ? `trips/${tripId}/${id}.thumb.${EXT[thumbType]}` : null
+    const storageKey = `${prefix}/${id}.${EXT[contentType]}`
+    const thumbKey = thumbType ? `${prefix}/${id}.thumb.${EXT[thumbType]}` : null
     await this.storage.put(storageKey, input.file.bytes, contentType)
     if (thumbKey && input.thumb && thumbType)
       await this.storage.put(thumbKey, input.thumb.bytes, thumbType)
@@ -128,8 +148,8 @@ export class AttachmentsService {
   /** Where to read the bytes from, after checking the viewer can see the trip. */
   async file(actor: SessionUser, id: string, thumb: boolean) {
     const row = await this.attachments.find(id)
-    if (!row?.tripId) throw notFound('Attachment')
-    await this.trips.requireAccess(actor, row.tripId, 'viewer')
+    if (!row) throw notFound('Attachment')
+    await this.checkRow(actor, row, 'viewer')
     if (thumb && row.thumbKey) {
       const ext = row.thumbKey.split('.').at(-1) ?? ''
       const type = Object.entries(EXT).find(([, e]) => e === ext)?.[0] ?? 'image/jpeg'
@@ -140,8 +160,8 @@ export class AttachmentsService {
 
   async remove(actor: SessionUser, id: string): Promise<void> {
     const row = await this.attachments.find(id)
-    if (!row?.tripId) throw notFound('Attachment')
-    await this.trips.requireAccess(actor, row.tripId, 'editor')
+    if (!row) throw notFound('Attachment')
+    await this.checkRow(actor, row, 'editor')
     await this.attachments.delete(id)
     await this.storage.delete(row.storageKey)
     if (row.thumbKey) await this.storage.delete(row.thumbKey)

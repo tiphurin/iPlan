@@ -10,6 +10,8 @@ import { checklistRoutes } from './modules/checklist/checklist.routes'
 import type { ChecklistService } from './modules/checklist/checklist.service'
 import { expenseRoutes } from './modules/expenses/expenses.routes'
 import type { ExpensesService } from './modules/expenses/expenses.service'
+import { financeRoutes } from './modules/finance/finance.routes'
+import type { FinanceService } from './modules/finance/finance.service'
 import { infoCardRoutes } from './modules/info-cards/info-cards.routes'
 import type { InfoCardsService } from './modules/info-cards/info-cards.service'
 import { itemRoutes } from './modules/items/items.routes'
@@ -38,6 +40,7 @@ export interface AppDeps {
     infoCards: InfoCardsService
     expenses: ExpensesService
     attachments: AttachmentsService
+    finance: FinanceService
   }
 }
 
@@ -120,6 +123,7 @@ export function createApp(deps: AppDeps) {
   app.route('/', infoCardRoutes(deps.services.infoCards))
   app.route('/', expenseRoutes(deps.services.expenses))
   app.route('/', attachmentRoutes(deps.services.attachments, deps.storage))
+  app.route('/', financeRoutes(deps.services.finance))
 
   app.doc31('/openapi.json', {
     openapi: '3.1.0',

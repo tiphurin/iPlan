@@ -10,6 +10,8 @@ import { DrizzleChecklistRepository } from './modules/checklist/checklist.reposi
 import { ChecklistService } from './modules/checklist/checklist.service'
 import { DrizzleExpensesRepository } from './modules/expenses/expenses.repository'
 import { ExpensesService } from './modules/expenses/expenses.service'
+import { DrizzleFinanceRepository } from './modules/finance/finance.repository'
+import { FinanceService } from './modules/finance/finance.service'
 import { DrizzleInfoCardsRepository } from './modules/info-cards/info-cards.repository'
 import { InfoCardsService } from './modules/info-cards/info-cards.service'
 import { DrizzleItemsRepository } from './modules/items/items.repository'
@@ -51,6 +53,7 @@ export function buildApp(env = readEnv()): App {
         trips,
         audit,
       ),
+      finance: new FinanceService(new DrizzleFinanceRepository(db), audit),
     },
   })
 }

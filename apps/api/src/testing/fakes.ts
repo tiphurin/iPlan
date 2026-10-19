@@ -12,6 +12,7 @@ import type { AttachmentEntity } from '@iplan/contracts'
 import type { StorageProvider } from '../infra/storage'
 import type {
   AttachmentRow,
+  AttachmentScope,
   AttachmentsRepository,
   NewAttachmentRow,
 } from '../modules/attachments/attachments.repository'
@@ -26,6 +27,13 @@ import type {
   NewExpenseRow,
   ShareRow,
 } from '../modules/expenses/expenses.repository'
+import type {
+  CategoryRow,
+  FinanceRepository,
+  OverrideRow,
+  RuleRow,
+  TransactionRow,
+} from '../modules/finance/finance.repository'
 import type {
   InfoCardFields,
   InfoCardRow,
@@ -424,10 +432,10 @@ export class MemoryStorage implements StorageProvider {
 
 export class InMemoryAttachments implements AttachmentsRepository {
   rows = new Map<string, AttachmentRow>()
-  /** entityId → tripId for entities that "exist". */
-  entities = new Map<string, string>()
+  /** entityId → scope for entities that "exist". */
+  entities = new Map<string, AttachmentScope>()
 
-  async tripOf(_entityType: AttachmentEntity, entityId: string) {
+  async scopeOf(_entityType: AttachmentEntity, entityId: string) {
     return this.entities.get(entityId) ?? null
   }
   async list(entityType: AttachmentEntity, entityId: string) {
@@ -459,5 +467,114 @@ export class InMemoryAttachments implements AttachmentsRepository {
   }
   async delete(id: string) {
     this.rows.delete(id)
+  }
+}
+
+export class InMemoryFinance implements FinanceRepository {
+  cats: CategoryRow[] = []
+  ruleRows: RuleRow[] = []
+  overrideRows: OverrideRow[] = []
+  txRows: TransactionRow[] = []
+
+  async categories(ownerId: string) {
+    return this.cats.filter((c) => c.ownerId === ownerId)
+  }
+  async createCategories(rows: Parameters<FinanceRepository['createCategories']>[0]) {
+    const created = rows.map((r): CategoryRow => ({
+      id: uuid(),
+      ownerId: r.ownerId,
+      kind: r.kind,
+      name: r.name,
+      color: r.color ?? '#94a3b8',
+      budgetMinor: r.budgetMinor ?? null,
+      sortOrder: r.sortOrder ?? 0,
+      createdAt: new Date(),
+    }))
+    this.cats.push(...created)
+    return created
+  }
+  async updateCategory(id: string, ownerId: string, changes: Partial<CategoryRow>) {
+    const row = this.cats.find((c) => c.id === id && c.ownerId === ownerId)
+    if (!row) return null
+    Object.assign(row, changes)
+    return row
+  }
+  async deleteCategory(id: string, ownerId: string) {
+    const before = this.cats.length
+    this.cats = this.cats.filter((c) => !(c.id === id && c.ownerId === ownerId))
+    return this.cats.length < before
+  }
+  async rules(ownerId: string) {
+    return this.ruleRows.filter((r) => r.ownerId === ownerId)
+  }
+  async createRule(values: Parameters<FinanceRepository['createRule']>[0]) {
+    const row: RuleRow = {
+      id: uuid(),
+      ownerId: values.ownerId,
+      kind: values.kind,
+      name: values.name,
+      amountMinor: values.amountMinor,
+      startMonth: values.startMonth,
+      endMonth: values.endMonth ?? null,
+      categoryId: values.categoryId ?? null,
+      sortOrder: values.sortOrder ?? 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+    this.ruleRows.push(row)
+    return row
+  }
+  async updateRule(id: string, ownerId: string, changes: Partial<RuleRow>) {
+    const row = this.ruleRows.find((r) => r.id === id && r.ownerId === ownerId)
+    if (!row) return null
+    Object.assign(row, changes)
+    return row
+  }
+  async deleteRule(id: string, ownerId: string) {
+    const before = this.ruleRows.length
+    this.ruleRows = this.ruleRows.filter((r) => !(r.id === id && r.ownerId === ownerId))
+    return this.ruleRows.length < before
+  }
+  async overrides(ruleIds: string[]) {
+    return this.overrideRows.filter((o) => ruleIds.includes(o.ruleId))
+  }
+  async setOverride(row: OverrideRow) {
+    await this.clearOverride(row.ruleId, row.month)
+    this.overrideRows.push(row)
+  }
+  async clearOverride(ruleId: string, month: string) {
+    this.overrideRows = this.overrideRows.filter((o) => !(o.ruleId === ruleId && o.month === month))
+  }
+  async transactions(ownerId: string, fromDate: string, toDate: string) {
+    return this.txRows.filter(
+      (t) => t.ownerId === ownerId && t.date >= fromDate && t.date <= toDate,
+    )
+  }
+  async createTransaction(values: Parameters<FinanceRepository['createTransaction']>[0]) {
+    const row: TransactionRow = {
+      id: uuid(),
+      ownerId: values.ownerId,
+      kind: values.kind,
+      title: values.title,
+      amountMinor: values.amountMinor,
+      date: values.date,
+      categoryId: values.categoryId ?? null,
+      note: values.note ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+    this.txRows.push(row)
+    return row
+  }
+  async updateTransaction(id: string, ownerId: string, changes: Partial<TransactionRow>) {
+    const row = this.txRows.find((t) => t.id === id && t.ownerId === ownerId)
+    if (!row) return null
+    Object.assign(row, changes)
+    return row
+  }
+  async deleteTransaction(id: string, ownerId: string) {
+    const before = this.txRows.length
+    this.txRows = this.txRows.filter((t) => !(t.id === id && t.ownerId === ownerId))
+    return this.txRows.length < before
   }
 }

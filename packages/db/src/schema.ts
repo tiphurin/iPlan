@@ -343,6 +343,90 @@ export const expenseShare = pgTable(
 )
 
 // ---------------------------------------------------------------------------
+// Personal monthly finance (private to each user)
+// ---------------------------------------------------------------------------
+
+export const financeCategoryKind = pgEnum('finance_category_kind', ['income', 'expense'])
+
+export const financeCategory = pgTable(
+  'finance_category',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: text('owner_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    kind: financeCategoryKind('kind').notNull(),
+    name: text('name').notNull(),
+    color: text('color').notNull().default('#94a3b8'),
+    /** Monthly spending limit in minor units (expense categories only). */
+    budgetMinor: bigint('budget_minor', { mode: 'bigint' }),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt,
+  },
+  (t) => [index('finance_category_owner_idx').on(t.ownerId)],
+)
+
+export const recurringKind = pgEnum('recurring_kind', ['income', 'deduction', 'fixed'])
+
+/** Salary, tax, social security, provident fund, rent, phone, installments... */
+export const recurringRule = pgTable(
+  'recurring_rule',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: text('owner_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    kind: recurringKind('kind').notNull(),
+    name: text('name').notNull(),
+    amountMinor: bigint('amount_minor', { mode: 'bigint' }).notNull(),
+    /** "YYYY-MM", inclusive. */
+    startMonth: text('start_month').notNull(),
+    endMonth: text('end_month'),
+    categoryId: uuid('category_id').references(() => financeCategory.id, { onDelete: 'set null' }),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt,
+    updatedAt,
+  },
+  (t) => [index('recurring_rule_owner_idx').on(t.ownerId)],
+)
+
+/** One month's fix: a different amount, or skipped (amount null). */
+export const recurringOverride = pgTable(
+  'recurring_override',
+  {
+    ruleId: uuid('rule_id')
+      .notNull()
+      .references(() => recurringRule.id, { onDelete: 'cascade' }),
+    month: text('month').notNull(),
+    amountMinor: bigint('amount_minor', { mode: 'bigint' }),
+    note: text('note'),
+  },
+  (t) => [primaryKey({ columns: [t.ruleId, t.month] })],
+)
+
+export const transactionKind = pgEnum('transaction_kind', ['income', 'expense'])
+
+/** One-off income or spending. */
+export const financeTransaction = pgTable(
+  'finance_transaction',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: text('owner_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    kind: transactionKind('kind').notNull(),
+    title: text('title').notNull(),
+    amountMinor: bigint('amount_minor', { mode: 'bigint' }).notNull(),
+    date: date('date').notNull(),
+    categoryId: uuid('category_id').references(() => financeCategory.id, { onDelete: 'set null' }),
+    note: text('note'),
+    createdAt,
+    updatedAt,
+  },
+  (t) => [index('finance_transaction_owner_date_idx').on(t.ownerId, t.date)],
+)
+
+// ---------------------------------------------------------------------------
 // Attachments (slips, photos, PDFs)
 // ---------------------------------------------------------------------------
 
@@ -354,7 +438,7 @@ export const attachment = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     ownerId: text('owner_id').references(() => user.id, { onDelete: 'set null' }),
-    /** Trip the file belongs to, for permission checks; null for personal finance files. */
+    /** Trip the file belongs to, for permission checks; null for personal finance files (owner only). */
     tripId: uuid('trip_id').references(() => trip.id, { onDelete: 'cascade' }),
     entityType: text('entity_type').notNull(),
     entityId: uuid('entity_id').notNull(),

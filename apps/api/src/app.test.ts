@@ -8,6 +8,7 @@ import { TripsService } from './modules/trips/trips.service'
 import { MembersService } from './modules/members/members.service'
 import { AttachmentsService } from './modules/attachments/attachments.service'
 import { ChecklistService } from './modules/checklist/checklist.service'
+import { FinanceService } from './modules/finance/finance.service'
 import { ExpensesService } from './modules/expenses/expenses.service'
 import { InfoCardsService } from './modules/info-cards/info-cards.service'
 import {
@@ -15,6 +16,7 @@ import {
   InMemoryAttachments,
   InMemoryChecklist,
   InMemoryExpenses,
+  InMemoryFinance,
   InMemoryInfoCards,
   InMemoryItems,
   InMemoryMembers,
@@ -65,6 +67,7 @@ const app = createApp({
     infoCards: new InfoCardsService(new InMemoryInfoCards(), trips, audit),
     expenses: new ExpensesService(new InMemoryExpenses(tripRepo), trips, tripRepo, audit),
     attachments: new AttachmentsService(new InMemoryAttachments(), storage, trips, audit),
+    finance: new FinanceService(new InMemoryFinance(), audit),
   },
 })
 const signedIn = { cookie: 'session=u1' }

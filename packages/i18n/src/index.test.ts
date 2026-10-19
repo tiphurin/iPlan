@@ -2,6 +2,7 @@ import { money } from '@iplan/core'
 import { describe, expect, it } from 'vitest'
 import {
   formatDate,
+  formatMonth,
   formatDateRange,
   formatDayLabel,
   formatMoney,
@@ -38,6 +39,8 @@ describe('formatters', () => {
 
   it('labels trip days and ranges', () => {
     expect(formatDayLabel('2026-10-23', en)).toBe('Fri 23 Oct')
+    expect(formatMonth('2026-10', th)).toBe('ต.ค. 2569')
+    expect(formatMonth('2027-01', en)).toBe('Jan 2027')
     expect(formatDayLabel('2026-10-23', th)).toBe('ศ. 23 ต.ค.')
     expect(formatDateRange('2026-10-22', '2026-10-27', en)).toBe('22–27 Oct 2026')
     expect(formatDateRange('2026-10-22', '2026-10-27', th)).toBe('22–27 ต.ค. 2569')

@@ -62,7 +62,9 @@ export function createAuth(db: Database, env: ApiEnv) {
     session: {
       expiresIn: 60 * 60 * 24 * 30,
       updateAge: 60 * 60 * 24,
-      cookieCache: { enabled: true, maxAge: 5 * 60 },
+      // Off on purpose: every request re-reads the session, so suspending a user
+      // or signing them out takes effect immediately instead of after the cache expires.
+      cookieCache: { enabled: false },
     },
     advanced: {
       useSecureCookies: env.production,
@@ -82,6 +84,7 @@ export interface AuthGateway {
     name: string
     email: string
     role?: string | null | undefined
+    banned?: boolean | null | undefined
   } | null>
 }
 

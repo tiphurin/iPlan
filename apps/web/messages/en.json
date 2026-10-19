@@ -55,7 +55,8 @@
     "themeSystem": "System",
     "themeLight": "Light",
     "themeDark": "Dark",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "adminLink": "Admin"
   },
   "errors": {
     "UNAUTHORIZED": "Please sign in",
@@ -69,7 +70,8 @@
     "DEMO_DATA_MISSING": "No demo data yet: run yarn db:seed",
     "NETWORK": "Can't connect. Check your internet connection.",
     "INVITE_INVALID": "This invite link is invalid or has expired",
-    "OWNER_CANNOT_LEAVE": "The owner can't leave. Delete the trip instead."
+    "OWNER_CANNOT_LEAVE": "The owner can't leave. Delete the trip instead.",
+    "CANNOT_CHANGE_SELF": "You can't demote or suspend yourself"
   },
   "trips": {
     "empty": "No trips yet",
@@ -380,5 +382,41 @@
       "other": "Other"
     },
     "trend": "6-month trend"
+  },
+  "admin": {
+    "title": "Admin",
+    "overview": "Overview",
+    "users": "Users",
+    "audit": "Audit log",
+    "search": "Search name or email",
+    "role": "Role",
+    "roleUser": "User",
+    "roleAdmin": "Admin",
+    "suspend": "Suspend",
+    "unsuspend": "Lift suspension",
+    "suspended": "Suspended",
+    "reason": "Reason for suspension",
+    "trips": "{count, plural, one {# trip} other {# trips}}",
+    "joined": "Joined {date}",
+    "you": "You",
+    "stats": {
+      "users": "Users",
+      "newUsers30d": "New in 30 days",
+      "suspendedUsers": "Suspended",
+      "activeSessions": "Active sessions",
+      "trips": "Trips",
+      "tripItems": "Plan items",
+      "expenses": "Trip expenses",
+      "transactions": "Money transactions",
+      "attachments": "Files",
+      "storageBytes": "File storage (of 10 GB)",
+      "databaseBytes": "Database size (of 0.5 GB)"
+    },
+    "filter": "Filter by action",
+    "prev": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
+    "empty": "Nothing here",
+    "open": "Open admin"
   }
 }

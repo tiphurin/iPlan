@@ -55,7 +55,8 @@
     "themeSystem": "ตามระบบ",
     "themeLight": "สว่าง",
     "themeDark": "มืด",
-    "signOut": "ออกจากระบบ"
+    "signOut": "ออกจากระบบ",
+    "adminLink": "ผู้ดูแลระบบ"
   },
   "errors": {
     "UNAUTHORIZED": "กรุณาเข้าสู่ระบบ",
@@ -69,7 +70,8 @@
     "DEMO_DATA_MISSING": "ยังไม่มีข้อมูลตัวอย่าง ให้รัน yarn db:seed",
     "NETWORK": "เชื่อมต่อไม่ได้ ตรวจสอบอินเทอร์เน็ต",
     "INVITE_INVALID": "ลิงก์เชิญใช้ไม่ได้หรือหมดอายุแล้ว",
-    "OWNER_CANNOT_LEAVE": "เจ้าของทริปออกจากทริปไม่ได้ ให้ลบทริปแทน"
+    "OWNER_CANNOT_LEAVE": "เจ้าของทริปออกจากทริปไม่ได้ ให้ลบทริปแทน",
+    "CANNOT_CHANGE_SELF": "ลดสิทธิ์หรือระงับบัญชีตัวเองไม่ได้"
   },
   "trips": {
     "empty": "ยังไม่มีทริป",
@@ -380,5 +382,41 @@
       "other": "อื่นๆ"
     },
     "trend": "แนวโน้ม 6 เดือน"
+  },
+  "admin": {
+    "title": "ผู้ดูแลระบบ",
+    "overview": "ภาพรวม",
+    "users": "ผู้ใช้",
+    "audit": "Audit log",
+    "search": "ค้นหาชื่อหรืออีเมล",
+    "role": "สิทธิ์",
+    "roleUser": "ผู้ใช้",
+    "roleAdmin": "แอดมิน",
+    "suspend": "ระงับบัญชี",
+    "unsuspend": "ยกเลิกการระงับ",
+    "suspended": "ถูกระงับ",
+    "reason": "เหตุผลที่ระงับ",
+    "trips": "{count, plural, other {# ทริป}}",
+    "joined": "สมัคร {date}",
+    "you": "คุณ",
+    "stats": {
+      "users": "ผู้ใช้ทั้งหมด",
+      "newUsers30d": "ผู้ใช้ใหม่ 30 วัน",
+      "suspendedUsers": "ถูกระงับ",
+      "activeSessions": "เซสชันที่ใช้อยู่",
+      "trips": "ทริป",
+      "tripItems": "รายการในแผน",
+      "expenses": "ค่าใช้จ่ายทริป",
+      "transactions": "รายการการเงิน",
+      "attachments": "ไฟล์แนบ",
+      "storageBytes": "พื้นที่ไฟล์ (จาก 10 GB)",
+      "databaseBytes": "ขนาดฐานข้อมูล (จาก 0.5 GB)"
+    },
+    "filter": "กรองตาม action",
+    "prev": "ก่อนหน้า",
+    "next": "ถัดไป",
+    "page": "หน้า {page}/{pages}",
+    "empty": "ไม่มีข้อมูล",
+    "open": "เปิดหน้าผู้ดูแลระบบ"
   }
 }

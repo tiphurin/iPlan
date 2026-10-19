@@ -11,6 +11,12 @@ import type {
 import type { AttachmentEntity } from '@iplan/contracts'
 import type { StorageProvider } from '../infra/storage'
 import type {
+  AdminRepository,
+  AuditRow,
+  StatsRow,
+  UserRow as AdminUserRow,
+} from '../modules/admin/admin.repository'
+import type {
   AttachmentRow,
   AttachmentScope,
   AttachmentsRepository,
@@ -576,5 +582,63 @@ export class InMemoryFinance implements FinanceRepository {
     const before = this.txRows.length
     this.txRows = this.txRows.filter((t) => !(t.id === id && t.ownerId === ownerId))
     return this.txRows.length < before
+  }
+}
+
+export class InMemoryAdmin implements AdminRepository {
+  people: AdminUserRow[] = Object.values(users).map((u, i) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    emailVerified: true,
+    image: null,
+    createdAt: new Date(Date.UTC(2026, 0, i + 1)),
+    updatedAt: new Date(),
+    role: u.id === 'owner' ? 'admin' : 'user',
+    banned: false,
+    banReason: null,
+    banExpires: null,
+    locale: 'th',
+    trips: 1,
+  }))
+  sessions = new Set(['owner', 'editor', 'viewer'])
+  log: AuditRow[] = []
+
+  async stats(): Promise<StatsRow> {
+    return {
+      users: this.people.length,
+      newUsers30d: 0,
+      suspendedUsers: this.people.filter((p) => p.banned).length,
+      activeSessions: this.sessions.size,
+      trips: 1,
+      tripItems: 0,
+      expenses: 0,
+      transactions: 0,
+      attachments: 0,
+      storageBytes: 0,
+      databaseBytes: 0,
+    }
+  }
+  async users(query: string | undefined) {
+    const rows = this.people.filter(
+      (p) => !query || p.name.includes(query) || p.email.includes(query),
+    )
+    return { rows, total: rows.length }
+  }
+  async user(id: string) {
+    return this.people.find((p) => p.id === id) ?? null
+  }
+  async updateUser(
+    id: string,
+    changes: { role?: string; banned?: boolean; banReason?: string | null },
+  ) {
+    const person = this.people.find((p) => p.id === id)
+    if (person) Object.assign(person, changes)
+  }
+  async revokeSessions(userId: string) {
+    this.sessions.delete(userId)
+  }
+  async audit() {
+    return { rows: this.log, total: this.log.length }
   }
 }

@@ -3,6 +3,11 @@ import {
   ExpenseDto,
   ExpenseInput,
   ExpenseSummaryDto,
+  PoolContributionDto,
+  PoolContributionInput,
+  PoolContributionUpdateInput,
+  PoolDto,
+  PoolModeInput,
   TripMoneySettingsInput,
 } from '@iplan/contracts'
 import { requireUser } from '../../shared/auth-guard'
@@ -76,6 +81,57 @@ const settings = createRoute({
   responses: { 204: { description: 'Saved' }, ...denied, 422: errorResponses[422] },
 })
 
+const ContributionParams = z.object({ contributionId: z.uuid() })
+const poolTags = ['Pool']
+const contribution = { description: 'Contribution', content: json(PoolContributionDto) }
+const poolGet = createRoute({
+  method: 'get',
+  path: '/trips/{tripId}/pool',
+  tags: poolTags,
+  summary: 'Money put into the shared pool, what it spent and who put in how much',
+  request: { params: TripParams },
+  responses: { 200: { description: 'Pool', content: json(PoolDto) }, ...denied },
+})
+const poolMode = createRoute({
+  method: 'put',
+  path: '/trips/{tripId}/pool',
+  tags: poolTags,
+  summary: 'Choose how pool spending is shared (editor or owner)',
+  request: { params: TripParams, body: { content: json(PoolModeInput), required: true } },
+  responses: {
+    200: { description: 'Pool', content: json(PoolDto) },
+    ...denied,
+    422: errorResponses[422],
+  },
+})
+const contribute = createRoute({
+  method: 'post',
+  path: '/trips/{tripId}/pool/contributions',
+  tags: poolTags,
+  summary: 'Record money a member put into the pool (editor or owner)',
+  request: { params: TripParams, body: { content: json(PoolContributionInput), required: true } },
+  responses: { 201: contribution, ...denied, 422: errorResponses[422] },
+})
+const contributionUpdate = createRoute({
+  method: 'patch',
+  path: '/pool-contributions/{contributionId}',
+  tags: poolTags,
+  summary: 'Change a pool contribution (editor or owner)',
+  request: {
+    params: ContributionParams,
+    body: { content: json(PoolContributionUpdateInput), required: true },
+  },
+  responses: { 200: contribution, ...denied, 422: errorResponses[422] },
+})
+const contributionRemove = createRoute({
+  method: 'delete',
+  path: '/pool-contributions/{contributionId}',
+  tags: poolTags,
+  summary: 'Delete a pool contribution (editor or owner)',
+  request: { params: ContributionParams },
+  responses: { 204: { description: 'Deleted' }, ...denied },
+})
+
 export function expenseRoutes(service: ExpensesService) {
   return createRouter()
     .openapi(list, async (c) =>
@@ -114,6 +170,43 @@ export function expenseRoutes(service: ExpensesService) {
         c.req.valid('param').tripId,
         c.req.valid('json'),
       )
+      return c.body(null, 204)
+    })
+    .openapi(poolGet, async (c) =>
+      c.json(await service.pool(requireUser(c), c.req.valid('param').tripId), 200),
+    )
+    .openapi(poolMode, async (c) =>
+      c.json(
+        await service.setPoolMode(
+          requireUser(c),
+          c.req.valid('param').tripId,
+          c.req.valid('json').mode,
+        ),
+        200,
+      ),
+    )
+    .openapi(contribute, async (c) =>
+      c.json(
+        await service.addContribution(
+          requireUser(c),
+          c.req.valid('param').tripId,
+          c.req.valid('json'),
+        ),
+        201,
+      ),
+    )
+    .openapi(contributionUpdate, async (c) =>
+      c.json(
+        await service.updateContribution(
+          requireUser(c),
+          c.req.valid('param').contributionId,
+          c.req.valid('json'),
+        ),
+        200,
+      ),
+    )
+    .openapi(contributionRemove, async (c) => {
+      await service.removeContribution(requireUser(c), c.req.valid('param').contributionId)
       return c.body(null, 204)
     })
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ExpenseDto, ExpenseSummaryDto, TripDetailDto } from '@iplan/contracts'
+import type { ExpenseDto, ExpenseSummaryDto, PoolDto, TripDetailDto } from '@iplan/contracts'
 import { money, toDecimalString } from '@iplan/core'
 import {
   ArrowRight,
@@ -29,19 +29,22 @@ import { Fab } from '@/components/ui/fab'
 import { cn } from '@/lib/cn'
 import { exportTripExcel } from '@/lib/excel'
 import { balanceRows, dayBars, personBars, settleHeadline, viewerShare } from '@/lib/expense-charts'
-import { fmt, useExpenseMutations, useExpenseSummary, useExpenses } from '@/lib/expenses'
+import { fmt, useExpenseMutations, useExpenseSummary, useExpenses, usePool } from '@/lib/expenses'
 import { useTrip } from '@/lib/trips'
+import { PoolCard } from './pool-card'
 import { useFormat } from '@/lib/use-format'
 
 export function ExpensesView({
   initialTrip,
   initialExpenses,
   initialSummary,
+  initialPool,
   meId,
 }: {
   initialTrip: TripDetailDto
   initialExpenses: ExpenseDto[]
   initialSummary: ExpenseSummaryDto
+  initialPool: PoolDto
   /** The viewer, to show their own share of the total. */
   meId: string | null
 }) {
@@ -50,6 +53,7 @@ export function ExpensesView({
   const { data: trip } = useTrip(initialTrip.id, initialTrip)
   const { data: expenses } = useExpenses(trip.id, initialExpenses)
   const { data: summary } = useExpenseSummary(trip.id, initialSummary)
+  const { data: pool } = usePool(trip.id, initialPool)
   const mutations = useExpenseMutations(trip.id)
   const [showSettings, setShowSettings] = useState(false)
   const [newCurrency, setNewCurrency] = useState('')
@@ -248,6 +252,7 @@ export function ExpensesView({
 
       {tab === 'list' && (
         <>
+          <PoolCard trip={trip} pool={pool} meId={meId} />
           {expenses.length > 0 && (
             <section aria-label={t('expenses.charts.label')}>
               {/* Phones: a swipeable row of chart cards; md+: two columns. */}
@@ -408,6 +413,10 @@ export function ExpensesView({
             )}
           </Card>
 
+          {(pool.contributions.length > 0 || BigInt(pool.spentBaseMinor) > 0n) && (
+            <PoolCard trip={trip} pool={pool} meId={meId} compact />
+          )}
+
           {/* One transfer is already spelled out in the headline. */}
           {summary.transfers.length > 1 && (
             <section>
@@ -454,11 +463,22 @@ export function ExpensesView({
                         ? t('expenses.charts.owes', { amount: fmt(BigInt(-r.net), base) })
                         : t('expenses.charts.even'),
                   detail: r.isPool
-                    ? t('expenses.settleView.poolDetail', { paid: fmt(BigInt(r.paid), base) })
-                    : t('expenses.settleView.detail', {
-                        paid: fmt(BigInt(r.paid), base),
-                        share: fmt(BigInt(r.share), base),
-                      }),
+                    ? BigInt(pool.totalBaseMinor) > 0n
+                      ? t('expenses.settleView.poolDetailIn', {
+                          in: fmt(pool.totalBaseMinor, base),
+                          paid: fmt(BigInt(r.paid), base),
+                        })
+                      : t('expenses.settleView.poolDetail', { paid: fmt(BigInt(r.paid), base) })
+                    : r.contributed > 0
+                      ? t('expenses.settleView.detailPool', {
+                          contributed: fmt(BigInt(r.contributed), base),
+                          paid: fmt(BigInt(r.paid), base),
+                          share: fmt(BigInt(r.share), base),
+                        })
+                      : t('expenses.settleView.detail', {
+                          paid: fmt(BigInt(r.paid), base),
+                          share: fmt(BigInt(r.share), base),
+                        }),
                 }))}
                 labels={{
                   owes: t('expenses.settleView.owes'),

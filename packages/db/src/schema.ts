@@ -247,6 +247,8 @@ export const trip = pgTable('trip', {
   color: text('color'),
   /** Storage key of the cover photo (never a URL); null shows the colour. */
   coverKey: text('cover_key'),
+  /** How pool-paid spending is shared: 'actual' (each expense's split) or 'proportional'. */
+  poolMode: text('pool_mode').$type<'actual' | 'proportional'>().notNull().default('actual'),
   createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
   createdAt,
   updatedAt,
@@ -475,6 +477,30 @@ export const expenseShare = pgTable(
     percentBp: integer('percent_bp'),
   },
   (t) => [primaryKey({ columns: [t.expenseId, t.userId] })],
+)
+
+/** Money a member put into the trip's shared pool (kitty). */
+export const tripPoolContribution = pgTable(
+  'trip_pool_contribution',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tripId: uuid('trip_id')
+      .notNull()
+      .references(() => trip.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    amountMinor: bigint('amount_minor', { mode: 'bigint' }).notNull(),
+    currency: text('currency').notNull(),
+    /** Base-currency units per 1 unit of `currency` when this was put in. */
+    fxRate: text('fx_rate').notNull(),
+    baseAmountMinor: bigint('base_amount_minor', { mode: 'bigint' }).notNull(),
+    date: date('date').notNull(),
+    note: text('note'),
+    createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
+    createdAt,
+  },
+  (t) => [index('trip_pool_contribution_trip_idx').on(t.tripId)],
 )
 
 // ---------------------------------------------------------------------------

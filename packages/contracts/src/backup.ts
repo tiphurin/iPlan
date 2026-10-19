@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ExpenseCategory, MajorAmount, Rate } from './expenses'
+import { ExpenseCategory, MajorAmount, PoolMode, Rate } from './expenses'
 import { InfoCardKind } from './checklist'
 import { TripItemDetails, TripItemKind } from './trips'
 
@@ -24,6 +24,8 @@ export const TripBackup = z.object({
     dailyBudget: MajorAmount.nullable().optional(),
     /** Cover colour; older files have none, unknown values are dropped on import. */
     color: z.string().max(20).nullable().optional(),
+    /** How pool spending is shared; older files have none (actual). */
+    poolMode: PoolMode.optional(),
   }),
   items: z
     .array(
@@ -74,6 +76,19 @@ export const TripBackup = z.object({
         fxRate: z.string(),
         paidBy: z.string(),
         shares: z.record(z.string(), z.string()),
+      }),
+    )
+    .default([]),
+  /** Money put into the shared pool; kept for the record like expenses, not re-created. */
+  poolContributions: z
+    .array(
+      z.object({
+        date: z.iso.date(),
+        member: z.string(),
+        amount: MajorAmount,
+        currency: z.string(),
+        fxRate: z.string(),
+        note: z.string().nullable().optional(),
       }),
     )
     .default([]),

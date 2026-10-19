@@ -1,4 +1,4 @@
-import { ExpenseDto, ExpenseSummaryDto } from '@iplan/contracts'
+import { ExpenseDto, ExpenseSummaryDto, PoolDto } from '@iplan/contracts'
 import type { Route } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
@@ -10,11 +10,12 @@ import { getMe, serverApi } from '@/lib/server-api'
 
 export default async function ExpensesPage({ params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params
-  const [t, { trip }, expenses, summary, me] = await Promise.all([
+  const [t, { trip }, expenses, summary, pool, me] = await Promise.all([
     getTranslations(),
     loadTrip(tripId),
     serverApi(`/api/trips/${tripId}/expenses`, z.array(ExpenseDto)),
     serverApi(`/api/trips/${tripId}/expenses/summary`, ExpenseSummaryDto),
+    serverApi(`/api/trips/${tripId}/pool`, PoolDto),
     getMe(),
   ])
   return (
@@ -27,6 +28,7 @@ export default async function ExpensesPage({ params }: { params: Promise<{ tripI
         initialTrip={trip}
         initialExpenses={expenses}
         initialSummary={summary}
+        initialPool={pool}
         meId={me?.id ?? null}
       />
     </>

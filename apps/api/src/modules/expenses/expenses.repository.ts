@@ -12,6 +12,11 @@ export interface ShareRow {
   amountMinor: bigint
   percentBp: number | null
 }
+export type ContributionRow = typeof schema.tripPoolContribution.$inferSelect
+export type NewContributionRow = Omit<
+  typeof schema.tripPoolContribution.$inferInsert,
+  'id' | 'createdAt'
+>
 export interface ExpenseWithShares {
   expense: ExpenseRow
   shares: ShareRow[]
@@ -32,6 +37,13 @@ export interface ExpensesRepository {
     tripId: string,
     changes: { fxRates?: Record<string, string>; dailyBudgetMinor?: bigint | null },
   ): Promise<void>
+  /** Money put into the pool, oldest day first. */
+  listContributions(tripId: string): Promise<ContributionRow[]>
+  findContribution(id: string): Promise<ContributionRow | null>
+  createContribution(values: NewContributionRow): Promise<ContributionRow>
+  updateContribution(id: string, values: NewContributionRow): Promise<ContributionRow>
+  deleteContribution(id: string): Promise<void>
+  updatePoolMode(tripId: string, mode: 'actual' | 'proportional'): Promise<void>
 }
 
 export class DrizzleExpensesRepository implements ExpensesRepository {
@@ -119,5 +131,46 @@ export class DrizzleExpensesRepository implements ExpensesRepository {
     changes: { fxRates?: Record<string, string>; dailyBudgetMinor?: bigint | null },
   ) {
     await this.db.update(schema.trip).set(changes).where(eq(schema.trip.id, tripId))
+  }
+
+  async listContributions(tripId: string) {
+    return this.db
+      .select()
+      .from(schema.tripPoolContribution)
+      .where(eq(schema.tripPoolContribution.tripId, tripId))
+      .orderBy(asc(schema.tripPoolContribution.date), asc(schema.tripPoolContribution.createdAt))
+  }
+
+  async findContribution(id: string) {
+    const [row] = await this.db
+      .select()
+      .from(schema.tripPoolContribution)
+      .where(eq(schema.tripPoolContribution.id, id))
+      .limit(1)
+    return row ?? null
+  }
+
+  async createContribution(values: NewContributionRow) {
+    const [row] = await this.db.insert(schema.tripPoolContribution).values(values).returning()
+    if (!row) throw new Error('Contribution insert returned nothing')
+    return row
+  }
+
+  async updateContribution(id: string, values: NewContributionRow) {
+    const [row] = await this.db
+      .update(schema.tripPoolContribution)
+      .set(values)
+      .where(eq(schema.tripPoolContribution.id, id))
+      .returning()
+    if (!row) throw new Error('Contribution not found')
+    return row
+  }
+
+  async deleteContribution(id: string) {
+    await this.db.delete(schema.tripPoolContribution).where(eq(schema.tripPoolContribution.id, id))
+  }
+
+  async updatePoolMode(tripId: string, mode: 'actual' | 'proportional') {
+    await this.db.update(schema.trip).set({ poolMode: mode }).where(eq(schema.trip.id, tripId))
   }
 }

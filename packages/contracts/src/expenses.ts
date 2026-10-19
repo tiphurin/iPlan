@@ -41,6 +41,14 @@ export type TransportMode = z.infer<typeof TransportMode>
 export const SplitMode = z.enum(['equal', 'exact', 'percent'])
 export type SplitMode = z.infer<typeof SplitMode>
 
+/**
+ * How pool-paid spending is shared between members:
+ * - actual: each expense keeps its own split; whoever put in more than they used gets it back.
+ * - proportional: shared (and any leftover or shortfall) by how much each member put in.
+ */
+export const PoolMode = z.enum(['actual', 'proportional'])
+export type PoolMode = z.infer<typeof PoolMode>
+
 /** Amounts travel as strings: inputs in major units ("1500.25"), outputs in minor units ("150025"). */
 const Major = z
   .string()
@@ -120,6 +128,8 @@ export type ExpenseDto = z.infer<typeof ExpenseDto>
 
 export const ExpenseSummaryDto = z.object({
   baseCurrency: z.string(),
+  /** How pool-paid spending is shared; parties and transfers follow it. */
+  poolMode: PoolMode,
   totalMinor: Minor,
   parties: z.array(
     z.object({
@@ -129,7 +139,9 @@ export const ExpenseSummaryDto = z.object({
       paidMinor: Minor,
       /** Their share of the spending. */
       shareMinor: Minor,
-      /** Positive: is owed money. Negative: owes money. */
+      /** Put into the shared pool (members only; 0 for the pool itself). */
+      contributedMinor: Minor,
+      /** Positive: is owed money. Negative: owes money. Pool rules already applied. */
       netMinor: Minor,
     }),
   ),
@@ -156,3 +168,60 @@ export const TripMoneySettingsInput = z.object({
   dailyBudget: Major.nullable().optional(),
 })
 export type TripMoneySettingsInput = z.infer<typeof TripMoneySettingsInput>
+
+export const PoolModeInput = z.object({ mode: PoolMode })
+export type PoolModeInput = z.infer<typeof PoolModeInput>
+
+/** Money a member put into the shared pool. */
+export const PoolContributionInput = z.object({
+  /** The member who put the money in. */
+  userId: z.string().min(1),
+  amount: Major,
+  currency: Currency,
+  /** Base-currency units per 1 unit of `currency`; defaults to the trip's saved rate. */
+  fxRate: Rate.optional(),
+  /** Day the money went in; defaults to today. */
+  date: z.iso.date().optional(),
+  note: z.string().trim().max(500).nullable().optional(),
+})
+export type PoolContributionInput = z.infer<typeof PoolContributionInput>
+
+/** Changes to a contribution; fields left out stay as they are. */
+export const PoolContributionUpdateInput = PoolContributionInput.partial()
+export type PoolContributionUpdateInput = z.infer<typeof PoolContributionUpdateInput>
+
+export const PoolContributionDto = z.object({
+  id: z.uuid(),
+  userId: z.string(),
+  name: z.string(),
+  amountMinor: Minor,
+  currency: z.string(),
+  fxRate: z.string(),
+  baseAmountMinor: Minor,
+  date: z.iso.date(),
+  note: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+})
+export type PoolContributionDto = z.infer<typeof PoolContributionDto>
+
+export const PoolDto = z.object({
+  mode: PoolMode,
+  baseCurrency: z.string(),
+  contributions: z.array(PoolContributionDto),
+  /** Everything put in, in base minor units. */
+  totalBaseMinor: Minor,
+  /** Spent by the pool (expenses paid by "pool"). */
+  spentBaseMinor: Minor,
+  /** total − spent: positive is left over, negative is short. */
+  leftoverBaseMinor: Minor,
+  byMember: z.array(
+    z.object({
+      userId: z.string(),
+      name: z.string(),
+      contributedBaseMinor: Minor,
+      /** Share of everything put in, in basis points (100% = 10000). */
+      percentBp: z.number().int(),
+    }),
+  ),
+})
+export type PoolDto = z.infer<typeof PoolDto>

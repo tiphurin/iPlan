@@ -423,7 +423,52 @@
       "detail": "Paid {paid} · share {share}",
       "poolDetail": "Pool paid {paid}",
       "owes": "Owes",
-      "getsBack": "Gets back"
+      "getsBack": "Gets back",
+      "detailPool": "Put in pool {contributed} · paid {paid} · share {share}",
+      "poolDetailIn": "Received {in} · paid {paid}"
+    },
+    "pool": {
+      "title": "Pool",
+      "putIn": "Put in",
+      "spent": "Spent",
+      "left": "Left",
+      "short": "Short",
+      "add": "Put money in",
+      "addTitle": "Put money into the pool",
+      "editTitle": "Edit pool money",
+      "who": "Who put it in",
+      "date": "Date",
+      "note": "Note",
+      "confirmDelete": "Delete this pool payment? Refunds are worked out again right away.",
+      "empty": "Nobody has put money in yet",
+      "byMember": "Who put in how much",
+      "contributions": "Money put in",
+      "rule": "How pool spending is shared",
+      "modes": {
+        "actual": "Split as used (refund overpayment)",
+        "proportional": "Proportional to what each put in"
+      },
+      "modesShort": {
+        "actual": "As used",
+        "proportional": "By share put in"
+      },
+      "explain": {
+        "actual": "Each expense keeps its own split; whoever put in more than they used gets the rest back.",
+        "proportional": "Pool spending is split by each person's % of the pool; leftovers or shortfalls follow the same %."
+      },
+      "headline": {
+        "empty": "Nobody has put money in yet",
+        "only": "Only {name} has put money in",
+        "equal": "Everyone put in the same",
+        "more": "{who} put in {amount} more than {other}",
+        "most": "{who} put in the most ({amount} more than {other})"
+      },
+      "you": "You",
+      "youObject": "you",
+      "summary": "In {in} · spent {spent}",
+      "leftAmount": "{amount} left",
+      "shortAmount": "{amount} short",
+      "readOnly": "View only: trip editors record pool money"
     }
   },
   "attachments": {

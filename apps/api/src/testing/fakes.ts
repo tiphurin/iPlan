@@ -51,7 +51,9 @@ import type {
 } from '../modules/checklist/checklist.repository'
 import type {
   ExpenseWithShares,
+  ContributionRow,
   ExpensesRepository,
+  NewContributionRow,
   NewExpenseRow,
   ShareRow,
 } from '../modules/expenses/expenses.repository'
@@ -154,6 +156,7 @@ export class InMemoryTrips implements TripsRepository {
       dailyBudgetMinor: values.dailyBudgetMinor ?? null,
       color: values.color ?? null,
       coverKey: values.coverKey ?? null,
+      poolMode: values.poolMode ?? 'actual',
       createdBy: values.createdBy ?? null,
       createdAt: now,
       updatedAt: now,
@@ -186,9 +189,10 @@ export class InMemoryTrips implements TripsRepository {
   async contents(tripId: string): Promise<TripContents> {
     const items = (await this.linked.items?.listByTrip(tripId)) ?? []
     const expenses = (await this.linked.expenses?.list(tripId)) ?? []
+    const contributions = (await this.linked.expenses?.listContributions(tripId)) ?? []
     const days = [...items.map((i) => i.dayDate), ...expenses.map((e) => e.expense.dayDate)].sort()
     return {
-      expenseCount: expenses.length,
+      expenseCount: expenses.length + contributions.length,
       firstDay: days[0] ?? null,
       lastDay: days.at(-1) ?? null,
     }
@@ -470,6 +474,39 @@ export class InMemoryExpenses implements ExpensesRepository {
     changes: { fxRates?: Record<string, string>; dailyBudgetMinor?: bigint | null },
   ) {
     await this.trips.update(tripId, changes)
+  }
+
+  contributions = new Map<string, ContributionRow>()
+  async listContributions(tripId: string) {
+    return [...this.contributions.values()]
+      .filter((c) => c.tripId === tripId)
+      .sort((a, b) => a.date.localeCompare(b.date))
+  }
+  async findContribution(id: string) {
+    return this.contributions.get(id) ?? null
+  }
+  private saveContribution(id: string, values: NewContributionRow, createdAt: Date) {
+    const row: ContributionRow = {
+      id,
+      ...values,
+      note: values.note ?? null,
+      createdBy: values.createdBy ?? null,
+      createdAt,
+    }
+    this.contributions.set(id, row)
+    return row
+  }
+  async createContribution(values: NewContributionRow) {
+    return this.saveContribution(uuid(), values, new Date())
+  }
+  async updateContribution(id: string, values: NewContributionRow) {
+    return this.saveContribution(id, values, this.contributions.get(id)?.createdAt ?? new Date())
+  }
+  async deleteContribution(id: string) {
+    this.contributions.delete(id)
+  }
+  async updatePoolMode(tripId: string, mode: 'actual' | 'proportional') {
+    await this.trips.update(tripId, { poolMode: mode })
   }
 }
 

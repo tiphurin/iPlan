@@ -52,7 +52,7 @@ iPlan/
 │  ├─ contracts/   Zod request/response schemas and error codes shared by web and API
 │  ├─ i18n/        locales and formatters (dates, months, money; Buddhist era for Thai)
 │  └─ config/      shared tsconfig and ESLint config
-├─ docs/           HANDOFF.md (background), INFRA.md (accounts, secrets, quotas), DEPLOY.md (releases)
+├─ docs/           HANDOFF.md (background), INFRA.md (accounts, secrets, quotas), DEPLOY.md / DEPLOY.th.md (releases, step by step in Thai)
 └─ .github/workflows/ci.yml
 ```
 

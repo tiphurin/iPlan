@@ -25,7 +25,8 @@
     "db:seed": "yarn workspace @iplan/db db:seed",
     "db:setup": "yarn db:up && yarn workspace @iplan/db db:setup",
     "db:studio": "yarn workspace @iplan/db db:studio",
-    "validate": "yarn format:check && yarn lint && yarn typecheck && yarn test && yarn build"
+    "validate": "yarn format:check && yarn lint && yarn typecheck && yarn test && yarn build",
+    "legacy:convert": "yarn workspace @iplan/db legacy:convert"
   },
   "devDependencies": {
     "@types/node": "22.20.3",

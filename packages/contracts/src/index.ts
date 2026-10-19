@@ -1,5 +1,6 @@
 export * from './admin'
 export * from './attachments'
+export * from './backup'
 export * from './checklist'
 export * from './errors'
 export * from './expenses'

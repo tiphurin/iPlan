@@ -5,6 +5,8 @@ import type { AuthGateway } from './infra/auth'
 import type { StorageProvider } from './infra/storage'
 import { adminRoutes } from './modules/admin/admin.routes'
 import type { AdminService } from './modules/admin/admin.service'
+import { backupRoutes } from './modules/backup/backup.routes'
+import type { BackupService } from './modules/backup/backup.service'
 import { attachmentRoutes } from './modules/attachments/attachments.routes'
 import type { AttachmentsService } from './modules/attachments/attachments.service'
 import { DEV_LOGIN_EMAILS, type DevLoginEmail } from './infra/dev-login'
@@ -44,6 +46,7 @@ export interface AppDeps {
     attachments: AttachmentsService
     finance: FinanceService
     admin: AdminService
+    backup: BackupService
   }
 }
 
@@ -121,6 +124,7 @@ export function createApp(deps: AppDeps) {
   }
 
   app.route('/', meRoutes(deps.services.me))
+  app.route('/', backupRoutes(deps.services.backup))
   app.route('/', tripRoutes(deps.services.trips))
   app.route('/', itemRoutes(deps.services.items))
   app.route('/', memberRoutes(deps.services.members))

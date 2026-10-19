@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { PageHeader } from '@/components/page-header'
+import { ImportTrip } from '@/components/trips/import-trip'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, SectionTitle } from '@/components/ui/card'
 import { cn } from '@/lib/cn'
@@ -100,6 +101,7 @@ export default async function TripsPage() {
             </section>
           )
         })}
+        <ImportTrip />
       </div>
     </>
   )

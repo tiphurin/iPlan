@@ -8,6 +8,7 @@ import { TripsService } from './modules/trips/trips.service'
 import { MembersService } from './modules/members/members.service'
 import { AdminService } from './modules/admin/admin.service'
 import { AttachmentsService } from './modules/attachments/attachments.service'
+import { BackupService } from './modules/backup/backup.service'
 import { ChecklistService } from './modules/checklist/checklist.service'
 import { FinanceService } from './modules/finance/finance.service'
 import { ExpensesService } from './modules/expenses/expenses.service'
@@ -16,6 +17,7 @@ import {
   FakeAudit,
   InMemoryAdmin,
   InMemoryAttachments,
+  InMemoryBackup,
   InMemoryChecklist,
   InMemoryExpenses,
   InMemoryFinance,
@@ -57,20 +59,36 @@ const audit = new FakeAudit()
 const tripRepo = new InMemoryTrips()
 const trips = new TripsService(tripRepo, audit)
 const storage = new MemoryStorage()
+const itemRepo = new InMemoryItems()
+const checklistRepo = new InMemoryChecklist()
+const infoRepo = new InMemoryInfoCards()
+const expenseRepo = new InMemoryExpenses(tripRepo)
 const deps = {
   auth,
   storage,
   services: {
     me: new MeService(users),
     trips,
-    items: new ItemsService(new InMemoryItems(), trips, audit),
+    items: new ItemsService(itemRepo, trips, audit),
     members: new MembersService(new InMemoryMembers(tripRepo), trips, audit),
-    checklist: new ChecklistService(new InMemoryChecklist(), trips, audit),
-    infoCards: new InfoCardsService(new InMemoryInfoCards(), trips, audit),
-    expenses: new ExpensesService(new InMemoryExpenses(tripRepo), trips, tripRepo, audit),
+    checklist: new ChecklistService(checklistRepo, trips, audit),
+    infoCards: new InfoCardsService(infoRepo, trips, audit),
+    expenses: new ExpensesService(expenseRepo, trips, tripRepo, audit),
     attachments: new AttachmentsService(new InMemoryAttachments(), storage, trips, audit),
     finance: new FinanceService(new InMemoryFinance(), audit),
     admin: new AdminService(new InMemoryAdmin(), audit),
+    backup: new BackupService(
+      {
+        trips: tripRepo,
+        items: itemRepo,
+        checklist: checklistRepo,
+        infoCards: infoRepo,
+        expenses: expenseRepo,
+      },
+      new InMemoryBackup(tripRepo, itemRepo, checklistRepo, infoRepo),
+      trips,
+      audit,
+    ),
   },
 }
 const app = createApp(deps)
@@ -155,6 +173,56 @@ describe('API app', () => {
     expect(item.status).toBe(201)
     const list = await app.request(`/api/trips/${trip.id}/items`, { headers: signedIn })
     expect(await list.json()).toHaveLength(1)
+  })
+
+  it('round-trips a trip through backup, import and calendar', async () => {
+    const headers = { ...signedIn, 'content-type': 'application/json' }
+    const created = (await (
+      await app.request('/api/trips', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ name: 'Tokyo', startDate: '2026-11-01', endDate: '2026-11-03' }),
+      })
+    ).json()) as { id: string }
+    await app.request(`/api/trips/${created.id}/items`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        dayDate: '2026-11-01',
+        kind: 'place',
+        title: 'Senso-ji, Asakusa',
+        startsAt: '2026-11-01T01:00:00Z',
+        timeZone: 'Asia/Tokyo',
+      }),
+    })
+    const backup = await (
+      await app.request(`/api/trips/${created.id}/backup.json`, { headers: signedIn })
+    ).json()
+    expect(backup).toMatchObject({ format: 'iplan.trip', version: 1, trip: { name: 'Tokyo' } })
+
+    const imported = await app.request('/api/trips/import', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(backup),
+    })
+    expect(imported.status).toBe(201)
+    const { tripId } = (await imported.json()) as { tripId: string }
+    expect(tripId).not.toBe(created.id)
+    const items = (await (
+      await app.request(`/api/trips/${tripId}/items`, { headers: signedIn })
+    ).json()) as unknown[]
+    expect(items).toHaveLength(1)
+
+    const ics = await app.request(`/api/trips/${tripId}/calendar.ics`, { headers: signedIn })
+    expect(ics.headers.get('content-type')).toContain('text/calendar')
+    expect(await ics.text()).toContain('SUMMARY:Senso-ji\\, Asakusa')
+
+    const bad = await app.request('/api/trips/import', {
+      method: 'POST',
+      headers,
+      body: '{"hello":1}',
+    })
+    expect(bad.status).toBe(422)
   })
 
   it('rejects malformed ids before reaching the service', async () => {

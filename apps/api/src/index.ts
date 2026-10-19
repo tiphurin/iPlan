@@ -6,6 +6,8 @@ import { devLogin } from './infra/dev-login'
 import { createStorage } from './infra/storage'
 import { DrizzleAdminRepository } from './modules/admin/admin.repository'
 import { AdminService } from './modules/admin/admin.service'
+import { DrizzleBackupRepository } from './modules/backup/backup.repository'
+import { BackupService } from './modules/backup/backup.service'
 import { DrizzleAttachmentsRepository } from './modules/attachments/attachments.repository'
 import { AttachmentsService } from './modules/attachments/attachments.service'
 import { DrizzleChecklistRepository } from './modules/checklist/checklist.repository'
@@ -57,6 +59,18 @@ export function buildApp(env = readEnv()): App {
       ),
       finance: new FinanceService(new DrizzleFinanceRepository(db), audit),
       admin: new AdminService(new DrizzleAdminRepository(db), audit),
+      backup: new BackupService(
+        {
+          trips: tripRepo,
+          items: new DrizzleItemsRepository(db),
+          checklist: new DrizzleChecklistRepository(db),
+          infoCards: new DrizzleInfoCardsRepository(db),
+          expenses: new DrizzleExpensesRepository(db),
+        },
+        new DrizzleBackupRepository(db),
+        trips,
+        audit,
+      ),
     },
   })
 }

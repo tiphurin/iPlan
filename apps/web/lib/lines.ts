@@ -42,89 +42,65 @@ export interface LinePreset {
   country?: Country
 }
 
-const walk: LinePreset = { line: 'W', color: '#9aa3ae', label: 'walk', emoji: '🚶', mode: 'walk' }
-const taxi: LinePreset = {
-  line: 'TAXI',
-  color: '#e0a100',
-  label: 'taxi',
-  emoji: '🚕',
-  mode: 'taxi',
-}
-const drive: LinePreset = {
-  line: 'car',
-  color: '#4a5563',
-  label: 'drive',
-  emoji: '🚗',
-  mode: 'drive',
-}
-const train: LinePreset = {
-  line: 'TRAIN',
-  color: '#1f2a37',
-  label: 'train',
-  emoji: '🚆',
-  mode: 'train',
-}
-const bus: LinePreset = { line: 'BUS', color: '#0068b7', label: 'bus', emoji: '🚌', mode: 'bus' }
-const boat: LinePreset = {
-  line: 'BOAT',
-  color: '#0e7490',
-  label: 'boat',
-  emoji: '⛴️',
-  mode: 'boat',
-}
-const plane: LinePreset = {
-  line: 'FLY',
-  color: '#6366f1',
-  label: 'plane',
-  emoji: '✈️',
-  mode: 'plane',
-}
+const mode = (
+  line: string,
+  color: string,
+  label: string,
+  emoji: string,
+  m: TransportMode,
+  country?: Country,
+): LinePreset => ({ line, color, label, emoji, mode: m, ...(country && { country }) })
 
-/** Ride apps and long-distance trains that belong to one country. */
+const walk = mode('W', '#9aa3ae', 'walk', '🚶', 'walk')
+const taxi = mode('TAXI', '#e0a100', 'taxi', '🚕', 'taxi')
+const drive = mode('car', '#4a5563', 'drive', '🚗', 'drive')
+const bus = mode('BUS', '#0068b7', 'bus', '🚌', 'bus')
+const boat = mode('BOAT', '#0e7490', 'boat', '⛴️', 'boat')
+const plane = mode('FLY', '#6366f1', 'plane', '✈️', 'plane')
+/** City rail (BTS/MRT, subway, metro): opens that country's lines. Labelled per country. */
+const metro = (country: Country) => mode('METRO', '#1f2a37', `metro_${country}`, '🚇', 'metro')
+/** Intercity / regional trains, labelled the way each country calls them. */
+const train = (country: Country) => mode('TRAIN', '#1f2a37', `train_${country}`, '🚆', 'train')
+
+/** Ride apps, local rides and long-distance trains that belong to one country. */
 const LOCAL_MODES: Record<Country, LinePreset[]> = {
   TH: [
-    { line: 'GRAB', color: '#00b14f', label: 'grab', emoji: '🟢', mode: 'grab', country: 'TH' },
-    { line: 'BOLT', color: '#2a9d5c', label: 'bolt', emoji: '⚡', mode: 'bolt', country: 'TH' },
-    {
-      line: 'LINEMAN',
-      color: '#06c755',
-      label: 'lineman',
-      emoji: '🛵',
-      mode: 'lineman',
-      country: 'TH',
-    },
+    mode('GRAB', '#00b14f', 'grab', '🟢', 'grab', 'TH'),
+    mode('BOLT', '#2a9d5c', 'bolt', '⚡', 'bolt', 'TH'),
+    mode('LINEMAN', '#06c755', 'lineman', '🛵', 'lineman', 'TH'),
+    mode('TUKTUK', '#2563eb', 'tuktuk', '🛺', 'tuktuk', 'TH'),
+    mode('MOTO', '#ea580c', 'motorbike', '🏍️', 'motorbike', 'TH'),
   ],
-  KR: [
-    {
-      line: 'KAKAOT',
-      color: '#f7c600',
-      label: 'kakao_t',
-      emoji: '🟡',
-      mode: 'kakao_t',
-      country: 'KR',
-    },
-  ],
-  JP: [
-    { line: 'GO', color: '#111827', label: 'go', emoji: '🚖', mode: 'go', country: 'JP' },
-    {
-      line: 'SHINKANSEN',
-      color: '#1d4ed8',
-      label: 'shinkansen',
-      emoji: '🚄',
-      mode: 'shinkansen',
-      country: 'JP',
-    },
-  ],
-  TW: [
-    { line: 'UBER', color: '#000000', label: 'uber', emoji: '⚫', mode: 'uber', country: 'TW' },
-    { line: 'THSR', color: '#f26522', label: 'thsr', emoji: '🚄', mode: 'thsr', country: 'TW' },
-  ],
+  KR: [mode('KAKAOT', '#f7c600', 'kakao_t', '🟡', 'kakao_t', 'KR')],
+  JP: [mode('GO', '#111827', 'go', '🚖', 'go', 'JP')],
+  TW: [mode('UBER', '#000000', 'uber', '⚫', 'uber', 'TW')],
   OTHER: [],
 }
 
-/** Ways of getting around in a country: the basics plus its own ride apps and trains. */
+/** High-speed trains with their own name. */
+const FAST_TRAINS: Record<Country, LinePreset[]> = {
+  TH: [],
+  KR: [],
+  JP: [mode('SHINKANSEN', '#1d4ed8', 'shinkansen', '🚄', 'shinkansen', 'JP')],
+  TW: [mode('THSR', '#f26522', 'thsr', '🚄', 'thsr', 'TW')],
+  OTHER: [],
+}
+
+/** Ways of getting around in a country, in the order people reach for them there. */
 export function modesFor(country: Country): LinePreset[] {
-  return [walk, taxi, ...LOCAL_MODES[country], drive, bus, train, boat, plane]
+  return [
+    walk,
+    taxi,
+    ...LOCAL_MODES[country],
+    metro(country),
+    ...FAST_TRAINS[country],
+    train(country),
+    bus,
+    // River and canal boats are an everyday ride in Bangkok; elsewhere they are rare.
+    ...(country === 'TH' || country === 'OTHER' ? [boat] : []),
+    drive,
+    plane,
+  ]
 }
 
 /** Every mode preset, from every country (for reading items saved earlier). */
@@ -132,10 +108,12 @@ export const MODE_PRESETS: LinePreset[] = [
   walk,
   taxi,
   ...Object.values(LOCAL_MODES).flat(),
-  drive,
+  metro('OTHER'),
+  ...Object.values(FAST_TRAINS).flat(),
+  train('OTHER'),
   bus,
-  train,
   boat,
+  drive,
   plane,
 ]
 
@@ -150,13 +128,15 @@ const rail = (
     color,
     label,
     ...(labelTh && { labelTh }),
-    mode: 'train' as const,
+    mode: 'metro' as const,
     country,
   }))
 
 export interface LineGroup {
   /** Message key under "lines.groups". */
   key: string
+  /** City centre, to rank station search results near it. */
+  center: { lat: number; lng: number }
   lines: LinePreset[]
 }
 
@@ -165,6 +145,7 @@ export const RAIL_GROUPS: Record<Country, LineGroup[]> = {
   TH: [
     {
       key: 'bangkok',
+      center: { lat: 13.7466, lng: 100.5393 },
       lines: [
         ...rail('TH', 'BTS', [
           ['SUK', '#7fbf3a', 'BTS Sukhumvit', 'BTS สุขุมวิท'],
@@ -188,6 +169,7 @@ export const RAIL_GROUPS: Record<Country, LineGroup[]> = {
   KR: [
     {
       key: 'seoul',
+      center: { lat: 37.5665, lng: 126.978 },
       // Saved before countries existed, so these keep their short line ids.
       lines: [
         ...(
@@ -208,7 +190,7 @@ export const RAIL_GROUPS: Record<Country, LineGroup[]> = {
           color,
           label: `Line ${n}`,
           labelTh: `สาย ${n}`,
-          mode: 'train' as const,
+          mode: 'metro' as const,
           country: 'KR' as const,
         })),
         ...rail('KR', '', [
@@ -222,6 +204,7 @@ export const RAIL_GROUPS: Record<Country, LineGroup[]> = {
   JP: [
     {
       key: 'tokyo',
+      center: { lat: 35.6812, lng: 139.7671 },
       lines: [
         ...rail('JP', 'TYO', [
           ['G', '#ff9500', 'Ginza'],
@@ -243,6 +226,7 @@ export const RAIL_GROUPS: Record<Country, LineGroup[]> = {
     },
     {
       key: 'osaka',
+      center: { lat: 34.6937, lng: 135.5023 },
       lines: rail('JP', 'OSA', [
         ['M', '#e5171f', 'Midosuji'],
         ['T', '#522886', 'Tanimachi'],
@@ -257,6 +241,7 @@ export const RAIL_GROUPS: Record<Country, LineGroup[]> = {
   TW: [
     {
       key: 'taipei',
+      center: { lat: 25.0478, lng: 121.517 },
       lines: [
         ...rail('TW', 'TPE', [
           ['BR', '#c48c31', 'Wenhu'],
@@ -273,10 +258,34 @@ export const RAIL_GROUPS: Record<Country, LineGroup[]> = {
   OTHER: [],
 }
 
-const ALL_PRESETS: LinePreset[] = [
-  ...MODE_PRESETS,
-  ...Object.values(RAIL_GROUPS).flatMap((groups) => groups.flatMap((g) => g.lines)),
-]
+const RAIL_LINES = Object.values(RAIL_GROUPS).flatMap((groups) => groups.flatMap((g) => g.lines))
+
+/** True for a saved city rail line (BTS, Seoul line 2, Ginza…), not a travel mode. */
+export function isRailLine(line: string | undefined): boolean {
+  return RAIL_LINES.some((p) => p.line === line)
+}
+
+/** Rides that run between stations, so a start and end station make sense. */
+const STATION_MODES = new Set(['METRO', 'TRAIN', 'SHINKANSEN', 'THSR'])
+export function hasStations(line: string | undefined): boolean {
+  return Boolean(line) && (STATION_MODES.has(line ?? '') || isRailLine(line))
+}
+
+/** Where to look for stations: the line's city, else the country's first city. */
+export function stationArea(
+  line: string | undefined,
+  country: Country,
+): { lat: number; lng: number } | undefined {
+  const groups = RAIL_GROUPS[country]
+  return (groups.find((g) => g.lines.some((p) => p.line === line)) ?? groups[0])?.center
+}
+
+/** The short badge text for a saved line ("BTS-SUK" → "SUK"). */
+export function lineBadge(line: string): string {
+  return RAIL_LINES.find((p) => p.line === line)?.badge ?? line
+}
+
+const ALL_PRESETS: LinePreset[] = [...MODE_PRESETS, ...RAIL_LINES]
 
 export function findPreset(line: string | undefined, color: string | undefined) {
   return ALL_PRESETS.find(

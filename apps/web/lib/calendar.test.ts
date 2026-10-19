@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { googleCalendarUrl } from './calendar'
+import { googleCalendarUrl, isPrivateFeed } from './calendar'
 
 describe('googleCalendarUrl', () => {
   it('builds a template link with UTC times', () => {
@@ -27,5 +27,17 @@ describe('googleCalendarUrl', () => {
       }),
     )
     expect(url.searchParams.get('dates')).toBe('20261023T223000Z/20261023T224500Z')
+  })
+})
+
+describe('isPrivateFeed', () => {
+  it('flags links calendar servers cannot reach', () => {
+    expect(isPrivateFeed('http://localhost:3000/api/calendar/x.ics')).toBe(true)
+    expect(isPrivateFeed('http://192.168.1.36:3000/api/calendar/x.ics')).toBe(true)
+    expect(isPrivateFeed('https://10.0.0.2/api/calendar/x.ics')).toBe(true)
+    expect(isPrivateFeed('https://mac.local/api/calendar/x.ics')).toBe(true)
+    expect(isPrivateFeed('http://iplan.example.com/x.ics')).toBe(true)
+    expect(isPrivateFeed('not a url')).toBe(true)
+    expect(isPrivateFeed('https://iplan.vercel.app/api/calendar/x.ics')).toBe(false)
   })
 })

@@ -11,7 +11,7 @@ import { TripCover } from '@/components/trips/trip-cover'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, SectionTitle } from '@/components/ui/card'
 import { getMe, serverApi } from '@/lib/server-api'
-import { tripColor } from '@/lib/trip-color'
+import { coverColor } from '@/lib/trip-color'
 import { ScopeTabs } from '@/components/scope-tabs'
 import { type TripPhase, tripPhase } from '@/lib/trip-dates'
 
@@ -72,7 +72,7 @@ export default async function TripsPage({
                 >
                   <span
                     className="size-3 shrink-0 rounded-full"
-                    style={{ backgroundColor: tripColor(trip.id) }}
+                    style={{ backgroundColor: coverColor(trip) }}
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-semibold">{trip.name}</span>

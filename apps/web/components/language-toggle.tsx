@@ -47,7 +47,7 @@ export function LanguageToggle({
           onClick={() => change(l)}
           className={cn(
             'min-h-9 min-w-10 rounded-full px-2.5',
-            locale === l ? 'bg-foreground text-background' : 'text-muted-foreground',
+            locale === l ? 'seg-on font-semibold' : 'text-muted-foreground',
           )}
         >
           {l === 'th' ? 'TH' : 'EN'}

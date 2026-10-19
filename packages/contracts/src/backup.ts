@@ -22,6 +22,8 @@ export const TripBackup = z.object({
     fxRates: z.record(z.string().regex(/^[A-Z]{3}$/), Rate).default({}),
     /** Major units of the base currency. */
     dailyBudget: MajorAmount.nullable().optional(),
+    /** Cover colour; older files have none, unknown values are dropped on import. */
+    color: z.string().max(20).nullable().optional(),
   }),
   items: z
     .array(

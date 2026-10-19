@@ -1,3 +1,4 @@
+import { CreateTripInput, UpdateTripInput } from '@iplan/contracts'
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
   FakeAudit,
@@ -62,6 +63,27 @@ describe('TripsService', () => {
     await expect(service.remove(users.editor, tripId)).rejects.toMatchObject({ code: 'FORBIDDEN' })
     await service.remove(users.owner, tripId)
     expect(await service.list(users.owner)).toHaveLength(0)
+  })
+
+  it('stores a cover colour on create, keeps it when left out and clears it with null', async () => {
+    expect((await service.get(users.owner, tripId)).color).toBeNull()
+    const created = await service.create(users.owner, { ...input, color: '#0e7490' })
+    expect(created.color).toBe('#0e7490')
+
+    await service.update(users.editor, tripId, { color: '#d6453d' })
+    expect((await service.get(users.owner, tripId)).color).toBe('#d6453d')
+    await service.update(users.editor, tripId, { name: 'Seoul 2026' })
+    expect((await service.get(users.owner, tripId)).color).toBe('#d6453d')
+    await service.update(users.editor, tripId, { color: null })
+    expect((await service.get(users.owner, tripId)).color).toBeNull()
+  })
+
+  it('accepts only palette colours and never defaults one on update', () => {
+    expect(CreateTripInput.safeParse({ ...input, color: '#ff0000' }).success).toBe(false)
+    expect(CreateTripInput.safeParse({ ...input, color: 'red' }).success).toBe(false)
+    expect(UpdateTripInput.safeParse({ color: '#123456' }).success).toBe(false)
+    expect(UpdateTripInput.parse({ color: null })).toEqual({ color: null })
+    expect(UpdateTripInput.parse({ name: 'x' })).not.toHaveProperty('color')
   })
 
   it('validates dates and time zone', async () => {

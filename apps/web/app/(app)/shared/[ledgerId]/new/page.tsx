@@ -7,10 +7,16 @@ import { getMe, serverApi } from '@/lib/server-api'
 
 export const metadata: Metadata = { title: 'Add a shared cost' }
 
-export default async function NewEntryPage({ params }: { params: Promise<{ ledgerId: string }> }) {
-  const { ledgerId } = await params
+export default async function NewEntryPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ ledgerId: string }>
+  searchParams: Promise<{ date?: string }>
+}) {
+  const [{ ledgerId }, query] = await Promise.all([params, searchParams])
   const me = await getMe()
   if (!me) notFound()
   const ledger = await orNotFound(serverApi(`/api/ledgers/${ledgerId}`, LedgerDetailDto))
-  return <EntryForm ledger={ledger} meId={me.id} />
+  return <EntryForm ledger={ledger} meId={me.id} defaultDate={query.date} />
 }

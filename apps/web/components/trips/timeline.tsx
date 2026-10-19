@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { type CSSProperties, type ReactNode, useEffect } from 'react'
 import { cn } from '@/lib/cn'
-import { modeEmoji } from '@/lib/lines'
+import { lineBadge, modeEmoji } from '@/lib/lines'
 import { useTripDisplay } from '@/lib/trip-display'
 import { KIND_STYLE } from '@/lib/item-kinds'
 import { zoneCity, zoneShort } from '@/lib/time-zones'
@@ -197,7 +197,7 @@ function TimelineRow({
                 className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full px-1.5 font-display text-[13px] font-bold text-white"
                 style={{ backgroundColor: railColor }}
               >
-                {item.details.line}
+                {lineBadge(item.details.line)}
               </span>
             ) : (
               <Icon aria-hidden className="mt-0.5 size-4 shrink-0" />
@@ -207,6 +207,11 @@ function TimelineRow({
               {item.endsAt && item.kind === 'move' && (
                 <span className="ml-1.5 text-xs text-faint">
                   {f.duration(Date.parse(item.endsAt) - Date.parse(item.startsAt))}
+                </span>
+              )}
+              {item.kind === 'move' && (item.details.from || item.details.to) && (
+                <span className="block text-xs text-muted-foreground">
+                  {item.details.from || '?'} → {item.details.to || '?'}
                 </span>
               )}
               {item.notes && <span className="block text-xs text-faint">{item.notes}</span>}

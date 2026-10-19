@@ -7,6 +7,24 @@ const Currency = CurrencyCode.default('THB')
 /** Links open in the browser, so only web addresses (no javascript: or data:). */
 export const WebUrl = z.url({ protocol: /^https?$/ })
 
+/** Trip cover colours: calm tones that keep white text readable in light and dark mode. */
+export const TRIP_COLORS = [
+  '#00a84d',
+  '#0e7490',
+  '#0090d2',
+  '#0052a4',
+  '#6366f1',
+  '#996cac',
+  '#d6453d',
+  '#475569',
+] as const
+export const TripColor = z.enum(TRIP_COLORS)
+export type TripColor = z.infer<typeof TripColor>
+
+export function isTripColor(value: unknown): value is TripColor {
+  return typeof value === 'string' && (TRIP_COLORS as readonly string[]).includes(value)
+}
+
 export const TripRole = z.enum(['owner', 'editor', 'viewer'])
 export type TripRole = z.infer<typeof TripRole>
 
@@ -22,6 +40,8 @@ export const TripDto = z.object({
   fxRates: z.record(z.string(), z.string()),
   /** Planned spending per day in base minor units. */
   dailyBudgetMinor: z.string().nullable(),
+  /** Chosen cover colour; null means one is picked from the trip id. */
+  color: z.string().nullable(),
   /** The caller's role in this trip. */
   role: TripRole,
   memberCount: z.number().int(),
@@ -46,6 +66,8 @@ const tripFields = {
   endDate: DateKey,
   homeTimeZone: z.string().min(1).default('Asia/Bangkok'),
   baseCurrency: Currency,
+  /** Cover colour from TRIP_COLORS; null clears it. */
+  color: TripColor.nullable().optional(),
 }
 
 export const CreateTripInput = z.object(tripFields)
@@ -76,8 +98,9 @@ export const TripItemDetails = z
       .regex(/^#[0-9a-fA-F]{6}$/)
       .optional(),
     flightNumber: z.string().max(12).optional(),
-    from: z.string().max(40).optional(),
-    to: z.string().max(40).optional(),
+    /** Flight: airport codes. Move: start and end station. */
+    from: z.string().max(80).optional(),
+    to: z.string().max(80).optional(),
     terminal: z.string().max(40).optional(),
     arrivalTimeZone: z.string().optional(),
     budget: z.object({ amount: z.string(), currency: z.string() }).optional(),
@@ -164,4 +187,6 @@ export const PlaceQuery = z.object({
   /** Bias results near this point, e.g. the trip's other places. */
   lat: z.coerce.number().min(-90).max(90).optional(),
   lng: z.coerce.number().min(-180).max(180).optional(),
+  /** Only railway and subway stations (start/end of a train ride). */
+  kind: z.enum(['station']).optional(),
 })

@@ -238,7 +238,7 @@ function TodayBody({ initialTrip, initialItems, meId, serverNow }: TodayProps) {
           {!before && !after && (
             <>
               {current && status.current ? (
-                <Hero tone={late ? 'red' : skipped ? 'ink' : 'green'}>
+                <Hero variant="solid" tone={late ? 'red' : skipped ? 'ink' : 'green'}>
                   <p className="text-sm font-semibold opacity-95">
                     {late
                       ? t('todayView.lateNow', { min: lateMin ?? 0 })

@@ -21,7 +21,7 @@ export function ScopeTabs({
           aria-current={scope === s ? 'page' : undefined}
           className={cn(
             'flex min-h-10 items-center justify-center rounded-full text-sm font-semibold',
-            scope === s ? 'bg-foreground text-background' : 'text-muted-foreground',
+            scope === s ? 'seg-on' : 'text-muted-foreground',
           )}
         >
           {labels[s]}

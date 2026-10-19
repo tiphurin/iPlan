@@ -90,7 +90,7 @@ export default async function DashboardPage() {
           })}
           {isAdminRole(me.role) && (
             <Link href="/admin" className={cn(tile, 'active:bg-muted')}>
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-foreground text-background">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
                 <Shield aria-hidden className="size-6" />
               </span>
               <span className="min-w-0">

@@ -24,7 +24,7 @@ export function CountryChips({
           onClick={() => onChange(c)}
           className={cn(
             'inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-sm',
-            value === c ? 'border-primary bg-primary/10 font-semibold text-primary' : 'bg-card',
+            value === c ? 'chip-on' : 'bg-card',
           )}
         >
           <span aria-hidden>{COUNTRY_FLAG[c]}</span>

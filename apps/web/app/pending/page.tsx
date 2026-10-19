@@ -23,9 +23,9 @@ export default async function PendingPage() {
           <LanguageToggle />
         </div>
         <Hero tone="ink">
-          <Clock aria-hidden className="mb-3 size-9" />
+          <Clock aria-hidden className="mb-3 size-9 text-warning" />
           <p className="font-display text-[26px] leading-tight font-bold">{t('title')}</p>
-          <p className="mt-2 text-[15px] opacity-95">{t('body', { email: me.email })}</p>
+          <p className="mt-2 text-[15px] text-muted-foreground">{t('body', { email: me.email })}</p>
         </Hero>
         <p className="px-1 text-sm text-muted-foreground">{t('hint')}</p>
       </div>

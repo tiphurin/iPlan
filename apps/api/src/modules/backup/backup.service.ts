@@ -1,4 +1,4 @@
-import { TripBackup } from '@iplan/contracts'
+import { TripBackup, isTripColor } from '@iplan/contracts'
 import { isValidTimeZone, money, parseMoney, toDecimalString } from '@iplan/core'
 import type { AuditLog } from '../../shared/audit'
 import type { SessionUser } from '../../shared/context'
@@ -101,6 +101,7 @@ export class BackupService {
           trip.dailyBudgetMinor === null
             ? null
             : toDecimalString(money(trip.dailyBudgetMinor, trip.baseCurrency)),
+        color: trip.color,
       },
       items: items.map((i) => ({
         dayDate: i.dayDate,
@@ -188,6 +189,7 @@ export class BackupService {
           Object.entries(data.trip.fxRates).filter(([code]) => code !== data.trip.baseCurrency),
         ),
         dailyBudgetMinor,
+        color: isTripColor(data.trip.color) ? data.trip.color : null,
         createdBy: actor.id,
       },
       items: data.items.map((i, index) => ({

@@ -25,7 +25,7 @@ export function Avatar({
   return (
     <span
       aria-hidden
-      className="flex items-center justify-center rounded-full bg-foreground font-display font-bold text-background"
+      className="flex items-center justify-center rounded-full bg-muted font-display font-bold text-foreground"
       style={{ width: size, height: size, fontSize: size * 0.42 }}
     >
       {name.trim().charAt(0).toUpperCase() || '?'}

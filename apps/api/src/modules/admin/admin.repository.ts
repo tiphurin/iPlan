@@ -25,6 +25,7 @@ export interface AdminTripRow {
   destination: string | null
   startDate: string
   endDate: string
+  color: string | null
   ownerName: string | null
   memberCount: number
 }
@@ -174,6 +175,7 @@ export class DrizzleAdminRepository implements AdminRepository {
         destination: schema.trip.destination,
         startDate: schema.trip.startDate,
         endDate: schema.trip.endDate,
+        color: schema.trip.color,
         ownerName: sql<
           string | null
         >`(select u.name from ${schema.tripMember} m join ${schema.user} u on u.id = m.user_id where m.trip_id = "trip"."id" and m.role = 'owner' limit 1)`,

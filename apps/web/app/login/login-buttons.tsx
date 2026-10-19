@@ -90,7 +90,7 @@ export function LoginButtons({
               <span className="flex min-w-0 items-center gap-1.5">
                 <span className="truncate">{u.name}</span>
                 {u.role !== 'user' && (
-                  <span className="shrink-0 rounded-full bg-foreground px-1.5 py-px text-[10px] font-semibold text-background">
+                  <span className="shrink-0 rounded-full bg-muted px-1.5 py-px text-[10px] font-semibold text-foreground">
                     {u.role === 'superadmin' ? t('login.roleSuper') : t('login.roleAdmin')}
                   </span>
                 )}

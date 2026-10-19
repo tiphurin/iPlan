@@ -14,6 +14,8 @@ const config: NextConfig = {
   typedRoutes: true,
   // The floating dev badge covers the bottom tab bar on phones.
   devIndicators: false,
+  // Dev only: let a phone on the same Wi-Fi (http://192.168.x.x:3000) load dev assets and hot reload.
+  allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '*.local'],
   async headers() {
     return [
       {

@@ -121,3 +121,88 @@ export const LEDGER_CATEGORY_COLORS: Record<string, string> = {
   travel: '#0052a4',
   other: '#9aa3ae',
 }
+
+export type WalletTab = 'overview' | 'months'
+
+/** "?tab=" from the URL; anything unknown falls back to the overview. */
+export function parseWalletTab(value: unknown): WalletTab {
+  return value === 'months' ? 'months' : 'overview'
+}
+
+/** "YYYY-MM-DD" that is a real calendar date, else null. */
+export function validDateKey(value: unknown): string | null {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null
+  const date = new Date(`${value}T12:00:00Z`)
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value ? value : null
+}
+
+/** The month an entry belongs to: expenses by date, settlements by what they settle. */
+export function entryMonth(
+  entry: Pick<LedgerEntryDto, 'date' | 'settlesMonth' | 'settlesEntryId'>,
+  byId: ReadonlyMap<string, Pick<LedgerEntryDto, 'date'>>,
+): string {
+  return (
+    entry.settlesMonth ??
+    (entry.settlesEntryId ? byId.get(entry.settlesEntryId)?.date.slice(0, 7) : undefined) ??
+    entry.date.slice(0, 7)
+  )
+}
+
+/** Months the switcher can show, oldest first: every month with data plus the current one. */
+export function walletMonths(withData: readonly string[], current: string): string[] {
+  return [...new Set([...withData, current])].sort()
+}
+
+/** The current month when it has data, else the latest month that does, else the current one. */
+export function defaultWalletMonth(withData: readonly string[], current: string): string {
+  if (withData.includes(current)) return current
+  return [...withData].sort().at(-1) ?? current
+}
+
+/** "?month=" when it is one of the switcher's months, else the default. */
+export function pickWalletMonth(
+  value: unknown,
+  withData: readonly string[],
+  current: string,
+): string {
+  return typeof value === 'string' && walletMonths(withData, current).includes(value)
+    ? value
+    : defaultWalletMonth(withData, current)
+}
+
+/** The previous (-1) or next (+1) month in the switcher's list, or null at either end. */
+export function stepWalletMonth(
+  months: readonly string[],
+  month: string,
+  delta: -1 | 1,
+): string | null {
+  const index = months.indexOf(month)
+  if (index < 0) return null
+  return months[index + delta] ?? null
+}
+
+/** Entries grouped by day, newest day first; within a day, newest added first. */
+export function groupByDay<T extends Pick<LedgerEntryDto, 'date' | 'createdAt'>>(
+  entries: readonly T[],
+): { date: string; entries: T[] }[] {
+  const sorted = [...entries].sort(
+    (a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt),
+  )
+  const days: { date: string; entries: T[] }[] = []
+  for (const entry of sorted) {
+    const last = days.at(-1)
+    if (last?.date === entry.date) last.entries.push(entry)
+    else days.push({ date: entry.date, entries: [entry] })
+  }
+  return days
+}
+
+/** Date to pre-fill for a new cost: today in the current month, else the 1st of the month. */
+export function newEntryDate(month: string, today: string): string {
+  return today.startsWith(`${month}-`) ? today : `${month}-01`
+}
+
+/** Back to a wallet's monthly summary on a given month. */
+export function walletMonthHref(ledgerId: string, month: string): string {
+  return `/shared/${ledgerId}?tab=months&month=${month}`
+}

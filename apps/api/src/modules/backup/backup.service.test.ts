@@ -59,6 +59,27 @@ describe('BackupService.import', () => {
     expect(await items.listByTrip(tripId)).toHaveLength(1)
   })
 
+  it('round-trips the cover colour and imports older files without one', async () => {
+    const { service, tripRepo } = setup()
+    const { tripId } = await service.import(users.owner, {
+      ...file,
+      trip: { ...file.trip, color: '#6366f1' },
+    })
+    expect(tripRepo.trips.get(tripId)?.color).toBe('#6366f1')
+    const exported = await service.export(users.owner, tripId)
+    expect(exported.trip.color).toBe('#6366f1')
+    const { tripId: copyId } = await service.import(users.owner, exported)
+    expect(tripRepo.trips.get(copyId)?.color).toBe('#6366f1')
+
+    const { tripId: oldId } = await service.import(users.owner, file)
+    expect(tripRepo.trips.get(oldId)?.color).toBeNull()
+    const { tripId: oddId } = await service.import(users.owner, {
+      ...file,
+      trip: { ...file.trip, color: '#abcdef' },
+    })
+    expect(tripRepo.trips.get(oddId)?.color).toBeNull()
+  })
+
   it.each([
     ['a zero rate', { trip: { ...file.trip, fxRates: { KRW: '0' } } }],
     ['a non-numeric rate', { trip: { ...file.trip, fxRates: { KRW: 'abc' } } }],

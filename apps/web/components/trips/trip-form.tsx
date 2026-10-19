@@ -1,6 +1,6 @@
 'use client'
 
-import type { TripDetailDto } from '@iplan/contracts'
+import type { TripColor, TripDetailDto } from '@iplan/contracts'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -9,14 +9,19 @@ import { Button } from '@/components/ui/button'
 import { DateField } from '@/components/ui/date-fields'
 import { Field, Input, Select } from '@/components/ui/field'
 import { ApiError } from '@/lib/api-error'
+import { TripColorPicker } from '@/components/trips/trip-color-picker'
 import { CURRENCIES, TIME_ZONES, zoneLabel } from '@/lib/time-zones'
+import { coverColor } from '@/lib/trip-color'
 import { useCreateTrip, useDeleteTrip, useUpdateTrip } from '@/lib/trips'
 
 export function TripForm({
   trip,
   currencyLocked = false,
+  suggestedColor,
 }: {
   trip?: TripDetailDto
+  /** Preselected cover colour for a new trip. */
+  suggestedColor?: TripColor
   /** The trip has expenses, so its currency can't change (the API refuses it too). */
   currencyLocked?: boolean
 }) {
@@ -25,6 +30,10 @@ export function TripForm({
   const create = useCreateTrip()
   const update = useUpdateTrip(trip?.id ?? '')
   const remove = useDeleteTrip(trip?.id ?? '')
+  const initialColor = trip ? coverColor(trip) : (suggestedColor ?? null)
+  const [color, setColor] = useState<string | null>(initialColor)
+  const [name, setName] = useState(trip?.name ?? '')
+  const [destination, setDestination] = useState(trip?.destination ?? '')
   const [startDate, setStartDate] = useState(trip?.startDate ?? '')
   const [endDate, setEndDate] = useState(trip?.endDate ?? '')
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -48,6 +57,8 @@ export function TripForm({
       // A locked (disabled) picker isn't in the form data; keep the stored currency.
       baseCurrency:
         trip && currencyLocked ? trip.baseCurrency : String(form.get('baseCurrency') ?? 'THB'),
+      // Only send a colour the user picked; an untouched edit keeps the stored one.
+      ...(color && (!trip || color !== initialColor) ? { color: color as TripColor } : {}),
     }
     setErrors({})
     setFormError(null)
@@ -78,11 +89,30 @@ export function TripForm({
         </p>
       )}
       <Field label={t('trips.name')} error={errors.name}>
-        <Input name="name" required maxLength={80} defaultValue={trip?.name} autoComplete="off" />
+        <Input
+          name="name"
+          required
+          maxLength={80}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          autoComplete="off"
+        />
       </Field>
       <Field label={t('trips.destination')} hint={t('common.optional')} error={errors.destination}>
-        <Input name="destination" maxLength={120} defaultValue={trip?.destination ?? ''} />
+        <Input
+          name="destination"
+          maxLength={120}
+          value={destination}
+          onChange={(e) => setDestination(e.target.value)}
+        />
       </Field>
+      <TripColorPicker
+        value={color ?? 'var(--muted)'}
+        onChange={setColor}
+        name={name}
+        destination={destination}
+      />
+      {errors.color && <p className="text-sm text-danger">{errors.color}</p>}
       <div className="grid grid-cols-2 gap-3">
         <Field label={t('trips.startDate')} error={errors.startDate}>
           <DateField

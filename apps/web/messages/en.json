@@ -127,6 +127,18 @@
     "create": "Create trip",
     "deleteTrip": "Delete trip",
     "confirmDeleteTrip": "Delete this trip and its whole plan? This can't be undone.",
+    "coverColor": "Cover colour",
+    "coverPreview": "Your trip",
+    "colors": {
+      "green": "Green",
+      "teal": "Teal",
+      "sky": "Sky blue",
+      "blue": "Blue",
+      "indigo": "Indigo",
+      "purple": "Purple",
+      "rose": "Rose",
+      "slate": "Slate"
+    },
     "dayN": "Day {n}",
     "noItems": "Nothing planned for this day yet",
     "addItem": "Add to plan",
@@ -360,7 +372,38 @@
     "noBudget": "No daily budget set",
     "budgetHint": "Set it with \"Exchange rates and budget\" above · amounts are in the trip currency",
     "overBy": "over by {amount}",
-    "left": "{amount} left"
+    "left": "{amount} left",
+    "yourShare": "Your share {amount}",
+    "budgetExplain": "What was actually spent each day, compared with the daily budget of {amount}",
+    "budgetExplainNone": "What was actually spent each day (no daily budget set yet, so nothing to compare with)",
+    "charts": {
+      "label": "Charts",
+      "categories": "Spent on",
+      "daily": "Spent per day",
+      "people": "Who paid how much vs their share",
+      "spent": "Spent that day",
+      "over": "Over budget",
+      "budgetLine": "Dashed line = daily budget {amount}",
+      "hint": "Tap a bar to see that day",
+      "dayDetail": "{day} · spent {amount}",
+      "dayDetailOver": "{day} · spent {amount} · over by {diff}",
+      "dayDetailLeft": "{day} · spent {amount} · {diff} left",
+      "paid": "Paid",
+      "share": "Their share",
+      "getsBack": "Gets back {amount}",
+      "owes": "Owes {amount}",
+      "even": "Even"
+    },
+    "settleView": {
+      "one": "{from} pays {to} {amount}",
+      "many": "{count} transfers ({amount} in total) settle everyone up",
+      "transfers": "Who pays whom",
+      "balances": "Balance per person",
+      "detail": "Paid {paid} · share {share}",
+      "poolDetail": "Pool paid {paid}",
+      "owes": "Owes",
+      "getsBack": "Gets back"
+    }
   },
   "attachments": {
     "title": "Slips & photos",
@@ -789,7 +832,16 @@
     "cancel": "Cancel",
     "markPaidAmount": "Mark {amount} as paid",
     "pays": "pays",
-    "receives": "receives"
+    "receives": "receives",
+    "tabOverview": "Overview",
+    "tabsLabel": "Wallet view",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "spentTogether": "Spent together",
+    "yourShare": "Your part",
+    "emptyMonth": "Nothing this month yet",
+    "emptyMonthHint": "Add the first shared cost for this month",
+    "entryStatus": "Paid back?"
   },
   "invitations": {
     "title": "{count, plural, one {# invitation} other {# invitations}}",
@@ -891,7 +943,8 @@
     "download": "Download .ics (one-off)",
     "rotate": "New link",
     "confirmRotate": "The old link stops working and calendars must re-subscribe. Continue?",
-    "mac": "Mac: copy the link, then Calendar › File › New Calendar Subscription and paste"
+    "mac": "Mac: copy the link, then Calendar › File › New Calendar Subscription and paste",
+    "localOnly": "The app is running on this computer (not deployed yet), so calendars that sync through iCloud or Google cannot reach this link and show \"There was an error subscribing\". On a Mac choose Location \"On My Mac\" when subscribing, or download the .ics below for now. Once deployed on https it syncs everywhere."
   },
   "itemCalendar": {
     "apple": "Apple Calendar",
@@ -935,6 +988,12 @@
     "line": "Line {n}",
     "custom": "Custom (name and colour)",
     "hideCustom": "Hide custom",
+    "customShort": "Custom",
+    "namePlaceholder": "e.g. Bus A1",
+    "moreColors": "More colours",
+    "from": "From station",
+    "to": "To station",
+    "stationPlaceholder": "Search a station, e.g. Siam",
     "name": "Line name",
     "color": "Colour",
     "grab": "Grab",
@@ -945,7 +1004,7 @@
     "country": "Country",
     "countries": {
       "TH": "Thailand",
-      "KR": "Korea",
+      "KR": "South Korea",
       "JP": "Japan",
       "TW": "Taiwan",
       "OTHER": "Other"
@@ -961,7 +1020,20 @@
     "go": "GO (taxi)",
     "uber": "Uber",
     "shinkansen": "Shinkansen",
-    "thsr": "High-speed rail (THSR)"
+    "thsr": "High-speed rail (THSR)",
+    "metro_TH": "BTS/MRT",
+    "metro_KR": "Subway",
+    "metro_JP": "Subway / JR city lines",
+    "metro_TW": "MRT",
+    "metro_OTHER": "Metro",
+    "train_TH": "Train (SRT)",
+    "train_KR": "KTX / train",
+    "train_JP": "JR / private railway",
+    "train_TW": "TRA train",
+    "train_OTHER": "Train",
+    "tuktuk": "Tuk-tuk",
+    "motorbike": "Motorbike taxi",
+    "stationPick": "Tap to choose a station or type to search"
   },
   "places": {
     "placeholder": "Search a place or type an address",

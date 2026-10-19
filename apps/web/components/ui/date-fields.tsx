@@ -124,7 +124,7 @@ function Column({
           className={cn(
             'block h-10 w-full snap-center text-center font-display text-xl tabular-nums',
             v === value
-              ? 'rounded-xl bg-foreground font-bold text-background'
+              ? 'rounded-xl bg-primary font-bold text-primary-foreground'
               : 'text-muted-foreground',
           )}
         >
@@ -323,10 +323,7 @@ export function MonthField({
                   setValue(key)
                   setOpen(false)
                 }}
-                className={cn(
-                  'min-h-12 rounded-xl border text-[15px]',
-                  on ? 'border-foreground bg-foreground font-semibold text-background' : 'bg-card',
-                )}
+                className={cn('min-h-12 rounded-xl border text-[15px]', on ? 'chip-on' : 'bg-card')}
               >
                 {formatMonth(key, { locale: f.locale }).split(' ')[0]}
               </button>

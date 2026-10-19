@@ -1,0 +1,5449 @@
+{
+  "1": [
+    {
+      "en": "Incheon",
+      "local": "인천"
+    },
+    {
+      "en": "Dongincheon",
+      "local": "동인천"
+    },
+    {
+      "en": "Dowon",
+      "local": "도원"
+    },
+    {
+      "en": "Jemulpo",
+      "local": "제물포"
+    },
+    {
+      "en": "Dohwa",
+      "local": "도화"
+    },
+    {
+      "en": "Juan",
+      "local": "주안"
+    },
+    {
+      "en": "Ganseok",
+      "local": "간석"
+    },
+    {
+      "en": "Dongam",
+      "local": "동암"
+    },
+    {
+      "en": "Baegun",
+      "local": "백운"
+    },
+    {
+      "en": "Bupyeong",
+      "local": "부평"
+    },
+    {
+      "en": "Bugae",
+      "local": "부개"
+    },
+    {
+      "en": "Songnae",
+      "local": "송내"
+    },
+    {
+      "en": "Jung-dong",
+      "local": "중동"
+    },
+    {
+      "en": "Bucheon",
+      "local": "부천"
+    },
+    {
+      "en": "Sosa",
+      "local": "소사"
+    },
+    {
+      "en": "Yeokgok",
+      "local": "역곡"
+    },
+    {
+      "en": "Onsu",
+      "local": "온수"
+    },
+    {
+      "en": "Oryu-dong",
+      "local": "오류동"
+    },
+    {
+      "en": "Gaebong",
+      "local": "개봉"
+    },
+    {
+      "en": "Guil",
+      "local": "구일"
+    },
+    {
+      "en": "Guro",
+      "local": "구로"
+    },
+    {
+      "en": "Sindorim",
+      "local": "신도림"
+    },
+    {
+      "en": "Yeongdeungpo",
+      "local": "영등포"
+    },
+    {
+      "en": "Singil",
+      "local": "신길"
+    },
+    {
+      "en": "Daebang",
+      "local": "대방"
+    },
+    {
+      "en": "Noryangjin",
+      "local": "노량진"
+    },
+    {
+      "en": "Yongsan",
+      "local": "용산"
+    },
+    {
+      "en": "Namyeong",
+      "local": "남영"
+    },
+    {
+      "en": "Seoul",
+      "local": "서울역"
+    },
+    {
+      "en": "City Hall",
+      "local": "시청"
+    },
+    {
+      "en": "Jonggak",
+      "local": "종각"
+    },
+    {
+      "en": "Jongno 3(sam)-ga",
+      "local": "종로3가"
+    },
+    {
+      "en": "Jongno 5(o)-ga",
+      "local": "종로5가"
+    },
+    {
+      "en": "Dongdaemun",
+      "local": "동대문"
+    },
+    {
+      "en": "Dongmyo",
+      "local": "동묘앞"
+    },
+    {
+      "en": "Sinseol-dong",
+      "local": "신설동"
+    },
+    {
+      "en": "Jegidong",
+      "local": "제기동"
+    },
+    {
+      "en": "Cheongnyangni (University of Seoul)",
+      "local": "청량리"
+    },
+    {
+      "en": "Hoegi",
+      "local": "회기"
+    },
+    {
+      "en": "Hankuk University of Foreign Studies",
+      "local": "외대앞"
+    },
+    {
+      "en": "Sinimun (Korea National University of Arts)",
+      "local": "신이문"
+    },
+    {
+      "en": "Seokgye",
+      "local": "석계"
+    },
+    {
+      "en": "Kwangwoon University",
+      "local": "광운대"
+    },
+    {
+      "en": "Wolgye (Induk University)",
+      "local": "월계"
+    },
+    {
+      "en": "Nokcheon",
+      "local": "녹천"
+    },
+    {
+      "en": "Chang-Dong",
+      "local": "창동"
+    },
+    {
+      "en": "Banghak (Dobong-gu Office)",
+      "local": "방학"
+    },
+    {
+      "en": "Dobong",
+      "local": "도봉"
+    },
+    {
+      "en": "Dobongsan",
+      "local": "도봉산"
+    },
+    {
+      "en": "Mangwolsa (Shinhan University)",
+      "local": "망월사"
+    },
+    {
+      "en": "Hoeryong",
+      "local": "회룡"
+    },
+    {
+      "en": "Uijeongbu",
+      "local": "의정부"
+    },
+    {
+      "en": "Cheonan",
+      "local": "천안"
+    },
+    {
+      "en": "Dujeong",
+      "local": "두정"
+    },
+    {
+      "en": "Jiksan",
+      "local": "직산"
+    },
+    {
+      "en": "Seonghwan",
+      "local": "성환"
+    },
+    {
+      "en": "Pyeongtaek",
+      "local": "평택"
+    },
+    {
+      "en": "Pyeongtaek Jije",
+      "local": "평택지제"
+    },
+    {
+      "en": "Seojeong-ri",
+      "local": "서정리"
+    },
+    {
+      "en": "Songtan",
+      "local": "송탄"
+    },
+    {
+      "en": "Jinwi",
+      "local": "진위"
+    },
+    {
+      "en": "Osan",
+      "local": "오산"
+    },
+    {
+      "en": "Osan College",
+      "local": "오산대"
+    },
+    {
+      "en": "Sema",
+      "local": "세마"
+    },
+    {
+      "en": "Byeongjeom",
+      "local": "병점"
+    },
+    {
+      "en": "Seryu",
+      "local": "세류"
+    },
+    {
+      "en": "Suwon",
+      "local": "수원"
+    },
+    {
+      "en": "Hwaseo",
+      "local": "화서"
+    },
+    {
+      "en": "Sungkyunkwan University",
+      "local": "성균관대"
+    },
+    {
+      "en": "Uiwang",
+      "local": "의왕"
+    },
+    {
+      "en": "Dangjeong",
+      "local": "당정"
+    },
+    {
+      "en": "Gunpo",
+      "local": "군포"
+    },
+    {
+      "en": "Geumjeong",
+      "local": "금정"
+    },
+    {
+      "en": "Myeonghak",
+      "local": "명학"
+    },
+    {
+      "en": "Anyang",
+      "local": "안양"
+    },
+    {
+      "en": "Gwanak",
+      "local": "관악"
+    },
+    {
+      "en": "Seoksu",
+      "local": "석수"
+    },
+    {
+      "en": "Geumcheon-gu Office",
+      "local": "금천구청"
+    },
+    {
+      "en": "Doksan",
+      "local": "독산"
+    },
+    {
+      "en": "Gasan Digital Complex",
+      "local": "가산디지털단지"
+    }
+  ],
+  "2": [
+    {
+      "en": "City Hall",
+      "local": "시청"
+    },
+    {
+      "en": "Chungjeongno(Kyonggi University)",
+      "local": "충정로"
+    },
+    {
+      "en": "Ahyeon",
+      "local": "아현"
+    },
+    {
+      "en": "Ewha Womans University",
+      "local": "이대"
+    },
+    {
+      "en": "Sinchon",
+      "local": "신촌"
+    },
+    {
+      "en": "Hongik University",
+      "local": "홍대입구"
+    },
+    {
+      "en": "Hapjeong",
+      "local": "합정"
+    },
+    {
+      "en": "Dangsan",
+      "local": "당산"
+    },
+    {
+      "en": "Yeongdeungpo-gu Office",
+      "local": "영등포구청"
+    },
+    {
+      "en": "Mullae",
+      "local": "문래"
+    },
+    {
+      "en": "Sindorim",
+      "local": "신도림"
+    },
+    {
+      "en": "Daerim(Guro-gu Office)",
+      "local": "대림(구로구청)"
+    },
+    {
+      "en": "Guro Digital Complex",
+      "local": "구로디지털단지"
+    },
+    {
+      "en": "Sindaebang",
+      "local": "신대방"
+    },
+    {
+      "en": "Sillim",
+      "local": "신림"
+    },
+    {
+      "en": "Bongcheon",
+      "local": "봉천"
+    },
+    {
+      "en": "Seoul Nat'l University (Gwanak-gu Office)",
+      "local": "서울대입구"
+    },
+    {
+      "en": "Nakseongdae",
+      "local": "낙성대"
+    },
+    {
+      "en": "Sadang",
+      "local": "사당"
+    },
+    {
+      "en": "Bangbae",
+      "local": "방배"
+    },
+    {
+      "en": "Seocho",
+      "local": "서초"
+    },
+    {
+      "en": "Seoul Nat'l Univ. of Education (Court & Public Prosecutors' Office)",
+      "local": "교대"
+    },
+    {
+      "en": "Gangnam",
+      "local": "강남"
+    },
+    {
+      "en": "Yeoksam",
+      "local": "역삼"
+    },
+    {
+      "en": "Seolleung",
+      "local": "선릉"
+    },
+    {
+      "en": "Samseong(World Trade Center Seoul)",
+      "local": "삼성"
+    },
+    {
+      "en": "Sports Complex",
+      "local": "종합운동장"
+    },
+    {
+      "en": "Jamsilsaenae",
+      "local": "잠실새내"
+    },
+    {
+      "en": "Jamsil(Songpa-gu Office)",
+      "local": "잠실"
+    },
+    {
+      "en": "Jamsillaru",
+      "local": "잠실나루"
+    },
+    {
+      "en": "Gangbyeon(Dongseoul Bus Terminal)",
+      "local": "강변"
+    },
+    {
+      "en": "Guui(Gwangjin-gu Office)",
+      "local": "구의"
+    },
+    {
+      "en": "Konkuk University",
+      "local": "건대입구"
+    },
+    {
+      "en": "Seongsu",
+      "local": "성수"
+    },
+    {
+      "en": "Ttukseom",
+      "local": "뚝섬"
+    },
+    {
+      "en": "Hanyang University",
+      "local": "한양대"
+    },
+    {
+      "en": "Wangsimni",
+      "local": "왕십리"
+    },
+    {
+      "en": "Sangwangsimni",
+      "local": "상왕십리"
+    },
+    {
+      "en": "Sindang",
+      "local": "신당"
+    },
+    {
+      "en": "Dongdaemun History & Culture Park Station (DDP)",
+      "local": "동대문역사문화공원"
+    },
+    {
+      "en": "Euljiro 4(sa)-ga",
+      "local": "을지로4가"
+    },
+    {
+      "en": "Euljiro 3(sam)-ga",
+      "local": "을지로3가"
+    },
+    {
+      "en": "Euljiro 1(il)-ga (Industrial Bank of Korea)",
+      "local": "을지로입구"
+    },
+    {
+      "en": "Yongdap",
+      "local": "용답"
+    },
+    {
+      "en": "Sindap",
+      "local": "신답"
+    },
+    {
+      "en": "Yongdu",
+      "local": "용두"
+    },
+    {
+      "en": "Sinseol-dong",
+      "local": "신설동"
+    },
+    {
+      "en": "Kkachisan",
+      "local": "까치산"
+    },
+    {
+      "en": "Sinjeongnegeori",
+      "local": "신정네거리"
+    },
+    {
+      "en": "Yangcheon-gu Office",
+      "local": "양천구청"
+    },
+    {
+      "en": "Dorimcheon",
+      "local": "도림천"
+    }
+  ],
+  "3": [
+    {
+      "en": "Daehwa",
+      "local": "대화"
+    },
+    {
+      "en": "Juyeop",
+      "local": "주엽"
+    },
+    {
+      "en": "Jeongbalsan",
+      "local": "정발산"
+    },
+    {
+      "en": "Madu",
+      "local": "마두"
+    },
+    {
+      "en": "Baekseok",
+      "local": "백석"
+    },
+    {
+      "en": "Daegok",
+      "local": "대곡"
+    },
+    {
+      "en": "Hwajeong",
+      "local": "화정"
+    },
+    {
+      "en": "Wondang",
+      "local": "원당"
+    },
+    {
+      "en": "Wonheung",
+      "local": "원흥"
+    },
+    {
+      "en": "Samsong",
+      "local": "삼송"
+    },
+    {
+      "en": "Jichuk",
+      "local": "지축"
+    },
+    {
+      "en": "Gupabal",
+      "local": "구파발"
+    },
+    {
+      "en": "Yeonsinnae",
+      "local": "연신내"
+    },
+    {
+      "en": "Bulgwang",
+      "local": "불광"
+    },
+    {
+      "en": "Nokbeon",
+      "local": "녹번"
+    },
+    {
+      "en": "Hongje (Seoul Culture Arts Univ.)",
+      "local": "홍제"
+    },
+    {
+      "en": "Muakjae",
+      "local": "무악재"
+    },
+    {
+      "en": "Dongnimmun",
+      "local": "독립문"
+    },
+    {
+      "en": "Gyeongbokgung (Government Complex Seoul)",
+      "local": "경복궁"
+    },
+    {
+      "en": "Anguk",
+      "local": "안국"
+    },
+    {
+      "en": "Jongno 3(sam)-ga",
+      "local": "종로3가"
+    },
+    {
+      "en": "Euljiro 3(sam)-ga",
+      "local": "을지로3가"
+    },
+    {
+      "en": "Chungmuro",
+      "local": "충무로"
+    },
+    {
+      "en": "Dongguk Univ.",
+      "local": "동대입구"
+    },
+    {
+      "en": "Yaksu",
+      "local": "약수"
+    },
+    {
+      "en": "Geumho",
+      "local": "금호"
+    },
+    {
+      "en": "Oksu",
+      "local": "옥수"
+    },
+    {
+      "en": "Apgujeong",
+      "local": "압구정"
+    },
+    {
+      "en": "Sinsa",
+      "local": "신사"
+    },
+    {
+      "en": "Jamwon",
+      "local": "잠원"
+    },
+    {
+      "en": "Express Bus Terminal",
+      "local": "고속터미널"
+    },
+    {
+      "en": "Seoul Nat'l Univ. of Education (Court & Public Prosecutors' Office)",
+      "local": "교대(법원·검찰청)"
+    },
+    {
+      "en": "Nambu Bus Terminal (Seoul Arts Center)",
+      "local": "남부터미널(예술의전당)"
+    },
+    {
+      "en": "Yangjae",
+      "local": "양재"
+    },
+    {
+      "en": "Maebong",
+      "local": "매봉"
+    },
+    {
+      "en": "Dogok",
+      "local": "도곡"
+    },
+    {
+      "en": "Daechi",
+      "local": "대치"
+    },
+    {
+      "en": "Hangnyeoul",
+      "local": "학여울"
+    },
+    {
+      "en": "Daecheong",
+      "local": "대청"
+    },
+    {
+      "en": "Irwon",
+      "local": "일원"
+    },
+    {
+      "en": "Suseo",
+      "local": "수서"
+    },
+    {
+      "en": "Garak Market",
+      "local": "가락시장"
+    },
+    {
+      "en": "Nat'l Police Hospital",
+      "local": "경찰병원"
+    },
+    {
+      "en": "Ogeum",
+      "local": "오금"
+    }
+  ],
+  "4": [
+    {
+      "en": "Oido",
+      "local": "오이도"
+    },
+    {
+      "en": "Jeongwang",
+      "local": "정왕"
+    },
+    {
+      "en": "Singiloncheon",
+      "local": "신길온천"
+    },
+    {
+      "en": "Ansan",
+      "local": "안산"
+    },
+    {
+      "en": "Choji",
+      "local": "초지"
+    },
+    {
+      "en": "Gojan",
+      "local": "고잔"
+    },
+    {
+      "en": "Jungang",
+      "local": "중앙"
+    },
+    {
+      "en": "Hanyang University at Ansan",
+      "local": "한대앞"
+    },
+    {
+      "en": "Sangnoksu",
+      "local": "상록수"
+    },
+    {
+      "en": "Banwol",
+      "local": "반월"
+    },
+    {
+      "en": "Daeyami",
+      "local": "대야미"
+    },
+    {
+      "en": "Surisan",
+      "local": "수리산"
+    },
+    {
+      "en": "Sanbon",
+      "local": "산본"
+    },
+    {
+      "en": "Geumjeong",
+      "local": "금정"
+    },
+    {
+      "en": "Beomgye",
+      "local": "범계"
+    },
+    {
+      "en": "Pyeongchon",
+      "local": "평촌"
+    },
+    {
+      "en": "Indeogwon",
+      "local": "인덕원"
+    },
+    {
+      "en": "Ansan Line",
+      "local": "정부과천청사"
+    },
+    {
+      "en": "Gwacheon",
+      "local": "과천"
+    },
+    {
+      "en": "Seoul Grand park",
+      "local": "대공원"
+    },
+    {
+      "en": "Seoul Racecourse park",
+      "local": "경마공원"
+    },
+    {
+      "en": "Seonbawi",
+      "local": "선바위"
+    },
+    {
+      "en": "Namtaeryeong",
+      "local": "남태령"
+    },
+    {
+      "en": "Sadang",
+      "local": "사당"
+    },
+    {
+      "en": "Chongsin Univ. (Isu)",
+      "local": "총신대입구 (이수)"
+    },
+    {
+      "en": "Dongjak",
+      "local": "동작"
+    },
+    {
+      "en": "Ichon",
+      "local": "이촌"
+    },
+    {
+      "en": "Sinyongsan",
+      "local": "신용산"
+    },
+    {
+      "en": "Samgakji",
+      "local": "삼각지"
+    },
+    {
+      "en": "Sookmyung Women's Univ.",
+      "local": "숙대입구"
+    },
+    {
+      "en": "Seoul",
+      "local": "서울역"
+    },
+    {
+      "en": "Hoehyeon (Namdaemun Market)",
+      "local": "회현"
+    },
+    {
+      "en": "Myeong-dong",
+      "local": "명동"
+    },
+    {
+      "en": "Chungmuro",
+      "local": "충무로"
+    },
+    {
+      "en": "Dongdaemun History & Culture Park Station (DDP)",
+      "local": "동대문역사문화공원"
+    },
+    {
+      "en": "Dongdaemun",
+      "local": "동대문"
+    },
+    {
+      "en": "Hyehwa",
+      "local": "혜화"
+    },
+    {
+      "en": "Hansung Univ. (Samseongyo)",
+      "local": "한성대입구"
+    },
+    {
+      "en": "Sungshin Women's University",
+      "local": "성신여대입구"
+    },
+    {
+      "en": "Gireum",
+      "local": "길음"
+    },
+    {
+      "en": "Miasageori",
+      "local": "미아사거리"
+    },
+    {
+      "en": "Mia",
+      "local": "미아"
+    },
+    {
+      "en": "Suyu (Gangbuk-gu Office)",
+      "local": "수유"
+    },
+    {
+      "en": "Ssangmun",
+      "local": "쌍문"
+    },
+    {
+      "en": "Changdong",
+      "local": "창동"
+    },
+    {
+      "en": "Nowon",
+      "local": "노원"
+    },
+    {
+      "en": "Sanggye",
+      "local": "상계"
+    },
+    {
+      "en": "Buramsan",
+      "local": "불암산"
+    }
+  ],
+  "5": [
+    {
+      "en": "Banghwa",
+      "local": "방화"
+    },
+    {
+      "en": "Gaehwasan",
+      "local": "개화산"
+    },
+    {
+      "en": "Gimpo Int'l Airport",
+      "local": "김포공항"
+    },
+    {
+      "en": "Songjeong",
+      "local": "송정"
+    },
+    {
+      "en": "Magok",
+      "local": "마곡"
+    },
+    {
+      "en": "Balsan",
+      "local": "발산"
+    },
+    {
+      "en": "Ujangsan",
+      "local": "우장산"
+    },
+    {
+      "en": "Hwagok",
+      "local": "화곡"
+    },
+    {
+      "en": "Kkachisan",
+      "local": "까치산"
+    },
+    {
+      "en": "Sinjeong",
+      "local": "신정"
+    },
+    {
+      "en": "Mok-dong",
+      "local": "목동"
+    },
+    {
+      "en": "Omokgyo",
+      "local": "오목교"
+    },
+    {
+      "en": "Yangpyeong",
+      "local": "양평"
+    },
+    {
+      "en": "Yeongdeungpo-gu Office",
+      "local": "영등포구청"
+    },
+    {
+      "en": "Yeongdeungpo Market",
+      "local": "영등포시장"
+    },
+    {
+      "en": "Singil",
+      "local": "신길"
+    },
+    {
+      "en": "Yeouido",
+      "local": "여의도"
+    },
+    {
+      "en": "Yeouinaru",
+      "local": "여의나루"
+    },
+    {
+      "en": "Mapo",
+      "local": "마포"
+    },
+    {
+      "en": "Gongdeok",
+      "local": "공덕"
+    },
+    {
+      "en": "Aeogae",
+      "local": "애오개"
+    },
+    {
+      "en": "Chungjeongno",
+      "local": "충정로"
+    },
+    {
+      "en": "Seodaemun",
+      "local": "서대문"
+    },
+    {
+      "en": "Gwanghwamun",
+      "local": "광화문"
+    },
+    {
+      "en": "Jongno 3(sam)-ga",
+      "local": "종로3가"
+    },
+    {
+      "en": "Euljiro 4(sa)-ga",
+      "local": "을지로4가"
+    },
+    {
+      "en": "Dongdaemun History & Culture Park Station (DDP)",
+      "local": "동대문역사문화공원"
+    },
+    {
+      "en": "Cheonggu",
+      "local": "청구"
+    },
+    {
+      "en": "Singeumho",
+      "local": "신금호"
+    },
+    {
+      "en": "Haengdang",
+      "local": "행당"
+    },
+    {
+      "en": "Wangsimni",
+      "local": "왕십리"
+    },
+    {
+      "en": "Majang",
+      "local": "마장"
+    },
+    {
+      "en": "Dapsipri",
+      "local": "답십리"
+    },
+    {
+      "en": "Janghanpyeong",
+      "local": "장한평"
+    },
+    {
+      "en": "Gunja",
+      "local": "군자"
+    },
+    {
+      "en": "Achasan",
+      "local": "아차산"
+    },
+    {
+      "en": "Gwangnaru",
+      "local": "광나루"
+    },
+    {
+      "en": "Cheonho",
+      "local": "천호"
+    },
+    {
+      "en": "Gangdong",
+      "local": "강동"
+    },
+    {
+      "en": "Gil-dong",
+      "local": "길동"
+    },
+    {
+      "en": "Gubeundari",
+      "local": "굽은다리"
+    },
+    {
+      "en": "Myeongil",
+      "local": "명일"
+    },
+    {
+      "en": "Godeok",
+      "local": "고덕"
+    },
+    {
+      "en": "Sangil-dong",
+      "local": "상일동"
+    },
+    {
+      "en": "Gangil",
+      "local": "강일"
+    },
+    {
+      "en": "Misa",
+      "local": "미사"
+    },
+    {
+      "en": "Hanam Pungsan",
+      "local": "하남풍산"
+    },
+    {
+      "en": "Hanam City Hall (Deokpung·Sinjang)",
+      "local": "하남시청"
+    },
+    {
+      "en": "Hanam Geomdansan",
+      "local": "하남검단산"
+    },
+    {
+      "en": "Dunchon-dong",
+      "local": "둔촌동"
+    },
+    {
+      "en": "Olympic Park",
+      "local": "올림픽공원"
+    },
+    {
+      "en": "Bangi",
+      "local": "방이"
+    },
+    {
+      "en": "Ogeum",
+      "local": "오금"
+    },
+    {
+      "en": "Gaerong",
+      "local": "개롱"
+    },
+    {
+      "en": "Geoyeo",
+      "local": "거여"
+    },
+    {
+      "en": "Macheon",
+      "local": "마천"
+    }
+  ],
+  "6": [
+    {
+      "en": "Bonghwasan",
+      "local": "봉화산"
+    },
+    {
+      "en": "Hwarangdae",
+      "local": "화랑대"
+    },
+    {
+      "en": "Taereung",
+      "local": "태릉입구"
+    },
+    {
+      "en": "Seokgye",
+      "local": "석계"
+    },
+    {
+      "en": "Dolgoji",
+      "local": "돌곶이"
+    },
+    {
+      "en": "Sangwolgok",
+      "local": "상월곡"
+    },
+    {
+      "en": "Wolgok",
+      "local": "월곡"
+    },
+    {
+      "en": "Korea Univ.",
+      "local": "고려대"
+    },
+    {
+      "en": "Anam",
+      "local": "안암"
+    },
+    {
+      "en": "Bomun",
+      "local": "보문"
+    },
+    {
+      "en": "Changsin",
+      "local": "창신"
+    },
+    {
+      "en": "Dongmyo",
+      "local": "동묘앞"
+    },
+    {
+      "en": "Sindang",
+      "local": "신당"
+    },
+    {
+      "en": "Cheonggu",
+      "local": "청구"
+    },
+    {
+      "en": "Yaksu",
+      "local": "약수"
+    },
+    {
+      "en": "Beotigogae",
+      "local": "버티고개"
+    },
+    {
+      "en": "Hangangjin",
+      "local": "한강진"
+    },
+    {
+      "en": "Itaewon",
+      "local": "이태원"
+    },
+    {
+      "en": "Noksapyeong",
+      "local": "녹사평"
+    },
+    {
+      "en": "Samgakji",
+      "local": "삼각지"
+    },
+    {
+      "en": "Hyochang Park",
+      "local": "효창공원앞"
+    },
+    {
+      "en": "Gongdeok",
+      "local": "공덕"
+    },
+    {
+      "en": "Daeheung",
+      "local": "대흥"
+    },
+    {
+      "en": "Gwangheungchang",
+      "local": "광흥창"
+    },
+    {
+      "en": "Sangsu",
+      "local": "상수"
+    },
+    {
+      "en": "Hapjeong",
+      "local": "합정"
+    },
+    {
+      "en": "Mangwon",
+      "local": "망원"
+    },
+    {
+      "en": "Mapo-gu Office",
+      "local": "마포구청"
+    },
+    {
+      "en": "World Cup Stadium",
+      "local": "월드컵경기장"
+    },
+    {
+      "en": "Digital Media City",
+      "local": "디지털미디어시티"
+    },
+    {
+      "en": "Jeungsan",
+      "local": "증산"
+    },
+    {
+      "en": "Saejeol",
+      "local": "새절"
+    },
+    {
+      "en": "Eungam",
+      "local": "응암"
+    },
+    {
+      "en": "Sinnae",
+      "local": "신내"
+    },
+    {
+      "en": "Yeokchon",
+      "local": "역촌"
+    },
+    {
+      "en": "Bulgwang",
+      "local": "불광"
+    },
+    {
+      "en": "Dokbawi",
+      "local": "독바위"
+    },
+    {
+      "en": "Yeonsinnae",
+      "local": "연신내"
+    },
+    {
+      "en": "Gusan",
+      "local": "구산"
+    }
+  ],
+  "7": [
+    {
+      "en": "Dobongsan",
+      "local": "도봉산"
+    },
+    {
+      "en": "Suraksan",
+      "local": "수락산"
+    },
+    {
+      "en": "Madeul",
+      "local": "마들"
+    },
+    {
+      "en": "Nowon",
+      "local": "노원"
+    },
+    {
+      "en": "Junggye",
+      "local": "중계"
+    },
+    {
+      "en": "Hagye",
+      "local": "하계"
+    },
+    {
+      "en": "Gongneung",
+      "local": "공릉"
+    },
+    {
+      "en": "Taereung",
+      "local": "태릉입구"
+    },
+    {
+      "en": "Meokgol",
+      "local": "먹골"
+    },
+    {
+      "en": "Junghwa",
+      "local": "중화"
+    },
+    {
+      "en": "Sangbong",
+      "local": "상봉"
+    },
+    {
+      "en": "Myeonmok",
+      "local": "면목"
+    },
+    {
+      "en": "Sagajeong",
+      "local": "사가정"
+    },
+    {
+      "en": "Yongmasan",
+      "local": "용마산"
+    },
+    {
+      "en": "Junggok",
+      "local": "중곡"
+    },
+    {
+      "en": "Gunja",
+      "local": "군자"
+    },
+    {
+      "en": "Children's Grand Park",
+      "local": "어린이대공원"
+    },
+    {
+      "en": "Konkuk Univ.",
+      "local": "건대입구"
+    },
+    {
+      "en": "Jayang",
+      "local": "자양"
+    },
+    {
+      "en": "Cheongdam",
+      "local": "청담"
+    },
+    {
+      "en": "Gangnam-gu Office",
+      "local": "강남구청"
+    },
+    {
+      "en": "Hak-dong",
+      "local": "학동"
+    },
+    {
+      "en": "Nonhyeon",
+      "local": "논현"
+    },
+    {
+      "en": "Banpo",
+      "local": "반포"
+    },
+    {
+      "en": "Express Bus Terminal",
+      "local": "고속터미널"
+    },
+    {
+      "en": "Naebang",
+      "local": "내방"
+    },
+    {
+      "en": "Isu",
+      "local": "이수"
+    },
+    {
+      "en": "Namseong",
+      "local": "남성"
+    },
+    {
+      "en": "Soongsil Univ.",
+      "local": "숭실대입구"
+    },
+    {
+      "en": "Sangdo",
+      "local": "상도"
+    },
+    {
+      "en": "Jangseungbaegi",
+      "local": "장승배기"
+    },
+    {
+      "en": "Sindaebangsamgeori",
+      "local": "신대방삼거리"
+    },
+    {
+      "en": "Boramae",
+      "local": "보라매"
+    },
+    {
+      "en": "Sinpung",
+      "local": "신풍"
+    },
+    {
+      "en": "Daerim",
+      "local": "대림"
+    },
+    {
+      "en": "Namguro",
+      "local": "남구로"
+    },
+    {
+      "en": "Gasan Digital Complex",
+      "local": "가산디지털단지"
+    },
+    {
+      "en": "Cheolsan",
+      "local": "철산"
+    },
+    {
+      "en": "Gwangmyeongsageori",
+      "local": "광명사거리"
+    },
+    {
+      "en": "Cheonwang",
+      "local": "천왕"
+    },
+    {
+      "en": "Onsu",
+      "local": "온수"
+    },
+    {
+      "en": "Kkachiul",
+      "local": "까치울"
+    },
+    {
+      "en": "Bucheon Stadium",
+      "local": "부천종합운동장"
+    },
+    {
+      "en": "Chunui",
+      "local": "춘의"
+    },
+    {
+      "en": "Sinjung-dong",
+      "local": "신중동"
+    },
+    {
+      "en": "부천시청",
+      "local": "부천시청"
+    },
+    {
+      "en": "Sang-dong",
+      "local": "상동"
+    },
+    {
+      "en": "Samsan Gymnasium",
+      "local": "삼산체육관"
+    },
+    {
+      "en": "Gulpocheon",
+      "local": "굴포천"
+    },
+    {
+      "en": "Bupyeong-gu Office",
+      "local": "부평구청"
+    },
+    {
+      "en": "Sangok",
+      "local": "산곡"
+    },
+    {
+      "en": "Seongnam",
+      "local": "석남"
+    }
+  ],
+  "8": [
+    {
+      "en": "Amsa",
+      "local": "암사"
+    },
+    {
+      "en": "Cheonho",
+      "local": "천호"
+    },
+    {
+      "en": "Gangdong-gu Office",
+      "local": "강동구청"
+    },
+    {
+      "en": "Mongchontoseong",
+      "local": "몽촌토성"
+    },
+    {
+      "en": "Jamsil",
+      "local": "잠실"
+    },
+    {
+      "en": "Seokchon",
+      "local": "석촌"
+    },
+    {
+      "en": "Songpa",
+      "local": "송파"
+    },
+    {
+      "en": "Garak Market",
+      "local": "가락시장"
+    },
+    {
+      "en": "Munjeong",
+      "local": "문정"
+    },
+    {
+      "en": "Jangji",
+      "local": "장지"
+    },
+    {
+      "en": "Bokjeong",
+      "local": "복정"
+    },
+    {
+      "en": "Namwirye",
+      "local": "남위례"
+    },
+    {
+      "en": "Sanseong",
+      "local": "산성"
+    },
+    {
+      "en": "Namhansanseong",
+      "local": "남한산성입구"
+    },
+    {
+      "en": "Dandaeogeori",
+      "local": "단대오거리"
+    },
+    {
+      "en": "Sinheung",
+      "local": "신흥"
+    },
+    {
+      "en": "Sujin",
+      "local": "수진"
+    },
+    {
+      "en": "Moran",
+      "local": "모란"
+    },
+    {
+      "en": "Amsa History Park",
+      "local": "암사역사공원"
+    },
+    {
+      "en": "Jangja Lake Park",
+      "local": "장자호수공원"
+    },
+    {
+      "en": "Guri",
+      "local": "구리"
+    },
+    {
+      "en": "Donggureung",
+      "local": "동구릉"
+    },
+    {
+      "en": "Dasan",
+      "local": "다산"
+    },
+    {
+      "en": "Byeollae",
+      "local": "별내"
+    }
+  ],
+  "9": [
+    {
+      "en": "Gaehwa",
+      "local": "개화"
+    },
+    {
+      "en": "Gimpo Int'l Airport",
+      "local": "김포공항"
+    },
+    {
+      "en": "Airport Market",
+      "local": "공항시장"
+    },
+    {
+      "en": "Sinbanghwa",
+      "local": "신방화"
+    },
+    {
+      "en": "Magongnaru",
+      "local": "마곡나루"
+    },
+    {
+      "en": "Yangcheon Hyanggyo",
+      "local": "양천향교"
+    },
+    {
+      "en": "Gayang",
+      "local": "가양"
+    },
+    {
+      "en": "Jeungmi",
+      "local": "증미"
+    },
+    {
+      "en": "Deungchon",
+      "local": "등촌"
+    },
+    {
+      "en": "Yeomchang",
+      "local": "염창"
+    },
+    {
+      "en": "Sinmokdong",
+      "local": "신목동"
+    },
+    {
+      "en": "Seonyudo",
+      "local": "선유도"
+    },
+    {
+      "en": "Dangsan",
+      "local": "당산"
+    },
+    {
+      "en": "National Assembly",
+      "local": "국회의사당"
+    },
+    {
+      "en": "Yeouido",
+      "local": "여의도"
+    },
+    {
+      "en": "Saetgang",
+      "local": "샛강"
+    },
+    {
+      "en": "Noryangjin",
+      "local": "노량진"
+    },
+    {
+      "en": "Nodeul",
+      "local": "노들"
+    },
+    {
+      "en": "Heukseok",
+      "local": "흑석"
+    },
+    {
+      "en": "Dongjak",
+      "local": "동작"
+    },
+    {
+      "en": "Gubanpo",
+      "local": "구반포"
+    },
+    {
+      "en": "Sinbanpo",
+      "local": "신반포"
+    },
+    {
+      "en": "Express Bus Terminal",
+      "local": "고속터미널"
+    },
+    {
+      "en": "Sapyeong",
+      "local": "사평"
+    },
+    {
+      "en": "Sinnonhyeon",
+      "local": "신논현"
+    },
+    {
+      "en": "Eonju",
+      "local": "언주"
+    },
+    {
+      "en": "Seonjeongneung",
+      "local": "선정릉"
+    },
+    {
+      "en": "Samseong Jungang",
+      "local": "삼성중앙"
+    },
+    {
+      "en": "Bongeunsa",
+      "local": "봉은사"
+    },
+    {
+      "en": "Sports Complex",
+      "local": "종합운동장"
+    },
+    {
+      "en": "Samjeon",
+      "local": "삼전"
+    },
+    {
+      "en": "Seokchon Gobun",
+      "local": "석촌고분"
+    },
+    {
+      "en": "Seokchon",
+      "local": "석촌"
+    },
+    {
+      "en": "Songpanaru",
+      "local": "송파나루"
+    },
+    {
+      "en": "Hanseong Baekje",
+      "local": "한성백제"
+    },
+    {
+      "en": "Olympic Park",
+      "local": "올림픽공원"
+    },
+    {
+      "en": "Dunchon Oryun",
+      "local": "둔촌오륜"
+    },
+    {
+      "en": "VHS Medical Center",
+      "local": "중앙보훈병원"
+    }
+  ],
+  "BTS-SUK": [
+    {
+      "en": "Khu Khot",
+      "local": "คูคต",
+      "th": "คูคต"
+    },
+    {
+      "en": "Yaek Kor Por Aor",
+      "local": "แยก คปอ.",
+      "th": "แยก คปอ."
+    },
+    {
+      "en": "Royal Thai Air Force Museum",
+      "local": "พิพิธภัณฑ์กองทัพอากาศ",
+      "th": "พิพิธภัณฑ์กองทัพอากาศ"
+    },
+    {
+      "en": "Bhumibol Adulyadej Hospital",
+      "local": "โรงพยาบาลภูมิพลอดุลยเดช",
+      "th": "โรงพยาบาลภูมิพลอดุลยเดช"
+    },
+    {
+      "en": "Saphan Mai",
+      "local": "สะพานใหม่",
+      "th": "สะพานใหม่"
+    },
+    {
+      "en": "Sai Yud",
+      "local": "สายหยุด",
+      "th": "สายหยุด"
+    },
+    {
+      "en": "Phahonyothin 59",
+      "local": "พหลโยธิน 59",
+      "th": "พหลโยธิน 59"
+    },
+    {
+      "en": "Wat Phra Sri Mahathat",
+      "local": "วัดพระศรีมหาธาตุ",
+      "th": "วัดพระศรีมหาธาตุ"
+    },
+    {
+      "en": "11th Infantry Regiment",
+      "local": "กรมทหารราบที่ 11",
+      "th": "กรมทหารราบที่ 11"
+    },
+    {
+      "en": "Bang Bua",
+      "local": "บางบัว",
+      "th": "บางบัว"
+    },
+    {
+      "en": "Royal Forest Department",
+      "local": "กรมป่าไม้",
+      "th": "กรมป่าไม้"
+    },
+    {
+      "en": "Kasetsart University",
+      "local": "มหาวิทยาลัยเกษตรศาสตร์"
+    },
+    {
+      "en": "Sena Nikhom",
+      "local": "เสนานิคม",
+      "th": "เสนานิคม"
+    },
+    {
+      "en": "Ratchayothin",
+      "local": "รัชโยธิน",
+      "th": "รัชโยธิน"
+    },
+    {
+      "en": "Phahonyothin 24",
+      "local": "พหลโยธิน 24",
+      "th": "พหลโยธิน 24"
+    },
+    {
+      "en": "Ha Yaek Lat Phrao",
+      "local": "ห้าแยกลาดพร้าว"
+    },
+    {
+      "en": "Saphan Khwai",
+      "local": "สะพานควาย",
+      "th": "สะพานควาย"
+    },
+    {
+      "en": "Sena Ruam",
+      "local": "เสนาร่วม",
+      "th": "เสนาร่วม"
+    },
+    {
+      "en": "Ari",
+      "local": "อารีย์",
+      "th": "อารีย์"
+    },
+    {
+      "en": "Sanam Pao",
+      "local": "สนามเป้า",
+      "th": "สนามเป้า"
+    },
+    {
+      "en": "Victory Monument",
+      "local": "อนุสาวรีย์ชัยสมรภูมิ",
+      "th": "อนุสาวรีย์ชัยสมรภูมิ"
+    },
+    {
+      "en": "Phaya Thai",
+      "local": "พญาไท",
+      "th": "พญาไท"
+    },
+    {
+      "en": "Ratchathewi",
+      "local": "ราชเทวี",
+      "th": "ราชเทวี"
+    },
+    {
+      "en": "Siam",
+      "local": "สยาม",
+      "th": "สยาม"
+    },
+    {
+      "en": "Chit Lom",
+      "local": "ชิดลม",
+      "th": "ชิดลม"
+    },
+    {
+      "en": "Phloen Chit",
+      "local": "เพลินจิต",
+      "th": "เพลินจิต"
+    },
+    {
+      "en": "Nana",
+      "local": "นานา",
+      "th": "นานา"
+    },
+    {
+      "en": "Asok",
+      "local": "อโศก",
+      "th": "อโศก"
+    },
+    {
+      "en": "Phrom Phong",
+      "local": "พร้อมพงษ์",
+      "th": "พร้อมพงษ์"
+    },
+    {
+      "en": "Thong Lo",
+      "local": "ทองหล่อ",
+      "th": "ทองหล่อ"
+    },
+    {
+      "en": "Ekkamai",
+      "local": "เอกมัย",
+      "th": "ekkamai"
+    },
+    {
+      "en": "Phra Khanong",
+      "local": "พระโขนง",
+      "th": "พระโขนง"
+    },
+    {
+      "en": "On Nut",
+      "local": "อ่อนนุช",
+      "th": "อ่อนนุช"
+    },
+    {
+      "en": "Bang Chak",
+      "local": "บางจาก",
+      "th": "บางจาก"
+    },
+    {
+      "en": "Punnawithi",
+      "local": "ปุณณวิถี",
+      "th": "ปุณณวิถี"
+    },
+    {
+      "en": "Udom Suk",
+      "local": "อุดมสุข",
+      "th": "อุดมสุข"
+    },
+    {
+      "en": "Bang Na",
+      "local": "บางนา",
+      "th": "บางนา"
+    },
+    {
+      "en": "Bearing",
+      "local": "แบริ่ง",
+      "th": "แบริ่ง"
+    },
+    {
+      "en": "Samrong",
+      "local": "สำโรง",
+      "th": "สำโรง"
+    },
+    {
+      "en": "Pu Chao",
+      "local": "ปู่เจ้า",
+      "th": "ปู่เจ้า"
+    },
+    {
+      "en": "Chang Erawan",
+      "local": "ช้างเอราวัณ",
+      "th": "ช้างเอราวัณ"
+    },
+    {
+      "en": "Royal Thai Naval Academy",
+      "local": "โรงเรียนนายเรือ",
+      "th": "โรงเรียนนายเรือ"
+    },
+    {
+      "en": "Pak Nam",
+      "local": "ปากน้ำ",
+      "th": "ปากน้ำ"
+    },
+    {
+      "en": "Srinagarindra",
+      "local": "ศรีนครินทร์",
+      "th": "ศรีนครินทร์"
+    },
+    {
+      "en": "Phraek Sa",
+      "local": "แพรกษา",
+      "th": "แพรกษา"
+    },
+    {
+      "en": "Sai Luat",
+      "local": "สายลวด",
+      "th": "สายลวด"
+    },
+    {
+      "en": "Kheha",
+      "local": "เคหะฯ",
+      "th": "เคหะฯ"
+    }
+  ],
+  "BTS-SIL": [
+    {
+      "en": "National Stadium",
+      "local": "สนามกีฬาแห่งชาติ",
+      "th": "สนามกีฬาแห่งชาติ"
+    },
+    {
+      "en": "Siam",
+      "local": "สยาม",
+      "th": "สยาม"
+    },
+    {
+      "en": "Ratchadamri",
+      "local": "ราชดำริ",
+      "th": "ราชดำริ"
+    },
+    {
+      "en": "Sala Daeng",
+      "local": "ศาลาแดง",
+      "th": "ศาลาแดง"
+    },
+    {
+      "en": "Chong Nonsi",
+      "local": "ช่องนนทรี",
+      "th": "ช่องนนทรี"
+    },
+    {
+      "en": "Saint Louis",
+      "local": "เซนต์หลุยส์",
+      "th": "เซนต์หลุยส์"
+    },
+    {
+      "en": "Surasak",
+      "local": "สุรศักดิ์",
+      "th": "สุรศักดิ์"
+    },
+    {
+      "en": "Saphan Taksin",
+      "local": "สะพานตากสิน",
+      "th": "สะพานตากสิน"
+    },
+    {
+      "en": "Krung Thon Buri",
+      "local": "กรุงธนบุรี",
+      "th": "กรุงธนบุรี"
+    },
+    {
+      "en": "Wongwian Yai",
+      "local": "วงเวียนใหญ่",
+      "th": "วงเวียนใหญ่"
+    },
+    {
+      "en": "Pho Nimit",
+      "local": "โพธิ์นิมิตร",
+      "th": "โพธิ์นิมิตร"
+    },
+    {
+      "en": "Talat Phlu",
+      "local": "ตลาดพลู",
+      "th": "ตลาดพลู"
+    },
+    {
+      "en": "Wutthakat",
+      "local": "วุฒากาศ",
+      "th": "วุฒากาศ"
+    },
+    {
+      "en": "Bang Wa",
+      "local": "บางหว้า",
+      "th": "บางหว้า"
+    }
+  ],
+  "BTS-GOLD": [
+    {
+      "en": "Krung Thon Buri",
+      "local": "กรุงธนบุรี",
+      "th": "กรุงธนบุรี"
+    },
+    {
+      "en": "Charoen Nakhon",
+      "local": "เจริญนคร",
+      "th": "เจริญนคร"
+    },
+    {
+      "en": "Khlong San",
+      "local": "คลองสาน",
+      "th": "คลองสาน"
+    }
+  ],
+  "MRT-BL": [
+    {
+      "en": "Tha Phra",
+      "local": "ท่าพระ",
+      "th": "ท่าพระ"
+    },
+    {
+      "en": "Charan 13",
+      "local": "จรัญฯ 13",
+      "th": "จรัญฯ 13"
+    },
+    {
+      "en": "Fai Chai",
+      "local": "ไฟฉาย",
+      "th": "ไฟฉาย"
+    },
+    {
+      "en": "Bang Khun Non",
+      "local": "บางขุนนนท์"
+    },
+    {
+      "en": "Bang Yi Khan",
+      "local": "บางยี่ขัน"
+    },
+    {
+      "en": "Sirindhorn",
+      "local": "สิรินธร"
+    },
+    {
+      "en": "Bang Phlat",
+      "local": "บางพลัด"
+    },
+    {
+      "en": "Bang O",
+      "local": "บางอ้อ"
+    },
+    {
+      "en": "Bang Pho",
+      "local": "บางโพ",
+      "th": "บางโพ"
+    },
+    {
+      "en": "Tao Poon",
+      "local": "เตาปูน"
+    },
+    {
+      "en": "Bang Sue",
+      "local": "บางซื่อ",
+      "th": "บางซื่อ"
+    },
+    {
+      "en": "Kamphaeng Phet",
+      "local": "กำแพงเพชร",
+      "th": "กำแพงเพชร"
+    },
+    {
+      "en": "Chatuchak Park",
+      "local": "สวนจตุจักร",
+      "th": "สวนจตุจักร"
+    },
+    {
+      "en": "Phahon Yothin",
+      "local": "พหลโยธิน",
+      "th": "พหลโยธิน"
+    },
+    {
+      "en": "Lat Phrao",
+      "local": "ลาดพร้าว",
+      "th": "ลาดพร้าว"
+    },
+    {
+      "en": "Ratchadaphisek",
+      "local": "รัชดาภิเษก",
+      "th": "รัชดาภิเษก"
+    },
+    {
+      "en": "Sutthisan",
+      "local": "สุทธิสาร",
+      "th": "สุทธิสาร"
+    },
+    {
+      "en": "Huai Khwang",
+      "local": "ห้วยขวาง",
+      "th": "ห้วยขวาง"
+    },
+    {
+      "en": "Thailand Cultural Centre",
+      "local": "ศูนย์วัฒนธรรมแห่งประเทศไทย",
+      "th": "ศูนย์วัฒนธรรมแห่งประเทศไทย"
+    },
+    {
+      "en": "Phra Ram 9",
+      "local": "พระราม 9",
+      "th": "พระราม 9"
+    },
+    {
+      "en": "Phetchaburi",
+      "local": "เพชรบุรี",
+      "th": "เพชรบุรี"
+    },
+    {
+      "en": "Sukhumvit",
+      "local": "สุขุมวิท",
+      "th": "สุขุมวิท"
+    },
+    {
+      "en": "Queen Sirikit National Convention Centre",
+      "local": "ศูนย์การประชุมแห่งชาติสิริกิติ์",
+      "th": "ศูนย์การประชุมแห่งชาติสิริกิติ์"
+    },
+    {
+      "en": "Khlong Toei",
+      "local": "คลองเตย",
+      "th": "คลองเตย"
+    },
+    {
+      "en": "Lumphini",
+      "local": "ลุมพินี",
+      "th": "ลุมพินี"
+    },
+    {
+      "en": "Si Lom",
+      "local": "สีลม",
+      "th": "สีลม"
+    },
+    {
+      "en": "Sam Yan",
+      "local": "สามย่าน",
+      "th": "สามย่าน"
+    },
+    {
+      "en": "Hua Lamphong",
+      "local": "หัวลำโพง",
+      "th": "หัวลำโพง"
+    },
+    {
+      "en": "Wat Mangkon",
+      "local": "วัดมังกร"
+    },
+    {
+      "en": "Sam Yot",
+      "local": "สามยอด",
+      "th": "สามยอด"
+    },
+    {
+      "en": "Sanam Chai",
+      "local": "สนามไชย"
+    },
+    {
+      "en": "Itsaraphap",
+      "local": "อิสรภาพ"
+    },
+    {
+      "en": "Bang Phai",
+      "local": "บางไผ่"
+    },
+    {
+      "en": "Bang Wa",
+      "local": "บางหว้า"
+    },
+    {
+      "en": "Phetkasem 48",
+      "local": "เพชรเกษม 48"
+    },
+    {
+      "en": "Phasi Charoen",
+      "local": "ภาษีเจริญ"
+    },
+    {
+      "en": "Bang Khae",
+      "local": "บางแค"
+    },
+    {
+      "en": "Lak Song",
+      "local": "หลักสอง"
+    }
+  ],
+  "MRT-PP": [
+    {
+      "en": "Tao Poon",
+      "local": "เตาปูน"
+    },
+    {
+      "en": "Bang Son",
+      "local": "บางซ่อน",
+      "th": "บางซ่อน"
+    },
+    {
+      "en": "Wong Sawang",
+      "local": "วงศ์สว่าง"
+    },
+    {
+      "en": "Yaek Tiwanon",
+      "local": "แยกติวานนท์"
+    },
+    {
+      "en": "Ministry of Public Health",
+      "local": "กระทรวงสาธารณสุข"
+    },
+    {
+      "en": "Nonthaburi Civic Center",
+      "local": "ศูนย์ราชการนนทบุรี"
+    },
+    {
+      "en": "Bang Krasor",
+      "local": "บางกระสอ"
+    },
+    {
+      "en": "Yaek Nonthaburi 1",
+      "local": "แยกนนทบุรี 1",
+      "th": "แยกนนทบุรี 1"
+    },
+    {
+      "en": "Phra Nang Klao Bridge",
+      "local": "สะพานพระนั่งเกล้า",
+      "th": "สะพานพระนั่งเกล้า"
+    },
+    {
+      "en": "Sai Ma",
+      "local": "ไทรม้า",
+      "th": "ไทรม้า"
+    },
+    {
+      "en": "Bang Rak Noi Tha It",
+      "local": "บางรักน้อยท่าอิฐ"
+    },
+    {
+      "en": "Bang Rak Yai",
+      "local": "บางรักใหญ่"
+    },
+    {
+      "en": "Bang Phlu",
+      "local": "บางพลู"
+    },
+    {
+      "en": "Sam Yaek Bang Yai",
+      "local": "สามแยกบางใหญ่",
+      "th": "สามแยกบางใหญ่"
+    },
+    {
+      "en": "Talad Bang Yai",
+      "local": "ตลาดบางใหญ่",
+      "th": "ตลาดบางใหญ่"
+    },
+    {
+      "en": "Khlong Bang Phai",
+      "local": "คลองบางไผ่",
+      "th": "คลองบางไผ่"
+    }
+  ],
+  "MRT-YL": [
+    {
+      "en": "Lat Phrao",
+      "local": "ลาดพร้าว",
+      "th": "ลาดพร้าว"
+    },
+    {
+      "en": "Phawana",
+      "local": "ภาวนา",
+      "th": "ภาวนา"
+    },
+    {
+      "en": "Chok Chai 4",
+      "local": "โชคชัย 4",
+      "th": "โชคชัย 4"
+    },
+    {
+      "en": "Lat Phrao 71",
+      "local": "ลาดพร้าว 71",
+      "th": "ลาดพร้าว 71"
+    },
+    {
+      "en": "Lat Phrao 83",
+      "local": "ลาดพร้าว 83",
+      "th": "ลาดพร้าว 83"
+    },
+    {
+      "en": "Mahatthai",
+      "local": "มหาดไทย",
+      "th": "มหาดไทย"
+    },
+    {
+      "en": "Lat Phrao 101",
+      "local": "ลาดพร้าว 101",
+      "th": "ลาดพร้าว 101"
+    },
+    {
+      "en": "Bang Kapi",
+      "local": "บางกะปิ",
+      "th": "บางกะปิ"
+    },
+    {
+      "en": "Yaek Lam Sali",
+      "local": "แยกลำสาลี",
+      "th": "แยกลำสาลี"
+    },
+    {
+      "en": "Si Kritha",
+      "local": "ศรีกรีฑา",
+      "th": "ศรีกรีฑา"
+    },
+    {
+      "en": "Hua Mak",
+      "local": "หัวหมาก",
+      "th": "หัวหมาก"
+    },
+    {
+      "en": "Kalantan",
+      "local": "กลันตัน",
+      "th": "กลันตัน"
+    },
+    {
+      "en": "Si Nut",
+      "local": "ศรีนุช",
+      "th": "ศรีนุช"
+    },
+    {
+      "en": "Srinagarindra 38",
+      "local": "ศรีนครินทร์ 38",
+      "th": "ศรีนครินทร์ 38"
+    },
+    {
+      "en": "Suan Luang Rama IX",
+      "local": "สวนหลวง ร.9",
+      "th": "สวนหลวง ร.9"
+    },
+    {
+      "en": "Si Udom",
+      "local": "ศรีอุดม",
+      "th": "ศรีอุดม"
+    },
+    {
+      "en": "Si Iam",
+      "local": "ศรีเอี่ยม",
+      "th": "ศรีเอี่ยม"
+    },
+    {
+      "en": "Si La Salle",
+      "local": "ศรีลาซาล",
+      "th": "ศรีลาซาล"
+    },
+    {
+      "en": "Si Bearing",
+      "local": "ศรีแบริ่ง",
+      "th": "ศรีแบริ่ง"
+    },
+    {
+      "en": "Si Dan",
+      "local": "ศรีด่าน",
+      "th": "ศรีด่าน"
+    },
+    {
+      "en": "Si Thepha",
+      "local": "ศรีเทพา",
+      "th": "ศรีเทพา"
+    },
+    {
+      "en": "Thipphawan",
+      "local": "ทิพวัล",
+      "th": "ทิพวัล"
+    },
+    {
+      "en": "Samrong",
+      "local": "สำโรง",
+      "th": "สำโรง"
+    }
+  ],
+  "MRT-PK": [
+    {
+      "en": "Nonthaburi Civic Center",
+      "local": "ศูนย์ราชการนนทบุรี",
+      "th": "ศูนย์ราชการนนทบุรี"
+    },
+    {
+      "en": "Khae Rai",
+      "local": "แคราย",
+      "th": "แคราย"
+    },
+    {
+      "en": "Sanambin Nam",
+      "local": "สนามบินน้ำ",
+      "th": "สนามบินน้ำ"
+    },
+    {
+      "en": "Samakkhi",
+      "local": "สามัคคี",
+      "th": "สามัคคี"
+    },
+    {
+      "en": "Royal Irrigation Department",
+      "local": "กรมชลประทาน",
+      "th": "กรมชลประทาน"
+    },
+    {
+      "en": "Yaek Pak Kret",
+      "local": "แยกปากเกร็ด",
+      "th": "แยกปากเกร็ด"
+    },
+    {
+      "en": "Pak Kret Bypass",
+      "local": "เลี่ยงเมืองปากเกร็ด",
+      "th": "เลี่ยงเมืองปากเกร็ด"
+    },
+    {
+      "en": "Chaeng Watthana-Pak Kret 28",
+      "local": "แจ้งวัฒนะ-ปากเกร็ด 28",
+      "th": "แจ้งวัฒนะ-ปากเกร็ด 28"
+    },
+    {
+      "en": "Si Rat",
+      "local": "ศรีรัช",
+      "th": "ศรีรัช"
+    },
+    {
+      "en": "Muang Thong Thani",
+      "local": "เมืองทองธานี",
+      "th": "เมืองทองธานี"
+    },
+    {
+      "en": "Chaeng Watthana 14",
+      "local": "แจ้งวัฒนะ 14",
+      "th": "แจ้งวัฒนะ 14"
+    },
+    {
+      "en": "Government Complex",
+      "local": "ศูนย์ราชการเฉลิมพระเกียรติ",
+      "th": "ศูนย์ราชการเฉลิมพระเกียรติ"
+    },
+    {
+      "en": "National Telecom",
+      "local": "โทรคมนาคมแห่งชาติ",
+      "th": "โทรคมนาคมแห่งชาติ"
+    },
+    {
+      "en": "Lak Si",
+      "local": "หลักสี่",
+      "th": "หลักสี่"
+    },
+    {
+      "en": "Rajabhat Phranakhon",
+      "local": "ราชภัฏพระนคร",
+      "th": "ราชภัฏพระนคร"
+    },
+    {
+      "en": "Wat Phra Sri Mahathat",
+      "local": "วัดพระศรีมหาธาตุ",
+      "th": "วัดพระศรีมหาธาตุ"
+    },
+    {
+      "en": "Ram Inthra 3",
+      "local": "รามอินทรา 3",
+      "th": "รามอินทรา 3"
+    },
+    {
+      "en": "Lat Pla Khao",
+      "local": "ลาดปลาเค้า",
+      "th": "ลาดปลาเค้า"
+    },
+    {
+      "en": "Ram Inthra Kor Mor 4",
+      "local": "รามอินทรา กม.4",
+      "th": "รามอินทรา กม.4"
+    },
+    {
+      "en": "Maiyalap",
+      "local": "มัยลาภ",
+      "th": "มัยลาภ"
+    },
+    {
+      "en": "Vacharaphol",
+      "local": "วัชรพล",
+      "th": "วัชรพล"
+    },
+    {
+      "en": "Ram Inthra Kor Mor 6",
+      "local": "รามอินทรา กม.6",
+      "th": "รามอินทรา กม.6"
+    },
+    {
+      "en": "Khu Bon",
+      "local": "คู้บอน",
+      "th": "คู้บอน"
+    },
+    {
+      "en": "Ram Inthra Kor Mor 9",
+      "local": "รามอินทรา กม.9",
+      "th": "รามอินทรา กม.9"
+    },
+    {
+      "en": "Outer Ring Road-Ram Inthra",
+      "local": "วงแหวนรามอินทรา",
+      "th": "วงแหวนรามอินทรา"
+    },
+    {
+      "en": "Nopparat",
+      "local": "นพรัตน์",
+      "th": "นพรัตน์"
+    },
+    {
+      "en": "Bang Chan",
+      "local": "บางชัน",
+      "th": "บางชัน"
+    },
+    {
+      "en": "Setthabutbamphen",
+      "local": "เศรษฐบุตรบำเพ็ญ",
+      "th": "เศรษฐบุตรบำเพ็ญ"
+    },
+    {
+      "en": "Min Buri Market",
+      "local": "ตลาดมีนบุรี",
+      "th": "ตลาดมีนบุรี"
+    },
+    {
+      "en": "Min Buri",
+      "local": "มีนบุรี",
+      "th": "มีนบุรี"
+    }
+  ],
+  "TH-ARL": [
+    {
+      "en": "Phaya Thai",
+      "local": "พญาไท",
+      "th": "พญาไท"
+    },
+    {
+      "en": "Ratchaprarop",
+      "local": "ราชปรารภ",
+      "th": "ราชปรารภ"
+    },
+    {
+      "en": "Makkasan",
+      "local": "มักกะสัน",
+      "th": "มักกะสัน"
+    },
+    {
+      "en": "Ramkhamhaeng",
+      "local": "รามคำแหง",
+      "th": "รามคำแหง"
+    },
+    {
+      "en": "Hua Mak",
+      "local": "หัวหมาก",
+      "th": "หัวหมาก"
+    },
+    {
+      "en": "Ban Thap Chang",
+      "local": "บ้านทับช้าง",
+      "th": "บ้านทับช้าง"
+    },
+    {
+      "en": "Lat Krabang",
+      "local": "ลาดกระบัง",
+      "th": "ลาดกระบัง"
+    },
+    {
+      "en": "Suvarnabhumi",
+      "local": "สุวรรณภูมิ",
+      "th": "สุวรรณภูมิ"
+    }
+  ],
+  "TH-RED": [
+    {
+      "en": "Krung Thep Aphiwat",
+      "local": "กรุงเทพอภิวัฒน์",
+      "th": "กรุงเทพอภิวัฒน์"
+    },
+    {
+      "en": "Chatuchak",
+      "local": "จตุจักร"
+    },
+    {
+      "en": "Wat Samian Nari",
+      "local": "วัดเสมียนนารี"
+    },
+    {
+      "en": "Bang Khen",
+      "local": "บางเขน"
+    },
+    {
+      "en": "Thung Song Hong",
+      "local": "ทุ่งสองห้อง"
+    },
+    {
+      "en": "Lak Si",
+      "local": "หลักสี่"
+    },
+    {
+      "en": "Kan Kheha",
+      "local": "การเคหะ"
+    },
+    {
+      "en": "Don Muang",
+      "local": "ดอนเมือง",
+      "th": "ดอนเมือง"
+    },
+    {
+      "en": "Rangsit",
+      "local": "รังสิต"
+    },
+    {
+      "en": "Lak Hok (Rangsit U.)",
+      "local": "หลักหก (ม.รังสิต)"
+    }
+  ],
+  "TH-LRED": [
+    {
+      "en": "Krung Thep Aphiwat",
+      "local": "กรุงเทพอภิวัฒน์",
+      "th": "กรุงเทพอภิวัฒน์"
+    },
+    {
+      "en": "Bang Son",
+      "local": "บางซ่อน",
+      "th": "บางซ่อน"
+    },
+    {
+      "en": "Bang Bamru",
+      "local": "บางบำหรุ",
+      "th": "บางบำหรุ"
+    },
+    {
+      "en": "Taling Chan Junction",
+      "local": "ชุมทางตลิ่งชัน",
+      "th": "ชุมทางตลิ่งชัน"
+    }
+  ],
+  "AREX": [
+    {
+      "en": "Seoul",
+      "local": "서울역"
+    },
+    {
+      "en": "Gongdeok",
+      "local": "공덕"
+    },
+    {
+      "en": "Magongnaru",
+      "local": "마곡나루"
+    },
+    {
+      "en": "Gimpo Int'l Airport",
+      "local": "김포공항"
+    },
+    {
+      "en": "Gyeyang",
+      "local": "계양"
+    },
+    {
+      "en": "Geomam",
+      "local": "검암"
+    },
+    {
+      "en": "Cheongna Int'l City",
+      "local": "청라국제도시"
+    },
+    {
+      "en": "Yeongjong",
+      "local": "영종"
+    },
+    {
+      "en": "Unseo",
+      "local": "운서"
+    },
+    {
+      "en": "Incheon International Airport Cargo Terminal",
+      "local": "공항화물청사"
+    },
+    {
+      "en": "Incheon Int'l Airport Terminal 1",
+      "local": "인천공항1터미널"
+    },
+    {
+      "en": "Incheon Airport Terminal 2",
+      "local": "인천공항2터미널"
+    }
+  ],
+  "S": [
+    {
+      "en": "Sinsa",
+      "local": "신사"
+    },
+    {
+      "en": "Nonhyeon",
+      "local": "논현"
+    },
+    {
+      "en": "Sinnonhyeon",
+      "local": "신논현"
+    },
+    {
+      "en": "Gangnam",
+      "local": "강남"
+    },
+    {
+      "en": "Yangjae",
+      "local": "양재"
+    },
+    {
+      "en": "Yangjae Citizen's Forest",
+      "local": "양재시민의숲"
+    },
+    {
+      "en": "Cheonggyesan",
+      "local": "청계산입구"
+    },
+    {
+      "en": "Pangyo",
+      "local": "판교"
+    },
+    {
+      "en": "Jeongja",
+      "local": "정자"
+    },
+    {
+      "en": "Migeum",
+      "local": "미금"
+    },
+    {
+      "en": "Dongcheon",
+      "local": "동천"
+    },
+    {
+      "en": "Suji-gu Office",
+      "local": "수지구청"
+    },
+    {
+      "en": "Seongbok",
+      "local": "성복"
+    },
+    {
+      "en": "Sanghyeon",
+      "local": "상현"
+    },
+    {
+      "en": "Gwanggyo Jungang",
+      "local": "광교중앙"
+    },
+    {
+      "en": "Gwanggyo",
+      "local": "광교"
+    }
+  ],
+  "K": [
+    {
+      "en": "Yongmun",
+      "local": "용문"
+    },
+    {
+      "en": "원덕",
+      "local": "원덕"
+    },
+    {
+      "en": "Yangpyeong",
+      "local": "양평"
+    },
+    {
+      "en": "오빈",
+      "local": "오빈"
+    },
+    {
+      "en": "Asin",
+      "local": "아신"
+    },
+    {
+      "en": "국수",
+      "local": "국수"
+    },
+    {
+      "en": "신원",
+      "local": "신원"
+    },
+    {
+      "en": "양수",
+      "local": "양수"
+    },
+    {
+      "en": "운길산",
+      "local": "운길산"
+    },
+    {
+      "en": "Paldang",
+      "local": "팔당"
+    },
+    {
+      "en": "Dosim",
+      "local": "도심"
+    },
+    {
+      "en": "Deokso",
+      "local": "덕소"
+    },
+    {
+      "en": "Yangjeong",
+      "local": "양정"
+    },
+    {
+      "en": "Donong",
+      "local": "도농"
+    },
+    {
+      "en": "Guri",
+      "local": "구리"
+    },
+    {
+      "en": "Yangwon",
+      "local": "양원"
+    },
+    {
+      "en": "Mangu",
+      "local": "망우"
+    },
+    {
+      "en": "Sangbong",
+      "local": "상봉"
+    },
+    {
+      "en": "Jungnang",
+      "local": "중랑"
+    },
+    {
+      "en": "Hoegi",
+      "local": "회기"
+    },
+    {
+      "en": "Cheongnyangni",
+      "local": "청량리"
+    },
+    {
+      "en": "Wangsimni",
+      "local": "왕십리"
+    },
+    {
+      "en": "Eungbong",
+      "local": "응봉"
+    },
+    {
+      "en": "Oksu",
+      "local": "옥수"
+    },
+    {
+      "en": "Hannam",
+      "local": "한남"
+    },
+    {
+      "en": "Seobinggo",
+      "local": "서빙고"
+    },
+    {
+      "en": "Ichon",
+      "local": "이촌"
+    },
+    {
+      "en": "Yongsan",
+      "local": "용산"
+    },
+    {
+      "en": "Hyochang Park",
+      "local": "효창공원앞"
+    },
+    {
+      "en": "Gongdeok",
+      "local": "공덕"
+    },
+    {
+      "en": "Sogang Univ.",
+      "local": "서강대"
+    },
+    {
+      "en": "Gajwa",
+      "local": "가좌"
+    },
+    {
+      "en": "Digital Media City",
+      "local": "디지털미디어시티"
+    },
+    {
+      "en": "Susaek",
+      "local": "수색"
+    },
+    {
+      "en": "Korea Aerospace University",
+      "local": "한국항공대"
+    },
+    {
+      "en": "Gangmae",
+      "local": "강매"
+    },
+    {
+      "en": "Haengsin",
+      "local": "행신"
+    },
+    {
+      "en": "Neunggok",
+      "local": "능곡"
+    },
+    {
+      "en": "Daegok",
+      "local": "대곡"
+    },
+    {
+      "en": "Goksan",
+      "local": "곡산"
+    },
+    {
+      "en": "Pungsan",
+      "local": "풍산"
+    },
+    {
+      "en": "Ilsan",
+      "local": "일산"
+    },
+    {
+      "en": "Tanhyeon",
+      "local": "탄현"
+    },
+    {
+      "en": "Yadang",
+      "local": "야당"
+    },
+    {
+      "en": "Unjeong",
+      "local": "운정"
+    },
+    {
+      "en": "Geumneung",
+      "local": "금릉"
+    },
+    {
+      "en": "Geumchon",
+      "local": "금촌"
+    },
+    {
+      "en": "Wollong",
+      "local": "월롱"
+    },
+    {
+      "en": "Paju",
+      "local": "파주"
+    },
+    {
+      "en": "Munsan",
+      "local": "문산"
+    },
+    {
+      "en": "Seoul",
+      "local": "서울역"
+    },
+    {
+      "en": "Sinchon",
+      "local": "신촌"
+    }
+  ],
+  "TYO-G": [
+    {
+      "en": "Asakusa",
+      "local": "浅草"
+    },
+    {
+      "en": "Tawaramachi",
+      "local": "田原町"
+    },
+    {
+      "en": "Inaricho",
+      "local": "稲荷町"
+    },
+    {
+      "en": "Ueno",
+      "local": "上野"
+    },
+    {
+      "en": "Ueno-hirokoji",
+      "local": "上野広小路"
+    },
+    {
+      "en": "Suehirocho",
+      "local": "末広町"
+    },
+    {
+      "en": "Kanda",
+      "local": "神田"
+    },
+    {
+      "en": "Mitsukoshimae",
+      "local": "三越前"
+    },
+    {
+      "en": "Nihombashi",
+      "local": "日本橋"
+    },
+    {
+      "en": "Kyobashi",
+      "local": "京橋"
+    },
+    {
+      "en": "Ginza",
+      "local": "銀座"
+    },
+    {
+      "en": "Shimbashi",
+      "local": "新橋"
+    },
+    {
+      "en": "Toranomon",
+      "local": "虎ノ門"
+    },
+    {
+      "en": "Tameike-sanno",
+      "local": "溜池山王"
+    },
+    {
+      "en": "Akasaka-mitsuke",
+      "local": "赤坂見附"
+    },
+    {
+      "en": "Aoyama-itchome",
+      "local": "青山一丁目"
+    },
+    {
+      "en": "Gaiemmae",
+      "local": "外苑前"
+    },
+    {
+      "en": "Omote-sando",
+      "local": "表参道"
+    },
+    {
+      "en": "Shibuya",
+      "local": "渋谷"
+    }
+  ],
+  "TYO-M": [
+    {
+      "en": "Ogikubo",
+      "local": "荻窪"
+    },
+    {
+      "en": "Minami-asagaya",
+      "local": "南阿佐ケ谷"
+    },
+    {
+      "en": "Shin-koenji",
+      "local": "新高円寺"
+    },
+    {
+      "en": "Higashi-koenji",
+      "local": "東高円寺"
+    },
+    {
+      "en": "Shin-nakano",
+      "local": "新中野"
+    },
+    {
+      "en": "Nakano-sakaue",
+      "local": "中野坂上"
+    },
+    {
+      "en": "Nishi-shinjuku",
+      "local": "西新宿"
+    },
+    {
+      "en": "Shinjuku",
+      "local": "新宿"
+    },
+    {
+      "en": "Shinjuku-sanchome",
+      "local": "新宿三丁目"
+    },
+    {
+      "en": "Shinjuku-gyoemmae",
+      "local": "新宿御苑前"
+    },
+    {
+      "en": "Yotsuya-sanchome",
+      "local": "四谷三丁目"
+    },
+    {
+      "en": "Yotsuya",
+      "local": "四ツ谷"
+    },
+    {
+      "en": "Akasaka-mitsuke",
+      "local": "赤坂見附"
+    },
+    {
+      "en": "Kokkai-gijidomae",
+      "local": "国会議事堂前"
+    },
+    {
+      "en": "Kasumigaseki",
+      "local": "霞ケ関"
+    },
+    {
+      "en": "Ginza",
+      "local": "銀座"
+    },
+    {
+      "en": "Tokyo",
+      "local": "東京"
+    },
+    {
+      "en": "Otemachi",
+      "local": "大手町"
+    },
+    {
+      "en": "Awajicho",
+      "local": "淡路町"
+    },
+    {
+      "en": "Ochanomizu",
+      "local": "御茶ノ水"
+    },
+    {
+      "en": "Hongo-sanchome",
+      "local": "本郷三丁目"
+    },
+    {
+      "en": "Korakuen",
+      "local": "後楽園"
+    },
+    {
+      "en": "Myogadani",
+      "local": "茗荷谷"
+    },
+    {
+      "en": "Shin-otsuka",
+      "local": "新大塚"
+    },
+    {
+      "en": "Ikebukuro",
+      "local": "池袋"
+    },
+    {
+      "en": "Nakano-shimbashi",
+      "local": "中野新橋"
+    },
+    {
+      "en": "Nakano-fujimicho",
+      "local": "中野富士見町"
+    },
+    {
+      "en": "Honancho",
+      "local": "方南町"
+    }
+  ],
+  "TYO-H": [
+    {
+      "en": "Naka-meguro",
+      "local": "中目黒"
+    },
+    {
+      "en": "Ebisu",
+      "local": "恵比寿"
+    },
+    {
+      "en": "Hiro-o",
+      "local": "広尾"
+    },
+    {
+      "en": "Roppongi",
+      "local": "六本木"
+    },
+    {
+      "en": "Kamiyacho",
+      "local": "神谷町"
+    },
+    {
+      "en": "Toranomon Hills",
+      "local": "虎ノ門ヒルズ"
+    },
+    {
+      "en": "Kasumigaseki",
+      "local": "霞ケ関"
+    },
+    {
+      "en": "Hibiya",
+      "local": "日比谷"
+    },
+    {
+      "en": "Ginza",
+      "local": "銀座"
+    },
+    {
+      "en": "Higashi-Ginza",
+      "local": "東銀座"
+    },
+    {
+      "en": "Tsukiji",
+      "local": "築地"
+    },
+    {
+      "en": "Hatchobori",
+      "local": "八丁堀"
+    },
+    {
+      "en": "Kayabacho",
+      "local": "茅場町"
+    },
+    {
+      "en": "Ningyocho",
+      "local": "人形町"
+    },
+    {
+      "en": "Kodemmacho",
+      "local": "小伝馬町"
+    },
+    {
+      "en": "Akihabara",
+      "local": "秋葉原"
+    },
+    {
+      "en": "Naka-okachimachi",
+      "local": "仲御徒町"
+    },
+    {
+      "en": "Ueno",
+      "local": "上野"
+    },
+    {
+      "en": "Iriya",
+      "local": "入谷"
+    },
+    {
+      "en": "Minowa",
+      "local": "三ノ輪"
+    },
+    {
+      "en": "Minami-senju",
+      "local": "南千住"
+    },
+    {
+      "en": "Kita-Senju",
+      "local": "北千住"
+    }
+  ],
+  "TYO-T": [
+    {
+      "en": "Nakano",
+      "local": "中野"
+    },
+    {
+      "en": "Ochiai",
+      "local": "落合"
+    },
+    {
+      "en": "Takadanobaba",
+      "local": "高田馬場"
+    },
+    {
+      "en": "Waseda",
+      "local": "早稲田"
+    },
+    {
+      "en": "Kagurazaka",
+      "local": "神楽坂"
+    },
+    {
+      "en": "Iidabashi",
+      "local": "飯田橋"
+    },
+    {
+      "en": "Kudanshita",
+      "local": "九段下"
+    },
+    {
+      "en": "Takebashi",
+      "local": "竹橋"
+    },
+    {
+      "en": "Otemachi",
+      "local": "大手町"
+    },
+    {
+      "en": "Nihombashi",
+      "local": "日本橋"
+    },
+    {
+      "en": "Kayabacho",
+      "local": "茅場町"
+    },
+    {
+      "en": "Monzen-nakacho",
+      "local": "門前仲町"
+    },
+    {
+      "en": "Kiba",
+      "local": "木場"
+    },
+    {
+      "en": "Toyocho",
+      "local": "東陽町"
+    },
+    {
+      "en": "Minami-sunamachi",
+      "local": "南砂町"
+    },
+    {
+      "en": "Nishi-kasai",
+      "local": "西葛西"
+    },
+    {
+      "en": "Kasai",
+      "local": "葛西"
+    },
+    {
+      "en": "Urayasu",
+      "local": "浦安"
+    },
+    {
+      "en": "Minami-gyotoku",
+      "local": "南行徳"
+    },
+    {
+      "en": "Gyotoku",
+      "local": "行徳"
+    },
+    {
+      "en": "Myoden",
+      "local": "妙典"
+    },
+    {
+      "en": "Baraki-nakayama",
+      "local": "原木中山"
+    },
+    {
+      "en": "Nishi-Funabashi",
+      "local": "西船橋"
+    }
+  ],
+  "TYO-C": [
+    {
+      "en": "Yoyogi-Uehara",
+      "local": "代々木上原"
+    },
+    {
+      "en": "Yoyogi-koen",
+      "local": "代々木公園"
+    },
+    {
+      "en": "Meiji-jingumae 'Harajuku'",
+      "local": "明治神宮前〈原宿〉"
+    },
+    {
+      "en": "Omote-sando",
+      "local": "表参道"
+    },
+    {
+      "en": "Nogizaka",
+      "local": "乃木坂"
+    },
+    {
+      "en": "Akasaka",
+      "local": "赤坂"
+    },
+    {
+      "en": "Kokkai-gijidomae",
+      "local": "国会議事堂前"
+    },
+    {
+      "en": "Kasumigaseki",
+      "local": "霞ケ関"
+    },
+    {
+      "en": "Hibiya",
+      "local": "日比谷"
+    },
+    {
+      "en": "Nijubashimae 'Marunouchi'",
+      "local": "二重橋前〈丸の内〉"
+    },
+    {
+      "en": "Otemachi",
+      "local": "大手町"
+    },
+    {
+      "en": "Shin-ochanomizu",
+      "local": "新御茶ノ水"
+    },
+    {
+      "en": "Yushima",
+      "local": "湯島"
+    },
+    {
+      "en": "Nezu",
+      "local": "根津"
+    },
+    {
+      "en": "Sendagi",
+      "local": "千駄木"
+    },
+    {
+      "en": "Nishi-Nippori",
+      "local": "西日暮里"
+    },
+    {
+      "en": "Machiya",
+      "local": "町屋"
+    },
+    {
+      "en": "Kita-Senju",
+      "local": "北千住"
+    },
+    {
+      "en": "Ayase",
+      "local": "綾瀬"
+    },
+    {
+      "en": "Kita-Ayase",
+      "local": "北綾瀬"
+    }
+  ],
+  "TYO-Y": [
+    {
+      "en": "Wakoshi",
+      "local": "和光市"
+    },
+    {
+      "en": "Chikatetsu-narimasu",
+      "local": "地下鉄成増"
+    },
+    {
+      "en": "Chikatetsu-akatsuka",
+      "local": "地下鉄赤塚"
+    },
+    {
+      "en": "Heiwadai",
+      "local": "平和台"
+    },
+    {
+      "en": "Hikawadai",
+      "local": "氷川台"
+    },
+    {
+      "en": "Kotake-mukaihara",
+      "local": "小竹向原"
+    },
+    {
+      "en": "Senkawa",
+      "local": "千川"
+    },
+    {
+      "en": "Kanamecho",
+      "local": "要町"
+    },
+    {
+      "en": "Ikebukuro",
+      "local": "池袋"
+    },
+    {
+      "en": "Higashi-ikebukuro",
+      "local": "東池袋"
+    },
+    {
+      "en": "Gokokuji",
+      "local": "護国寺"
+    },
+    {
+      "en": "Edogawabashi",
+      "local": "江戸川橋"
+    },
+    {
+      "en": "Iidabashi",
+      "local": "飯田橋"
+    },
+    {
+      "en": "Ichigaya",
+      "local": "市ケ谷"
+    },
+    {
+      "en": "Kojimachi",
+      "local": "麹町"
+    },
+    {
+      "en": "Nagatacho",
+      "local": "永田町"
+    },
+    {
+      "en": "Sakuradamon",
+      "local": "桜田門"
+    },
+    {
+      "en": "Yurakucho",
+      "local": "有楽町"
+    },
+    {
+      "en": "Ginza-itchome",
+      "local": "銀座一丁目"
+    },
+    {
+      "en": "Shintomicho",
+      "local": "新富町"
+    },
+    {
+      "en": "Tsukishima",
+      "local": "月島"
+    },
+    {
+      "en": "Toyosu",
+      "local": "豊洲"
+    },
+    {
+      "en": "Tatsumi",
+      "local": "辰巳"
+    },
+    {
+      "en": "Shin-kiba",
+      "local": "新木場"
+    }
+  ],
+  "TYO-Z": [
+    {
+      "en": "Shibuya",
+      "local": "渋谷"
+    },
+    {
+      "en": "Omote-sando",
+      "local": "表参道"
+    },
+    {
+      "en": "Aoyama-itchome",
+      "local": "青山一丁目"
+    },
+    {
+      "en": "Nagatacho",
+      "local": "永田町"
+    },
+    {
+      "en": "Hanzomon",
+      "local": "半蔵門"
+    },
+    {
+      "en": "Kudanshita",
+      "local": "九段下"
+    },
+    {
+      "en": "Jimbocho",
+      "local": "神保町"
+    },
+    {
+      "en": "Otemachi",
+      "local": "大手町"
+    },
+    {
+      "en": "Mitsukoshimae",
+      "local": "三越前"
+    },
+    {
+      "en": "Suitengumae",
+      "local": "水天宮前"
+    },
+    {
+      "en": "Kiyosumi-shirakawa",
+      "local": "清澄白河"
+    },
+    {
+      "en": "Sumiyoshi",
+      "local": "住吉"
+    },
+    {
+      "en": "Kinshicho",
+      "local": "錦糸町"
+    },
+    {
+      "en": "Oshiage (SKYTREE)",
+      "local": "押上〈スカイツリー前〉"
+    }
+  ],
+  "TYO-N": [
+    {
+      "en": "Meguro",
+      "local": "目黒"
+    },
+    {
+      "en": "Shirokanedai",
+      "local": "白金台"
+    },
+    {
+      "en": "Shirokane-takanawa",
+      "local": "白金高輪"
+    },
+    {
+      "en": "Azabu-juban",
+      "local": "麻布十番"
+    },
+    {
+      "en": "Roppongi-itchome",
+      "local": "六本木一丁目"
+    },
+    {
+      "en": "Tameike-sanno",
+      "local": "溜池山王"
+    },
+    {
+      "en": "Nagatacho",
+      "local": "永田町"
+    },
+    {
+      "en": "Yotsuya",
+      "local": "四ツ谷"
+    },
+    {
+      "en": "Ichigaya",
+      "local": "市ヶ谷駅"
+    },
+    {
+      "en": "Iidabashi",
+      "local": "飯田橋"
+    },
+    {
+      "en": "Korakuen",
+      "local": "後楽園"
+    },
+    {
+      "en": "Todaimae",
+      "local": "東大前"
+    },
+    {
+      "en": "Hon-komagome",
+      "local": "本駒込"
+    },
+    {
+      "en": "Komagome",
+      "local": "駒込"
+    },
+    {
+      "en": "Nishigahara",
+      "local": "西ヶ原駅"
+    },
+    {
+      "en": "Oji",
+      "local": "王子"
+    },
+    {
+      "en": "Oji-kamiya",
+      "local": "王子神谷"
+    },
+    {
+      "en": "Shimo",
+      "local": "志茂"
+    },
+    {
+      "en": "Akabane-iwabuchi",
+      "local": "赤羽岩淵"
+    }
+  ],
+  "TYO-F": [
+    {
+      "en": "Wakoshi",
+      "local": "和光市"
+    },
+    {
+      "en": "Chikatetsu-narimasu",
+      "local": "地下鉄成増"
+    },
+    {
+      "en": "Chikatetsu-akatsuka",
+      "local": "地下鉄赤塚"
+    },
+    {
+      "en": "Heiwadai",
+      "local": "平和台"
+    },
+    {
+      "en": "Hikawadai",
+      "local": "氷川台"
+    },
+    {
+      "en": "Kotake-mukaihara",
+      "local": "小竹向原"
+    },
+    {
+      "en": "Senkawa",
+      "local": "千川"
+    },
+    {
+      "en": "Kanamecho",
+      "local": "要町"
+    },
+    {
+      "en": "Ikebukuro",
+      "local": "池袋"
+    },
+    {
+      "en": "Zoshigaya",
+      "local": "雑司が谷"
+    },
+    {
+      "en": "Nishi-waseda",
+      "local": "西早稲田"
+    },
+    {
+      "en": "Higashi-shinjuku",
+      "local": "東新宿"
+    },
+    {
+      "en": "Shinjuku-sanchome",
+      "local": "新宿三丁目"
+    },
+    {
+      "en": "Kita-sando",
+      "local": "北参道"
+    },
+    {
+      "en": "Meiji-jingumae 'Harajuku'",
+      "local": "明治神宮前〈原宿〉"
+    },
+    {
+      "en": "Shibuya",
+      "local": "渋谷"
+    }
+  ],
+  "TYO-A": [
+    {
+      "en": "Nishi-magome",
+      "local": "西馬込"
+    },
+    {
+      "en": "Magome",
+      "local": "馬込"
+    },
+    {
+      "en": "Nakanobu",
+      "local": "中延"
+    },
+    {
+      "en": "Togoshi",
+      "local": "戸越"
+    },
+    {
+      "en": "Gotanda",
+      "local": "五反田"
+    },
+    {
+      "en": "Takanawadai",
+      "local": "高輪台"
+    },
+    {
+      "en": "Sengakuji",
+      "local": "泉岳寺"
+    },
+    {
+      "en": "Mita",
+      "local": "三田"
+    },
+    {
+      "en": "Daimon",
+      "local": "大門"
+    },
+    {
+      "en": "Shimbashi",
+      "local": "新橋"
+    },
+    {
+      "en": "Higashi-Ginza",
+      "local": "東銀座"
+    },
+    {
+      "en": "Takaracho",
+      "local": "宝町"
+    },
+    {
+      "en": "Nihombashi",
+      "local": "日本橋"
+    },
+    {
+      "en": "Ningyōchō",
+      "local": "人形町"
+    },
+    {
+      "en": "Higashi-nihombashi",
+      "local": "東日本橋"
+    },
+    {
+      "en": "Asakusabashi",
+      "local": "浅草橋"
+    },
+    {
+      "en": "Kuramae",
+      "local": "蔵前"
+    },
+    {
+      "en": "Asakusa",
+      "local": "浅草"
+    },
+    {
+      "en": "Honjo-azumabashi",
+      "local": "本所吾妻橋"
+    },
+    {
+      "en": "Oshiage",
+      "local": "押上"
+    }
+  ],
+  "TYO-I": [
+    {
+      "en": "Meguro",
+      "local": "目黒"
+    },
+    {
+      "en": "Shirokanedai",
+      "local": "白金台"
+    },
+    {
+      "en": "Shirokane-takanawa",
+      "local": "白金高輪"
+    },
+    {
+      "en": "Mita",
+      "local": "三田"
+    },
+    {
+      "en": "Shibakoen",
+      "local": "芝公園"
+    },
+    {
+      "en": "Onarimon",
+      "local": "御成門"
+    },
+    {
+      "en": "Uchisaiwaicho",
+      "local": "内幸町"
+    },
+    {
+      "en": "Hibiya",
+      "local": "日比谷"
+    },
+    {
+      "en": "Otemachi",
+      "local": "大手町"
+    },
+    {
+      "en": "Jimbocho",
+      "local": "神保町"
+    },
+    {
+      "en": "Suidobashi",
+      "local": "水道橋"
+    },
+    {
+      "en": "Kasuga",
+      "local": "春日"
+    },
+    {
+      "en": "Hakusan",
+      "local": "白山"
+    },
+    {
+      "en": "Sengoku",
+      "local": "千石"
+    },
+    {
+      "en": "Sugamo",
+      "local": "巣鴨"
+    },
+    {
+      "en": "Nishi-sugamo",
+      "local": "西巣鴨"
+    },
+    {
+      "en": "Shin-itabashi",
+      "local": "新板橋"
+    },
+    {
+      "en": "Itabashi-kuyakushomae",
+      "local": "板橋区役所前"
+    },
+    {
+      "en": "Itabashihoncho",
+      "local": "板橋本町"
+    },
+    {
+      "en": "Motohasunuma",
+      "local": "本蓮沼"
+    },
+    {
+      "en": "Shimura-sakaue",
+      "local": "志村坂上"
+    },
+    {
+      "en": "Shimura-sanchome",
+      "local": "志村三丁目"
+    },
+    {
+      "en": "Hasune",
+      "local": "蓮根"
+    },
+    {
+      "en": "Nishidai",
+      "local": "西台"
+    },
+    {
+      "en": "Takashimadaira",
+      "local": "高島平"
+    },
+    {
+      "en": "Shin-takashimadaira",
+      "local": "新高島平"
+    },
+    {
+      "en": "Nishi-takashimadaira",
+      "local": "西高島平"
+    }
+  ],
+  "TYO-S": [
+    {
+      "en": "Motoyawata",
+      "local": "本八幡"
+    },
+    {
+      "en": "Shinozaki",
+      "local": "篠崎"
+    },
+    {
+      "en": "Mizue",
+      "local": "瑞江"
+    },
+    {
+      "en": "Ichinoe",
+      "local": "一之江"
+    },
+    {
+      "en": "Funabori",
+      "local": "船堀"
+    },
+    {
+      "en": "Higashi-ojima",
+      "local": "東大島"
+    },
+    {
+      "en": "Ojima",
+      "local": "大島"
+    },
+    {
+      "en": "Nishi-ojima",
+      "local": "西大島"
+    },
+    {
+      "en": "Sumiyoshi",
+      "local": "住吉"
+    },
+    {
+      "en": "Kikukawa",
+      "local": "菊川"
+    },
+    {
+      "en": "Morishita",
+      "local": "森下"
+    },
+    {
+      "en": "Hamacho",
+      "local": "浜町"
+    },
+    {
+      "en": "Bakuroyokoyama",
+      "local": "馬喰横山"
+    },
+    {
+      "en": "Iwamotocho",
+      "local": "岩本町"
+    },
+    {
+      "en": "Ogawamachi",
+      "local": "小川町"
+    },
+    {
+      "en": "Jimbocho",
+      "local": "神保町"
+    },
+    {
+      "en": "Kudanshita",
+      "local": "九段下"
+    },
+    {
+      "en": "Ichigaya",
+      "local": "市ヶ谷"
+    },
+    {
+      "en": "Akebonobashi",
+      "local": "曙橋"
+    },
+    {
+      "en": "Shinjuku-sanchome",
+      "local": "新宿三丁目"
+    },
+    {
+      "en": "Shinsen-Shinjuku",
+      "local": "新線新宿"
+    }
+  ],
+  "TYO-E": [
+    {
+      "en": "Hikarigaoka",
+      "local": "光が丘"
+    },
+    {
+      "en": "Nerima-kasugacho",
+      "local": "練馬春日町"
+    },
+    {
+      "en": "Toshimaen",
+      "local": "豊島園"
+    },
+    {
+      "en": "Nerima",
+      "local": "練馬"
+    },
+    {
+      "en": "Shin-egota",
+      "local": "新江古田"
+    },
+    {
+      "en": "Ochiai-minami-nagasaki",
+      "local": "落合南長崎"
+    },
+    {
+      "en": "Nakai",
+      "local": "中井"
+    },
+    {
+      "en": "Higashi-nakano",
+      "local": "東中野"
+    },
+    {
+      "en": "Nakano-sakaue",
+      "local": "中野坂上"
+    },
+    {
+      "en": "Nishi-shinjuku-gochome",
+      "local": "西新宿五丁目"
+    },
+    {
+      "en": "Tochomae",
+      "local": "都庁前"
+    },
+    {
+      "en": "Shinjuku",
+      "local": "新宿"
+    },
+    {
+      "en": "Yoyogi",
+      "local": "代々木"
+    },
+    {
+      "en": "Kokuritsu-kyogijo",
+      "local": "国立競技場"
+    },
+    {
+      "en": "Aoyama-itchome",
+      "local": "青山一丁目"
+    },
+    {
+      "en": "Roppongi",
+      "local": "六本木"
+    },
+    {
+      "en": "Azabu-juban",
+      "local": "麻布十番"
+    },
+    {
+      "en": "Akabanebashi",
+      "local": "赤羽橋"
+    },
+    {
+      "en": "Daimon",
+      "local": "大門"
+    },
+    {
+      "en": "Shiodome",
+      "local": "汐留"
+    },
+    {
+      "en": "Tsukijishijo",
+      "local": "築地市場"
+    },
+    {
+      "en": "Kachidoki",
+      "local": "勝どき"
+    },
+    {
+      "en": "Tsukishima",
+      "local": "月島"
+    },
+    {
+      "en": "Monzen-nakacho",
+      "local": "門前仲町"
+    },
+    {
+      "en": "Kiyosumi-shirakawa",
+      "local": "清澄白河"
+    },
+    {
+      "en": "Morishita",
+      "local": "森下"
+    },
+    {
+      "en": "Ryogoku",
+      "local": "両国"
+    },
+    {
+      "en": "Kuramae",
+      "local": "蔵前"
+    },
+    {
+      "en": "Shin-okachimachi",
+      "local": "新御徒町"
+    },
+    {
+      "en": "Ueno-okachimachi",
+      "local": "上野御徒町"
+    },
+    {
+      "en": "Hongo-sanchome",
+      "local": "本郷三丁目"
+    },
+    {
+      "en": "Kasuga",
+      "local": "春日"
+    },
+    {
+      "en": "Iidabashi",
+      "local": "飯田橋"
+    },
+    {
+      "en": "Ushigome-kagurazaka",
+      "local": "牛込神楽坂"
+    },
+    {
+      "en": "Ushigome-yanagicho",
+      "local": "牛込柳町"
+    },
+    {
+      "en": "Wakamatsu-kawada",
+      "local": "若松河田"
+    },
+    {
+      "en": "Higashi-shinjuku",
+      "local": "東新宿"
+    },
+    {
+      "en": "Shinjuku-nishiguchi",
+      "local": "新宿西口"
+    }
+  ],
+  "JR-JY": [
+    {
+      "en": "Shinagawa",
+      "local": "品川"
+    },
+    {
+      "en": "Osaki",
+      "local": "大崎"
+    },
+    {
+      "en": "Gotanda",
+      "local": "五反田"
+    },
+    {
+      "en": "Meguro",
+      "local": "目黒"
+    },
+    {
+      "en": "Ebisu",
+      "local": "恵比寿"
+    },
+    {
+      "en": "Shibuya",
+      "local": "渋谷"
+    },
+    {
+      "en": "Harajuku",
+      "local": "原宿"
+    },
+    {
+      "en": "Yoyogi",
+      "local": "代々木"
+    },
+    {
+      "en": "Shinjuku",
+      "local": "新宿"
+    },
+    {
+      "en": "Shin-Ōkubo",
+      "local": "新大久保"
+    },
+    {
+      "en": "Takadanobaba",
+      "local": "高田馬場"
+    },
+    {
+      "en": "Mejiro",
+      "local": "目白"
+    },
+    {
+      "en": "Ikebukuro",
+      "local": "池袋"
+    },
+    {
+      "en": "Otsuka",
+      "local": "大塚"
+    },
+    {
+      "en": "Sugamo",
+      "local": "巣鴨"
+    },
+    {
+      "en": "Komagome",
+      "local": "駒込"
+    },
+    {
+      "en": "Tabata",
+      "local": "田端"
+    },
+    {
+      "en": "Nishi-Nippori",
+      "local": "西日暮里"
+    },
+    {
+      "en": "Nippori",
+      "local": "日暮里"
+    },
+    {
+      "en": "Uguisudani",
+      "local": "鶯谷"
+    },
+    {
+      "en": "Ueno",
+      "local": "上野"
+    },
+    {
+      "en": "Okachimachi",
+      "local": "御徒町"
+    },
+    {
+      "en": "Akihabara",
+      "local": "秋葉原"
+    },
+    {
+      "en": "Kanda",
+      "local": "神田"
+    },
+    {
+      "en": "Tokyo",
+      "local": "東京"
+    },
+    {
+      "en": "Yurakucho",
+      "local": "有楽町"
+    },
+    {
+      "en": "Shimbashi",
+      "local": "新橋"
+    },
+    {
+      "en": "Hamamatsucho",
+      "local": "浜松町"
+    },
+    {
+      "en": "Tamachi",
+      "local": "田町"
+    },
+    {
+      "en": "Takanawa Gateway",
+      "local": "高輪ゲートウェイ"
+    }
+  ],
+  "OSA-M": [
+    {
+      "en": "Esaka",
+      "local": "江坂"
+    },
+    {
+      "en": "Higashi-Mikuni",
+      "local": "東三国"
+    },
+    {
+      "en": "Shin-Osaka",
+      "local": "新大阪"
+    },
+    {
+      "en": "Nishinakajima-Minamigata",
+      "local": "西中島南方"
+    },
+    {
+      "en": "Nakatsu",
+      "local": "中津"
+    },
+    {
+      "en": "Umeda",
+      "local": "梅田"
+    },
+    {
+      "en": "Yodoyabashi",
+      "local": "淀屋橋"
+    },
+    {
+      "en": "Hommachi",
+      "local": "本町"
+    },
+    {
+      "en": "Shinsaibashi",
+      "local": "心斎橋"
+    },
+    {
+      "en": "Namba",
+      "local": "なんば"
+    },
+    {
+      "en": "Daikokucho",
+      "local": "大国町"
+    },
+    {
+      "en": "Dobutsuen-mae",
+      "local": "動物園前"
+    },
+    {
+      "en": "Tennoji",
+      "local": "天王寺"
+    },
+    {
+      "en": "Showacho",
+      "local": "昭和町"
+    },
+    {
+      "en": "Nishi-Tanabe",
+      "local": "西田辺"
+    },
+    {
+      "en": "Nagai",
+      "local": "長居"
+    },
+    {
+      "en": "Abiko",
+      "local": "あびこ"
+    },
+    {
+      "en": "Kita-Hanada",
+      "local": "北花田"
+    },
+    {
+      "en": "Shin-Kanaoka",
+      "local": "新金岡"
+    },
+    {
+      "en": "Nakamozu",
+      "local": "なかもず"
+    }
+  ],
+  "OSA-T": [
+    {
+      "en": "Dainichi",
+      "local": "大日"
+    },
+    {
+      "en": "Moriguchi",
+      "local": "守口"
+    },
+    {
+      "en": "Taishibashi-Imaichi",
+      "local": "太子橋今市"
+    },
+    {
+      "en": "Sembayashi-Omiya",
+      "local": "千林大宮"
+    },
+    {
+      "en": "Sekime-Takadono",
+      "local": "関目高殿"
+    },
+    {
+      "en": "Noe-Uchindai",
+      "local": "野江内代"
+    },
+    {
+      "en": "Miyakojima",
+      "local": "都島"
+    },
+    {
+      "en": "Tenjinbashisuji 6-chome",
+      "local": "天神橋筋六丁目"
+    },
+    {
+      "en": "Nakazakicho",
+      "local": "中崎町"
+    },
+    {
+      "en": "Higashi-Umeda",
+      "local": "東梅田"
+    },
+    {
+      "en": "Minami-Morimachi",
+      "local": "南森町"
+    },
+    {
+      "en": "Temmabashi",
+      "local": "天満橋"
+    },
+    {
+      "en": "Tanimachi 4-chome",
+      "local": "谷町四丁目"
+    },
+    {
+      "en": "Tanimachi 6-chome",
+      "local": "谷町六丁目"
+    },
+    {
+      "en": "Tanimachi 9-chome",
+      "local": "谷町九丁目"
+    },
+    {
+      "en": "Shitannoji-mae Yuhigaoka",
+      "local": "四天王寺前夕陽ヶ丘"
+    },
+    {
+      "en": "Tennoji",
+      "local": "天王寺"
+    },
+    {
+      "en": "Abeno",
+      "local": "阿倍野"
+    },
+    {
+      "en": "Fuminosato",
+      "local": "文の里"
+    },
+    {
+      "en": "Tanabe",
+      "local": "田辺"
+    },
+    {
+      "en": "Komagawa-Nakano",
+      "local": "駒川中野"
+    },
+    {
+      "en": "Hirano",
+      "local": "平野"
+    },
+    {
+      "en": "Kire-Uriwari",
+      "local": "喜連瓜破"
+    },
+    {
+      "en": "Deto",
+      "local": "出戸"
+    },
+    {
+      "en": "Nagahara",
+      "local": "長原"
+    },
+    {
+      "en": "Yao-Minami",
+      "local": "八尾南"
+    }
+  ],
+  "OSA-Y": [
+    {
+      "en": "Suminoekoen",
+      "local": "住之江公園"
+    },
+    {
+      "en": "Kitakagaya",
+      "local": "北加賀屋"
+    },
+    {
+      "en": "Tamade",
+      "local": "玉出"
+    },
+    {
+      "en": "Kishinosato",
+      "local": "岸里"
+    },
+    {
+      "en": "Hanazonocho",
+      "local": "花園町"
+    },
+    {
+      "en": "Daikokucho",
+      "local": "大国町"
+    },
+    {
+      "en": "Namba",
+      "local": "なんば"
+    },
+    {
+      "en": "Yotsubashi",
+      "local": "四ツ橋"
+    },
+    {
+      "en": "Hommachi",
+      "local": "本町"
+    },
+    {
+      "en": "Higobashi",
+      "local": "肥後橋"
+    },
+    {
+      "en": "Nishi-Umeda",
+      "local": "西梅田"
+    }
+  ],
+  "OSA-C": [
+    {
+      "en": "Yumeshima",
+      "local": "夢洲"
+    },
+    {
+      "en": "Cosmo Square",
+      "local": "コスモスクエア"
+    },
+    {
+      "en": "Ōsakakō",
+      "local": "大阪港"
+    },
+    {
+      "en": "Asashiobashi",
+      "local": "朝潮橋"
+    },
+    {
+      "en": "Bentencho",
+      "local": "弁天町"
+    },
+    {
+      "en": "Kujō",
+      "local": "九条"
+    },
+    {
+      "en": "Awaza",
+      "local": "阿波座"
+    },
+    {
+      "en": "Hommachi",
+      "local": "本町"
+    },
+    {
+      "en": "Sakaisuji-Hommachi",
+      "local": "堺筋本町"
+    },
+    {
+      "en": "Tanimachi 4-chome",
+      "local": "谷町四丁目"
+    },
+    {
+      "en": "Morinomiya",
+      "local": "森ノ宮"
+    },
+    {
+      "en": "Midoribashi",
+      "local": "緑橋"
+    },
+    {
+      "en": "Fukaebashi",
+      "local": "深江橋"
+    },
+    {
+      "en": "Takaida",
+      "local": "高井田"
+    },
+    {
+      "en": "Nagata",
+      "local": "長田"
+    }
+  ],
+  "OSA-S": [
+    {
+      "en": "Nodahanshin",
+      "local": "野田阪神"
+    },
+    {
+      "en": "Tamagawa",
+      "local": "玉川"
+    },
+    {
+      "en": "Awaza",
+      "local": "阿波座"
+    },
+    {
+      "en": "Nishi-Nagahori",
+      "local": "西長堀"
+    },
+    {
+      "en": "Sakuragawa",
+      "local": "桜川"
+    },
+    {
+      "en": "Namba",
+      "local": "なんば"
+    },
+    {
+      "en": "Nippombashi",
+      "local": "日本橋"
+    },
+    {
+      "en": "Tanimachi 9-chome",
+      "local": "谷町九丁目"
+    },
+    {
+      "en": "Tsuruhashi",
+      "local": "鶴橋"
+    },
+    {
+      "en": "Imazato",
+      "local": "今里"
+    },
+    {
+      "en": "Shin-Fukae",
+      "local": "新深江"
+    },
+    {
+      "en": "Shoji",
+      "local": "小路"
+    },
+    {
+      "en": "Kita-Tatsumi",
+      "local": "北巽"
+    },
+    {
+      "en": "Minami-Tatsumi",
+      "local": "南巽"
+    }
+  ],
+  "OSA-K": [
+    {
+      "en": "Tenjinbashisuji-rokuchome",
+      "local": "天神橋筋六丁目"
+    },
+    {
+      "en": "Ogimachi",
+      "local": "扇町"
+    },
+    {
+      "en": "Minami-morimachi",
+      "local": "南森町"
+    },
+    {
+      "en": "Kitahama",
+      "local": "北浜"
+    },
+    {
+      "en": "Sakaisuji-Hommachi",
+      "local": "堺筋本町"
+    },
+    {
+      "en": "Nagahoribashi",
+      "local": "長堀橋"
+    },
+    {
+      "en": "Nippombashi",
+      "local": "日本橋"
+    },
+    {
+      "en": "Ebisucho",
+      "local": "恵美須町"
+    },
+    {
+      "en": "Dobutsuen-mae",
+      "local": "動物園前"
+    },
+    {
+      "en": "Tengachaya",
+      "local": "天下茶屋"
+    }
+  ],
+  "OSA-N": [
+    {
+      "en": "Taisho",
+      "local": "大正"
+    },
+    {
+      "en": "Dome-mae Chiyozaki",
+      "local": "ドーム前千代崎"
+    },
+    {
+      "en": "Nishi-Nagahori",
+      "local": "西長堀"
+    },
+    {
+      "en": "Nishiohashi",
+      "local": "西大橋"
+    },
+    {
+      "en": "Shinsaibashi",
+      "local": "心斎橋"
+    },
+    {
+      "en": "Nagahoribashi",
+      "local": "長堀橋"
+    },
+    {
+      "en": "Matsuyamachi",
+      "local": "松屋町"
+    },
+    {
+      "en": "Tanimachi 6-chome",
+      "local": "谷町六丁目"
+    },
+    {
+      "en": "Tamatsukuri",
+      "local": "玉造"
+    },
+    {
+      "en": "Morinomiya",
+      "local": "森ノ宮"
+    },
+    {
+      "en": "Osaka Business Park",
+      "local": "大阪ビジネスパーク"
+    },
+    {
+      "en": "Kyobashi",
+      "local": "京橋"
+    },
+    {
+      "en": "Gamo 4-chome",
+      "local": "蒲生四丁目"
+    },
+    {
+      "en": "Imafuku-Tsurumi",
+      "local": "今福鶴見"
+    },
+    {
+      "en": "Yokozutsumi",
+      "local": "横堤"
+    },
+    {
+      "en": "Tsurumi-ryokuchi",
+      "local": "鶴見緑地"
+    },
+    {
+      "en": "Kadoma-Minami",
+      "local": "門真南"
+    }
+  ],
+  "TPE-BR": [
+    {
+      "en": "Taipei Nangang Exhibition Center",
+      "local": "南港展覽館"
+    },
+    {
+      "en": "Nangang Software Park",
+      "local": "南港軟體園區"
+    },
+    {
+      "en": "Donghu",
+      "local": "東湖"
+    },
+    {
+      "en": "Huzhou",
+      "local": "葫洲"
+    },
+    {
+      "en": "Dahu Park",
+      "local": "大湖公園"
+    },
+    {
+      "en": "Neihu",
+      "local": "內湖"
+    },
+    {
+      "en": "Wende",
+      "local": "文德"
+    },
+    {
+      "en": "Gangqian",
+      "local": "港墘"
+    },
+    {
+      "en": "Xihu",
+      "local": "西湖"
+    },
+    {
+      "en": "Jiannan Road",
+      "local": "劍南路"
+    },
+    {
+      "en": "Dazhi",
+      "local": "大直"
+    },
+    {
+      "en": "Songshan Airport",
+      "local": "松山機場"
+    },
+    {
+      "en": "Zhongshan Junior High School",
+      "local": "中山國中"
+    },
+    {
+      "en": "Nanjing Fuxing",
+      "local": "南京復興"
+    },
+    {
+      "en": "Zhongxiao Fuxing",
+      "local": "忠孝復興"
+    },
+    {
+      "en": "Daan",
+      "local": "大安"
+    },
+    {
+      "en": "Technology Building",
+      "local": "科技大樓"
+    },
+    {
+      "en": "Liuzhangli",
+      "local": "六張犁"
+    },
+    {
+      "en": "Linguang",
+      "local": "麟光"
+    },
+    {
+      "en": "Xinhai",
+      "local": "辛亥"
+    },
+    {
+      "en": "Wanfang Hospital",
+      "local": "萬芳醫院"
+    },
+    {
+      "en": "Wanfang Community",
+      "local": "萬芳社區"
+    },
+    {
+      "en": "Muzha",
+      "local": "木柵"
+    },
+    {
+      "en": "Taipei Zoo",
+      "local": "動物園"
+    }
+  ],
+  "TPE-R": [
+    {
+      "en": "Tamsui",
+      "local": "淡水"
+    },
+    {
+      "en": "Hongshulin",
+      "local": "紅樹林"
+    },
+    {
+      "en": "Zhuwei",
+      "local": "竹圍"
+    },
+    {
+      "en": "Guandu",
+      "local": "關渡"
+    },
+    {
+      "en": "Zhongyi",
+      "local": "忠義"
+    },
+    {
+      "en": "Fuxinggang",
+      "local": "復興崗"
+    },
+    {
+      "en": "Beitou",
+      "local": "北投"
+    },
+    {
+      "en": "Qiyan",
+      "local": "奇岩"
+    },
+    {
+      "en": "Qilian",
+      "local": "唭哩岸"
+    },
+    {
+      "en": "Shipai",
+      "local": "石牌"
+    },
+    {
+      "en": "Mingde",
+      "local": "明德"
+    },
+    {
+      "en": "Zhishan",
+      "local": "芝山"
+    },
+    {
+      "en": "Shilin",
+      "local": "士林"
+    },
+    {
+      "en": "Jiantan",
+      "local": "劍潭"
+    },
+    {
+      "en": "Yuanshan",
+      "local": "圓山"
+    },
+    {
+      "en": "Minquan W. Rd.",
+      "local": "民權西路"
+    },
+    {
+      "en": "Shuanglian",
+      "local": "雙連"
+    },
+    {
+      "en": "Zhongshan",
+      "local": "中山"
+    },
+    {
+      "en": "Taipei main",
+      "local": "台北車站"
+    },
+    {
+      "en": "NTU Hospital",
+      "local": "台大醫院"
+    },
+    {
+      "en": "Chiang Kai-Shek Memorial Hall",
+      "local": "中正紀念堂"
+    },
+    {
+      "en": "Dongmen",
+      "local": "東門"
+    },
+    {
+      "en": "Daan Park",
+      "local": "大安森林公園"
+    },
+    {
+      "en": "Daan",
+      "local": "大安"
+    },
+    {
+      "en": "Xinyi Anhe",
+      "local": "信義安和"
+    },
+    {
+      "en": "Taipei 101/World Trade Center",
+      "local": "台北101/世貿"
+    },
+    {
+      "en": "Xiangshan",
+      "local": "象山"
+    },
+    {
+      "en": "Guangci/Fengtian Temple",
+      "local": "廣慈/奉天宮"
+    },
+    {
+      "en": "Xinbeitou",
+      "local": "新北投"
+    }
+  ],
+  "TPE-G": [
+    {
+      "en": "Songshan",
+      "local": "松山"
+    },
+    {
+      "en": "Nanjing Sanmin",
+      "local": "南京三民"
+    },
+    {
+      "en": "Taipei Arena",
+      "local": "台北小巨蛋"
+    },
+    {
+      "en": "Nanjing Fuxing",
+      "local": "南京復興"
+    },
+    {
+      "en": "Songjiang Nanjing",
+      "local": "松江南京"
+    },
+    {
+      "en": "Beimen",
+      "local": "北門"
+    },
+    {
+      "en": "Ximen",
+      "local": "西門"
+    },
+    {
+      "en": "Xiaonanmen",
+      "local": "小南門"
+    },
+    {
+      "en": "Chiang Kai-Shek Memorial Hall",
+      "local": "中正紀念堂"
+    },
+    {
+      "en": "Guting",
+      "local": "古亭"
+    },
+    {
+      "en": "Taipower Building",
+      "local": "台電大樓"
+    },
+    {
+      "en": "Xindian",
+      "local": "新店"
+    },
+    {
+      "en": "Xindian District Office",
+      "local": "新店區公所"
+    },
+    {
+      "en": "Qizhang",
+      "local": "七張"
+    },
+    {
+      "en": "Dapinglin",
+      "local": "大坪林"
+    },
+    {
+      "en": "Jingmei",
+      "local": "景美"
+    },
+    {
+      "en": "Wanlong",
+      "local": "萬隆"
+    },
+    {
+      "en": "Gongguan",
+      "local": "公館"
+    },
+    {
+      "en": "Zhongshan",
+      "local": "中山"
+    },
+    {
+      "en": "Xiaobitan",
+      "local": "小碧潭"
+    }
+  ],
+  "TPE-O": [
+    {
+      "en": "Nanshijiao",
+      "local": "南勢角"
+    },
+    {
+      "en": "Jingan",
+      "local": "景安"
+    },
+    {
+      "en": "Yongan Market",
+      "local": "永安市場"
+    },
+    {
+      "en": "Dingxi",
+      "local": "頂溪"
+    },
+    {
+      "en": "Guting",
+      "local": "古亭"
+    },
+    {
+      "en": "Dongmen",
+      "local": "東門"
+    },
+    {
+      "en": "Zhongxiao Xinsheng",
+      "local": "忠孝新生"
+    },
+    {
+      "en": "Songjiang Nanjing",
+      "local": "松江南京"
+    },
+    {
+      "en": "Xingtian Temple",
+      "local": "行天宮"
+    },
+    {
+      "en": "Zhongshan Elementary School",
+      "local": "中山國小"
+    },
+    {
+      "en": "Minquan W. Rd.",
+      "local": "民權西路"
+    },
+    {
+      "en": "Daqiaotou",
+      "local": "大橋頭"
+    },
+    {
+      "en": "Sanchong Elementary School",
+      "local": "三重國小"
+    },
+    {
+      "en": "Sanhe Junior High School",
+      "local": "三和國中"
+    },
+    {
+      "en": "St. Ignatius High School",
+      "local": "徐匯中學"
+    },
+    {
+      "en": "Sanmin Senior High School",
+      "local": "三民高中"
+    },
+    {
+      "en": "Luzhou",
+      "local": "蘆洲"
+    },
+    {
+      "en": "Taipei Bridge",
+      "local": "台北橋"
+    },
+    {
+      "en": "Cailiao",
+      "local": "菜寮"
+    },
+    {
+      "en": "Sanchong",
+      "local": "三重"
+    },
+    {
+      "en": "Xianse Temple",
+      "local": "先嗇宮"
+    },
+    {
+      "en": "Touqianzhuang",
+      "local": "頭前庄"
+    },
+    {
+      "en": "Xinzhuang",
+      "local": "新莊"
+    },
+    {
+      "en": "Fu Jen University",
+      "local": "輔大"
+    },
+    {
+      "en": "Danfeng",
+      "local": "丹鳳"
+    },
+    {
+      "en": "Huilong",
+      "local": "迴龍"
+    }
+  ],
+  "TPE-BL": [
+    {
+      "en": "Dingpu",
+      "local": "頂埔"
+    },
+    {
+      "en": "Yongning",
+      "local": "永寧"
+    },
+    {
+      "en": "Tucheng",
+      "local": "土城"
+    },
+    {
+      "en": "Haishan",
+      "local": "海山"
+    },
+    {
+      "en": "Far Eastern Hospital",
+      "local": "亞東醫院"
+    },
+    {
+      "en": "Fuzhong",
+      "local": "府中"
+    },
+    {
+      "en": "Banqiao",
+      "local": "板橋"
+    },
+    {
+      "en": "Xinpu",
+      "local": "新埔"
+    },
+    {
+      "en": "Jiangzicui",
+      "local": "江子翠"
+    },
+    {
+      "en": "Longshan Temple",
+      "local": "龍山寺"
+    },
+    {
+      "en": "Ximen",
+      "local": "西門"
+    },
+    {
+      "en": "Taipei main",
+      "local": "台北車站"
+    },
+    {
+      "en": "Shandao Temple",
+      "local": "善導寺"
+    },
+    {
+      "en": "Zhongxiao Xinsheng",
+      "local": "忠孝新生"
+    },
+    {
+      "en": "Zhongxiao Fuxing",
+      "local": "忠孝復興"
+    },
+    {
+      "en": "Zhongxiao Dunhua",
+      "local": "忠孝敦化"
+    },
+    {
+      "en": "Sun Yat-Sen Memorial Hall",
+      "local": "國父紀念館"
+    },
+    {
+      "en": "Taipei City Hall",
+      "local": "市政府"
+    },
+    {
+      "en": "Yongchun",
+      "local": "永春"
+    },
+    {
+      "en": "Houshanpi",
+      "local": "後山埤"
+    },
+    {
+      "en": "Kunyang",
+      "local": "昆陽"
+    },
+    {
+      "en": "Nangang",
+      "local": "南港"
+    },
+    {
+      "en": "Taipei Nangang Exhibition Center",
+      "local": "南港展覽館"
+    }
+  ],
+  "TPE-Y": [
+    {
+      "en": "Dapinglin",
+      "local": "大坪林"
+    },
+    {
+      "en": "Shisizhang",
+      "local": "十四張"
+    },
+    {
+      "en": "Xiulang Bridge",
+      "local": "秀朗橋"
+    },
+    {
+      "en": "Jingping",
+      "local": "景平"
+    },
+    {
+      "en": "Jingan",
+      "local": "景安"
+    },
+    {
+      "en": "Zhonghe",
+      "local": "中和"
+    },
+    {
+      "en": "Qiaohe",
+      "local": "橋和"
+    },
+    {
+      "en": "Zhongyuan",
+      "local": "中原"
+    },
+    {
+      "en": "Banxin",
+      "local": "板新"
+    },
+    {
+      "en": "Banqiao",
+      "local": "板橋"
+    },
+    {
+      "en": "Xinpu Minsheng",
+      "local": "新埔民生"
+    },
+    {
+      "en": "Touqianzhuang",
+      "local": "頭前庄"
+    },
+    {
+      "en": "Xingfu",
+      "local": "幸福"
+    },
+    {
+      "en": "New Taipei Industrial Park",
+      "local": "新北產業園區"
+    }
+  ],
+  "TYN-A": [
+    {
+      "en": "Taipei Main",
+      "local": "台北車站"
+    },
+    {
+      "en": "Sanchong",
+      "local": "三重"
+    },
+    {
+      "en": "New Taipei Industrial Park",
+      "local": "新北產業園區"
+    },
+    {
+      "en": "Xinzhuang Fuduxin",
+      "local": "新莊副都心"
+    },
+    {
+      "en": "Taishan",
+      "local": "泰山"
+    },
+    {
+      "en": "Taishan Guihe",
+      "local": "泰山貴和"
+    },
+    {
+      "en": "National Taiwan Sport University",
+      "local": "體育大學"
+    },
+    {
+      "en": "Chang Gung Memorial Hospital",
+      "local": "長庚醫院"
+    },
+    {
+      "en": "Linkou",
+      "local": "林口"
+    },
+    {
+      "en": "Shanbi",
+      "local": "山鼻"
+    },
+    {
+      "en": "Kengkou",
+      "local": "坑口"
+    },
+    {
+      "en": "Airport Terminal 1",
+      "local": "機場第一航廈"
+    },
+    {
+      "en": "Airport Terminal 2",
+      "local": "機場第二航廈"
+    },
+    {
+      "en": "Airport Hotel",
+      "local": "機場旅館"
+    },
+    {
+      "en": "Dayuan",
+      "local": "大園"
+    },
+    {
+      "en": "Hengshan",
+      "local": "橫山"
+    },
+    {
+      "en": "Linghang",
+      "local": "領航"
+    },
+    {
+      "en": "Taoyuan HSR",
+      "local": "高鐵桃園站"
+    },
+    {
+      "en": "Taoyuan Sports Park",
+      "local": "桃園體育園區"
+    },
+    {
+      "en": "Xingnan",
+      "local": "興南"
+    },
+    {
+      "en": "Huanbei",
+      "local": "環北"
+    },
+    {
+      "en": "Laojie River",
+      "local": "老街溪"
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 import type { ButtonHTMLAttributes } from 'react'
 import { cn } from '@/lib/cn'
 
-/** Toggle pill; pressed chips turn ink-coloured like the prototype. */
+/** Toggle pill; pressed chips get a soft brand tint. */
 export function Chip({
   pressed,
   className,
@@ -15,9 +15,7 @@ export function Chip({
       aria-pressed={pressed}
       className={cn(
         'inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border px-3.5 text-sm',
-        pressed
-          ? 'border-foreground bg-foreground text-background'
-          : 'bg-background text-foreground',
+        pressed ? 'chip-on' : 'bg-card text-foreground',
         className,
       )}
       {...props}
@@ -54,7 +52,7 @@ export function Segmented<T extends string>({
           onClick={() => onChange(option.value)}
           className={cn(
             'min-h-10 rounded-full px-3 text-sm font-semibold transition-colors',
-            value === option.value ? 'bg-foreground text-background' : 'text-muted-foreground',
+            value === option.value ? 'seg-on' : 'text-muted-foreground',
           )}
         >
           {option.label}

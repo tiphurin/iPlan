@@ -7,8 +7,12 @@ import {
   countryOfMode,
   countryOfZone,
   findPreset,
+  hasStations,
+  isRailLine,
+  lineBadge,
   modeOfLine,
   modesFor,
+  stationArea,
 } from './lines'
 
 describe('transport by country', () => {
@@ -49,7 +53,7 @@ describe('transport by country', () => {
   it('still reads Seoul lines saved before countries existed', () => {
     expect(findPreset('2', '#00a84d')?.country).toBe('KR')
     expect(countryOfLine('AREX')).toBe('KR')
-    expect(modeOfLine('2')).toBe('train')
+    expect(modeOfLine('2')).toBe('metro')
   })
 
   it('maps lines and expense kinds back to their country', () => {
@@ -66,5 +70,31 @@ describe('transport by country', () => {
     for (const c of COUNTRIES) {
       for (const p of modesFor(c)) expect(TRANSPORT_MODES).toContain(p.mode)
     }
+  })
+
+  it('only rail rides get stations; rail lines are not travel modes', () => {
+    expect(isRailLine('BTS-SUK')).toBe(true)
+    expect(isRailLine('2')).toBe(true)
+    expect(isRailLine('TAXI')).toBe(false)
+    expect(isRailLine('TRAIN')).toBe(false)
+    expect(hasStations('TRAIN')).toBe(true)
+    expect(hasStations('TYO-G')).toBe(true)
+    expect(hasStations('SHINKANSEN')).toBe(true)
+    for (const mode of ['TAXI', 'GRAB', 'W', 'BUS', 'car', '', undefined]) {
+      expect(hasStations(mode)).toBe(false)
+    }
+  })
+
+  it('searches stations near the line city, else the country city', () => {
+    expect(stationArea('OSA-M', 'JP')?.lat).toBeCloseTo(34.69, 1)
+    expect(stationArea('TRAIN', 'JP')?.lat).toBeCloseTo(35.68, 1)
+    expect(stationArea('TRAIN', 'TH')?.lng).toBeCloseTo(100.54, 1)
+    expect(stationArea('TRAIN', 'OTHER')).toBeUndefined()
+  })
+
+  it('shows a short badge for prefixed line ids', () => {
+    expect(lineBadge('BTS-SUK')).toBe('SUK')
+    expect(lineBadge('2')).toBe('2')
+    expect(lineBadge('My line')).toBe('My line')
   })
 })

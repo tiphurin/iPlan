@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/page-header'
 import { TripForm } from '@/components/trips/trip-form'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, SectionTitle } from '@/components/ui/card'
-import { CalendarPlus, Download } from 'lucide-react'
+import { CalendarPlus, Download, FileText } from 'lucide-react'
 import { loadTrip } from '@/lib/load-trip'
 
 export default async function EditTripPage({ params }: { params: Promise<{ tripId: string }> }) {
@@ -29,6 +29,13 @@ export default async function EditTripPage({ params }: { params: Promise<{ tripI
             {t('backup.calendar')}
           </a>
           <p className="text-center text-xs text-muted-foreground">{t('backup.calendarHint')}</p>
+          <a
+            href={`/print/trips/${tripId}`}
+            className={buttonVariants({ variant: 'secondary', size: 'lg' })}
+          >
+            <FileText aria-hidden className="size-4" />
+            {t('export.printPlan')}
+          </a>
           <a
             href={`/api/trips/${tripId}/backup.json`}
             download

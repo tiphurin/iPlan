@@ -96,3 +96,33 @@
     font-size: 16px;
   }
 }
+
+/* Print pages (PDF export): plain black on white, no app chrome. */
+@page {
+  size: A4;
+  margin: 12mm;
+}
+@media print {
+  :root,
+  .dark,
+  .system {
+    --background: #fff;
+    --foreground: #000;
+    --card: #fff;
+    --muted: #f2f2f2;
+    --muted-foreground: #444;
+    --border: #ccc;
+    color-scheme: light;
+  }
+  .no-print {
+    display: none !important;
+  }
+  table {
+    break-inside: auto;
+  }
+  tr,
+  h2 {
+    break-inside: avoid;
+    break-after: auto;
+  }
+}

@@ -3,7 +3,15 @@
 import { FinanceOverviewDto, type MonthDto, type MonthLineDto } from '@iplan/contracts'
 import { type Month, addMonths } from '@iplan/core'
 import { formatMonth } from '@iplan/i18n'
-import { ChevronLeft, ChevronRight, Plus, Repeat, Tags } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileSpreadsheet,
+  FileText,
+  Plus,
+  Repeat,
+  Tags,
+} from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -17,6 +25,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, SectionTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/cn'
+import { exportMonthExcel } from '@/lib/excel'
 import { fmt } from '@/lib/expenses'
 import { useCategoryName, useMonth } from '@/lib/finance'
 import { useFormat } from '@/lib/use-format'
@@ -26,6 +35,7 @@ const THB = 'THB'
 
 export function MoneyView({ month, initial }: { month: string; initial: MonthDto }) {
   const t = useTranslations('finance')
+  const tAll = useTranslations()
   const f = useFormat()
   const router = useRouter()
   const categoryName = useCategoryName()
@@ -164,6 +174,58 @@ export function MoneyView({ month, initial }: { month: string; initial: MonthDto
         >
           <Repeat aria-hidden className="size-4" />
           {t('recurring')}
+        </Link>
+        <Button
+          variant="secondary"
+          className="shrink-0"
+          onClick={() =>
+            void exportMonthExcel(data, {
+              summary: t('balance'),
+              lines: t('recurring'),
+              oneOff: t('oneOff'),
+              rows: [
+                { key: 'grossIncomeMinor', label: t('gross') },
+                { key: 'deductionsMinor', label: t('deductions') },
+                { key: 'netIncomeMinor', label: t('net') },
+                { key: 'fixedCostsMinor', label: t('fixed') },
+                { key: 'oneOffIncomeMinor', label: `${t('oneOff')} (${t('tx.income')})` },
+                { key: 'oneOffExpensesMinor', label: `${t('oneOff')} (${t('tx.expense')})` },
+                { key: 'balanceMinor', label: t('balance') },
+              ],
+              columns: {
+                type: tAll('export.col.type'),
+                name: tAll('export.col.name'),
+                planned: tAll('export.col.planned'),
+                amount: tAll('export.col.amount'),
+                adjusted: tAll('export.col.adjusted'),
+                date: tAll('export.col.date'),
+                title: tAll('export.col.title'),
+                category: tAll('export.col.category'),
+                note: tAll('export.col.note'),
+              },
+              kind: (k) =>
+                ({
+                  income: t('income'),
+                  deduction: t('deductions'),
+                  fixed: t('fixed'),
+                  expense: t('tx.expense'),
+                })[k] ?? k,
+              category: (id) => {
+                const c = id ? categories.get(id) : undefined
+                return c ? categoryName(c.name) : ''
+              },
+            })
+          }
+        >
+          <FileSpreadsheet aria-hidden className="size-4" />
+          {tAll('export.excel')}
+        </Button>
+        <Link
+          href={`/print/money/${month}` as Route}
+          className={cn(buttonVariants({ variant: 'secondary' }), 'shrink-0')}
+        >
+          <FileText aria-hidden className="size-4" />
+          {tAll('export.pdf')}
         </Link>
         <Link
           href="/money/categories"

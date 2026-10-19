@@ -1,19 +1,30 @@
-import type {
-  CreateTripInput,
-  TripDetailDto,
-  TripDto,
-  TripRole,
-  UpdateTripInput,
+import {
+  type CreateTripInput,
+  MAX_ATTACHMENT_BYTES,
+  type TripDetailDto,
+  type TripDto,
+  type TripRole,
+  type UpdateTripInput,
 } from '@iplan/contracts'
 import { isValidTimeZone } from '@iplan/core'
+import { randomUUID } from 'node:crypto'
+import type { StorageProvider } from '../../infra/storage'
 import type { AuditLog } from '../../shared/audit'
 import { type SessionUser, isAdmin, isSuperAdmin } from '../../shared/context'
 import { AppError, forbidden, notFound, validationFailed } from '../../shared/errors'
+import { sniffType } from '../../shared/file-type'
 import { toTripDetailDto, toTripDto } from './trips.mapper'
 import type { NewTripRow, TripWithRole, TripsRepository } from './trips.repository'
 
 export const RANK: Record<TripRole, number> = { viewer: 0, editor: 1, owner: 2 }
 export const MAX_TRIP_DAYS = 60
+/** The browser shrinks covers to 1600 px WebP first, so real uploads are far below this. */
+export const MAX_COVER_BYTES = MAX_ATTACHMENT_BYTES
+const COVER_EXT: Record<string, string> = {
+  'image/webp': 'webp',
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+}
 
 /** Lets other modules (items, expenses...) check trip permissions. */
 export interface TripAccess {
@@ -41,7 +52,13 @@ export class TripsService implements TripAccess {
   constructor(
     private readonly trips: TripsRepository,
     private readonly audit: AuditLog,
+    private readonly storage?: StorageProvider,
   ) {}
+
+  private requireStorage(): StorageProvider {
+    if (!this.storage) throw new Error('Storage is not configured')
+    return this.storage
+  }
 
   async requireAccess(actor: SessionUser, tripId: string, minimum: TripRole) {
     // Admins can look at any trip; only the superadmin can also change it.
@@ -159,9 +176,69 @@ export class TripsService implements TripAccess {
     return this.get(actor, tripId)
   }
 
+  /**
+   * Replaces the cover photo (editor or owner); the old file is deleted afterwards.
+   * The type comes from the bytes themselves, never from what the browser declared.
+   */
+  async setCover(actor: SessionUser, tripId: string, bytes: Uint8Array): Promise<TripDetailDto> {
+    const { trip } = await this.requireAccess(actor, tripId, 'editor')
+    const storage = this.requireStorage()
+    if (bytes.byteLength > MAX_COVER_BYTES) {
+      throw validationFailed({ file: 'File is larger than 5 MB' })
+    }
+    const contentType = sniffType(bytes)
+    const ext = contentType ? COVER_EXT[contentType] : undefined
+    if (!contentType || !ext) throw validationFailed({ file: 'Use a JPEG, PNG or WebP image' })
+    const key = `trips/${tripId}/cover-${randomUUID()}.${ext}`
+    await storage.put(key, bytes, contentType)
+    await this.trips.update(tripId, { coverKey: key })
+    if (trip.coverKey) await storage.delete(trip.coverKey).catch(() => undefined)
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'trip.cover.set',
+      entityType: 'trip',
+      entityId: tripId,
+      data: { bytes: bytes.byteLength },
+    })
+    return this.get(actor, tripId)
+  }
+
+  /** Back to the colour cover. */
+  async removeCover(actor: SessionUser, tripId: string): Promise<TripDetailDto> {
+    const { trip } = await this.requireAccess(actor, tripId, 'editor')
+    if (trip.coverKey) {
+      await this.trips.update(tripId, { coverKey: null })
+      await this.requireStorage()
+        .delete(trip.coverKey)
+        .catch(() => undefined)
+      await this.audit.record({
+        actorId: actor.id,
+        action: 'trip.cover.remove',
+        entityType: 'trip',
+        entityId: tripId,
+      })
+    }
+    return this.get(actor, tripId)
+  }
+
+  /** Storage key and type of the cover photo, after checking the viewer can see the trip. */
+  async coverFile(
+    actor: SessionUser,
+    tripId: string,
+  ): Promise<{ key: string; contentType: string } | null> {
+    const { trip } = await this.requireAccess(actor, tripId, 'viewer')
+    if (!trip.coverKey) return null
+    const ext = trip.coverKey.split('.').pop() ?? ''
+    const contentType =
+      Object.entries(COVER_EXT).find(([, e]) => e === ext)?.[0] ?? 'application/octet-stream'
+    return { key: trip.coverKey, contentType }
+  }
+
   async remove(actor: SessionUser, tripId: string): Promise<void> {
     const { trip } = await this.requireAccess(actor, tripId, 'owner')
     await this.trips.delete(tripId)
+    if (trip.coverKey && this.storage)
+      await this.storage.delete(trip.coverKey).catch(() => undefined)
     await this.audit.record({
       actorId: actor.id,
       action: 'trip.delete',

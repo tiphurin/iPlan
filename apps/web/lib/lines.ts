@@ -58,9 +58,9 @@ const bus = mode('BUS', '#0068b7', 'bus', '🚌', 'bus')
 const boat = mode('BOAT', '#0e7490', 'boat', '⛴️', 'boat')
 const plane = mode('FLY', '#6366f1', 'plane', '✈️', 'plane')
 /** City rail (BTS/MRT, subway, metro): opens that country's lines. Labelled per country. */
-const metro = (country: Country) => mode('METRO', '#1f2a37', `metro_${country}`, '🚇', 'metro')
+const metro = (country: Country) => mode('METRO', '#64748b', `metro_${country}`, '🚇', 'metro')
 /** Intercity / regional trains, labelled the way each country calls them. */
-const train = (country: Country) => mode('TRAIN', '#1f2a37', `train_${country}`, '🚆', 'train')
+const train = (country: Country) => mode('TRAIN', '#8b5e3c', `train_${country}`, '🚆', 'train')
 
 /** Ride apps, local rides and long-distance trains that belong to one country. */
 const LOCAL_MODES: Record<Country, LinePreset[]> = {

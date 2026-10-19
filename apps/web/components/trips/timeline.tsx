@@ -10,6 +10,7 @@ import { useTranslations } from 'next-intl'
 import { type CSSProperties, type ReactNode, useEffect } from 'react'
 import { cn } from '@/lib/cn'
 import { lineBadge, modeEmoji, presetOf } from '@/lib/lines'
+import { routeColors } from '@/lib/route-colors'
 import { useTripDisplay } from '@/lib/trip-display'
 import { KIND_STYLE } from '@/lib/item-kinds'
 import { zoneCity, zoneShort } from '@/lib/time-zones'
@@ -62,6 +63,9 @@ export function Timeline({
       .getElementById(`item-${focusId}`)
       ?.scrollIntoView({ block: 'center', behavior: 'instant' as ScrollBehavior })
   }, [focusId])
+  // A place takes the colour of the ride that brought you there (Line 4 → Myeongdong in
+  // Line 4 blue) until the next ride, unless it has its own colour; else the day colour.
+  const rowColors = routeColors(items, color)
   return (
     <ol>
       {items.map((item, i) => (
@@ -70,7 +74,7 @@ export function Timeline({
           item={item}
           tripId={tripId}
           homeTimeZone={homeTimeZone}
-          color={color}
+          color={rowColors[i] ?? color}
           meId={meId}
           status={statusOf?.(item.id) ?? null}
           last={i === items.length - 1}

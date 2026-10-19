@@ -11,6 +11,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { apiFetch } from './api-client'
+import { toApiError } from './api-error'
 
 export const tripKeys = {
   all: ['trips'] as const,
@@ -62,6 +63,24 @@ export function useDeleteTrip(tripId: string) {
     mutationFn: () => apiFetch(`/api/trips/${tripId}`, { method: 'DELETE' }),
     onSuccess: () => client.invalidateQueries({ queryKey: tripKeys.all }),
   })
+}
+
+/** Uploads an already-resized cover photo (see prepareCover) and returns the updated trip. */
+export async function uploadTripCover(tripId: string, photo: Blob): Promise<TripDetailDto> {
+  const form = new FormData()
+  form.set('file', photo, photo.type === 'image/webp' ? 'cover.webp' : 'cover.jpg')
+  const response = await fetch(`/api/trips/${tripId}/cover`, {
+    method: 'PUT',
+    body: form,
+    credentials: 'same-origin',
+  })
+  if (!response.ok) throw await toApiError(response)
+  return TripDetailDto.parse(await response.json())
+}
+
+/** Removes the cover photo; the trip goes back to its colour. */
+export function removeTripCover(tripId: string): Promise<TripDetailDto> {
+  return apiFetch(`/api/trips/${tripId}/cover`, { method: 'DELETE', schema: TripDetailDto })
 }
 
 /** Item mutations; every success refreshes the trip's item list. */

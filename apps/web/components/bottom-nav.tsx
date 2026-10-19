@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl'
 import { FEATURES, featureFor } from '@/features'
 import { cn } from '@/lib/cn'
 import { LanguageToggle } from './language-toggle'
+import { LogoMark } from '@/components/logo'
 
 /** Phones fit five tabs; with more, Admin stays reachable from the profile tab. */
 const MAX_MOBILE_TABS = 5
@@ -111,10 +112,7 @@ export function AppNav({
           href="/"
           className="mb-6 flex items-center justify-center gap-2 font-display text-[22px] font-bold lg:justify-start lg:px-2"
         >
-          <span
-            aria-hidden
-            className="size-3.5 shrink-0 rounded-full border-4 border-[#00a84d] bg-card"
-          />
+          <LogoMark size={32} />
           <span className="hidden lg:inline">iPlan</span>
         </Link>
         <ul className="space-y-1">

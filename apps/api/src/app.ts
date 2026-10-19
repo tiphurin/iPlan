@@ -252,7 +252,7 @@ export function createApp(deps: AppDeps) {
   if (deps.services.places) app.route('/', placesRoutes(deps.services.places))
   app.route('/', invitationRoutes(deps.services.invitations))
   app.route('/', backupRoutes(deps.services.backup))
-  app.route('/', tripRoutes(deps.services.trips))
+  app.route('/', tripRoutes(deps.services.trips, deps.storage))
   app.route('/', itemRoutes(deps.services.items))
   app.route('/', memberRoutes(deps.services.members))
   app.route('/', checklistRoutes(deps.services.checklist))

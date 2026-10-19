@@ -49,6 +49,7 @@ import {
   walletMonths,
 } from '@/lib/ledgers'
 import { useFormat } from '@/lib/use-format'
+import { confirmDialog } from '@/lib/confirm'
 
 /**
  * A shared wallet in two tabs: the overview (my balance, who owes whom, members,
@@ -260,8 +261,8 @@ export function LedgerView({
                         variant="primary"
                         className={cn('w-full', ledger.readOnly && 'hidden')}
                         disabled={m.settle.isPending}
-                        onClick={() => {
-                          if (!window.confirm(t('shared.confirmSettle'))) return
+                        onClick={async () => {
+                          if (!(await confirmDialog(t('shared.confirmSettle')))) return
                           m.settle
                             .mutateAsync({
                               from: tr.from,
@@ -312,9 +313,10 @@ export function LedgerView({
                           variant="ghost"
                           size="icon"
                           aria-label={t('common.delete')}
-                          onClick={() =>
-                            window.confirm(t('shared.confirmRemove', { name: x.name })) &&
-                            m.removeMember.mutateAsync(x.userId).catch(fail)
+                          onClick={async () =>
+                            (await confirmDialog(t('shared.confirmRemove', { name: x.name }), {
+                              danger: true,
+                            })) && m.removeMember.mutateAsync(x.userId).catch(fail)
                           }
                         >
                           <Trash2 aria-hidden className="size-4 text-danger" />
@@ -385,7 +387,12 @@ export function LedgerView({
                 variant="ghost"
                 className="w-full text-danger"
                 onClick={async () => {
-                  if (!window.confirm(t('shared.confirmDelete', { name: ledger.name }))) return
+                  if (
+                    !(await confirmDialog(t('shared.confirmDelete', { name: ledger.name }), {
+                      danger: true,
+                    }))
+                  )
+                    return
                   try {
                     await m.remove.mutateAsync()
                   } catch (e) {
@@ -488,12 +495,12 @@ export function LedgerView({
                   readOnly={ledger.readOnly}
                   busy={m.monthStatus.isPending || m.entryPaid.isPending}
                   paidByMonth={monthData?.status === 'paid' && hasMonthPayment}
-                  onEntryPaid={(entry, paidBack) => {
+                  onEntryPaid={async (entry, paidBack) => {
                     // Marking one expense replaces the month's own payment; say so first.
                     if (
                       paidBack &&
                       hasMonthPayment &&
-                      !window.confirm(t('shared.confirmReplaceMonthPaid'))
+                      !(await confirmDialog(t('shared.confirmReplaceMonthPaid')))
                     )
                       return
                     setError(null)

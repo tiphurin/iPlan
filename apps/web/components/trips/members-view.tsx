@@ -17,6 +17,7 @@ import { apiFetch } from '@/lib/api-client'
 import { ApiError } from '@/lib/api-error'
 import { tripKeys, useTrip } from '@/lib/trips'
 import { useFormat } from '@/lib/use-format'
+import { confirmDialog } from '@/lib/confirm'
 
 const inviteKey = (tripId: string) => ['trips', tripId, 'invites'] as const
 
@@ -118,7 +119,12 @@ export function MembersView({
 
   async function removeMember(userId: string, name: string) {
     const leaving = userId === meId
-    if (!window.confirm(leaving ? t('members.confirmLeave') : t('members.confirmRemove', { name })))
+    if (
+      !(await confirmDialog(
+        leaving ? t('members.confirmLeave') : t('members.confirmRemove', { name }),
+        { danger: true },
+      ))
+    )
       return
     await remove.mutateAsync(userId)
     if (leaving) {

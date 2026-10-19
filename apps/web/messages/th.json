@@ -5,6 +5,12 @@
     "retry": "ลองใหม่",
     "save": "บันทึก",
     "cancel": "ยกเลิก",
+    "confirm": "ยืนยัน",
+    "confirmTitle": "แน่ใจไหม?",
+    "unsavedTitle": "ยังไม่ได้บันทึก",
+    "unsavedBody": "สิ่งที่คุณแก้ในหน้านี้ยังไม่ได้บันทึก ถ้าออกตอนนี้ การแก้ไขจะหายไป",
+    "unsavedStay": "กลับไปบันทึก",
+    "unsavedLeave": "ออกโดยไม่บันทึก",
     "comingSoon": "เร็วๆ นี้",
     "back": "กลับ",
     "edit": "แก้ไข",
@@ -129,6 +135,11 @@
     "confirmDeleteTrip": "ลบทริปนี้และแผนทั้งหมด? ย้อนกลับไม่ได้",
     "coverColor": "สีปกทริป",
     "coverPreview": "ทริปของคุณ",
+    "coverPhoto": "ใช้รูปเป็นปก",
+    "coverPhotoChange": "เปลี่ยนรูป",
+    "coverPhotoRemove": "ลบรูป",
+    "coverPhotoUnreadable": "อ่านรูปนี้ไม่ได้ ลองเลือกรูปอื่น",
+    "coverPhotoFailed": "บันทึกทริปแล้ว แต่อัปโหลดรูปปกไม่สำเร็จ กดบันทึกเพื่อลองใหม่",
     "colors": {
       "green": "เขียว",
       "teal": "เขียวอมฟ้า",
@@ -137,7 +148,8 @@
       "indigo": "คราม",
       "purple": "ม่วง",
       "rose": "แดงกุหลาบ",
-      "slate": "เทาเข้ม"
+      "slate": "เทาเข้ม",
+      "custom": "สีอื่น"
     },
     "dayN": "วันที่ {n}",
     "noItems": "ยังไม่มีแผนในวันนี้",
@@ -187,8 +199,16 @@
     "openIn": "เปิดใน",
     "checkedIn": "เช็กอินแล้ว {time}",
     "terminal": "อาคาร",
-    "duration": "เวลาเดินทาง {time}",
-    "endBeforeStart": "เวลาสิ้นสุดอยู่ก่อนเวลาเริ่ม ตรวจโซนเวลาปลายทางอีกครั้ง"
+    "duration": "ใช้เวลา {time} (คิดจากเวลาเริ่มถึงเวลาสิ้นสุด)",
+    "endBeforeStart": "เวลาสิ้นสุดอยู่ก่อนเวลาเริ่ม ตรวจโซนเวลาปลายทางอีกครั้ง",
+    "setDuration": "ตั้งระยะเวลา",
+    "customDuration": "กำหนดเอง",
+    "durationHours": "ชั่วโมง",
+    "durationMinutes": "นาที",
+    "applyDuration": "ใช้ระยะเวลานี้",
+    "planColor": "สีในแผน",
+    "planColorAuto": "ตามเส้นทางที่มาถึง",
+    "planColorHint": "ปุ่มไม้กายสิทธิ์ = ใช้สีของสายที่นั่งมาถึง (เช่น มาด้วยสาย 4 ก็เป็นสีฟ้า)"
   },
   "todayView": {
     "now": "ตอนนี้",
@@ -345,9 +365,10 @@
       "category": "หมวด",
       "day": "วัน",
       "item": "สถานที่ในแผน",
-      "none": "ไม่ระบุ",
+      "none": "ไม่หาร",
       "note": "โน้ต",
-      "converted": "≈ {amount}"
+      "converted": "≈ {amount}",
+      "noneHint": "{name} จ่ายเองทั้งหมด ไม่ต้องหารกับใคร"
     },
     "categories": {
       "food": "อาหาร",
@@ -842,7 +863,9 @@
     "yourShare": "ส่วนของคุณ",
     "emptyMonth": "เดือนนี้ยังไม่มีรายการ",
     "emptyMonthHint": "บันทึกค่าใช้จ่ายร่วมรายการแรกของเดือนนี้",
-    "entryStatus": "สถานะการจ่ายคืน"
+    "entryStatus": "สถานะการจ่ายคืน",
+    "modeNone": "ไม่หาร",
+    "noneHint": "{name} จ่ายเองทั้งหมด ไม่ต้องหารกับใคร"
   },
   "invitations": {
     "title": "{count, plural, other {มีคำเชิญ # รายการ}}",
@@ -992,6 +1015,7 @@
     "customShort": "กำหนดเอง",
     "namePlaceholder": "เช่น รถบัส A1",
     "moreColors": "สีอื่น",
+    "lineColor": "สีเส้นในแผน",
     "name": "ชื่อสาย",
     "color": "สี",
     "grab": "Grab",
@@ -1050,7 +1074,9 @@
   },
   "itemSheet": {
     "edit": "แก้ไข",
-    "expense": "เพิ่มค่าใช้จ่าย"
+    "expense": "เพิ่มค่าใช้จ่าย",
+    "costs": "ค่าใช้จ่ายที่นี่ (แตะเพื่อแก้ไข)",
+    "paidBy": "{name} จ่าย"
   },
   "dates": {
     "pick": "เลือกวันที่",

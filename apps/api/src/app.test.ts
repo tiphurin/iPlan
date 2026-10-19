@@ -86,8 +86,8 @@ const auth: AuthGateway = {
 
 const audit = new FakeAudit()
 const tripRepo = new InMemoryTrips()
-const trips = new TripsService(tripRepo, audit)
 const storage = new MemoryStorage()
+const trips = new TripsService(tripRepo, audit, storage)
 const itemRepo = new InMemoryItems()
 const checklistRepo = new InMemoryChecklist()
 const infoRepo = new InMemoryInfoCards()
@@ -313,6 +313,37 @@ describe('API app', () => {
     expect(item.status).toBe(201)
     const list = await app.request(`/api/trips/${trip.id}/items`, { headers: signedIn })
     expect(await list.json()).toHaveLength(1)
+  })
+
+  it('uploads, serves and removes a trip cover over HTTP', async () => {
+    const created = await app.request('/api/trips', {
+      method: 'POST',
+      headers: { ...signedIn, 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Cover', startDate: '2026-10-22', endDate: '2026-10-23' }),
+    })
+    const { id } = (await created.json()) as { id: string }
+    const upload = (bytes: Uint8Array) => {
+      const form = new FormData()
+      form.append('file', new File([bytes], 'cover.webp', { type: 'image/webp' }))
+      return app.request(`/api/trips/${id}/cover`, { method: 'PUT', headers: signedIn, body: form })
+    }
+    const webp = new Uint8Array([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50])
+    const tooBig = await upload(new Uint8Array(5 * 1024 * 1024 + 1))
+    expect(tooBig.status).toBe(422)
+    const ok = await upload(webp)
+    expect(ok.status).toBe(200)
+    const { coverUrl } = (await ok.json()) as { coverUrl: string }
+    expect(coverUrl).toMatch(new RegExp(`^/api/trips/${id}/cover\\?v=`))
+    const file = await app.request(coverUrl, { headers: signedIn })
+    expect(file.status).toBe(200)
+    expect(file.headers.get('content-type')).toBe('image/webp')
+    expect(new Uint8Array(await file.arrayBuffer())).toEqual(webp)
+    const removed = await app.request(`/api/trips/${id}/cover`, {
+      method: 'DELETE',
+      headers: signedIn,
+    })
+    expect(((await removed.json()) as { coverUrl: unknown }).coverUrl).toBeNull()
+    expect((await app.request(`/api/trips/${id}/cover`, { headers: signedIn })).status).toBe(404)
   })
 
   it('round-trips a trip through backup, import and calendar', async () => {

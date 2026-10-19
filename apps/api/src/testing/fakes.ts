@@ -153,6 +153,7 @@ export class InMemoryTrips implements TripsRepository {
       fxRates: values.fxRates ?? {},
       dailyBudgetMinor: values.dailyBudgetMinor ?? null,
       color: values.color ?? null,
+      coverKey: values.coverKey ?? null,
       createdBy: values.createdBy ?? null,
       createdAt: now,
       updatedAt: now,

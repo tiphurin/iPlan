@@ -10,6 +10,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { apiFetch } from '@/lib/api-client'
 import { isPrivateFeed } from '@/lib/calendar'
 import { cn } from '@/lib/cn'
+import { confirmDialog } from '@/lib/confirm'
 
 /** "Add to calendar": subscribe on iPhone or Google so later plan changes sync by themselves. */
 export function CalendarSync({ tripId, className }: { tripId: string; className?: string }) {
@@ -25,7 +26,7 @@ export function CalendarSync({ tripId, className }: { tripId: string; className?
   })
 
   async function rotate() {
-    if (!window.confirm(t('confirmRotate'))) return
+    if (!(await confirmDialog(t('confirmRotate'), { danger: true }))) return
     const next = await apiFetch(`/api/trips/${tripId}/calendar-feed/rotate`, {
       method: 'POST',
       schema: CalendarFeedDto,

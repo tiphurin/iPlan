@@ -76,3 +76,9 @@ export async function prepareAvatar(file: File): Promise<Blob> {
   const img = await loadImage(file)
   return (await render(img, { maxEdge: 400, quality: 0.85 })).blob
 }
+
+/** Trip cover photo: 1600 px at 0.80 like other photos, EXIF stripped, no thumbnail. */
+export async function prepareCover(file: File): Promise<Blob> {
+  const img = await loadImage(file)
+  return (await render(img, PRESETS.photo)).blob
+}

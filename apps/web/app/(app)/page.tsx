@@ -14,6 +14,7 @@ import { FEATURES } from '@/features'
 import { DASHBOARD_WIDGETS } from '@/features/widgets'
 import { cn } from '@/lib/cn'
 import { getMe, serverApi } from '@/lib/server-api'
+import { Logo } from '@/components/logo'
 
 const tile = 'flex min-h-[76px] items-center gap-3 rounded-2xl border bg-card px-3.5 py-3'
 
@@ -27,10 +28,7 @@ export default async function DashboardPage() {
     <>
       <header className="flex items-start justify-between gap-3 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-4 md:pt-8">
         <div className="min-w-0">
-          <div className="mb-3 flex items-center gap-2 font-display text-[22px] font-bold md:hidden">
-            <span aria-hidden className="size-3.5 rounded-full border-4 border-[#00a84d] bg-card" />
-            iPlan
-          </div>
+          <Logo className="mb-3 flex items-center gap-2 font-display text-[22px] font-bold md:hidden" />
           <p className="text-sm text-muted-foreground">
             {formatDate(todayKey('Asia/Bangkok'), { locale: locale as Locale })}
           </p>

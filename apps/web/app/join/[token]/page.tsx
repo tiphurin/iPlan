@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card'
 import { ApiError } from '@/lib/api-error'
 import { serverApi } from '@/lib/server-api'
 import { JoinButton } from './join-button'
+import { LogoMark } from '@/components/logo'
 
 /** Landing page of a shared invite link; sends signed-out visitors to sign in first. */
 export default async function JoinPage({ params }: { params: Promise<{ token: string }> }) {
@@ -28,8 +29,10 @@ export default async function JoinPage({ params }: { params: Promise<{ token: st
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 py-[max(2rem,env(safe-area-inset-top))]">
-      {/* eslint-disable-next-line @next/next/no-img-element -- static SVG icon */}
-      <img src="/icon.svg" alt="" className="mb-6 size-14 rounded-2xl shadow-lg" />
+      {}
+      <div className="mb-6">
+        <LogoMark size={56} />
+      </div>
       <p className="text-sm font-medium text-muted-foreground">{t('join.title')}</p>
       {preview ? (
         <>

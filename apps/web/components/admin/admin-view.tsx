@@ -41,6 +41,7 @@ import { apiFetch } from '@/lib/api-client'
 import { ApiError } from '@/lib/api-error'
 import { cn } from '@/lib/cn'
 import { useFormat } from '@/lib/use-format'
+import { confirmDialog } from '@/lib/confirm'
 
 type Tab = 'approvals' | 'users' | 'groups' | 'circles' | 'overview' | 'audit'
 const TABS: readonly Tab[] = ['approvals', 'users', 'groups', 'circles', 'overview', 'audit']
@@ -524,8 +525,12 @@ function Groups() {
                   size="icon"
                   aria-label={t('common.delete')}
                   disabled={remove.isPending}
-                  onClick={() => {
-                    if (window.confirm(t('admin.confirmDeleteGroup', { name: g.name }))) {
+                  onClick={async () => {
+                    if (
+                      await confirmDialog(t('admin.confirmDeleteGroup', { name: g.name }), {
+                        danger: true,
+                      })
+                    ) {
                       remove.mutate(g.id)
                     }
                   }}
@@ -632,9 +637,10 @@ function Circles() {
                 size="icon"
                 aria-label={t('common.delete')}
                 disabled={remove.isPending}
-                onClick={() =>
-                  window.confirm(t('admin.confirmDeleteCircle', { name: c.name })) &&
-                  remove.mutate(c.id)
+                onClick={async () =>
+                  (await confirmDialog(t('admin.confirmDeleteCircle', { name: c.name }), {
+                    danger: true,
+                  })) && remove.mutate(c.id)
                 }
               >
                 <Trash2 aria-hidden className="size-5 text-danger" />

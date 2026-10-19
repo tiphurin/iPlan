@@ -5,6 +5,7 @@ import {
   InMemoryExpenses,
   InMemoryItems,
   InMemoryTrips,
+  MemoryStorage,
   users,
 } from '../../testing/fakes'
 import { TripsService } from './trips.service'
@@ -78,10 +79,11 @@ describe('TripsService', () => {
     expect((await service.get(users.owner, tripId)).color).toBeNull()
   })
 
-  it('accepts only palette colours and never defaults one on update', () => {
-    expect(CreateTripInput.safeParse({ ...input, color: '#ff0000' }).success).toBe(false)
+  it('accepts any #rrggbb colour and never defaults one on update', () => {
+    expect(CreateTripInput.parse({ ...input, color: '#FF00AA' }).color).toBe('#ff00aa')
     expect(CreateTripInput.safeParse({ ...input, color: 'red' }).success).toBe(false)
-    expect(UpdateTripInput.safeParse({ color: '#123456' }).success).toBe(false)
+    expect(CreateTripInput.safeParse({ ...input, color: '#12345' }).success).toBe(false)
+    expect(UpdateTripInput.safeParse({ color: 'url(javascript:x)' }).success).toBe(false)
     expect(UpdateTripInput.parse({ color: null })).toEqual({ color: null })
     expect(UpdateTripInput.parse({ name: 'x' })).not.toHaveProperty('color')
   })
@@ -184,5 +186,94 @@ describe('TripsService', () => {
         service.update(users.owner, tripId, { startDate: '2026-10-21', endDate: '2026-10-28' }),
       ).resolves.toMatchObject({ startDate: '2026-10-21', endDate: '2026-10-28' })
     })
+  })
+})
+
+describe('TripsService cover photo', () => {
+  const webp = new Uint8Array([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50, 1, 2])
+  const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+  let repo: InMemoryTrips
+  let storage: MemoryStorage
+  let service: TripsService
+  let tripId: string
+
+  beforeEach(async () => {
+    repo = new InMemoryTrips()
+    storage = new MemoryStorage()
+    service = new TripsService(repo, new FakeAudit(), storage)
+    tripId = (await service.create(users.owner, input)).id
+    repo.addMember(tripId, 'editor', 'editor')
+    repo.addMember(tripId, 'viewer', 'viewer')
+  })
+
+  it('stores an uploaded cover and exposes only a versioned API url', async () => {
+    const trip = await service.setCover(users.editor, tripId, webp)
+    expect(trip.coverUrl).toMatch(new RegExp(`^/api/trips/${tripId}/cover\\?v=[0-9a-f-]+$`))
+    expect(JSON.stringify(trip)).not.toContain('/cover-')
+    const key = repo.trips.get(tripId)?.coverKey
+    expect(key).toMatch(new RegExp(`^trips/${tripId}/cover-[0-9a-f-]+\\.webp$`))
+    expect(storage.files.has(key ?? '')).toBe(true)
+    await expect(service.coverFile(users.viewer, tripId)).resolves.toEqual({
+      key,
+      contentType: 'image/webp',
+    })
+  })
+
+  it('replaces the previous file on a new upload', async () => {
+    await service.setCover(users.owner, tripId, webp)
+    const first = repo.trips.get(tripId)?.coverKey ?? ''
+    const trip = await service.setCover(users.owner, tripId, png)
+    const second = repo.trips.get(tripId)?.coverKey ?? ''
+    expect(second).toMatch(/\.png$/)
+    expect(storage.files.has(first)).toBe(false)
+    expect([...storage.files.keys()]).toEqual([second])
+    expect(trip.coverUrl).not.toBeNull()
+  })
+
+  it('rejects files that are not images by their bytes', async () => {
+    const pdf = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d])
+    await expect(service.setCover(users.owner, tripId, pdf)).rejects.toMatchObject({
+      code: 'VALIDATION_FAILED',
+      status: 422,
+    })
+    expect(storage.files.size).toBe(0)
+  })
+
+  it('rejects covers over 5 MB', async () => {
+    const big = new Uint8Array(5 * 1024 * 1024 + 1)
+    big.set(webp)
+    await expect(service.setCover(users.owner, tripId, big)).rejects.toMatchObject({
+      code: 'VALIDATION_FAILED',
+    })
+  })
+
+  it('lets only editors and owners change it, and hides it from strangers', async () => {
+    await expect(service.setCover(users.viewer, tripId, webp)).rejects.toMatchObject({
+      code: 'FORBIDDEN',
+    })
+    await expect(service.removeCover(users.viewer, tripId)).rejects.toMatchObject({
+      code: 'FORBIDDEN',
+    })
+    await expect(service.setCover(users.stranger, tripId, webp)).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    })
+    await service.setCover(users.owner, tripId, webp)
+    await expect(service.coverFile(users.stranger, tripId)).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    })
+  })
+
+  it('removes the cover and its file', async () => {
+    await service.setCover(users.owner, tripId, webp)
+    const trip = await service.removeCover(users.editor, tripId)
+    expect(trip.coverUrl).toBeNull()
+    expect(storage.files.size).toBe(0)
+    await expect(service.coverFile(users.owner, tripId)).resolves.toBeNull()
+  })
+
+  it('deletes the cover file with the trip', async () => {
+    await service.setCover(users.owner, tripId, webp)
+    await service.remove(users.owner, tripId)
+    expect(storage.files.size).toBe(0)
   })
 })

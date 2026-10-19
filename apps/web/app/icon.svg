@@ -1,5 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#14171d"/>
-  <path d="M32 6v13M32 45v13" stroke="#00a84d" stroke-width="6" stroke-linecap="round"/>
-  <circle cx="32" cy="32" r="11" fill="#fff" stroke="#00a84d" stroke-width="6"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Browser tab icon: the gradient version on light systems, the dark one on dark systems. -->
+  <style>
+    .bg { fill: url(#g); } .ring { stroke: #fff; } .dot { fill: #fff; }
+    @media (prefers-color-scheme: dark) { .bg { fill: #12161C; } .ring { stroke: #22C46A; } .dot { fill: #22C46A; } }
+  </style>
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22C46A"/><stop offset="1" stop-color="#0090D2"/></linearGradient></defs>
+  <rect class="bg" width="1024" height="1024" rx="228"/>
+  <g transform="translate(0 40)">
+    <circle class="ring" cx="440" cy="300" r="72" fill="none" stroke-width="60"/>
+    <path d="M440 462 V 600 Q440 712 552 712 H 590" fill="none" stroke="#FFFFFF" stroke-width="60" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle class="dot" cx="682" cy="712" r="40"/>
+  </g>
 </svg>

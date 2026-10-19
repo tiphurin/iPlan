@@ -11,10 +11,9 @@ import {
 } from '@iplan/contracts'
 import { convertMoney, money, parseMoney, toDecimalString } from '@iplan/core'
 import { Trash2 } from 'lucide-react'
-import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useRef, useState } from 'react'
 import { Attachments } from '@/components/attachments'
 import { CATEGORY_COLORS } from '@/components/charts/donut'
 import { Button } from '@/components/ui/button'
@@ -28,6 +27,8 @@ import { fmt, useExpenseMutations } from '@/lib/expenses'
 import { tripDays } from '@/lib/trip-dates'
 import { CountryChips } from './country-chips'
 import { useFormat } from '@/lib/use-format'
+import { confirmDialog } from '@/lib/confirm'
+import { useUnsavedChanges } from '@/lib/unsaved'
 
 const tryParse = (value: string, currency: string) => {
   try {
@@ -62,6 +63,9 @@ export function ExpenseForm({
   const t = useTranslations()
   const f = useFormat()
   const router = useRouter()
+  const formRef = useRef<HTMLFormElement>(null)
+  // Warn before leaving with unsaved edits; saving or deleting clears it first.
+  const { markSaved } = useUnsavedChanges(formRef)
   const { save, remove } = useExpenseMutations(trip.id)
   const base = trip.baseCurrency
   const members = trip.members
@@ -85,7 +89,16 @@ export function ExpenseForm({
     expense ? decimal(expense.amountMinor, expense.currency) : '',
   )
   const [rate, setRate] = useState(expense?.fxRate ?? trip.fxRates[currency] ?? '')
-  const [mode, setMode] = useState<SplitMode>(expense?.splitMode ?? 'equal')
+  const [payer, setPayer] = useState(expense?.paidBy ?? members[0]?.userId ?? POOL_ID)
+  // "No split": one person pays and owes it all (saved as an equal split with only them).
+  const [mode, setMode] = useState<SplitMode | 'none'>(
+    expense?.splitMode === 'equal' &&
+      expense.shares.length === 1 &&
+      expense.shares[0]?.userId === expense.paidBy &&
+      expense.paidBy !== POOL_ID
+      ? 'none'
+      : (expense?.splitMode ?? 'equal'),
+  )
   const [category, setCategory] = useState<ExpenseCategory>(
     expense?.category ?? defaultCategory ?? 'food',
   )
@@ -174,24 +187,29 @@ export function ExpenseForm({
     event.preventDefault()
     const form = new FormData(event.currentTarget)
     const split: ExpenseInput['split'] =
-      mode === 'equal'
-        ? { mode, participants }
-        : mode === 'exact'
-          ? { mode, shares: Object.fromEntries(Object.entries(exact).filter(([, v]) => v.trim())) }
-          : {
-              mode,
-              shares: Object.fromEntries(
-                Object.entries(percent)
-                  .filter(([, v]) => v.trim())
-                  .map(([k, v]) => [k, Number(v)]),
-              ),
-            }
+      mode === 'none'
+        ? { mode: 'equal', participants: [payer] }
+        : mode === 'equal'
+          ? { mode, participants }
+          : mode === 'exact'
+            ? {
+                mode,
+                shares: Object.fromEntries(Object.entries(exact).filter(([, v]) => v.trim())),
+              }
+            : {
+                mode,
+                shares: Object.fromEntries(
+                  Object.entries(percent)
+                    .filter(([, v]) => v.trim())
+                    .map(([k, v]) => [k, Number(v)]),
+                ),
+              }
     const input: ExpenseInput = {
       title: String(form.get('title') ?? ''),
       amount: amount.replaceAll(',', ''),
       currency,
       ...(currency !== base && rate ? { fxRate: rate } : {}),
-      paidBy: String(form.get('paidBy')),
+      paidBy: payer,
       category,
       subcategory: category === 'transport' ? subcategory : null,
       dayDate: day,
@@ -204,6 +222,7 @@ export function ExpenseForm({
     try {
       await save.mutateAsync(expense ? { id: expense.id, input } : { input })
       // Came from a place or the list: go back there (scroll kept).
+      markSaved()
       goBack(router, returnTo ?? `/trips/${trip.id}/expenses`)
       router.refresh()
     } catch (error) {
@@ -215,16 +234,22 @@ export function ExpenseForm({
   }
 
   async function onDelete() {
-    if (!expense || !window.confirm(t('common.confirmDelete'))) return
-    await remove.mutateAsync(expense.id)
-    router.push(`/trips/${trip.id}/expenses` as Route)
-    router.refresh()
+    if (!expense || !(await confirmDialog(t('common.confirmDelete'), { danger: true }))) return
+    try {
+      await remove.mutateAsync(expense.id)
+      // Back to where it was opened from (the place's sheet or the list).
+      markSaved()
+      goBack(router, returnTo ?? `/trips/${trip.id}/expenses`)
+      router.refresh()
+    } catch (error) {
+      setFormError(t(`errors.${error instanceof ApiError ? error.code : 'INTERNAL'}`))
+    }
   }
 
   const remaining = total === null ? null : total - exactSum
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 px-4" noValidate>
+    <form ref={formRef} onSubmit={onSubmit} className="space-y-4 px-4" noValidate>
       {formError && (
         <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">
           {formError}
@@ -270,7 +295,15 @@ export function ExpenseForm({
       )}
 
       <Field label={t('expenses.form.paidBy')} error={errors.paidBy}>
-        <Select name="paidBy" defaultValue={expense?.paidBy ?? members[0]?.userId}>
+        <Select
+          name="paidBy"
+          value={payer}
+          onChange={(e) => {
+            setPayer(e.target.value)
+            // The pool can't keep a cost to itself: fall back to splitting equally.
+            if (e.target.value === POOL_ID && mode === 'none') setMode('equal')
+          }}
+        >
           {members.map((m) => (
             <option key={m.userId} value={m.userId}>
               {m.name}
@@ -283,16 +316,17 @@ export function ExpenseForm({
 
       <fieldset className="space-y-2">
         <legend className="mb-1.5 text-sm font-medium">{t('expenses.form.split')}</legend>
-        <div className="grid grid-cols-3 gap-1 rounded-xl bg-muted p-1">
-          {(['equal', 'exact', 'percent'] as const).map((m) => (
+        <div className="grid grid-cols-4 gap-1 rounded-xl bg-muted p-1">
+          {(['equal', 'exact', 'percent', 'none'] as const).map((m) => (
             <button
               key={m}
               type="button"
               aria-pressed={mode === m}
+              disabled={m === 'none' && payer === POOL_ID}
               onClick={() => setMode(m)}
               className={cn(
-                'min-h-11 rounded-lg text-sm font-medium',
-                mode === m ? 'bg-card shadow-sm' : 'text-muted-foreground',
+                'min-h-11 rounded-lg px-1 text-sm font-medium disabled:opacity-40',
+                mode === m ? 'seg-on' : 'text-muted-foreground',
               )}
             >
               {t(`expenses.form.${m}`)}
@@ -300,72 +334,84 @@ export function ExpenseForm({
           ))}
         </div>
 
-        <ul className="divide-y rounded-2xl border bg-card">
-          {members.map((m) => (
-            <li key={m.userId} className="flex min-h-12 items-center gap-3 px-4 py-1.5">
-              {mode === 'equal' ? (
-                <label className="flex flex-1 items-center gap-3">
-                  <input
-                    type="checkbox"
-                    className="size-5 accent-[var(--primary)]"
-                    checked={participants.includes(m.userId)}
-                    onChange={(e) =>
-                      setParticipants((list) =>
-                        e.target.checked
-                          ? [...list, m.userId]
-                          : list.filter((id) => id !== m.userId),
-                      )
-                    }
-                  />
-                  <span className="flex-1">{m.name}</span>
-                  {participants.includes(m.userId) && total !== null && participants.length > 0 && (
-                    <span className="text-sm text-muted-foreground tabular-nums">
-                      {fmt(total / BigInt(participants.length), currency)}
+        {mode === 'none' && (
+          <p className="rounded-2xl border bg-card px-4 py-3 text-sm text-muted-foreground">
+            {t('expenses.form.noneHint', {
+              name: members.find((m) => m.userId === payer)?.name ?? '',
+            })}
+          </p>
+        )}
+
+        {mode !== 'none' && (
+          <ul className="divide-y rounded-2xl border bg-card">
+            {members.map((m) => (
+              <li key={m.userId} className="flex min-h-12 items-center gap-3 px-4 py-1.5">
+                {mode === 'equal' ? (
+                  <label className="flex flex-1 items-center gap-3">
+                    <input
+                      type="checkbox"
+                      className="size-5 accent-[var(--primary)]"
+                      checked={participants.includes(m.userId)}
+                      onChange={(e) =>
+                        setParticipants((list) =>
+                          e.target.checked
+                            ? [...list, m.userId]
+                            : list.filter((id) => id !== m.userId),
+                        )
+                      }
+                    />
+                    <span className="flex-1">{m.name}</span>
+                    {participants.includes(m.userId) &&
+                      total !== null &&
+                      participants.length > 0 && (
+                        <span className="text-sm text-muted-foreground tabular-nums">
+                          {fmt(total / BigInt(participants.length), currency)}
+                        </span>
+                      )}
+                  </label>
+                ) : (
+                  <>
+                    <span className="flex-1">{m.name}</span>
+                    <Input
+                      aria-label={m.name}
+                      inputMode="decimal"
+                      className="w-28 text-right tabular-nums"
+                      value={(mode === 'exact' ? exact : percent)[m.userId] ?? ''}
+                      onChange={(e) =>
+                        (mode === 'exact' ? setExact : setPercent)((v) => ({
+                          ...v,
+                          [m.userId]: e.target.value,
+                        }))
+                      }
+                    />
+                    <span className="w-8 text-sm text-muted-foreground">
+                      {mode === 'percent' ? '%' : currency}
                     </span>
-                  )}
-                </label>
-              ) : (
-                <>
-                  <span className="flex-1">{m.name}</span>
-                  <Input
-                    aria-label={m.name}
-                    inputMode="decimal"
-                    className="w-28 text-right tabular-nums"
-                    value={(mode === 'exact' ? exact : percent)[m.userId] ?? ''}
-                    onChange={(e) =>
-                      (mode === 'exact' ? setExact : setPercent)((v) => ({
-                        ...v,
-                        [m.userId]: e.target.value,
-                      }))
-                    }
-                  />
-                  <span className="w-8 text-sm text-muted-foreground">
-                    {mode === 'percent' ? '%' : currency}
-                  </span>
-                </>
-              )}
-            </li>
-          ))}
-          {former.map((s) => {
-            const shown =
-              mode === 'equal'
-                ? participants.includes(s.userId) && total !== null && participants.length > 0
-                  ? fmt(total / BigInt(participants.length), currency)
-                  : null
-                : mode === 'exact'
-                  ? `${exact[s.userId] ?? ''} ${currency}`
-                  : `${percent[s.userId] ?? ''}%`
-            return (
-              <li
-                key={s.userId}
-                className="flex min-h-12 items-center gap-3 px-4 py-1.5 text-muted-foreground"
-              >
-                <span className="flex-1">{t('expenses.form.formerMember')}</span>
-                {shown && <span className="text-sm tabular-nums">{shown}</span>}
+                  </>
+                )}
               </li>
-            )
-          })}
-        </ul>
+            ))}
+            {former.map((s) => {
+              const shown =
+                mode === 'equal'
+                  ? participants.includes(s.userId) && total !== null && participants.length > 0
+                    ? fmt(total / BigInt(participants.length), currency)
+                    : null
+                  : mode === 'exact'
+                    ? `${exact[s.userId] ?? ''} ${currency}`
+                    : `${percent[s.userId] ?? ''}%`
+              return (
+                <li
+                  key={s.userId}
+                  className="flex min-h-12 items-center gap-3 px-4 py-1.5 text-muted-foreground"
+                >
+                  <span className="flex-1">{t('expenses.form.formerMember')}</span>
+                  {shown && <span className="text-sm tabular-nums">{shown}</span>}
+                </li>
+              )
+            })}
+          </ul>
+        )}
         {former.length > 0 && (
           <p className="text-xs text-muted-foreground">{t('expenses.form.formerHint')}</p>
         )}

@@ -75,7 +75,7 @@ describe('BackupService.import', () => {
     expect(tripRepo.trips.get(oldId)?.color).toBeNull()
     const { tripId: oddId } = await service.import(users.owner, {
       ...file,
-      trip: { ...file.trip, color: '#abcdef' },
+      trip: { ...file.trip, color: 'not-a-colour' },
     })
     expect(tripRepo.trips.get(oddId)?.color).toBeNull()
   })

@@ -5,6 +5,12 @@
     "retry": "Try again",
     "save": "Save",
     "cancel": "Cancel",
+    "confirm": "Confirm",
+    "confirmTitle": "Are you sure?",
+    "unsavedTitle": "Changes not saved",
+    "unsavedBody": "What you changed on this page hasn't been saved. If you leave now, your changes will be lost.",
+    "unsavedStay": "Go back and save",
+    "unsavedLeave": "Leave without saving",
     "comingSoon": "Coming soon",
     "back": "Back",
     "edit": "Edit",
@@ -129,6 +135,11 @@
     "confirmDeleteTrip": "Delete this trip and its whole plan? This can't be undone.",
     "coverColor": "Cover colour",
     "coverPreview": "Your trip",
+    "coverPhoto": "Use a photo",
+    "coverPhotoChange": "Change photo",
+    "coverPhotoRemove": "Remove photo",
+    "coverPhotoUnreadable": "This image can't be read. Try another photo.",
+    "coverPhotoFailed": "The trip was saved, but the cover photo wasn't. Tap save to try again.",
     "colors": {
       "green": "Green",
       "teal": "Teal",
@@ -137,7 +148,8 @@
       "indigo": "Indigo",
       "purple": "Purple",
       "rose": "Rose",
-      "slate": "Slate"
+      "slate": "Slate",
+      "custom": "Other colour"
     },
     "dayN": "Day {n}",
     "noItems": "Nothing planned for this day yet",
@@ -187,8 +199,16 @@
     "openIn": "Open in",
     "checkedIn": "Checked in {time}",
     "terminal": "Terminal",
-    "duration": "Travel time {time}",
-    "endBeforeStart": "The end is before the start; check the arrival time zone"
+    "duration": "Takes {time} (from the start to the end time)",
+    "endBeforeStart": "The end is before the start; check the arrival time zone",
+    "setDuration": "Set duration",
+    "customDuration": "Custom",
+    "durationHours": "Hours",
+    "durationMinutes": "Minutes",
+    "applyDuration": "Use this duration",
+    "planColor": "Colour in the plan",
+    "planColorAuto": "Follow the ride here",
+    "planColorHint": "Magic wand = use the colour of the line you arrived on (e.g. blue after Line 4)"
   },
   "todayView": {
     "now": "Now",
@@ -345,9 +365,10 @@
       "category": "Category",
       "day": "Day",
       "item": "Place in the plan",
-      "none": "None",
+      "none": "No split",
       "note": "Note",
-      "converted": "≈ {amount}"
+      "converted": "≈ {amount}",
+      "noneHint": "{name} pays it all; nobody owes anything"
     },
     "categories": {
       "food": "Food",
@@ -842,7 +863,9 @@
     "yourShare": "Your part",
     "emptyMonth": "Nothing this month yet",
     "emptyMonthHint": "Add the first shared cost for this month",
-    "entryStatus": "Paid back?"
+    "entryStatus": "Paid back?",
+    "modeNone": "No split",
+    "noneHint": "{name} pays it all; nobody owes anything"
   },
   "invitations": {
     "title": "{count, plural, one {# invitation} other {# invitations}}",
@@ -992,6 +1015,7 @@
     "customShort": "Custom",
     "namePlaceholder": "e.g. Bus A1",
     "moreColors": "More colours",
+    "lineColor": "Line colour in the plan",
     "name": "Line name",
     "color": "Colour",
     "grab": "Grab",
@@ -1050,7 +1074,9 @@
   },
   "itemSheet": {
     "edit": "Edit",
-    "expense": "Add expense"
+    "expense": "Add expense",
+    "costs": "Costs here (tap to edit)",
+    "paidBy": "Paid by {name}"
   },
   "dates": {
     "pick": "Pick a date",

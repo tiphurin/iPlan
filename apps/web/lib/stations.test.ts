@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { RAIL_GROUPS } from './lines'
 import data from './stations.json'
-import { type Station, filterStations, stationLabel } from './stations'
+import { type Station, cityStations, filterStations, stationLabel } from './stations'
 
 const stations = data as Record<string, Station[]>
 
@@ -49,9 +49,24 @@ describe('stations', () => {
       label: 'Siam',
       hint: 'สยาม',
     })
+    expect(stationLabel({ en: 'Bang Phai', local: 'บางไผ่' }, true)).toEqual({
+      label: 'บางไผ่',
+      hint: 'Bang Phai',
+    })
     expect(stationLabel({ en: 'Myeongdong', local: '명동' }, true)).toEqual({
       label: 'Myeongdong',
       hint: '명동',
     })
+  })
+
+  it('lists a city network once per station with every line that stops there', () => {
+    const city = cityStations(stations, [
+      { line: 'BTS-SUK', badge: 'SUK' },
+      { line: 'BTS-SIL', badge: 'SIL' },
+    ])
+    expect(city.find((s) => s.en === 'Siam')?.lines).toEqual(['SUK', 'SIL'])
+    expect(city.find((s) => s.en === 'Siam')?.lineIds).toEqual(['BTS-SUK', 'BTS-SIL'])
+    expect(city.find((s) => s.en === 'Asok')?.lines).toEqual(['SUK'])
+    expect(new Set(city.map((s) => s.en)).size).toBe(city.length)
   })
 })

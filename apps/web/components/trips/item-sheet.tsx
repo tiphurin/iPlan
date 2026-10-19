@@ -33,12 +33,11 @@ export function ItemSheet({
 }) {
   const t = useTranslations()
   const f = useFormat()
-  const { display } = useTripDisplay()
+  const { zoneFor } = useTripDisplay()
   if (!item) return null
   const canEdit = trip.role !== 'viewer'
-  const zone = display.time === 'home' ? trip.homeTimeZone : item.timeZone
-  const endZone =
-    display.time === 'home' ? trip.homeTimeZone : (item.details.arrivalTimeZone ?? item.timeZone)
+  const zone = zoneFor(item.timeZone)
+  const endZone = zoneFor(item.details.arrivalTimeZone ?? item.timeZone)
   const { lat, lng } = item.details
   const place = item.details.address ?? (item.kind === 'place' ? item.title : null)
   const links = place

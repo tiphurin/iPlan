@@ -38,15 +38,20 @@ export class PlacesService {
   async search(
     query: string,
     near?: { lat: number; lng: number },
-    kind?: 'station',
+    kind?: 'station' | 'airport',
   ): Promise<PlaceDto[]> {
     const params = new URLSearchParams({ q: query, limit: '6' })
     if (near) {
       params.set('lat', String(near.lat))
       params.set('lon', String(near.lng))
     }
-    // Subway and train stations are tagged railway=station in OpenStreetMap.
+    // Subway and train stations are tagged railway=station, airports aeroway=aerodrome.
     if (kind === 'station') params.set('osm_tag', 'railway:station')
+    if (kind === 'airport') {
+      params.set('osm_tag', 'aeroway:aerodrome')
+      // Airport names in English read the same for everyone ("Incheon International Airport").
+      params.set('lang', 'en')
+    }
     const key = params.toString()
     const cached = this.cache.get(key)
     if (cached) return cached

@@ -36,3 +36,6 @@ legacy/
 # Real trip data never goes into this public repo
 /seoul-trip.html
 packages/db/seed/private/
+
+# Vercel CLI link (vercel link / pull); holds project ids and pulled env
+.vercel/

@@ -6,8 +6,8 @@ import { z } from 'zod'
 import { Avatar } from '@/components/avatar'
 import { PageHeader } from '@/components/page-header'
 import { BalanceLine } from '@/components/shared/balance-line'
-import { NewLedger } from '@/components/shared/new-ledger'
-import { Card, SectionTitle } from '@/components/ui/card'
+import { NewLedgerButton } from '@/components/shared/new-ledger'
+import { Card } from '@/components/ui/card'
 import { getMe, serverApi } from '@/lib/server-api'
 import { ScopeTabs } from '@/components/scope-tabs'
 
@@ -30,7 +30,11 @@ export default async function SharedPage({
     scope === 'all' ? await serverApi('/api/admin/ledgers', z.array(AdminLedgerDto)) : []
   return (
     <>
-      <PageHeader title={t('features.shared')} subtitle={t('shared.subtitle')} />
+      <PageHeader
+        title={t('features.shared')}
+        subtitle={t('shared.subtitle')}
+        action={scope === 'mine' ? <NewLedgerButton /> : undefined}
+      />
       <div className="space-y-6 px-4">
         {admin && (
           <ScopeTabs
@@ -59,9 +63,10 @@ export default async function SharedPage({
           </ul>
         )}
         {scope === 'mine' && ledgers.length === 0 && (
-          <Card className="space-y-1 py-6 text-center">
+          <Card className="flex flex-col items-center gap-1 py-8 text-center">
             <p className="font-display text-xl font-semibold">{t('shared.empty')}</p>
             <p className="text-sm text-muted-foreground">{t('shared.emptyHint')}</p>
+            <NewLedgerButton className="mt-3 px-5" />
           </Card>
         )}
         {scope === 'mine' && ledgers.length > 0 && (
@@ -90,12 +95,6 @@ export default async function SharedPage({
               </li>
             ))}
           </ul>
-        )}
-        {scope === 'mine' && (
-          <section>
-            <SectionTitle>{t('shared.newTitle')}</SectionTitle>
-            <NewLedger />
-          </section>
         )}
       </div>
     </>

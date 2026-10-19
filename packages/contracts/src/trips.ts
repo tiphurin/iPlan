@@ -93,6 +93,8 @@ export const TripItemDetails = z
     url: WebUrl.optional(),
     hours: z.string().max(80).optional(),
     line: z.string().max(20).optional(),
+    /** More rail lines on the same ride after `line` (a transfer, e.g. Purple then Blue). */
+    via: z.array(z.string().trim().min(1).max(20)).max(6).optional(),
     lineColor: z
       .string()
       .regex(/^#[0-9a-fA-F]{6}$/)
@@ -187,6 +189,6 @@ export const PlaceQuery = z.object({
   /** Bias results near this point, e.g. the trip's other places. */
   lat: z.coerce.number().min(-90).max(90).optional(),
   lng: z.coerce.number().min(-180).max(180).optional(),
-  /** Only railway and subway stations (start/end of a train ride). */
-  kind: z.enum(['station']).optional(),
+  /** Only railway/subway stations, or only airports (start and end of a ride or flight). */
+  kind: z.enum(['station', 'airport']).optional(),
 })

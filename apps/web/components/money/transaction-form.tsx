@@ -97,6 +97,7 @@ export function TransactionForm({
       </div>
       <Field label={t('finance.tx.title')} error={errors.title}>
         <Input
+          noLeadingSpace
           name="title"
           required
           maxLength={80}

@@ -232,6 +232,7 @@ export function ExpenseForm({
       )}
       <Field label={t('expenses.form.title')} error={errors.title}>
         <Input
+          noLeadingSpace
           name="title"
           required
           maxLength={120}

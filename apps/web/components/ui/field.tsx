@@ -33,8 +33,27 @@ export function Field({
   )
 }
 
-export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={cn(control, className)} {...props} />
+export function Input({
+  className,
+  noLeadingSpace,
+  onChange,
+  ...props
+}: InputHTMLAttributes<HTMLInputElement> & {
+  /** Names can't start with a space: one typed or pasted first is dropped as you type. */
+  noLeadingSpace?: boolean
+}) {
+  return (
+    <input
+      className={cn(control, className)}
+      onChange={(e) => {
+        if (noLeadingSpace && /^\s/.test(e.target.value)) {
+          e.target.value = e.target.value.replace(/^\s+/, '')
+        }
+        onChange?.(e)
+      }}
+      {...props}
+    />
+  )
 }
 
 export { Select } from './select'

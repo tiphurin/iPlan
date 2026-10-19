@@ -12,15 +12,26 @@ import {
   countryOfLine,
   countryOfZone,
   findPreset,
-  hasStations,
+  countryLines,
+  endpointKind,
   isRailLine,
   modesFor,
+  presetOf,
   stationArea,
 } from '@/lib/lines'
 import { CountryChips } from './country-chips'
-import { StationField } from './station-field'
+import { EndpointField } from './endpoint-field'
 
 const METRO = { line: 'METRO', color: '#1f2a37' }
+
+/** Message key suffix per kind of start/end: "fromStation", "placeholderAirport", … */
+const ENDPOINT_TEXT = {
+  line: 'Station',
+  city: 'Station',
+  station: 'Station',
+  airport: 'Airport',
+  place: 'Place',
+} as const
 
 /** Quick colours for a custom line; the last swatch opens the full colour picker. */
 const SWATCHES = [
@@ -39,18 +50,23 @@ const SWATCHES = [
 
 /**
  * How you travel, step by step: the country (suggested from the item's time
- * zone), then the way of getting around; city rail opens that country's lines,
- * and rail rides get a start and end station. Tapping a chosen chip
- * again clears it. "Custom" still lets you type any line name and colour.
+ * zone), then the way of getting around; city rail opens that country's lines.
+ * A ride can use several lines (Purple then Blue): tap each, or just pick the
+ * start and end stations and their lines are ticked for you. Every mode gets a
+ * start and end. Tapping a chosen chip again clears it. "Custom" still lets you
+ * type any line name and colour.
  */
 export function LinePicker({
   line,
+  via,
   color,
   from,
   to,
   timeZone,
 }: {
   line?: string | undefined
+  /** More rail lines on the same ride (transfers), after `line`. */
+  via?: readonly string[] | undefined
   color?: string | undefined
   from?: string | undefined
   to?: string | undefined
@@ -63,15 +79,33 @@ export function LinePicker({
   const country = picked ?? countryOfZone(timeZone)
   const [value, setValue] = useState({ line: line ?? '', color: color ?? '#00a84d' })
   const [custom, setCustom] = useState(Boolean(line) && !findPreset(line, color))
-  // The city-rail chip stays on while one of its lines is chosen.
+  // The rail lines of this ride, in order; the first one gives the badge and colour.
+  const [rail, setRailState] = useState<string[]>(
+    isRailLine(line) && line ? [line, ...(via ?? []).filter(isRailLine)] : [],
+  )
+  const setRail = (next: string[]) => {
+    setRailState(next)
+    const first = next[0]
+    setValue(first ? { line: first, color: presetOf(first)?.color ?? METRO.color } : METRO)
+  }
+  // The city-rail chip stays on while any of its lines is chosen.
   const metroOn = !custom && (value.line === METRO.line || isRailLine(value.line))
   const on = (p: LinePreset) =>
-    !custom && (p.line === METRO.line ? metroOn : value.line === p.line && value.color === p.color)
+    !custom &&
+    (p.line === METRO.line
+      ? metroOn
+      : isRailLine(p.line)
+        ? rail.includes(p.line)
+        : value.line === p.line && value.color === p.color)
   const toggle = (p: LinePreset) => {
     setCustom(false)
+    // Lines add up (a transfer); tapping a chosen line removes just that one.
+    if (isRailLine(p.line)) {
+      setRail(rail.includes(p.line) ? rail.filter((l) => l !== p.line) : [...rail, p.line])
+      return
+    }
+    setRailState([])
     if (!on(p)) setValue({ line: p.line, color: p.color })
-    // Tapping a chosen line goes back to plain city rail; tapping a chosen mode clears it.
-    else if (isRailLine(p.line)) setValue(METRO)
     else setValue((v) => ({ ...v, line: '' }))
   }
   const chip = (p: LinePreset, body: React.ReactNode) => (
@@ -91,10 +125,19 @@ export function LinePicker({
   )
   const groups = metroOn ? RAIL_GROUPS[country] : []
   const area = stationArea(value.line, country)
+  // City rail lists every station of the city (a ride can change lines), chosen lines first.
+  const endpoint = metroOn ? 'city' : endpointKind(value.line)
+  const savedEndpoint = isRailLine(line) || line === METRO.line ? 'city' : endpointKind(line)
+  const allLines = countryLines(country)
+  const cityLines = [
+    ...rail.flatMap((id) => allLines.filter((l) => l.line === id)),
+    ...allLines.filter((l) => !rail.includes(l.line)),
+  ]
 
   return (
     <div className="space-y-4">
       <input type="hidden" name="line" value={value.line} />
+      {metroOn && rail.slice(1).map((l) => <input key={l} type="hidden" name="via" value={l} />)}
       {/* A colour only means something with a line; without one, nothing is saved. */}
       {value.line.trim() && <input type="hidden" name="lineColor" value={value.color} />}
       <div>
@@ -106,7 +149,8 @@ export function LinePicker({
             // A Grab ride or BTS line makes no sense in another country: drop it.
             const own = countryOfLine(value.line)
             if (own && own !== c && !custom) {
-              setValue(isRailLine(value.line) ? METRO : (v) => ({ ...v, line: '' }))
+              if (isRailLine(value.line)) setRail([])
+              else setValue((v) => ({ ...v, line: '' }))
             }
           }}
         />
@@ -164,25 +208,28 @@ export function LinePicker({
           </div>
         </div>
       ))}
-      {!custom && hasStations(value.line) && (
+      {endpoint && (
         <div className="grid gap-3 sm:grid-cols-2">
-          {/* Another line or mode starts the stations over; saved ones belong to the saved line. */}
-          <StationField
-            key={`from-${value.line}`}
-            name="from"
-            label={t('from')}
-            line={value.line}
-            defaultValue={value.line === line ? from : undefined}
-            near={area}
-          />
-          <StationField
-            key={`to-${value.line}`}
-            name="to"
-            label={t('to')}
-            line={value.line}
-            defaultValue={value.line === line ? to : undefined}
-            near={area}
-          />
+          {/* Another line or mode starts the ends over; saved ones belong to the saved line. */}
+          {(['from', 'to'] as const).map((end) => (
+            <EndpointField
+              key={`${end}-${endpoint}`}
+              name={end}
+              label={t(`${end}${ENDPOINT_TEXT[endpoint]}`)}
+              placeholder={t(`placeholder${ENDPOINT_TEXT[endpoint]}`)}
+              kind={endpoint}
+              line={value.line}
+              lines={cityLines}
+              country={country}
+              defaultValue={endpoint === savedEndpoint ? (end === 'from' ? from : to) : undefined}
+              near={area}
+              onPickLines={(ids) => {
+                // A station on a line not chosen yet: tick its line (start's first, end's after).
+                if (ids.some((id) => rail.includes(id)) || !ids[0]) return
+                setRail(end === 'from' ? [ids[0], ...rail] : [...rail, ids[0]])
+              }}
+            />
+          ))}
         </div>
       )}
       {custom && (

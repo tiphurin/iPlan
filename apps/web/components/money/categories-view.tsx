@@ -122,6 +122,7 @@ export function CategoriesView({ initial }: { initial: FinanceCategoryDto[] }) {
                   onChange={(e) => setColor(e.target.value)}
                   className="h-11 w-11 shrink-0 rounded-xl border bg-card p-1"
                 />
+                noLeadingSpace{' '}
                 <Input name="name" maxLength={40} placeholder={t('finance.category.name')} />
                 <Button type="submit" size="icon" aria-label={t('finance.category.add')}>
                   <Plus aria-hidden className="size-5" />

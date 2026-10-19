@@ -7,7 +7,8 @@ import {
   countryOfMode,
   countryOfZone,
   findPreset,
-  hasStations,
+  countryLines,
+  endpointKind,
   isRailLine,
   lineBadge,
   modeOfLine,
@@ -72,17 +73,24 @@ describe('transport by country', () => {
     }
   })
 
-  it('only rail rides get stations; rail lines are not travel modes', () => {
+  it('every ride gets a start and end of the right kind', () => {
     expect(isRailLine('BTS-SUK')).toBe(true)
     expect(isRailLine('2')).toBe(true)
     expect(isRailLine('TAXI')).toBe(false)
     expect(isRailLine('TRAIN')).toBe(false)
-    expect(hasStations('TRAIN')).toBe(true)
-    expect(hasStations('TYO-G')).toBe(true)
-    expect(hasStations('SHINKANSEN')).toBe(true)
-    for (const mode of ['TAXI', 'GRAB', 'W', 'BUS', 'car', '', undefined]) {
-      expect(hasStations(mode)).toBe(false)
+    expect(endpointKind('TYO-G')).toBe('line')
+    expect(endpointKind('METRO')).toBe('city')
+    expect(endpointKind('TRAIN')).toBe('station')
+    expect(endpointKind('SHINKANSEN')).toBe('station')
+    expect(endpointKind('FLY')).toBe('airport')
+    // Every other way of getting around still gets a start and end place.
+    for (const mode of ['TAXI', 'GRAB', 'W', 'BUS', 'car', 'BOAT', 'A1 bus']) {
+      expect(endpointKind(mode)).toBe('place')
     }
+    expect(endpointKind('')).toBeNull()
+    expect(endpointKind(undefined)).toBeNull()
+    expect(countryLines('TH').map((l) => l.badge)).toContain('SUK')
+    expect(countryLines('OTHER')).toEqual([])
   })
 
   it('searches stations near the line city, else the country city', () => {

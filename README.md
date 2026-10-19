@@ -52,7 +52,7 @@ iPlan/
 │  ├─ contracts/   Zod request/response schemas and error codes shared by web and API
 │  ├─ i18n/        locales and formatters (dates, months, money; Buddhist era for Thai)
 │  └─ config/      shared tsconfig and ESLint config
-├─ docs/           HANDOFF.md (background), INFRA.md (accounts, secrets, quotas)
+├─ docs/           HANDOFF.md (background), INFRA.md (accounts, secrets, quotas), DEPLOY.md (releases)
 └─ .github/workflows/ci.yml
 ```
 
@@ -169,6 +169,8 @@ The web app translates `code` into Thai or English. Authorization happens in the
 ## Deploy
 
 Vercel builds the Next.js app (which includes the API), Neon provides Postgres, Backblaze B2 stores files and Google Cloud provides the OAuth client. Every service is on a free tier without a card. Follow the **Deploy checklist** in [docs/INFRA.md](docs/INFRA.md): accounts in order, every environment variable, `ADMIN_EMAILS` for the first admin, approving people, and the uptime ping. Production builds apply migrations automatically; previews never touch the production schema.
+
+Production deploys only from a version tag: merge into `feature/iPlan/main`, then `git tag v0.3.0 && git push origin v0.3.0` runs the Release workflow (checks, migrate, deploy, smoke test, release notes). One-time setup, rollbacks and migration safety are in [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Free-tier notes
 

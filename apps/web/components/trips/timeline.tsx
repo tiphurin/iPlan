@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { type CSSProperties, type ReactNode, useEffect } from 'react'
 import { cn } from '@/lib/cn'
-import { lineBadge, modeEmoji } from '@/lib/lines'
+import { lineBadge, modeEmoji, presetOf } from '@/lib/lines'
 import { useTripDisplay } from '@/lib/trip-display'
 import { KIND_STYLE } from '@/lib/item-kinds'
 import { zoneCity, zoneShort } from '@/lib/time-zones'
@@ -115,12 +115,11 @@ function TimelineRow({
   const mine = meId ? item.checkIns.find((c) => c.userId === meId) : undefined
   const skipped = mine?.skipped === true
   const done = status === 'done' || Boolean(mine)
-  const { display } = useTripDisplay()
-  // Main time in the place's zone or at home (trip header switch); the other underneath.
-  const mainZone = display.time === 'home' ? homeTimeZone : item.timeZone
-  const otherZone = display.time === 'home' ? item.timeZone : homeTimeZone
-  const arrivalZone =
-    display.time === 'home' ? homeTimeZone : (item.details.arrivalTimeZone ?? item.timeZone)
+  const { zoneFor, otherZoneFor } = useTripDisplay()
+  // Main time in the zone the KR | TH switch picked; the other one small underneath.
+  const mainZone = zoneFor(item.timeZone)
+  const otherZone = otherZoneFor(item.timeZone)
+  const arrivalZone = zoneFor(item.details.arrivalTimeZone ?? item.timeZone)
   const href = `/trips/${tripId}/items/${item.id}` as Route
   const budget = item.details.budget
 
@@ -193,11 +192,21 @@ function TimelineRow({
                 {modeEmoji(item.details.line)}
               </span>
             ) : item.details.line && item.details.line !== 'W' ? (
-              <span
-                className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full px-1.5 font-display text-[13px] font-bold text-white"
-                style={{ backgroundColor: railColor }}
-              >
-                {lineBadge(item.details.line)}
+              // A transfer shows every line in order: [PP] › [BL].
+              <span className="inline-flex shrink-0 items-center gap-0.5">
+                {[item.details.line, ...(item.details.via ?? [])].map((l, i) => (
+                  <span key={`${i}:${l}`} className="inline-flex items-center gap-0.5">
+                    {i > 0 && <span className="text-xs text-faint">›</span>}
+                    <span
+                      className="inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 font-display text-[13px] font-bold text-white"
+                      style={{
+                        backgroundColor: i === 0 ? railColor : (presetOf(l)?.color ?? railColor),
+                      }}
+                    >
+                      {lineBadge(l)}
+                    </span>
+                  </span>
+                ))}
               </span>
             ) : (
               <Icon aria-hidden className="mt-0.5 size-4 shrink-0" />

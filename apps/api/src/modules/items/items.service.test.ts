@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { CreateTripItemInput } from '@iplan/contracts'
 import { FakeAudit, InMemoryItems, InMemoryTrips, users } from '../../testing/fakes'
 import { TripsService } from '../trips/trips.service'
 import { ItemsService } from './items.service'
@@ -109,6 +110,42 @@ describe('ItemsService', () => {
     await expect(
       service.checkIn(users.viewer, item.id, { at: '2027-06-01T00:00:00.000Z' }, now),
     ).rejects.toMatchObject({ fields: { at: expect.any(String) } })
+  })
+
+  it('saves a ride that changes lines, with its start and end stations', async () => {
+    const ride = await service.create(users.owner, tripId, {
+      ...lunch,
+      kind: 'move',
+      title: 'Purple to Blue',
+      details: {
+        line: 'MRT-PP',
+        lineColor: '#6c2c8d',
+        via: ['MRT-BL'],
+        from: 'Khlong Bang Phai',
+        to: 'Sam Yan',
+      },
+    })
+    expect(ride.details).toMatchObject({
+      line: 'MRT-PP',
+      via: ['MRT-BL'],
+      from: 'Khlong Bang Phai',
+      to: 'Sam Yan',
+    })
+  })
+
+  it('rejects malformed transfer lines', () => {
+    const bad = CreateTripItemInput.safeParse({
+      ...lunch,
+      kind: 'move',
+      details: { line: 'MRT-PP', via: ['', 'x'.repeat(21)] },
+    })
+    expect(bad.success).toBe(false)
+    const tooMany = CreateTripItemInput.safeParse({
+      ...lunch,
+      kind: 'move',
+      details: { line: 'MRT-PP', via: Array.from({ length: 7 }, (_, i) => `L${i}`) },
+    })
+    expect(tooMany.success).toBe(false)
   })
 
   it('keeps an arrival zone only on flights', async () => {

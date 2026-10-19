@@ -129,7 +129,7 @@ export function InfoView({
           </Select>
         </Field>
         <Field label={t('info.cardTitle')} error={errors.title}>
-          <Input name="title" required maxLength={120} defaultValue={card?.title} />
+          noLeadingSpace <Input name="title" required maxLength={120} defaultValue={card?.title} />
         </Field>
         <Field label={t('info.body')} error={errors.body}>
           <Textarea name="body" rows={5} maxLength={4000} defaultValue={card?.body} />

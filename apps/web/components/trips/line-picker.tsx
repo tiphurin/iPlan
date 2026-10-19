@@ -1,24 +1,40 @@
 'use client'
 
 import { Check } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Field, Input } from '@/components/ui/field'
 import { cn } from '@/lib/cn'
-import { type LinePreset, MODE_PRESETS, SEOUL_LINES, findPreset } from '@/lib/lines'
+import {
+  type Country,
+  type LinePreset,
+  RAIL_GROUPS,
+  countryOfLine,
+  countryOfZone,
+  findPreset,
+  modesFor,
+} from '@/lib/lines'
+import { CountryChips } from './country-chips'
 
 /**
- * How you travel: tap a suggestion (walk, taxi, bus, Seoul line 1–9, AREX…) or
- * open "Custom" to type a line name and pick any colour, as before.
+ * How you travel: pick the country (suggested from the item's time zone), then
+ * tap one of its ways of getting around or rail lines, or open "Custom" to
+ * type a line name and pick any colour.
  */
 export function LinePicker({
   line,
   color,
+  timeZone,
 }: {
   line?: string | undefined
   color?: string | undefined
+  timeZone: string
 }) {
   const t = useTranslations('lines')
+  const locale = useLocale()
+  // A saved Grab ride or BTS line keeps its own country; otherwise follow the time zone.
+  const [picked, setPicked] = useState<Country | undefined>(countryOfLine(line))
+  const country = picked ?? countryOfZone(timeZone)
   const [value, setValue] = useState({ line: line ?? '', color: color ?? '#00a84d' })
   const [custom, setCustom] = useState(Boolean(line) && !findPreset(line, color))
   const pick = (p: LinePreset) => {
@@ -48,9 +64,21 @@ export function LinePicker({
       {/* A colour only means something with a line; without one, nothing is saved. */}
       {value.line.trim() && <input type="hidden" name="lineColor" value={value.color} />}
       <div>
+        <p className="mb-1.5 text-sm text-muted-foreground">{t('country')}</p>
+        <CountryChips
+          value={country}
+          onChange={(c) => {
+            setPicked(c)
+            // A Grab ride or BTS line makes no sense in another country: drop it.
+            const own = countryOfLine(value.line)
+            if (own && own !== c && !custom) setValue((v) => ({ ...v, line: '' }))
+          }}
+        />
+      </div>
+      <div>
         <p className="mb-1.5 text-sm text-muted-foreground">{t('how')}</p>
         <div className="flex flex-wrap gap-2">
-          {MODE_PRESETS.map((p) =>
+          {modesFor(country).map((p) =>
             chip(
               p,
               <>
@@ -61,26 +89,28 @@ export function LinePicker({
           )}
         </div>
       </div>
-      <div>
-        <p className="mb-1.5 text-sm text-muted-foreground">{t('seoul')}</p>
-        <div className="flex flex-wrap gap-2">
-          {SEOUL_LINES.map((p) =>
-            chip(
-              p,
-              <>
-                <span
-                  aria-hidden
-                  className="inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 font-display text-xs font-bold text-white"
-                  style={{ backgroundColor: p.color }}
-                >
-                  {p.line.length <= 2 ? p.line : p.line.slice(0, 1)}
-                </span>
-                {p.line.length > 2 || p.label.length > 2 ? p.label : t('line', { n: p.label })}
-              </>,
-            ),
-          )}
+      {RAIL_GROUPS[country].map((group) => (
+        <div key={group.key}>
+          <p className="mb-1.5 text-sm text-muted-foreground">{t(`groups.${group.key}`)}</p>
+          <div className="flex flex-wrap gap-2">
+            {group.lines.map((p) =>
+              chip(
+                p,
+                <>
+                  <span
+                    aria-hidden
+                    className="inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 font-display text-xs font-bold text-white [text-shadow:0_0_2px_rgb(0_0_0/0.35)]"
+                    style={{ backgroundColor: p.color }}
+                  >
+                    {p.badge ?? p.line}
+                  </span>
+                  {locale === 'th' && p.labelTh ? p.labelTh : p.label}
+                </>,
+              ),
+            )}
+          </div>
         </div>
-      </div>
+      ))}
       <button
         type="button"
         aria-expanded={custom}

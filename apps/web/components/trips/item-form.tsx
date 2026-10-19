@@ -314,7 +314,9 @@ export function ItemForm({
         </>
       )}
 
-      {kind === 'move' && <LinePicker line={item?.details.line} color={item?.details.lineColor} />}
+      {kind === 'move' && (
+        <LinePicker line={item?.details.line} color={item?.details.lineColor} timeZone={zone} />
+      )}
 
       {kind === 'place' && (
         <>

@@ -932,7 +932,6 @@
     "bus": "Bus",
     "train": "Train/metro",
     "plane": "Plane",
-    "seoul": "Seoul subway",
     "line": "Line {n}",
     "custom": "Custom (name and colour)",
     "hideCustom": "Hide custom",
@@ -942,7 +941,27 @@
     "bolt": "Bolt",
     "lineman": "LINE MAN",
     "drive": "Drive",
-    "boat": "Boat"
+    "boat": "Boat",
+    "country": "Country",
+    "countries": {
+      "TH": "Thailand",
+      "KR": "Korea",
+      "JP": "Japan",
+      "TW": "Taiwan",
+      "OTHER": "Other"
+    },
+    "groups": {
+      "bangkok": "Bangkok rail",
+      "seoul": "Seoul Metro",
+      "tokyo": "Tokyo subway",
+      "osaka": "Osaka Metro",
+      "taipei": "Taipei MRT"
+    },
+    "kakao_t": "Kakao T",
+    "go": "GO (taxi)",
+    "uber": "Uber",
+    "shinkansen": "Shinkansen",
+    "thsr": "High-speed rail (THSR)"
   },
   "places": {
     "placeholder": "Search a place or type an address",

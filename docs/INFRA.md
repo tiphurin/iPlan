@@ -65,6 +65,49 @@ Never commit a secret. `.env.example` lists every variable with a note on where 
 
 Google OAuth redirect URIs to register: `http://localhost:3000/api/auth/callback/google` and `https://<project>.vercel.app/api/auth/callback/google`.
 
+## Deploy checklist (first time)
+
+Do these in order; each step only needs the previous ones. Nothing here asks for a card; if a screen does, you've hit an upgrade prompt, so go back.
+
+1. **Neon** (Continue with GitHub)
+   1. Create project `iplan`, Postgres 17, region **AWS Asia Pacific (Singapore)**.
+   2. Copy the **pooled** connection string (host contains `-pooler`, ends with `?sslmode=require`). This is `DATABASE_URL`.
+   3. Optional: create a branch `preview` and copy its pooled string for preview deployments.
+2. **Backblaze B2** (email sign-up, B2 Cloud Storage only)
+   1. Buckets → Create bucket `iplan-attachments`, **Private**, default encryption on.
+   2. Note the bucket's **Endpoint** (e.g. `s3.us-west-004.backblazeb2.com`).
+   3. Application Keys → Add a key **restricted to `iplan-attachments`**, read and write. Copy keyID and applicationKey (shown once).
+3. **Google Cloud Console** (personal Google account, no billing)
+   1. Create project `iplan`.
+   2. APIs & Services → OAuth consent screen: External, app name iPlan, scopes `email` and `profile`, add yourself as a test user (or publish; basic scopes need no review).
+   3. Credentials → Create OAuth client ID → Web application. Redirect URI: `https://<project>.vercel.app/api/auth/callback/google` (add `http://localhost:3000/api/auth/callback/google` for local testing). Copy client ID and secret.
+4. **Vercel** (Continue with GitHub, Hobby)
+   1. Add New → Project → import `tiphurin/iPlan`. **Root Directory: `apps/web`**. Framework: Next.js. `apps/web/vercel.json` sets the install and build commands and the Singapore region.
+   2. Settings → Git → Production Branch: the branch you deploy from (e.g. `main` once merged there).
+   3. Settings → Environment Variables, for **Production** (and Preview, pointing `DATABASE_URL` at the Neon `preview` branch):
+
+      | Variable                                    | Value                                           |
+      | ------------------------------------------- | ----------------------------------------------- |
+      | `DATABASE_URL`                              | Neon pooled connection string                   |
+      | `BETTER_AUTH_SECRET`                        | output of `openssl rand -base64 32`             |
+      | `BETTER_AUTH_URL`                           | `https://<project>.vercel.app`                  |
+      | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | from step 3                                     |
+      | `DEV_LOGIN_ENABLED`                         | `false`                                         |
+      | `STORAGE_DRIVER`                            | `s3`                                            |
+      | `S3_ENDPOINT`                               | `https://` + the B2 endpoint                    |
+      | `S3_REGION`                                 | region part of the endpoint, e.g. `us-west-004` |
+      | `S3_BUCKET`                                 | `iplan-attachments`                             |
+      | `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | B2 keyID / applicationKey                       |
+      | `S3_FORCE_PATH_STYLE`                       | `false`                                         |
+
+   4. Deploy. Production builds run `yarn db:migrate` first (`scripts/vercel-build.sh`); preview builds never migrate.
+5. **First sign-in and admin**
+   1. Open `https://<project>.vercel.app`, sign in with Google.
+   2. Make yourself admin once, in Neon → SQL Editor: `update "user" set role = 'admin' where email = 'you@example.com';`
+6. **Uptime ping** (optional): GitHub → repo Settings → Secrets and variables → Actions → Variables → `APP_URL` = `https://<project>.vercel.app`. The weekly `Uptime` workflow then emails you if `/api/health` fails.
+
+The app refuses to start in production if `DEV_LOGIN_ENABLED` is true or `STORAGE_DRIVER` is not `s3`, so a missing setting shows up immediately in the Vercel logs.
+
 ## Keeping an eye on usage
 
 | Dashboard                  | What to check                                             |
@@ -74,7 +117,7 @@ Google OAuth redirect URIs to register: `http://localhost:3000/api/auth/callback
 | Backblaze → Caps & Alerts  | Storage used, daily downloads; email alerts at 75% / 100% |
 | iPlan admin page (planned) | Users, trips, storage used vs 10 GB, DB size, audit log   |
 
-A weekly GitHub Actions job (added with the deploy PR) will ping the app so you get an email from GitHub if it is down.
+The weekly `Uptime` workflow pings `/api/health` once `APP_URL` is set; GitHub emails you if it fails.
 
 ## Backups
 

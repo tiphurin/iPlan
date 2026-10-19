@@ -2,10 +2,10 @@ import { z } from 'zod'
 
 const DateKey = z.iso.date()
 const Instant = z.iso.datetime({ offset: true })
-const Currency = z
-  .string()
-  .regex(/^[A-Z]{3}$/)
-  .default('THB')
+const CurrencyCode = z.string().regex(/^[A-Z]{3}$/)
+const Currency = CurrencyCode.default('THB')
+/** Links open in the browser, so only web addresses (no javascript: or data:). */
+export const WebUrl = z.url({ protocol: /^https?$/ })
 
 export const TripRole = z.enum(['owner', 'editor', 'viewer'])
 export type TripRole = z.infer<typeof TripRole>
@@ -51,7 +51,10 @@ const tripFields = {
 export const CreateTripInput = z.object(tripFields)
 export type CreateTripInput = z.infer<typeof CreateTripInput>
 
-export const UpdateTripInput = z.object(tripFields).partial()
+/** No defaults here: a field left out of an update keeps its stored value. */
+export const UpdateTripInput = z
+  .object({ ...tripFields, homeTimeZone: z.string().min(1), baseCurrency: CurrencyCode })
+  .partial()
 export type UpdateTripInput = z.infer<typeof UpdateTripInput>
 
 export const TripItemKind = z.enum(['place', 'move', 'flight', 'task', 'wake', 'sleep'])
@@ -61,8 +64,11 @@ export type TripItemKind = z.infer<typeof TripItemKind>
 export const TripItemDetails = z
   .object({
     address: z.string().max(300).optional(),
+    /** Coordinates from the place search; calendars show a map pin with them. */
+    lat: z.number().min(-90).max(90).optional(),
+    lng: z.number().min(-180).max(180).optional(),
     phone: z.string().max(40).optional(),
-    url: z.url().optional(),
+    url: WebUrl.optional(),
     hours: z.string().max(80).optional(),
     line: z.string().max(20).optional(),
     lineColor: z
@@ -88,6 +94,7 @@ export const CheckInDto = z.object({
   userId: z.string(),
   name: z.string(),
   checkedInAt: Instant,
+  skipped: z.boolean(),
 })
 export type CheckInDto = z.infer<typeof CheckInDto>
 
@@ -127,5 +134,34 @@ export type UpdateTripItemInput = z.infer<typeof UpdateTripItemInput>
 export const CheckInInput = z.object({
   /** Defaults to now; the time simulator sends its own time. */
   at: Instant.optional(),
+  /** Mark the item as skipped instead of done. */
+  skipped: z.boolean().optional(),
 })
 export type CheckInInput = z.infer<typeof CheckInInput>
+
+/** Links for subscribing to a trip in a calendar app (kept up to date automatically). */
+export const CalendarFeedDto = z.object({
+  /** https link, for "subscribe by URL" in any calendar. */
+  url: z.string(),
+  /** Opens the iPhone/Mac Calendar subscribe dialog. */
+  webcalUrl: z.string(),
+  /** Opens Google Calendar's "add calendar from URL". */
+  googleUrl: z.string(),
+})
+export type CalendarFeedDto = z.infer<typeof CalendarFeedDto>
+
+/** One suggestion from the free place search (OpenStreetMap data via Photon). */
+export const PlaceDto = z.object({
+  name: z.string(),
+  address: z.string(),
+  lat: z.number(),
+  lng: z.number(),
+})
+export type PlaceDto = z.infer<typeof PlaceDto>
+
+export const PlaceQuery = z.object({
+  q: z.string().trim().min(2).max(120),
+  /** Bias results near this point, e.g. the trip's other places. */
+  lat: z.coerce.number().min(-90).max(90).optional(),
+  lng: z.coerce.number().min(-180).max(180).optional(),
+})

@@ -6,9 +6,12 @@ import {
   LedgerEntryDto,
   type LedgerEntryInput,
   type LedgerInput,
+  type MonthStatusInput,
+  PendingInviteDto,
   type SettleInput,
 } from '@iplan/contracts'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { z } from 'zod'
 import { apiFetch } from './api-client'
 
 export const ledgerKeys = {
@@ -43,12 +46,12 @@ export function useLedgerMutations(ledgerId?: string) {
       mutationFn: () => apiFetch(`/api/ledgers/${ledgerId}`, { method: 'DELETE' }),
       onSuccess,
     }),
-    addMember: useMutation({
-      mutationFn: (email: string) =>
-        apiFetch(`/api/ledgers/${ledgerId}/members`, {
+    invite: useMutation({
+      mutationFn: (userId: string) =>
+        apiFetch(`/api/ledgers/${ledgerId}/invites`, {
           method: 'POST',
-          body: { email },
-          schema: LedgerDto,
+          body: { userId },
+          schema: z.array(PendingInviteDto),
         }),
       onSuccess,
     }),
@@ -75,6 +78,24 @@ export function useLedgerMutations(ledgerId?: string) {
     }),
     deleteEntry: useMutation({
       mutationFn: (id: string) => apiFetch(`/api/ledger-entries/${id}`, { method: 'DELETE' }),
+      onSuccess,
+    }),
+    monthStatus: useMutation({
+      mutationFn: ({ month, ...body }: MonthStatusInput & { month: string }) =>
+        apiFetch(`/api/ledgers/${ledgerId}/months/${month}/status`, {
+          method: 'PUT',
+          body,
+          schema: LedgerDetailDto,
+        }),
+      onSuccess,
+    }),
+    entryPaid: useMutation({
+      mutationFn: ({ id, paidBack }: { id: string; paidBack: boolean }) =>
+        apiFetch(`/api/ledger-entries/${id}/paid`, {
+          method: 'PUT',
+          body: { paidBack },
+          schema: LedgerEntryDto,
+        }),
       onSuccess,
     }),
     settle: useMutation({

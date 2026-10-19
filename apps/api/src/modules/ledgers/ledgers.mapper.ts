@@ -3,7 +3,11 @@ import type { EntryWithShares } from './ledgers.repository'
 
 export type NameOf = (userId: string) => string
 
-export function toLedgerEntryDto(row: EntryWithShares, nameOf: NameOf): LedgerEntryDto {
+export function toLedgerEntryDto(
+  row: EntryWithShares,
+  nameOf: NameOf,
+  paidBack = false,
+): LedgerEntryDto {
   return {
     id: row.id,
     ledgerId: row.ledgerId,
@@ -22,6 +26,9 @@ export function toLedgerEntryDto(row: EntryWithShares, nameOf: NameOf): LedgerEn
       percentBp: s.percentBp,
     })),
     note: row.note,
+    settlesMonth: row.settlesMonth,
+    settlesEntryId: row.settlesEntryId,
+    paidBack,
     createdBy: row.createdBy,
     createdAt: row.createdAt.toISOString(),
   }

@@ -1,15 +1,24 @@
+import { knownFeatures } from '../access/access.mapper'
 import { avatarUrl } from '../../shared/avatar'
-import type { AdminUserDto, AuditEntryDto } from '@iplan/contracts'
+import { type AdminUserDto, type AuditEntryDto, UserRole } from '@iplan/contracts'
 import type { AuditRow, UserRow } from './admin.repository'
 
-export const toAdminUserDto = (row: UserRow, groupIds: string[]): AdminUserDto => ({
+export const toAdminUserDto = (
+  row: UserRow,
+  groupIds: string[],
+  circleIds: string[],
+  features: string[] = [],
+): AdminUserDto => ({
   id: row.id,
   name: row.name,
+  nickname: row.nickname,
   email: row.email,
   image: avatarUrl(row),
-  role: row.role === 'admin' ? 'admin' : 'user',
+  role: UserRole.catch('user').parse(row.role),
   status: row.status === 'active' ? 'active' : 'pending',
   groupIds,
+  circleIds,
+  features: knownFeatures(features),
   banned: row.banned === true,
   banReason: row.banReason,
   createdAt: row.createdAt.toISOString(),

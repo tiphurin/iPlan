@@ -13,7 +13,11 @@
     "add": "Add",
     "optional": "optional",
     "confirmDelete": "Delete this item?",
-    "close": "Close"
+    "close": "Close",
+    "choose": "Choose",
+    "search": "Search",
+    "done": "Done",
+    "none": "None"
   },
   "nav": {
     "trips": "Trips",
@@ -32,7 +36,14 @@
     "googleMissing": "Google sign-in is not configured yet (see docs/INFRA.md)",
     "devTitle": "Local testing",
     "devEmpty": "No users yet; run yarn db:reset",
-    "devPending": "waiting for approval"
+    "devPending": "waiting for approval",
+    "adminLink": "Admin sign-in",
+    "adminTitle": "Admin sign-in",
+    "username": "Username",
+    "password": "Password",
+    "signIn": "Sign in",
+    "roleSuper": "super admin",
+    "roleAdmin": "admin"
   },
   "home": {
     "greeting": "Hi {name}",
@@ -77,10 +88,19 @@
     "NETWORK": "Can't connect. Check your internet connection.",
     "INVITE_INVALID": "This invite link is invalid or has expired",
     "OWNER_CANNOT_LEAVE": "The owner can't leave. Delete the trip instead.",
+    "BALANCE_NOT_SETTLED": "Settle up first: this member still owes or is owed money.",
     "CANNOT_CHANGE_SELF": "You can't demote or suspend yourself",
     "ACCOUNT_PENDING": "This account is waiting for approval",
     "FEATURE_DISABLED": "This feature is not enabled for you",
-    "USER_NOT_FOUND": "No approved user with that email"
+    "USER_NOT_FOUND": "No approved user with that email",
+    "PASSWORD_INVALID": "Wrong username or password",
+    "PASSWORD_CHANGE_REQUIRED": "Change your password first",
+    "SUPERADMIN_PROTECTED": "The super admin account cannot be changed",
+    "TOO_MANY_ATTEMPTS": "Too many wrong passwords. Try again in 15 minutes.",
+    "NOT_IN_CIRCLE": "You can only invite people who share a circle with you",
+    "INVITATION_GONE": "This trip or shared wallet no longer exists",
+    "TRIP_CURRENCY_LOCKED": "The trip currency can't change once expenses are recorded",
+    "TRIP_DATES_EXCLUDE_CONTENT": "Some plans or expenses fall outside the new dates. Move or delete them first."
   },
   "trips": {
     "empty": "No trips yet",
@@ -102,6 +122,8 @@
     "endDate": "End date",
     "homeTimeZone": "Home time zone",
     "currency": "Main currency",
+    "currencyLocked": "Locked because this trip already has expenses.",
+    "currencyResets": "Changing it clears the saved exchange rates and daily budget.",
     "create": "Create trip",
     "deleteTrip": "Delete trip",
     "confirmDeleteTrip": "Delete this trip and its whole plan? This can't be undone.",
@@ -117,7 +139,10 @@
     "startsIn": "{count, plural, =0 {Starts today} one {In # day} other {In # days}}",
     "ended": "Ended",
     "dayShort": "D{n}",
-    "itemCount": "{count, plural, one {# item} other {# items}}"
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "awaiting": "Waiting to accept",
+    "invitePeople": "Invite from your circles",
+    "invitePeopleHint": "They see it on their home screen and get an email"
   },
   "kinds": {
     "place": "Place",
@@ -148,7 +173,10 @@
     "to": "To",
     "notes": "Notes",
     "openIn": "Open in",
-    "checkedIn": "Checked in {time}"
+    "checkedIn": "Checked in {time}",
+    "terminal": "Terminal",
+    "duration": "Travel time {time}",
+    "endBeforeStart": "The end is before the start; check the arrival time zone"
   },
   "todayView": {
     "now": "Now",
@@ -176,7 +204,11 @@
       "done": "Done",
       "now": "Now",
       "upcoming": "Next"
-    }
+    },
+    "lateNow": "{min} min late, not checked in",
+    "skippedNow": "Skipped",
+    "skip": "Skip",
+    "getReady": "Get ready"
   },
   "duration": {
     "dh": "{d}d {h}h",
@@ -282,6 +314,7 @@
     "dailyBudget": "Daily budget ({base})",
     "saveSettings": "Save",
     "addCurrency": "Add currency",
+    "removeRate": "Remove {code} rate",
     "form": {
       "title": "What for",
       "amount": "Amount",
@@ -289,6 +322,8 @@
       "rate": "Rate (1 {code} = ? {base})",
       "paidBy": "Paid by",
       "pool": "Shared pool",
+      "formerMember": "Former member",
+      "formerHint": "People who left the trip keep their part and can't be changed.",
       "split": "Split",
       "equal": "Equally",
       "exact": "Exact amounts",
@@ -310,7 +345,22 @@
       "activity": "Activities",
       "health": "Health",
       "other": "Other"
-    }
+    },
+    "addHere": "Add an expense here",
+    "tabs": {
+      "label": "Expense view",
+      "list": "Entries",
+      "settle": "Who pays whom",
+      "budget": "Budget"
+    },
+    "settleHint": "From all entries: whoever paid more than their share gets paid back",
+    "paysTo": "pays",
+    "peopleHint": "Paid = money put in · Share = your part of the splits · Net + gets back / − owes",
+    "budgetIs": "Budget {amount} a day for the whole group",
+    "noBudget": "No daily budget set",
+    "budgetHint": "Set it with \"Exchange rates and budget\" above · amounts are in the trip currency",
+    "overBy": "over by {amount}",
+    "left": "{amount} left"
   },
   "attachments": {
     "title": "Slips & photos",
@@ -406,7 +456,7 @@
     "overview": "Overview",
     "users": "Users",
     "audit": "Audit log",
-    "search": "Search name or email",
+    "search": "Search name, nickname or email",
     "role": "Role",
     "roleUser": "User",
     "roleAdmin": "Admin",
@@ -442,17 +492,29 @@
       "users": "Users",
       "groups": "Groups",
       "overview": "Overview",
-      "audit": "Audit log"
+      "audit": "Audit log",
+      "circles": "Circles"
     },
     "approvalsHint": "People who signed in with Google wait here. Pick their groups, then approve.",
     "noPending": "Nobody is waiting",
-    "groups": "Groups (decide which features they get)",
+    "groups": "Groups (optional: adds the group's features)",
     "approve": "Approve",
     "reject": "Reject",
     "groupsHint": "Each group turns on features; a user gets every feature of every group they are in.",
     "memberCount": "{count, plural, one {# member} other {# members}}",
     "confirmDeleteGroup": "Delete \"{name}\"? Its members lose its features.",
-    "newGroup": "New group name"
+    "newGroup": "New group name",
+    "roleSuperadmin": "Super admin",
+    "circles": "Circles (people in one can find each other)",
+    "circlesHint": "People in the same circle can find each other to invite into trips and wallets; others can't.",
+    "newCircle": "New circle, e.g. Family",
+    "confirmDeleteCircle": "Delete \"{name}\"? Its members can no longer find each other.",
+    "viewData": "View data",
+    "viewingSuper": "Super admin: you can view and edit; every visit is logged",
+    "viewingReadOnly": "Admin: read-only; every visit is logged",
+    "nothing": "Nothing yet",
+    "userFeatures": "Features for this person",
+    "noFeatures": "None chosen (only from groups)"
   },
   "backup": {
     "title": "Calendar & backup",
@@ -566,11 +628,11 @@
     "finance": "My money",
     "tripsHint": "Plan trips, split costs",
     "financeHint": "Your own monthly income and spending",
-    "shared": "Shared money",
-    "sharedHint": "Split costs with a partner or friends",
+    "shared": "Shared wallet",
+    "sharedHint": "Share costs with a partner or friends",
     "tripsShort": "Trips",
     "financeShort": "Money",
-    "sharedShort": "Shared"
+    "sharedShort": "Wallet"
   },
   "dashboard": {
     "greeting": "Hi {name}",
@@ -590,11 +652,12 @@
     "spending": "Spending",
     "budgetAlerts": "{count, plural, one {# category near or over budget} other {# categories near or over budget}}",
     "locked": "Not enabled · ask an admin",
-    "startShared": "Start sharing costs",
-    "startSharedHint": "e.g. \"Me & partner\": who paid, split evenly or not",
+    "startShared": "Open your first shared wallet",
+    "startSharedHint": "Who paid, split evenly or not",
     "sharedOwedToYou": "Others owe you",
     "sharedYouOwe": "You owe others",
-    "sharedSettled": "Shared money · all settled"
+    "sharedBalances": "Shared wallets · balances",
+    "sharedSettled": "Shared wallets · all settled"
   },
   "calendar": {
     "previous": "Previous month",
@@ -606,13 +669,20 @@
     "fixed": "Fixed",
     "verify": "To verify",
     "optional": "Optional",
-    "budget": "Budget"
+    "budget": "Budget",
+    "spent": "Spent",
+    "skipped": "Skipped"
   },
   "profile": {
     "adminHint": "Approvals, groups and feature access",
     "pending": "{count} waiting",
     "changePhoto": "Change profile photo",
-    "removePhoto": "Remove photo"
+    "removePhoto": "Remove photo",
+    "nickname": "Nickname",
+    "nicknameHint": "helps friends find you",
+    "nicknamePlaceholder": "e.g. Mee, Mind",
+    "save": "Save",
+    "saved": "Saved"
   },
   "pending": {
     "title": "Waiting for approval",
@@ -622,11 +692,11 @@
   },
   "shared": {
     "subtitle": "Costs you share, kept apart from your own money",
-    "empty": "No shared ledgers yet",
-    "emptyHint": "Create one like \"Me & partner\", then add them by email",
-    "newTitle": "New shared ledger",
-    "newName": "Ledger name",
-    "newPlaceholder": "e.g. Me & partner, Flat",
+    "empty": "No shared wallets yet",
+    "emptyHint": "Create one, then invite people from your circles",
+    "newTitle": "New shared wallet",
+    "newName": "Wallet name",
+    "newPlaceholder": "e.g. Condo rent, October dinners",
     "create": "Create",
     "entryCount": "{count, plural, one {# entry} other {# entries}}",
     "settled": "All settled",
@@ -640,12 +710,12 @@
     "toSettle": "To settle",
     "markPaid": "Paid",
     "confirmSettle": "Record this as paid back?",
+    "confirmReplaceMonthPaid": "This replaces the payment recorded for the whole month with this expense's payback. Continue?",
     "members": "Members",
     "gets": "gets back {amount}",
     "owes": "owes {amount}",
-    "confirmRemove": "Remove {name} from this ledger?",
-    "addByEmail": "Their email (must be approved)",
-    "delete": "Delete this ledger",
+    "confirmRemove": "Remove {name} from this wallet?",
+    "delete": "Delete this wallet",
     "confirmDelete": "Delete \"{name}\" and all its entries?",
     "history": "History",
     "noEntries": "Nothing yet. Tap \"Add\" for the first cost.",
@@ -680,6 +750,221 @@
       "fun": "Fun",
       "travel": "Travel",
       "other": "Other"
+    },
+    "awaiting": "Waiting",
+    "cancelInvite": "Cancel invitation",
+    "invite": "Invite someone from your circles (name, nickname or email)",
+    "readOnly": "You are viewing as an admin (read-only)",
+    "memberCount": "{count, plural, one {# person} other {# people}}",
+    "rename": "Rename wallet",
+    "save": "Save",
+    "byMonth": "By month",
+    "monthTotal": "Together {total} · your part {mine}",
+    "status": {
+      "none": "Nothing to settle",
+      "unpaid": "Not paid",
+      "partial": "Partly paid",
+      "paid": "Paid",
+      "partialShort": "Partly"
+    },
+    "statusLabel": "This month is",
+    "paidOf": "Paid {paid} of {need}",
+    "paidAmount": "How much was paid in total (more than owed is fine)",
+    "entriesCount": "{count, plural, one {See # entry} other {See # entries}}",
+    "entryPaid": "Paid",
+    "entryUnpaid": "Not paid",
+    "chartTogether": "Together",
+    "chartMine": "Your part",
+    "byCategory": "By category",
+    "stillOwes": "{from} still owes {to} {amount}",
+    "editAmount": "Edit amount",
+    "amountTooBig": "That covers it all; choose \"Paid\" instead",
+    "whoOwes": "Who owes whom",
+    "whoOwesHint": "Right = gets money back · Left = owes",
+    "settledShort": "Settled",
+    "overall": "This wallet overall",
+    "owesTo": "{from} owes {to} {amount}",
+    "overpaid": "Paid {over} too much → {from} now owes {to} {over}",
+    "exactlyPaid": "Exactly settled",
+    "cancel": "Cancel",
+    "markPaidAmount": "Mark {amount} as paid",
+    "pays": "pays",
+    "receives": "receives"
+  },
+  "invitations": {
+    "title": "{count, plural, one {# invitation} other {# invitations}}",
+    "trip": "{name} invited you to a trip",
+    "wallet": "{name} invited you to a shared wallet",
+    "accept": "Accept",
+    "decline": "Decline",
+    "needAccess": "Ask an admin to turn this feature on before you can join"
+  },
+  "people": {
+    "search": "Search name, nickname or email",
+    "none": "No one found (only people in your circles; ask an admin to add them)"
+  },
+  "password": {
+    "title": "Change password",
+    "subtitle": "Set a new password for the admin account",
+    "required": "First sign-in: choose a new password before continuing",
+    "current": "Current password",
+    "new": "New password",
+    "rule": "at least 8 characters",
+    "again": "Repeat new password",
+    "mismatch": "Passwords do not match",
+    "save": "Save password"
+  },
+  "guide": {
+    "open": "How to use",
+    "title": "How to use",
+    "adminOnly": "For admins",
+    "user": {
+      "start": {
+        "title": "Getting started",
+        "google": "Sign in with Google",
+        "wait": "Wait for approval",
+        "home": "Pick a feature on Home"
+      },
+      "trips": {
+        "title": "Trips",
+        "plan": "Add the day plan",
+        "invite": "Invite, they accept",
+        "checkin": "On the day, check in"
+      },
+      "money": {
+        "title": "My money",
+        "rules": "Set income & fixed costs",
+        "spend": "Log spending, add slips",
+        "chart": "See monthly charts"
+      },
+      "wallet": {
+        "title": "Shared wallet",
+        "create": "Create a wallet",
+        "invite": "Invite, they accept",
+        "split": "Who paid, how to split",
+        "settle": "Pay back, tap \"Paid\"",
+        "month": "Monthly status, partial payments too"
+      },
+      "tripDay": {
+        "title": "During the trip",
+        "switch": "Switch Plan / Today",
+        "late": "Orange when close, red when late: check in or skip",
+        "toggle": "Switch time home/local and money ₩/฿",
+        "spend": "Budget and spending under each place"
+      },
+      "calendar": {
+        "title": "Calendar",
+        "subscribe": "Trip calendar button: iPhone or Google (syncs itself)",
+        "item": "One item: tap Apple Calendar again to update"
+      }
+    },
+    "admin": {
+      "approve": {
+        "title": "Approve new people",
+        "mail": "Get an email",
+        "pick": "Pick groups, approve",
+        "done": "They see their features"
+      },
+      "groups": {
+        "title": "Groups and circles",
+        "groups": "Groups = features, circles = findable",
+        "view": "View a user's data"
+      }
     }
+  },
+  "scope": {
+    "mine": "Mine",
+    "allTrips": "Everyone's trips",
+    "allWallets": "Every wallet",
+    "owner": "Owner {name}"
+  },
+  "calendarSync": {
+    "open": "Add to calendar",
+    "title": "Add to calendar",
+    "hint": "Pick your calendar app; later changes update by themselves (iPhone: Settings › Calendar › Accounts › Subscribed Calendars › fetch every 15 min)",
+    "iphone": "iPhone / Mac Calendar",
+    "iphoneHint": "Tap, then confirm Subscribe",
+    "google": "Google Calendar",
+    "googleHint": "Opens Google, tap Add (updates every 8–24 h)",
+    "copy": "Copy calendar link",
+    "copied": "Copied",
+    "download": "Download .ics (one-off)",
+    "rotate": "New link",
+    "confirmRotate": "The old link stops working and calendars must re-subscribe. Continue?",
+    "mac": "Mac: copy the link, then Calendar › File › New Calendar Subscription and paste"
+  },
+  "itemCalendar": {
+    "apple": "Apple Calendar",
+    "google": "Google Calendar",
+    "hint": "After editing, tap Apple Calendar again to update the same event · To sync the whole trip automatically, use the calendar button at the top of the trip"
+  },
+  "tripView": {
+    "switch": "Trip view",
+    "plan": "Day plan",
+    "today": "Today",
+    "timeMode": "Time",
+    "moneyMode": "Money",
+    "currency": {
+      "KRW": "Won",
+      "THB": "Baht",
+      "JPY": "Yen",
+      "USD": "Dollar",
+      "EUR": "Euro",
+      "TWD": "TWD",
+      "HKD": "HKD",
+      "CNY": "Yuan",
+      "SGD": "SGD",
+      "VND": "Dong",
+      "GBP": "Pound",
+      "AUD": "AUD",
+      "MYR": "Ringgit",
+      "IDR": "Rupiah",
+      "PHP": "Peso",
+      "INR": "Rupee",
+      "AED": "Dirham",
+      "CHF": "Franc"
+    }
+  },
+  "lines": {
+    "how": "Getting there by",
+    "walk": "Walk",
+    "taxi": "Taxi",
+    "bus": "Bus",
+    "train": "Train/metro",
+    "plane": "Plane",
+    "seoul": "Seoul subway",
+    "line": "Line {n}",
+    "custom": "Custom (name and colour)",
+    "hideCustom": "Hide custom",
+    "name": "Line name",
+    "color": "Colour",
+    "grab": "Grab",
+    "bolt": "Bolt",
+    "lineman": "LINE MAN",
+    "drive": "Drive",
+    "boat": "Boat"
+  },
+  "places": {
+    "placeholder": "Search a place or type an address",
+    "clear": "Clear",
+    "pinned": "📍 Pinned: maps and calendars show this spot",
+    "none": "No match; you can type the address yourself",
+    "credit": "Search data © OpenStreetMap contributors"
+  },
+  "itemSheet": {
+    "edit": "Edit",
+    "expense": "Add expense"
+  },
+  "dates": {
+    "pick": "Pick a date",
+    "pickTime": "Pick date and time",
+    "pickMonth": "Pick a month",
+    "today": "Today",
+    "clear": "Clear",
+    "hour": "Hour",
+    "minute": "Minute",
+    "done": "Done · {when}",
+    "prevYear": "Previous year",
+    "nextYear": "Next year"
   }
 }

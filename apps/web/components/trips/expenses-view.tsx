@@ -2,7 +2,7 @@
 
 import type { ExpenseDto, ExpenseSummaryDto, TripDetailDto } from '@iplan/contracts'
 import { money, toDecimalString } from '@iplan/core'
-import { ArrowRight, Download, FileSpreadsheet, FileText, Settings2 } from 'lucide-react'
+import { Download, FileSpreadsheet, FileText, Settings2, X } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -10,6 +10,7 @@ import { type FormEvent, useState } from 'react'
 import { CATEGORY_COLORS, Donut } from '@/components/charts/donut'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, SectionTitle } from '@/components/ui/card'
+import { Segmented } from '@/components/ui/chip'
 import { Field, Input } from '@/components/ui/field'
 import { Fab } from '@/components/ui/fab'
 import { cn } from '@/lib/cn'
@@ -35,6 +36,8 @@ export function ExpensesView({
   const mutations = useExpenseMutations(trip.id)
   const [showSettings, setShowSettings] = useState(false)
   const [newCurrency, setNewCurrency] = useState('')
+  /** Rates taken out of the form; saving sends the full list, so they are deleted. */
+  const [removed, setRemoved] = useState<string[]>([])
   const canEdit = trip.role !== 'viewer'
   const base = summary.baseCurrency
   const maxDay = summary.byDay.reduce(
@@ -42,6 +45,7 @@ export function ExpensesView({
     1,
   )
   const days = [...new Set(expenses.map((e) => e.dayDate))].sort()
+  const [tab, setTab] = useState<'list' | 'settle' | 'budget'>('list')
 
   function saveSettings(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -53,13 +57,18 @@ export function ExpensesView({
     const budget = String(form.get('dailyBudget') ?? '').trim()
     mutations.settings.mutate(
       { fxRates, dailyBudget: budget || null },
-      { onSuccess: () => setShowSettings(false) },
+      {
+        onSuccess: () => {
+          setShowSettings(false)
+          setRemoved([])
+        },
+      },
     )
   }
 
   const currencies = [
     ...new Set([...Object.keys(trip.fxRates), ...(newCurrency ? [newCurrency] : [])]),
-  ]
+  ].filter((code) => !removed.includes(code))
 
   return (
     <div className="space-y-5 px-4">
@@ -132,13 +141,26 @@ export function ExpensesView({
         <Card>
           <form onSubmit={saveSettings} className="space-y-3">
             {currencies.map((code) => (
-              <Field key={code} label={t('expenses.rate', { code, base })}>
-                <Input
-                  name={`rate:${code}`}
-                  inputMode="decimal"
-                  defaultValue={trip.fxRates[code] ?? ''}
-                />
-              </Field>
+              <div key={code} className="flex items-end gap-2">
+                <Field className="flex-1" label={t('expenses.rate', { code, base })}>
+                  <Input
+                    name={`rate:${code}`}
+                    inputMode="decimal"
+                    defaultValue={trip.fxRates[code] ?? ''}
+                  />
+                </Field>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t('expenses.removeRate', { code })}
+                  onClick={() => {
+                    setRemoved((list) => [...list, code])
+                    if (code === newCurrency) setNewCurrency('')
+                  }}
+                >
+                  <X aria-hidden className="size-5" />
+                </Button>
+              </div>
             ))}
             <div className="flex gap-2">
               <Input
@@ -146,7 +168,11 @@ export function ExpensesView({
                 placeholder="KRW"
                 maxLength={3}
                 className="uppercase"
-                onBlur={(e) => setNewCurrency(e.target.value.trim().toUpperCase())}
+                onBlur={(e) => {
+                  const code = e.target.value.trim().toUpperCase()
+                  setNewCurrency(code)
+                  setRemoved((list) => list.filter((c) => c !== code))
+                }}
               />
             </div>
             <Field label={t('expenses.dailyBudget', { base })}>
@@ -167,170 +193,207 @@ export function ExpensesView({
         </Card>
       )}
 
-      <section>
-        <SectionTitle>{t('expenses.settle')}</SectionTitle>
-        <Card className="space-y-2">
-          {summary.transfers.length === 0 ? (
-            <p className="text-muted-foreground">{t('expenses.settled')}</p>
-          ) : (
-            summary.transfers.map((tr) => (
-              <p key={`${tr.from}-${tr.to}`} className="flex items-center gap-2">
-                <span className="font-medium">
-                  {tr.from === 'pool' ? t('expenses.form.pool') : tr.fromName}
-                </span>
-                <ArrowRight
-                  aria-label={t('expenses.pays')}
-                  className="size-4 text-muted-foreground"
-                />
-                <span className="flex-1 font-medium">
-                  {tr.to === 'pool' ? t('expenses.form.pool') : tr.toName}
-                </span>
-                <span className="font-semibold tabular-nums">{fmt(tr.amountMinor, base)}</span>
-              </p>
-            ))
-          )}
-        </Card>
-      </section>
+      <Segmented
+        label={t('expenses.tabs.label')}
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: 'list', label: t('expenses.tabs.list') },
+          { value: 'settle', label: t('expenses.tabs.settle') },
+          { value: 'budget', label: t('expenses.tabs.budget') },
+        ]}
+      />
 
-      <section>
-        <SectionTitle>{t('expenses.people')}</SectionTitle>
-        <div className="overflow-hidden rounded-2xl border bg-card">
-          <table className="w-full text-[13px] tabular-nums [&_td:not(:first-child)]:whitespace-nowrap">
-            <thead className="bg-muted/60 text-xs text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium" />
-                <th className="px-2 py-2 text-right font-medium">{t('expenses.paid')}</th>
-                <th className="px-2 py-2 text-right font-medium">{t('expenses.share')}</th>
-                <th className="px-3 py-2 text-right font-medium">{t('expenses.net')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {summary.parties.map((p) => {
-                const net = BigInt(p.netMinor)
-                return (
-                  <tr key={p.id}>
-                    <td className="px-3 py-2 font-medium">
-                      {p.id === 'pool' ? t('expenses.form.pool') : p.name}
-                    </td>
-                    <td className="px-2 py-2 text-right">{fmt(p.paidMinor, base)}</td>
-                    <td className="px-2 py-2 text-right">{fmt(p.shareMinor, base)}</td>
-                    <td
-                      className={cn(
-                        'px-3 py-2 text-right font-semibold',
-                        net > 0n ? 'text-success' : net < 0n ? 'text-danger' : '',
-                      )}
-                    >
-                      {net > 0n ? '+' : ''}
-                      {fmt(p.netMinor, base)}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {summary.byCategory.length > 0 && (
-        <section>
-          <SectionTitle>{t('expenses.byCategory')}</SectionTitle>
-          <Card>
-            <Donut
-              center={t('expenses.byCategory')}
-              slices={summary.byCategory.map((c) => ({
-                key: c.category,
-                label: `${t(`expenses.categories.${c.category}`)} · ${fmt(c.spentMinor, base)}`,
-                value: Number(c.spentMinor),
-                color: CATEGORY_COLORS[c.category] ?? '#94a3b8',
-              }))}
-            />
-          </Card>
-        </section>
+      {tab === 'list' && (
+        <>
+          <section className="space-y-4">
+            {expenses.length === 0 && (
+              <Card className="text-muted-foreground">{t('expenses.empty')}</Card>
+            )}
+            {days.map((day) => (
+              <div key={day}>
+                <SectionTitle>{f.day(day)}</SectionTitle>
+                <ul className="divide-y rounded-2xl border bg-card">
+                  {expenses
+                    .filter((e) => e.dayDate === day)
+                    .map((e) => (
+                      <li key={e.id}>
+                        <Link
+                          href={`/trips/${trip.id}/expenses/${e.id}` as Route}
+                          className="flex items-center gap-3 px-4 py-3 active:bg-muted"
+                        >
+                          <span
+                            className="size-2.5 shrink-0 rounded-full"
+                            style={{ backgroundColor: CATEGORY_COLORS[e.category] }}
+                          />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate font-medium">{e.title}</span>
+                            <span className="block text-xs text-muted-foreground">
+                              {t('expenses.form.paidBy')}:{' '}
+                              {e.paidBy === 'pool' ? t('expenses.form.pool') : e.paidByName}
+                            </span>
+                          </span>
+                          <span className="text-right tabular-nums">
+                            <span className="block font-semibold">
+                              {fmt(e.amountMinor, e.currency)}
+                            </span>
+                            {e.currency !== base && (
+                              <span className="block text-xs text-muted-foreground">
+                                {fmt(e.baseAmountMinor, base)}
+                              </span>
+                            )}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        </>
       )}
 
-      <section>
-        <SectionTitle>{t('expenses.byDay')}</SectionTitle>
-        <Card className="space-y-3">
-          {summary.byDay.map((d) => {
-            const spent = Number(d.spentMinor)
-            const budget = d.budgetMinor === null ? null : Number(d.budgetMinor)
-            const over = budget !== null && spent > budget
-            return (
-              <div key={d.dayDate}>
-                <div className="mb-1 flex justify-between text-sm">
-                  <span>{f.day(d.dayDate)}</span>
-                  <span className={cn('tabular-nums', over && 'font-semibold text-danger')}>
-                    {fmt(d.spentMinor, base)}
-                    {budget !== null && (
-                      <span className="text-muted-foreground">
-                        {' '}
-                        / {fmt(d.budgetMinor ?? '0', base)}
-                      </span>
-                    )}
+      {tab === 'settle' && (
+        <>
+          <section className="space-y-2">
+            <p className="text-sm text-muted-foreground">{t('expenses.settleHint')}</p>
+            {summary.transfers.length === 0 ? (
+              <Card className="text-center text-success">✓ {t('expenses.settled')}</Card>
+            ) : (
+              summary.transfers.map((tr) => (
+                <Card key={`${tr.from}-${tr.to}`} className="flex items-center gap-3">
+                  <span className="min-w-0 flex-1 text-[15px]">
+                    <b>{tr.from === 'pool' ? t('expenses.form.pool') : tr.fromName}</b>{' '}
+                    {t('expenses.paysTo')}{' '}
+                    <b>{tr.to === 'pool' ? t('expenses.form.pool') : tr.toName}</b>
                   </span>
-                </div>
-                <div className="relative h-2 rounded-full bg-muted">
-                  <div
-                    className={cn('h-full rounded-full', over ? 'bg-danger' : 'bg-primary')}
-                    style={{ width: `${(spent / maxDay) * 100}%` }}
-                  />
-                  {budget !== null && (
-                    <div
-                      className="absolute -top-1 h-4 w-0.5 bg-foreground/60"
-                      style={{ left: `${(budget / maxDay) * 100}%` }}
-                    />
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </Card>
-      </section>
+                  <span className="num text-lg">{fmt(tr.amountMinor, base)}</span>
+                </Card>
+              ))
+            )}
+          </section>
+          <section>
+            <SectionTitle>{t('expenses.people')}</SectionTitle>
+            <p className="mb-2 text-sm text-muted-foreground">{t('expenses.peopleHint')}</p>
+            <div className="overflow-hidden rounded-2xl border bg-card">
+              <table className="w-full text-[13px] tabular-nums [&_td:not(:first-child)]:whitespace-nowrap">
+                <thead className="bg-muted/60 text-xs text-muted-foreground">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-medium" />
+                    <th className="px-2 py-2 text-right font-medium">{t('expenses.paid')}</th>
+                    <th className="px-2 py-2 text-right font-medium">{t('expenses.share')}</th>
+                    <th className="px-3 py-2 text-right font-medium">{t('expenses.net')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {summary.parties.map((p) => {
+                    const net = BigInt(p.netMinor)
+                    return (
+                      <tr key={p.id}>
+                        <td className="px-3 py-2 font-medium">
+                          {p.id === 'pool' ? t('expenses.form.pool') : p.name}
+                        </td>
+                        <td className="px-2 py-2 text-right">{fmt(p.paidMinor, base)}</td>
+                        <td className="px-2 py-2 text-right">{fmt(p.shareMinor, base)}</td>
+                        <td
+                          className={cn(
+                            'px-3 py-2 text-right font-semibold',
+                            net > 0n ? 'text-success' : net < 0n ? 'text-danger' : '',
+                          )}
+                        >
+                          {net > 0n ? '+' : ''}
+                          {fmt(p.netMinor, base)}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </>
+      )}
 
-      <section className="space-y-4">
-        {expenses.length === 0 && (
-          <Card className="text-muted-foreground">{t('expenses.empty')}</Card>
-        )}
-        {days.map((day) => (
-          <div key={day}>
-            <SectionTitle>{f.day(day)}</SectionTitle>
-            <ul className="divide-y rounded-2xl border bg-card">
-              {expenses
-                .filter((e) => e.dayDate === day)
-                .map((e) => (
-                  <li key={e.id}>
-                    <Link
-                      href={`/trips/${trip.id}/expenses/${e.id}` as Route}
-                      className="flex items-center gap-3 px-4 py-3 active:bg-muted"
-                    >
-                      <span
-                        className="size-2.5 shrink-0 rounded-full"
-                        style={{ backgroundColor: CATEGORY_COLORS[e.category] }}
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate font-medium">{e.title}</span>
-                        <span className="block text-xs text-muted-foreground">
-                          {t('expenses.form.paidBy')}:{' '}
-                          {e.paidBy === 'pool' ? t('expenses.form.pool') : e.paidByName}
-                        </span>
-                      </span>
-                      <span className="text-right tabular-nums">
-                        <span className="block font-semibold">
-                          {fmt(e.amountMinor, e.currency)}
-                        </span>
-                        {e.currency !== base && (
-                          <span className="block text-xs text-muted-foreground">
-                            {fmt(e.baseAmountMinor, base)}
+      {tab === 'budget' && (
+        <>
+          <Card className="space-y-1">
+            {trip.dailyBudgetMinor ? (
+              <p>{t('expenses.budgetIs', { amount: fmt(trip.dailyBudgetMinor, base) })}</p>
+            ) : (
+              <p className="text-muted-foreground">{t('expenses.noBudget')}</p>
+            )}
+            <p className="text-xs text-faint">{t('expenses.budgetHint')}</p>
+          </Card>
+          <section>
+            <SectionTitle>{t('expenses.byDay')}</SectionTitle>
+            <Card className="space-y-3">
+              {summary.byDay.map((d) => {
+                const spent = Number(d.spentMinor)
+                const budget = d.budgetMinor === null ? null : Number(d.budgetMinor)
+                const over = budget !== null && spent > budget
+                return (
+                  <div key={d.dayDate}>
+                    <div className="mb-1 flex justify-between text-sm">
+                      <span>{f.day(d.dayDate)}</span>
+                      <span className={cn('tabular-nums', over && 'font-semibold text-danger')}>
+                        {fmt(d.spentMinor, base)}
+                        {budget !== null && (
+                          <span className="text-muted-foreground">
+                            {' '}
+                            / {fmt(d.budgetMinor ?? '0', base)} ·{' '}
+                            {over
+                              ? t('expenses.overBy', {
+                                  amount: fmt(
+                                    BigInt(d.spentMinor) - BigInt(d.budgetMinor ?? '0'),
+                                    base,
+                                  ),
+                                })
+                              : t('expenses.left', {
+                                  amount: fmt(
+                                    BigInt(d.budgetMinor ?? '0') - BigInt(d.spentMinor),
+                                    base,
+                                  ),
+                                })}
                           </span>
                         )}
                       </span>
-                    </Link>
-                  </li>
-                ))}
-            </ul>
-          </div>
-        ))}
-      </section>
+                    </div>
+                    <div className="relative h-2 rounded-full bg-muted">
+                      <div
+                        className={cn('h-full rounded-full', over ? 'bg-danger' : 'bg-primary')}
+                        style={{ width: `${(spent / maxDay) * 100}%` }}
+                      />
+                      {budget !== null && (
+                        <div
+                          className="absolute -top-1 h-4 w-0.5 bg-foreground/60"
+                          style={{ left: `${(budget / maxDay) * 100}%` }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </Card>
+          </section>
+
+          {summary.byCategory.length > 0 && (
+            <section>
+              <SectionTitle>{t('expenses.byCategory')}</SectionTitle>
+              <Card>
+                <Donut
+                  center={t('expenses.byCategory')}
+                  slices={summary.byCategory.map((c) => ({
+                    key: c.category,
+                    label: `${t(`expenses.categories.${c.category}`)} · ${fmt(c.spentMinor, base)}`,
+                    value: Number(c.spentMinor),
+                    color: CATEGORY_COLORS[c.category] ?? '#94a3b8',
+                  }))}
+                />
+              </Card>
+            </section>
+          )}
+        </>
+      )}
 
       {canEdit && (
         <Fab href={`/trips/${trip.id}/expenses/new` as Route} label={t('expenses.add')} />

@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl'
 import { type FormEvent, useState } from 'react'
 import { Attachments } from '@/components/attachments'
 import { Button } from '@/components/ui/button'
+import { DateField } from '@/components/ui/date-fields'
 import { Field, Input, Select, Textarea } from '@/components/ui/field'
 import { ApiError } from '@/lib/api-error'
 import { cn } from '@/lib/cn'
@@ -115,7 +116,11 @@ export function TransactionForm({
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label={t('finance.tx.date')} error={errors.date}>
-          <Input type="date" name="date" required defaultValue={transaction?.date ?? defaultDate} />
+          <DateField
+            name="date"
+            label={t('finance.tx.date')}
+            defaultValue={transaction?.date ?? defaultDate}
+          />
         </Field>
         <Field label={t('finance.tx.category')} error={errors.categoryId}>
           <Select name="categoryId" defaultValue={transaction?.categoryId ?? ''}>

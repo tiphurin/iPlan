@@ -24,10 +24,11 @@ export function SectionTitle({
 /** Coloured feature card with a big number, like the prototype's hero. */
 export function Hero({
   tone = 'green',
+  decor = true,
   className,
   children,
   ...props
-}: HTMLAttributes<HTMLDivElement> & { tone?: HeroTone }) {
+}: HTMLAttributes<HTMLDivElement> & { tone?: HeroTone; decor?: boolean }) {
   return (
     <div
       className={cn(
@@ -37,16 +38,18 @@ export function Hero({
       )}
       {...props}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-9 -right-9 size-36 rounded-full border-[18px] border-white/18"
-      />
+      {decor && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-9 -right-9 size-36 rounded-full border-[18px] border-white/18"
+        />
+      )}
       <div className="relative">{children}</div>
     </div>
   )
 }
 
-export type HeroTone = 'green' | 'blue' | 'sky' | 'purple' | 'orange' | 'ink'
+export type HeroTone = 'green' | 'blue' | 'sky' | 'purple' | 'orange' | 'red' | 'ink'
 
 const HERO_TONES: Record<HeroTone, string> = {
   green: 'bg-[#00a84d]',
@@ -54,6 +57,7 @@ const HERO_TONES: Record<HeroTone, string> = {
   sky: 'bg-[#0090d2]',
   purple: 'bg-[#996cac]',
   orange: 'bg-[#ef7c1c]',
+  red: 'bg-[#d6453d]',
   ink: 'bg-hero-ink',
 }
 

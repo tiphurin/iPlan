@@ -1,4 +1,7 @@
-import { MonthDto } from '@iplan/contracts'
+import { FinanceOverviewDto, MonthDto } from '@iplan/contracts'
+import { type Month, addMonths } from '@iplan/core'
+import { Donut } from '@/components/charts/donut'
+import { TrendBars } from '@/components/charts/trend-bars'
 import { type Locale, formatDayLabel, formatMonth } from '@iplan/i18n'
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
@@ -24,10 +27,14 @@ export default async function PrintMonthPage({ params }: { params: Promise<{ mon
   const month = validMonth((await params).month)
   if (!month) notFound()
   if (!(await getMe())) redirect(`/login?next=${encodeURIComponent(`/print/money/${month}`)}`)
-  const [t, raw, data] = await Promise.all([
+  const [t, raw, data, overview] = await Promise.all([
     getTranslations(),
     getLocale(),
     serverApi(`/api/finance/months/${month}`, MonthDto),
+    serverApi(
+      `/api/finance/overview?from=${addMonths(month as Month, -5)}&to=${month}`,
+      FinanceOverviewDto,
+    ),
   ])
   const locale = raw as Locale
   const names = new Map(
@@ -57,6 +64,43 @@ export default async function PrintMonthPage({ params }: { params: Promise<{ mon
             ))}
           </tbody>
         </table>
+        <section className="grid grid-cols-2 gap-6 break-inside-avoid">
+          <div>
+            <h2 className="mb-1 text-lg font-semibold">{t('finance.trend')}</h2>
+            <TrendBars
+              points={overview.months.map((m) => ({
+                key: m.month,
+                label: formatMonth(m.month, { locale }).split(' ')[0] ?? m.month,
+                income: Number(m.totalIncomeMinor),
+                expense: Number(m.totalExpensesMinor),
+                balance: Number(m.balanceMinor),
+              }))}
+              labels={{
+                income: t('finance.totalIncome'),
+                expense: t('finance.totalExpenses'),
+                balance: t('finance.balance'),
+              }}
+              format={(v) => fmtServer(String(Math.round(v)))}
+            />
+          </div>
+          {data.spendingByCategory.length > 0 && (
+            <div>
+              <h2 className="mb-1 text-lg font-semibold">{t('finance.spending')}</h2>
+              <Donut
+                center={t('finance.spending')}
+                slices={data.spendingByCategory.map((c) => {
+                  const category = data.categories.find((x) => x.id === c.categoryId)
+                  return {
+                    key: c.categoryId ?? 'none',
+                    label: `${(c.categoryId && names.get(c.categoryId)) || '—'} · ${fmtServer(c.spentMinor)}`,
+                    value: Number(c.spentMinor),
+                    color: category?.color ?? '#94a3b8',
+                  }
+                })}
+              />
+            </div>
+          )}
+        </section>
         <section>
           <h2 className="mb-1 text-lg font-semibold">{t('finance.recurring')}</h2>
           <table className="w-full border-collapse tabular-nums">

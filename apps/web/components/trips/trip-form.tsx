@@ -6,19 +6,34 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { type FormEvent, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { DateField } from '@/components/ui/date-fields'
 import { Field, Input, Select } from '@/components/ui/field'
 import { ApiError } from '@/lib/api-error'
 import { CURRENCIES, TIME_ZONES, zoneLabel } from '@/lib/time-zones'
 import { useCreateTrip, useDeleteTrip, useUpdateTrip } from '@/lib/trips'
 
-export function TripForm({ trip }: { trip?: TripDetailDto }) {
+export function TripForm({
+  trip,
+  currencyLocked = false,
+}: {
+  trip?: TripDetailDto
+  /** The trip has expenses, so its currency can't change (the API refuses it too). */
+  currencyLocked?: boolean
+}) {
   const t = useTranslations()
   const router = useRouter()
   const create = useCreateTrip()
   const update = useUpdateTrip(trip?.id ?? '')
   const remove = useDeleteTrip(trip?.id ?? '')
+  const [startDate, setStartDate] = useState(trip?.startDate ?? '')
+  const [endDate, setEndDate] = useState(trip?.endDate ?? '')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
+  const currencyNote = currencyLocked
+    ? t('trips.currencyLocked')
+    : trip && (Object.keys(trip.fxRates).length > 0 || trip.dailyBudgetMinor !== null)
+      ? t('trips.currencyResets')
+      : null
   const busy = create.isPending || update.isPending || remove.isPending
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -30,7 +45,9 @@ export function TripForm({ trip }: { trip?: TripDetailDto }) {
       startDate: String(form.get('startDate') ?? ''),
       endDate: String(form.get('endDate') ?? ''),
       homeTimeZone: String(form.get('homeTimeZone') ?? 'Asia/Bangkok'),
-      baseCurrency: String(form.get('baseCurrency') ?? 'THB'),
+      // A locked (disabled) picker isn't in the form data; keep the stored currency.
+      baseCurrency:
+        trip && currencyLocked ? trip.baseCurrency : String(form.get('baseCurrency') ?? 'THB'),
     }
     setErrors({})
     setFormError(null)
@@ -68,10 +85,25 @@ export function TripForm({ trip }: { trip?: TripDetailDto }) {
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field label={t('trips.startDate')} error={errors.startDate}>
-          <Input type="date" name="startDate" required defaultValue={trip?.startDate} />
+          <DateField
+            name="startDate"
+            label={t('trips.startDate')}
+            value={startDate}
+            onChange={(d) => {
+              setStartDate(d)
+              // Keep the end on or after the start.
+              if (!endDate || endDate < d) setEndDate(d)
+            }}
+          />
         </Field>
         <Field label={t('trips.endDate')} error={errors.endDate}>
-          <Input type="date" name="endDate" required defaultValue={trip?.endDate} />
+          <DateField
+            name="endDate"
+            label={t('trips.endDate')}
+            value={endDate}
+            onChange={setEndDate}
+            min={startDate || undefined}
+          />
         </Field>
       </div>
       <Field label={t('trips.homeTimeZone')} error={errors.homeTimeZone}>
@@ -84,11 +116,18 @@ export function TripForm({ trip }: { trip?: TripDetailDto }) {
         </Select>
       </Field>
       <Field label={t('trips.currency')} error={errors.baseCurrency}>
-        <Select name="baseCurrency" defaultValue={trip?.baseCurrency ?? 'THB'}>
+        <Select
+          name="baseCurrency"
+          defaultValue={trip?.baseCurrency ?? 'THB'}
+          disabled={currencyLocked}
+        >
           {CURRENCIES.map((code) => (
             <option key={code}>{code}</option>
           ))}
         </Select>
+        {currencyNote && (
+          <span className="block text-xs text-muted-foreground">{currencyNote}</span>
+        )}
       </Field>
       <Button type="submit" size="lg" disabled={busy}>
         {trip ? t('common.save') : t('trips.create')}

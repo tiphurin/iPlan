@@ -1,5 +1,5 @@
 import { createRoute, z } from '@hono/zod-openapi'
-import type { ErrorResponse, FeatureKey } from '@iplan/contracts'
+import type { ErrorResponse, FeatureKey, UserRole } from '@iplan/contracts'
 import { createMiddleware } from 'hono/factory'
 import { Scalar } from '@scalar/hono-api-reference'
 import type { AuthGateway } from './infra/auth'
@@ -7,6 +7,14 @@ import type { StorageProvider } from './infra/storage'
 import { accessRoutes } from './modules/access/access.routes'
 import type { AccessService } from './modules/access/access.service'
 import { adminRoutes } from './modules/admin/admin.routes'
+import { calendarRoutes } from './modules/calendar/calendar.routes'
+import type { CalendarService } from './modules/calendar/calendar.service'
+import { invitationRoutes } from './modules/invitations/invitations.routes'
+import type { InvitationsService } from './modules/invitations/invitations.service'
+import { peopleRoutes } from './modules/people/people.routes'
+import { placesRoutes } from './modules/places/places.routes'
+import type { PlacesService } from './modules/places/places.service'
+import type { PeopleService } from './modules/people/people.service'
 import type { AdminService } from './modules/admin/admin.service'
 import { backupRoutes } from './modules/backup/backup.routes'
 import type { BackupService } from './modules/backup/backup.service'
@@ -45,8 +53,14 @@ export interface AppDeps {
   storage: StorageProvider
   /** Lower-cased emails that are always active admins (ADMIN_EMAILS). */
   adminEmails?: readonly string[]
+  /** One-time setup (e.g. the built-in admin) awaited before the first request. */
+  init?: () => Promise<void>
   services: {
     access: AccessService
+    people: PeopleService
+    calendar?: CalendarService
+    places?: PlacesService
+    invitations: InvitationsService
     me: MeService
     trips: TripsService
     items: ItemsService
@@ -102,7 +116,22 @@ const devUsersRoute = createRoute({
   },
 })
 
-/** API paths that belong to each feature; requests are refused unless the feature is granted. */
+/** Better Auth routes browsers may call: Google sign-in and its callback, session, sign-out. */
+export function isPublicAuthPath(path: string): boolean {
+  return (
+    path === 'sign-in/social' ||
+    path.startsWith('callback/') ||
+    path === 'get-session' ||
+    path === 'sign-out' ||
+    path === 'error'
+  )
+}
+
+/**
+ * API paths that belong to each feature; requests are refused unless the feature is granted.
+ * /attachments serves both trips and finance, so AttachmentsService checks the feature of
+ * the file's owner (trip file: trips, slip: finance) instead of a path rule here.
+ */
 export const FEATURE_PATHS: Record<FeatureKey, readonly string[]> = {
   trips: [
     '/trips',
@@ -113,6 +142,7 @@ export const FEATURE_PATHS: Record<FeatureKey, readonly string[]> = {
     '/info/*',
     '/invites/*',
     '/join/*',
+    '/places',
   ],
   finance: ['/finance/*'],
   shared: ['/ledgers', '/ledgers/*', '/ledger-entries/*'],
@@ -144,29 +174,54 @@ export function createApp(deps: AppDeps) {
   })
 
   // Better Auth owns /api/auth/* (Google sign-in, sessions, sign-out).
-  app.on(['GET', 'POST'], '/auth/*', (c) => deps.auth.handler(c.req.raw))
+  // Only the Better Auth endpoints the app needs are reachable over HTTP. Everything
+  // else (admin plugin, update-user, password sign-in, ...) stays server-side, so
+  // roles, approvals and passwords only change through our own checked endpoints.
+  app.on(['GET', 'POST'], '/auth/*', (c) => {
+    const path = new URL(c.req.url).pathname.replace(/^\/api\/auth\//, '')
+    if (!isPublicAuthPath(path)) {
+      const body: ErrorResponse = { error: { code: 'NOT_FOUND', message: 'No such endpoint' } }
+      return c.json(body, 404)
+    }
+    return deps.auth.handler(c.req.raw)
+  })
 
   // Resolve the session once per request for everything else.
   const adminEmails = new Set(deps.adminEmails ?? [])
+  let ready: Promise<void> | undefined
   app.use('*', async (c, next) => {
+    // Runs once per server process; a failure is retried on the next request.
+    ready ??= (deps.init?.() ?? Promise.resolve()).catch((error: unknown) => {
+      ready = undefined
+      throw error
+    })
+    await ready
     const found = await deps.auth.getSessionUser(c.req.raw.headers)
     // A suspended account is treated as signed out even if a session survives.
     let account: SessionAccount | null = null
     if (found && !found.banned) {
-      const admin = found.role === 'admin' || adminEmails.has(found.email.toLowerCase())
+      const role: UserRole =
+        found.role === 'superadmin'
+          ? 'superadmin'
+          : found.role === 'admin' || adminEmails.has(found.email.toLowerCase())
+            ? 'admin'
+            : 'user'
+      const admin = role !== 'user'
       account = {
         id: found.id,
         name: found.name,
         email: found.email,
-        role: admin ? 'admin' : 'user',
+        role,
         // Admins are never stuck on the waiting list.
         status: admin || found.status === 'active' ? 'active' : 'pending',
+        mustChangePassword: found.mustChangePassword === true,
       }
     }
     c.set('account', account)
+    // Until the bootstrap password is replaced, only /me and sign-out work.
     c.set(
       'user',
-      account?.status === 'active'
+      account?.status === 'active' && !account.mustChangePassword
         ? { id: account.id, name: account.name, email: account.email, role: account.role }
         : null,
     )
@@ -191,7 +246,11 @@ export function createApp(deps: AppDeps) {
     app.openapi(devUsersRoute, async (c) => c.json(await devLogin.users(), 200))
   }
 
-  app.route('/', meRoutes(deps.services.me, deps.storage))
+  app.route('/', meRoutes(deps.services.me, deps.storage, deps.auth))
+  app.route('/', peopleRoutes(deps.services.people))
+  if (deps.services.calendar) app.route('/', calendarRoutes(deps.services.calendar))
+  if (deps.services.places) app.route('/', placesRoutes(deps.services.places))
+  app.route('/', invitationRoutes(deps.services.invitations))
   app.route('/', backupRoutes(deps.services.backup))
   app.route('/', tripRoutes(deps.services.trips))
   app.route('/', itemRoutes(deps.services.items))

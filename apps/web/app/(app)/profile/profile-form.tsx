@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Segmented } from '@/components/ui/chip'
+import { Field, Input } from '@/components/ui/field'
 import { apiFetch } from '@/lib/api-client'
 import { THEME_COOKIE, THEMES, type Theme, setPreferenceCookie } from '@/lib/theme'
 
@@ -78,5 +79,44 @@ export function ProfileForm({ locale, theme: initialTheme }: { locale: Locale; t
         {t('signOut')}
       </Button>
     </div>
+  )
+}
+
+/** Nickname helps friends find you when they invite you. */
+export function NicknameForm({ initial }: { initial: string | null }) {
+  const t = useTranslations('profile')
+  const router = useRouter()
+  const [value, setValue] = useState(initial ?? '')
+  const [saved, setSaved] = useState(false)
+  const [pending, startTransition] = useTransition()
+  const dirty = value.trim() !== (initial ?? '')
+  return (
+    <form
+      className="flex items-end gap-2"
+      onSubmit={(e) => {
+        e.preventDefault()
+        startTransition(async () => {
+          await apiFetch('/api/me', { method: 'PATCH', body: { nickname: value.trim() || null } })
+          setSaved(true)
+          router.refresh()
+        })
+      }}
+    >
+      <Field label={t('nickname')} hint={t('nicknameHint')} className="flex-1">
+        <Input
+          value={value}
+          maxLength={40}
+          placeholder={t('nicknamePlaceholder')}
+          onChange={(e) => {
+            // No spaces at the start; spaces inside a nickname are fine.
+            setValue(e.target.value.replace(/^\s+/, ''))
+            setSaved(false)
+          }}
+        />
+      </Field>
+      <Button type="submit" variant="solid" disabled={pending || !dirty}>
+        {saved && !dirty ? t('saved') : t('save')}
+      </Button>
+    </form>
   )
 }

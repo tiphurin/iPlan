@@ -4,7 +4,7 @@ const Month = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Use YYYY-MM')
 const Major = z
   .string()
   .trim()
-  .regex(/^\d+(\.\d{1,2})?$/, 'Enter an amount like 1500 or 1500.50')
+  .regex(/^\d{1,12}(\.\d{1,2})?$/, 'Enter an amount like 1500 or 1500.50')
 const Minor = z.string().regex(/^-?\d+$/)
 const Color = z.string().regex(/^#[0-9a-fA-F]{6}$/)
 

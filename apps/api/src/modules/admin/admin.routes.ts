@@ -1,7 +1,10 @@
 import { createRoute, z } from '@hono/zod-openapi'
 import {
+  AdminLedgerDto,
   AdminStatsDto,
+  AdminTripDto,
   AdminUpdateUserInput,
+  AdminUserDataDto,
   AdminUserDto,
   AdminUserListDto,
   AdminUserQuery,
@@ -47,6 +50,32 @@ const updateUser = createRoute({
     409: errorResponses[409],
   },
 })
+const userData = createRoute({
+  method: 'get',
+  path: '/admin/users/{id}/data',
+  tags,
+  summary: "A user's trips and shared wallets (read-only, logged)",
+  request: { params: z.object({ id: z.string().min(1) }) },
+  responses: {
+    200: { description: 'Overview', content: json(AdminUserDataDto) },
+    ...denied,
+    404: errorResponses[404],
+  },
+})
+const allTrips = createRoute({
+  method: 'get',
+  path: '/admin/trips',
+  tags,
+  summary: 'Every trip in the system',
+  responses: { 200: { description: 'Trips', content: json(z.array(AdminTripDto)) }, ...denied },
+})
+const allLedgers = createRoute({
+  method: 'get',
+  path: '/admin/ledgers',
+  tags,
+  summary: 'Every shared wallet in the system',
+  responses: { 200: { description: 'Wallets', content: json(z.array(AdminLedgerDto)) }, ...denied },
+})
 const audit = createRoute({
   method: 'get',
   path: '/admin/audit',
@@ -69,6 +98,11 @@ export function adminRoutes(service: AdminService) {
         200,
       ),
     )
+    .openapi(userData, async (c) =>
+      c.json(await service.userData(requireAdmin(c), c.req.valid('param').id), 200),
+    )
+    .openapi(allTrips, async (c) => c.json(await service.allTrips(requireAdmin(c)), 200))
+    .openapi(allLedgers, async (c) => c.json(await service.allLedgers(requireAdmin(c)), 200))
     .openapi(audit, async (c) => {
       const { page, action } = c.req.valid('query')
       return c.json(await service.auditLog(requireAdmin(c), page, action), 200)

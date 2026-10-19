@@ -2,11 +2,9 @@
 
 import type { TripDetailDto, TripItemDto } from '@iplan/contracts'
 import { currentTripDay, delayMinutes, punctuality, scheduleStatus, timeline } from '@iplan/core'
-import { Check, FastForward, FlaskConical, RotateCcw, Undo2 } from 'lucide-react'
-import type { Route } from 'next'
+import { Check, FastForward, FlaskConical, RotateCcw, SkipForward, Undo2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
-import { BackLink } from '@/components/back-link'
 import { Button } from '@/components/ui/button'
 import { Card, Hero, SectionTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -17,7 +15,12 @@ import { useItemMutations, useItems, useTrip } from '@/lib/trips'
 import { useFormat } from '@/lib/use-format'
 import { dayColor } from '@/lib/day-colors'
 import { tripDays } from '@/lib/trip-dates'
+import { awayZone } from '@/lib/time-zones'
+import { TripDisplayProvider, useTripDisplay } from '@/lib/trip-display'
 import { SleepCard } from './sleep-card'
+import { ItemSheet } from './item-sheet'
+import { TripTopBar } from './trip-top-bar'
+import { DisplaySwitches } from './display-switches'
 import { type RowStatus, Timeline } from './timeline'
 
 interface Timed extends TripItemDto {
@@ -44,24 +47,41 @@ function useNow(serverNow: number) {
   return { now: new Date(real + offset), offset, setOffset }
 }
 
-export function TodayView({
-  initialTrip,
-  initialItems,
-  meId,
-  serverNow,
-}: {
+interface TodayProps {
   initialTrip: TripDetailDto
   initialItems: TripItemDto[]
   meId: string
   serverNow: number
-}) {
+}
+
+/** Simulator offset that makes "now" equal `target`. */
+function offsetTo(target: number): number {
+  return target - Date.now()
+}
+
+/** Minutes after the start before an unchecked item counts as late. */
+const LATE_AFTER_MIN = 5
+/** The next item turns orange this many minutes before it starts. */
+const SOON_MIN = 15
+
+export function TodayView(props: TodayProps) {
+  return (
+    <TripDisplayProvider tripId={props.initialTrip.id}>
+      <TodayBody {...props} />
+    </TripDisplayProvider>
+  )
+}
+
+function TodayBody({ initialTrip, initialItems, meId, serverNow }: TodayProps) {
   const t = useTranslations()
+  const { display } = useTripDisplay()
   const f = useFormat()
   const { data: trip } = useTrip(initialTrip.id, initialTrip)
   const { data: items } = useItems(initialTrip.id, initialItems)
   const mutations = useItemMutations(trip.id)
   const { now, offset, setOffset } = useNow(serverNow)
   const [showSimulator, setShowSimulator] = useState(false)
+  const [openItemId, setOpenItemId] = useState<string | null>(null)
 
   const timed: Timed[] = useMemo(
     () =>
@@ -94,7 +114,9 @@ export function TodayView({
   const nextAnywhere = whole.find((x) => x.start > now.getTime())
   const current = status.current ? timed.find((i) => i.id === status.current?.item.id) : undefined
   const next = nextAnywhere ? timed.find((i) => i.id === nextAnywhere.item.id) : undefined
-  const clockZone = current?.timeZone ?? next?.timeZone ?? trip.homeTimeZone
+  const placeZone = current?.timeZone ?? next?.timeZone ?? trip.homeTimeZone
+  const clockZone = display.time === 'home' ? trip.homeTimeZone : placeZone
+  const away = awayZone(items, trip.homeTimeZone)
 
   const dayLine = timeline(
     dayItems.map((i) => ({ ...i, startsAt: i.startsAtDate, endsAt: i.endsAtDate })),
@@ -106,9 +128,18 @@ export function TodayView({
   }
 
   const myCheckIn = current?.checkIns.find((c) => c.userId === meId)
-  const delay = myCheckIn
-    ? delayMinutes(new Date(current?.startsAt ?? 0), new Date(myCheckIn.checkedInAt))
-    : null
+  const skipped = myCheckIn?.skipped === true
+  const lateMin =
+    current && !myCheckIn
+      ? Math.floor((now.getTime() - current.startsAtDate.getTime()) / MINUTE)
+      : null
+  const late = lateMin !== null && lateMin >= LATE_AFTER_MIN
+  const nextIn = next ? next.startsAtDate.getTime() - now.getTime() : null
+  const soon = nextIn !== null && nextIn <= SOON_MIN * MINUTE
+  const delay =
+    myCheckIn && !skipped
+      ? delayMinutes(new Date(current?.startsAt ?? 0), new Date(myCheckIn.checkedInAt))
+      : null
   const delayText =
     delay === null
       ? null
@@ -123,11 +154,8 @@ export function TodayView({
 
   return (
     <>
-      <div className="flex items-center justify-between px-4 pt-[max(0.5rem,env(safe-area-inset-top))]">
-        <BackLink
-          href={`/trips/${trip.id}${day ? `?day=${day}` : ''}` as Route}
-          label={trip.name}
-        />
+      <TripTopBar trip={trip} view="today" day={day ?? undefined} />
+      <div className="flex justify-end px-4 pt-2">
         <Button
           variant={offset ? 'primary' : 'ghost'}
           size="icon"
@@ -146,6 +174,11 @@ export function TodayView({
         <p className="num text-5xl font-bold" suppressHydrationWarning>
           {f.time(now, clockZone)}
         </p>
+        {away && (
+          <div className="mt-3">
+            <DisplaySwitches trip={trip} away={away} serverNow={serverNow} />
+          </div>
+        )}
         {offset !== 0 && (
           <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-warning/15 px-2.5 py-0.5 text-xs font-medium text-warning">
             <FlaskConical aria-hidden className="size-3.5" />
@@ -175,7 +208,7 @@ export function TodayView({
             <Button
               variant="secondary"
               disabled={!next}
-              onClick={() => next && setOffset(next.startsAtDate.getTime() + MINUTE - Date.now())}
+              onClick={() => next && setOffset(offsetTo(next.startsAtDate.getTime() + MINUTE))}
             >
               <FastForward aria-hidden className="size-4" />
               {t('todayView.jumpNext')}
@@ -205,15 +238,31 @@ export function TodayView({
           {!before && !after && (
             <>
               {current && status.current ? (
-                <Hero tone="green">
-                  <p className="text-sm opacity-90">{t('todayView.now')}</p>
-                  <p className="my-1 font-display text-[28px] leading-tight font-bold">
+                <Hero tone={late ? 'red' : skipped ? 'ink' : 'green'}>
+                  <p className="text-sm font-semibold opacity-95">
+                    {late
+                      ? t('todayView.lateNow', { min: lateMin ?? 0 })
+                      : skipped
+                        ? t('todayView.skippedNow')
+                        : t('todayView.now')}
+                  </p>
+                  <p
+                    className={cn(
+                      'my-1 font-display text-[28px] leading-tight font-bold',
+                      skipped && 'line-through opacity-70',
+                    )}
+                  >
                     {current.title}
                   </p>
                   <p className="text-[15px] tabular-nums opacity-95">
-                    {f.time(current.startsAt, current.timeZone)}
+                    {f.time(current.startsAt, clockZone)}
                     {current.endsAt &&
-                      ` – ${f.time(current.endsAt, current.details.arrivalTimeZone ?? current.timeZone)}`}
+                      ` – ${f.time(
+                        current.endsAt,
+                        display.time === 'home'
+                          ? trip.homeTimeZone
+                          : (current.details.arrivalTimeZone ?? current.timeZone),
+                      )}`}
                   </p>
                   <div className="mt-4 h-[9px] overflow-hidden rounded-full bg-white/25">
                     <div
@@ -228,8 +277,12 @@ export function TodayView({
                     {myCheckIn ? (
                       <>
                         <p className="flex flex-1 items-center gap-1.5 text-sm font-semibold">
-                          <Check aria-hidden className="size-4" />
-                          {delayText}
+                          {skipped ? (
+                            <SkipForward aria-hidden className="size-4" />
+                          ) : (
+                            <Check aria-hidden className="size-4" />
+                          )}
+                          {skipped ? t('timeline.skipped') : delayText}
                         </p>
                         <button
                           type="button"
@@ -242,15 +295,31 @@ export function TodayView({
                         </button>
                       </>
                     ) : (
-                      <button
-                        type="button"
-                        className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-white font-semibold text-[#00873e] disabled:opacity-60"
-                        onClick={() => mutations.checkIn.mutate({ id: current.id, at: now })}
-                        disabled={mutations.checkIn.isPending}
-                      >
-                        <Check aria-hidden className="size-5" />
-                        {t('todayView.checkIn')}
-                      </button>
+                      <div className="grid w-full grid-cols-[1fr_auto] gap-2">
+                        <button
+                          type="button"
+                          className={cn(
+                            'inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white font-semibold disabled:opacity-60',
+                            late ? 'text-[#c93a32]' : 'text-[#00873e]',
+                          )}
+                          onClick={() => mutations.checkIn.mutate({ id: current.id, at: now })}
+                          disabled={mutations.checkIn.isPending}
+                        >
+                          <Check aria-hidden className="size-5" />
+                          {t('todayView.checkIn')}
+                        </button>
+                        <button
+                          type="button"
+                          className="inline-flex min-h-12 items-center justify-center gap-1.5 rounded-2xl bg-white/15 px-4 font-semibold disabled:opacity-60"
+                          onClick={() =>
+                            mutations.checkIn.mutate({ id: current.id, at: now, skipped: true })
+                          }
+                          disabled={mutations.checkIn.isPending}
+                        >
+                          <SkipForward aria-hidden className="size-5" />
+                          {t('todayView.skip')}
+                        </button>
+                      </div>
                     )}
                   </div>
                 </Hero>
@@ -266,17 +335,34 @@ export function TodayView({
               )}
 
               {next && (
-                <Card className="flex items-center gap-3">
+                <Card
+                  className={cn(
+                    'flex items-center gap-3',
+                    soon && 'border-2 border-[#ef7c1c] bg-[#ef7c1c]/10',
+                  )}
+                >
                   <KindBadge item={next} />
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                      {t('todayView.next')} · {f.time(next.startsAt, next.timeZone)}
+                    <p
+                      className={cn(
+                        'text-xs font-semibold tracking-wide uppercase',
+                        soon ? 'text-[#ef7c1c]' : 'text-muted-foreground',
+                      )}
+                    >
+                      {soon ? t('todayView.getReady') : t('todayView.next')} ·{' '}
+                      {f.time(
+                        next.startsAt,
+                        display.time === 'home' ? trip.homeTimeZone : next.timeZone,
+                      )}
                     </p>
                     <p className="truncate font-semibold">{next.title}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-muted-foreground">{t('todayView.startsIn')}</p>
-                    <p className="text-xl font-bold tabular-nums" suppressHydrationWarning>
+                    <p
+                      className={cn('text-xl font-bold tabular-nums', soon && 'text-[#ef7c1c]')}
+                      suppressHydrationWarning
+                    >
                       {f.clock(next.startsAtDate.getTime() - now.getTime())}
                     </p>
                   </div>
@@ -307,10 +393,18 @@ export function TodayView({
               color={dayColor(day ? tripDays(trip.startDate, trip.endDate).indexOf(day) : 1)}
               meId={meId}
               statusOf={rowStatus}
+              spent={{ currency: trip.baseCurrency, rates: trip.fxRates }}
+              onOpen={(item) => setOpenItemId(item.id)}
             />
           </section>
         )}
       </div>
+      <ItemSheet
+        item={items.find((i) => i.id === openItemId) ?? null}
+        trip={trip}
+        spent={{ currency: trip.baseCurrency, rates: trip.fxRates }}
+        onClose={() => setOpenItemId(null)}
+      />
     </>
   )
 }

@@ -1,4 +1,4 @@
-import { LedgerDto } from '@iplan/contracts'
+import { AdminLedgerDto, LedgerDto, isAdminRole } from '@iplan/contracts'
 import type { Metadata, Route } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
@@ -8,26 +8,63 @@ import { PageHeader } from '@/components/page-header'
 import { BalanceLine } from '@/components/shared/balance-line'
 import { NewLedger } from '@/components/shared/new-ledger'
 import { Card, SectionTitle } from '@/components/ui/card'
-import { serverApi } from '@/lib/server-api'
+import { getMe, serverApi } from '@/lib/server-api'
+import { ScopeTabs } from '@/components/scope-tabs'
 
 export const metadata: Metadata = { title: 'Shared money' }
 
-export default async function SharedPage() {
-  const [t, ledgers] = await Promise.all([
+export default async function SharedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ scope?: string }>
+}) {
+  const [t, ledgers, me, { scope: rawScope }] = await Promise.all([
     getTranslations(),
     serverApi('/api/ledgers', z.array(LedgerDto)),
+    getMe(),
+    searchParams,
   ])
+  const admin = me ? isAdminRole(me.role) : false
+  const scope = admin && rawScope === 'all' ? 'all' : 'mine'
+  const everyone =
+    scope === 'all' ? await serverApi('/api/admin/ledgers', z.array(AdminLedgerDto)) : []
   return (
     <>
       <PageHeader title={t('features.shared')} subtitle={t('shared.subtitle')} />
       <div className="space-y-6 px-4">
-        {ledgers.length === 0 && (
+        {admin && (
+          <ScopeTabs
+            base="/shared"
+            scope={scope}
+            labels={{ mine: t('scope.mine'), all: t('scope.allWallets') }}
+          />
+        )}
+        {scope === 'all' && (
+          <ul className="grid gap-2 md:grid-cols-2">
+            {everyone.map((ledger) => (
+              <li key={ledger.id}>
+                <Link
+                  href={`/shared/${ledger.id}` as Route}
+                  className="block rounded-2xl border bg-card px-4 py-3 active:bg-muted"
+                >
+                  <span className="block truncate font-semibold">{ledger.name}</span>
+                  <span className="block truncate text-xs text-faint">
+                    {t('scope.owner', { name: ledger.ownerName ?? '—' })} ·{' '}
+                    {t('shared.memberCount', { count: ledger.memberCount })} ·{' '}
+                    {t('shared.entryCount', { count: ledger.entryCount })}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+        {scope === 'mine' && ledgers.length === 0 && (
           <Card className="space-y-1 py-6 text-center">
             <p className="font-display text-xl font-semibold">{t('shared.empty')}</p>
             <p className="text-sm text-muted-foreground">{t('shared.emptyHint')}</p>
           </Card>
         )}
-        {ledgers.length > 0 && (
+        {scope === 'mine' && ledgers.length > 0 && (
           <ul className="grid gap-3 md:grid-cols-2">
             {ledgers.map((ledger) => (
               <li key={ledger.id}>
@@ -54,10 +91,12 @@ export default async function SharedPage() {
             ))}
           </ul>
         )}
-        <section>
-          <SectionTitle>{t('shared.newTitle')}</SectionTitle>
-          <NewLedger />
-        </section>
+        {scope === 'mine' && (
+          <section>
+            <SectionTitle>{t('shared.newTitle')}</SectionTitle>
+            <NewLedger />
+          </section>
+        )}
       </div>
     </>
   )

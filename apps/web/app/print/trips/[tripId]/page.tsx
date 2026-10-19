@@ -6,6 +6,7 @@ import { getLocale, getTranslations } from 'next-intl/server'
 import { PrintBar } from '@/components/print-button'
 import { loadTrip } from '@/lib/load-trip'
 import { fmtServer } from '@/lib/money-format'
+import { CATEGORY_COLORS, Donut } from '@/components/charts/donut'
 import { getMe, serverApi } from '@/lib/server-api'
 import { tripDays } from '@/lib/trip-dates'
 import { zoneCity } from '@/lib/time-zones'
@@ -27,7 +28,8 @@ export default async function PrintTripPage({ params }: { params: Promise<{ trip
   const c = (k: string) => t(`export.col.${k}`)
   return (
     <>
-      <PrintBar back={`/trips/${tripId}/edit`} />
+      {/* Viewers can't open the edit page, so they go back to the trip. */}
+      <PrintBar back={trip.role === 'viewer' ? `/trips/${tripId}` : `/trips/${tripId}/edit`} />
       <main className="mx-auto max-w-3xl space-y-6 px-4 py-6 text-[13px] leading-snug">
         <header>
           <h1 className="text-2xl font-bold">{trip.name}</h1>
@@ -103,6 +105,51 @@ export default async function PrintTripPage({ params }: { params: Promise<{ trip
               ))}
             </tbody>
           </table>
+          <div className="grid grid-cols-2 gap-6 break-inside-avoid pt-2">
+            {summary.byCategory.length > 0 && (
+              <Donut
+                center={t('expenses.byCategory')}
+                slices={summary.byCategory.map((x) => ({
+                  key: x.category,
+                  label: `${t(`expenses.categories.${x.category}`)} · ${fmtServer(x.spentMinor, base)}`,
+                  value: Number(x.spentMinor),
+                  color: CATEGORY_COLORS[x.category] ?? '#94a3b8',
+                }))}
+              />
+            )}
+            <div className="space-y-1.5">
+              <p className="font-semibold">{t('expenses.byDay')}</p>
+              {summary.byDay.map((d) => {
+                const peak = Math.max(
+                  1,
+                  ...summary.byDay.map((x) =>
+                    Math.max(Number(x.spentMinor), Number(x.budgetMinor ?? 0)),
+                  ),
+                )
+                const over = d.budgetMinor !== null && BigInt(d.spentMinor) > BigInt(d.budgetMinor)
+                return (
+                  <div key={d.dayDate}>
+                    <div className="flex justify-between text-[11px]">
+                      <span>{d.dayDate.slice(5)}</span>
+                      <span>
+                        {fmtServer(d.spentMinor, base)}
+                        {d.budgetMinor !== null && ` / ${fmtServer(d.budgetMinor, base)}`}
+                      </span>
+                    </div>
+                    <div className="h-2 rounded bg-[#eee]">
+                      <div
+                        className="h-full rounded"
+                        style={{
+                          width: `${(Number(d.spentMinor) / peak) * 100}%`,
+                          backgroundColor: over ? '#d6453d' : '#00a84d',
+                        }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
           {summary.transfers.map((tr) => (
             <p key={`${tr.from}-${tr.to}`}>
               {tr.from === 'pool' ? t('expenses.form.pool') : tr.fromName} →{' '}

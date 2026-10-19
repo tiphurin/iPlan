@@ -14,20 +14,36 @@ export function ItemDetail({ item }: { item: TripItemDto }) {
   const t = useTranslations()
   const f = useFormat()
   const place = item.details.address ?? (item.kind === 'place' ? item.title : null)
-  const links = place ? mapLinks(place) : null
+  const { lat, lng } = item.details
+  const links = place
+    ? mapLinks(place, typeof lat === 'number' && typeof lng === 'number' ? { lat, lng } : undefined)
+    : null
   const hasFacts =
     links || item.details.phone || item.details.url || item.checkIns.length > 0 || item.notes
 
   const calendar = (
-    <a
-      href={googleCalendarUrl(item)}
-      target="_blank"
-      rel="noreferrer"
-      className={buttonVariants({ variant: 'outline' })}
-    >
-      <CalendarPlus aria-hidden className="size-4" />
-      {t('backup.google')}
-    </a>
+    <div className="space-y-1.5">
+      <div className="grid grid-cols-2 gap-2">
+        {/* Same UID as the trip feed: opening it again updates the event on iPhone. */}
+        <a
+          href={`/api/trips/${item.tripId}/items/${item.id}/event.ics`}
+          className={buttonVariants({ variant: 'outline' })}
+        >
+          <CalendarPlus aria-hidden className="size-4" />
+          {t('itemCalendar.apple')}
+        </a>
+        <a
+          href={googleCalendarUrl(item)}
+          target="_blank"
+          rel="noreferrer"
+          className={buttonVariants({ variant: 'outline' })}
+        >
+          <CalendarPlus aria-hidden className="size-4" />
+          {t('itemCalendar.google')}
+        </a>
+      </div>
+      <p className="text-xs text-faint">{t('itemCalendar.hint')}</p>
+    </div>
   )
   if (!hasFacts) return <div className="mx-4 mb-4">{calendar}</div>
   return (

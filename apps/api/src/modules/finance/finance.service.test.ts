@@ -121,3 +121,73 @@ describe('FinanceService', () => {
     ).rejects.toMatchObject({ fields: { categoryId: 'Unknown category' } })
   })
 })
+
+describe('FinanceService amounts', () => {
+  it('rejects zero for transactions and rules but allows a zero month override', async () => {
+    const service = new FinanceService(new InMemoryFinance(), new FakeAudit())
+    await expect(
+      service.createTransaction(users.owner, {
+        kind: 'expense',
+        title: 'Nothing',
+        amount: '0',
+        date: '2026-10-03',
+      }),
+    ).rejects.toMatchObject({ code: 'VALIDATION_FAILED', fields: { amount: expect.any(String) } })
+    await expect(
+      service.createRule(users.owner, {
+        kind: 'fixed',
+        name: 'Phone',
+        amount: '0.00',
+        startMonth: '2026-10',
+      }),
+    ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' })
+    const rule = await service.createRule(users.owner, {
+      kind: 'fixed',
+      name: 'Phone',
+      amount: '599',
+      startMonth: '2026-10',
+    })
+    // Zero for one month is a real choice (e.g. a free month); it must not throw.
+    await service.setOverride(users.owner, rule.id, '2026-11', { amount: '0' })
+  })
+})
+
+describe('FinanceService categories and admin view', () => {
+  it('returns the category it just created and keeps "default:" names reserved', async () => {
+    const service = new FinanceService(new InMemoryFinance(), new FakeAudit())
+    await service.listCategories(users.owner)
+    const created = await service.createCategory(users.owner, {
+      kind: 'expense',
+      name: 'Pets',
+      color: '#123456',
+      budget: '1500',
+    })
+    expect(created).toMatchObject({ name: 'Pets', color: '#123456', budgetMinor: '150000' })
+    await expect(
+      service.createCategory(users.owner, {
+        kind: 'expense',
+        name: 'default:food',
+        color: '#123456',
+      }),
+    ).rejects.toMatchObject({ code: 'VALIDATION_FAILED', fields: { name: expect.any(String) } })
+    await expect(
+      service.updateCategory(users.owner, created.id, {
+        kind: 'expense',
+        name: 'Default:home',
+        color: '#123456',
+      }),
+    ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' })
+  })
+
+  it("lets an admin read someone's month without writing, and 404s for nobody", async () => {
+    const repo = new InMemoryFinance()
+    const service = new FinanceService(repo, new FakeAudit())
+    const admin = { ...users.viewer, role: 'admin' as const }
+    const month = await service.monthOf(admin, users.editor.id, '2026-10')
+    expect(month.categories).toEqual([])
+    expect(repo.cats).toEqual([])
+    await expect(service.monthOf(admin, 'nobody', '2026-10')).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    })
+  })
+})

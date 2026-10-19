@@ -20,6 +20,7 @@ export function toExpenseDto(found: ExpenseWithShares, nameOf: NameOf): ExpenseD
     itemId: expense.itemId,
     title: expense.title,
     category: expense.category,
+    subcategory: expense.subcategory,
     amountMinor: expense.amountMinor.toString(),
     currency: expense.currency,
     fxRate: expense.fxRate,

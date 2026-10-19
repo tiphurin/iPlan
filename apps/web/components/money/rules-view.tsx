@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { type FormEvent, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, SectionTitle } from '@/components/ui/card'
+import { MonthField } from '@/components/ui/date-fields'
 import { Field, Input, Select } from '@/components/ui/field'
 import { ApiError } from '@/lib/api-error'
 import { fmt } from '@/lib/expenses'
@@ -85,10 +86,9 @@ export function RulesView({
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label={t('finance.rule.start')} error={errors.startMonth}>
-            <Input
-              type="month"
+            <MonthField
               name="startMonth"
-              required
+              label={t('finance.rule.start')}
               defaultValue={rule?.startMonth ?? thisMonth}
             />
           </Field>
@@ -97,7 +97,12 @@ export function RulesView({
             hint={t('finance.rule.endHint')}
             error={errors.endMonth}
           >
-            <Input type="month" name="endMonth" defaultValue={rule?.endMonth ?? ''} />
+            <MonthField
+              name="endMonth"
+              label={t('finance.rule.end')}
+              defaultValue={rule?.endMonth ?? undefined}
+              optional
+            />
           </Field>
         </div>
         <Field label={t('finance.rule.category')} error={errors.categoryId}>

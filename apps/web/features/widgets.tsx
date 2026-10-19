@@ -111,7 +111,7 @@ async function FinanceWidget() {
   const peak = Math.max(1, ...balances.map(Math.abs))
   return (
     <Link href="/money" className="block active:opacity-90">
-      <Hero tone="ink">
+      <Hero tone="ink" decor={false}>
         <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
             <p className="text-sm opacity-90">{t('balanceThisMonth')}</p>
@@ -178,18 +178,41 @@ async function SharedWidget() {
       </Link>
     )
   }
-  // Ledgers default to THB; others are listed but not summed together.
-  const thb = ledgers.filter((l) => l.currency === 'THB')
-  const net = thb.reduce((sum, l) => sum + BigInt(l.myBalanceMinor), 0n)
+  // Each currency is summed on its own; different currencies are never added together.
+  const byCurrency = new Map<string, bigint>()
+  for (const l of ledgers) {
+    byCurrency.set(l.currency, (byCurrency.get(l.currency) ?? 0n) + BigInt(l.myBalanceMinor))
+  }
+  const open = [...byCurrency].filter(([, net]) => net !== 0n)
+  const owedToMe = open.every(([, net]) => net > 0n)
+  const iOwe = open.every(([, net]) => net < 0n)
+  const label =
+    open.length === 0
+      ? t('sharedSettled')
+      : owedToMe
+        ? t('sharedOwedToYou')
+        : iOwe
+          ? t('sharedYouOwe')
+          : t('sharedBalances')
+  /** With mixed directions each line carries its own sign. */
+  const signed = (net: bigint, currency: string) =>
+    `${owedToMe || iOwe ? '' : net > 0n ? '+' : '−'}${fmtServer((net < 0n ? -net : net).toString(), currency)}`
   return (
     <Link href="/shared" className="block active:opacity-90">
       <Hero tone="purple">
-        <p className="text-sm opacity-90">
-          {net > 0n ? t('sharedOwedToYou') : net < 0n ? t('sharedYouOwe') : t('sharedSettled')}
-        </p>
-        <p className="my-1 font-display text-[32px] leading-none font-bold tabular-nums">
-          {fmtServer((net < 0n ? -net : net).toString())}
-        </p>
+        <p className="text-sm opacity-90">{label}</p>
+        {open.length === 0 ? (
+          <p className="my-1 font-display text-[32px] leading-none font-bold">✓</p>
+        ) : (
+          open.map(([currency, net]) => (
+            <p
+              key={currency}
+              className="my-1 font-display text-[32px] leading-none font-bold tabular-nums"
+            >
+              {signed(net, currency)}
+            </p>
+          ))
+        )}
         <ul className="mt-3 space-y-1 text-sm">
           {ledgers.slice(0, 3).map((l) => {
             const b = BigInt(l.myBalanceMinor)

@@ -98,10 +98,10 @@ export function useItemMutations(tripId: string) {
       onSuccess: refresh,
     }),
     checkIn: useMutation({
-      mutationFn: ({ id, at }: { id: string; at: Date }) =>
+      mutationFn: ({ id, at, skipped }: { id: string; at: Date; skipped?: boolean }) =>
         apiFetch(`/api/items/${id}/check-in`, {
           method: 'POST',
-          body: { at: at.toISOString() },
+          body: { at: at.toISOString(), ...(skipped && { skipped: true }) },
           schema: TripItemDto,
         }),
       onSuccess: replace,

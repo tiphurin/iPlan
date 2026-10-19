@@ -21,21 +21,59 @@ export interface AccessRepository {
   deleteGroup(id: string): Promise<void>
   groupIdsFor(userIds: string[]): Promise<Map<string, string[]>>
   setUserGroups(userId: string, groupIds: string[]): Promise<void>
+  directFeaturesFor(userIds: string[]): Promise<Map<string, string[]>>
+  setUserFeatures(userId: string, features: string[]): Promise<void>
+  circles(): Promise<CircleRow[]>
+  createCircle(name: string): Promise<string>
+  renameCircle(id: string, name: string): Promise<void>
+  deleteCircle(id: string): Promise<void>
+  circleIdsFor(userIds: string[]): Promise<Map<string, string[]>>
+  setUserCircles(userId: string, circleIds: string[]): Promise<void>
 }
+
+export type CircleRow = typeof schema.circle.$inferSelect & { memberCount: number }
 
 export class DrizzleAccessRepository implements AccessRepository {
   constructor(private readonly db: Executor) {}
 
   async featuresFor(userId: string): Promise<string[]> {
+    const [viaGroups, direct] = await Promise.all([
+      this.db
+        .selectDistinct({ key: schema.groupFeature.featureKey })
+        .from(schema.groupFeature)
+        .innerJoin(
+          schema.userGroupMember,
+          eq(schema.userGroupMember.groupId, schema.groupFeature.groupId),
+        )
+        .where(eq(schema.userGroupMember.userId, userId)),
+      this.db
+        .select({ key: schema.userFeature.featureKey })
+        .from(schema.userFeature)
+        .where(eq(schema.userFeature.userId, userId)),
+    ])
+    return [...new Set([...viaGroups, ...direct].map((r) => r.key))]
+  }
+
+  async directFeaturesFor(userIds: string[]): Promise<Map<string, string[]>> {
+    const result = new Map<string, string[]>(userIds.map((id) => [id, []]))
+    if (userIds.length === 0) return result
     const rows = await this.db
-      .selectDistinct({ key: schema.groupFeature.featureKey })
-      .from(schema.groupFeature)
-      .innerJoin(
-        schema.userGroupMember,
-        eq(schema.userGroupMember.groupId, schema.groupFeature.groupId),
-      )
-      .where(eq(schema.userGroupMember.userId, userId))
-    return rows.map((r) => r.key)
+      .select()
+      .from(schema.userFeature)
+      .where(inArray(schema.userFeature.userId, userIds))
+    for (const row of rows) result.get(row.userId)?.push(row.featureKey)
+    return result
+  }
+
+  async setUserFeatures(userId: string, features: string[]) {
+    await this.db.transaction(async (tx) => {
+      await tx.delete(schema.userFeature).where(eq(schema.userFeature.userId, userId))
+      if (features.length > 0) {
+        await tx
+          .insert(schema.userFeature)
+          .values(features.map((featureKey) => ({ userId, featureKey })))
+      }
+    })
   }
 
   async groups(): Promise<GroupRow[]> {
@@ -112,6 +150,59 @@ export class DrizzleAccessRepository implements AccessRepository {
         await tx
           .insert(schema.userGroupMember)
           .values(groupIds.map((groupId) => ({ groupId, userId })))
+      }
+    })
+  }
+
+  async circles(): Promise<CircleRow[]> {
+    const [rows, members] = await Promise.all([
+      this.db.select().from(schema.circle).orderBy(asc(schema.circle.name)),
+      this.db
+        .select({ circleId: schema.circleMember.circleId, value: count() })
+        .from(schema.circleMember)
+        .groupBy(schema.circleMember.circleId),
+    ])
+    return rows.map((c) => ({
+      ...c,
+      memberCount: Number(members.find((m) => m.circleId === c.id)?.value ?? 0),
+    }))
+  }
+
+  async createCircle(name: string): Promise<string> {
+    const [row] = await this.db
+      .insert(schema.circle)
+      .values({ name })
+      .returning({ id: schema.circle.id })
+    if (!row) throw new Error('Insert returned no row')
+    return row.id
+  }
+
+  async renameCircle(id: string, name: string) {
+    await this.db.update(schema.circle).set({ name }).where(eq(schema.circle.id, id))
+  }
+
+  async deleteCircle(id: string) {
+    await this.db.delete(schema.circle).where(eq(schema.circle.id, id))
+  }
+
+  async circleIdsFor(userIds: string[]): Promise<Map<string, string[]>> {
+    const result = new Map<string, string[]>(userIds.map((id) => [id, []]))
+    if (userIds.length === 0) return result
+    const rows = await this.db
+      .select()
+      .from(schema.circleMember)
+      .where(inArray(schema.circleMember.userId, userIds))
+    for (const row of rows) result.get(row.userId)?.push(row.circleId)
+    return result
+  }
+
+  async setUserCircles(userId: string, circleIds: string[]) {
+    await this.db.transaction(async (tx) => {
+      await tx.delete(schema.circleMember).where(eq(schema.circleMember.userId, userId))
+      if (circleIds.length > 0) {
+        await tx
+          .insert(schema.circleMember)
+          .values(circleIds.map((circleId) => ({ circleId, userId })))
       }
     })
   }

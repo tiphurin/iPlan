@@ -22,8 +22,8 @@ import {
   summarizeMonth,
 } from '@iplan/core'
 import type { AuditLog } from '../../shared/audit'
-import type { SessionUser } from '../../shared/context'
-import { notFound, validationFailed } from '../../shared/errors'
+import { type SessionUser, isAdmin } from '../../shared/context'
+import { forbidden, notFound, validationFailed } from '../../shared/errors'
 import { toCategoryDto, toRuleDto, toTransactionDto } from './finance.mapper'
 import type { CategoryRow, FinanceRepository, RuleRow, TransactionRow } from './finance.repository'
 
@@ -46,12 +46,21 @@ const DEFAULT_CATEGORIES: { kind: 'income' | 'expense'; key: string; color: stri
   { kind: 'expense', key: 'other', color: '#94a3b8' },
 ]
 
-function amount(value: string, field: string): bigint {
+const RESERVED_NAME = 'Names starting with "default:" are reserved'
+const isBuiltInName = (name: string) => name.trim().toLowerCase().startsWith('default:')
+
+/** Parses a baht amount; zero is only allowed where it means something (a month override). */
+function amount(value: string, field: string, allowZero = false): bigint {
+  let parsed: bigint
   try {
-    return parseMoney(value, FINANCE_CURRENCY).amount
+    parsed = parseMoney(value, FINANCE_CURRENCY).amount
   } catch (error) {
     throw validationFailed({ [field]: error instanceof Error ? error.message : 'Invalid amount' })
   }
+  if (parsed < 0n || (!allowZero && parsed === 0n)) {
+    throw validationFailed({ [field]: 'Amount must be above zero' })
+  }
+  return parsed
 }
 
 function monthBounds(month: Month): { from: string; to: string } {
@@ -136,9 +145,24 @@ export class FinanceService {
     return { overrides, transactions, lines, txs, summary: summarizeMonth(lines, txs, month) }
   }
 
-  async month(actor: SessionUser, month: Month): Promise<MonthDto> {
+  /** An admin looking at someone's month (read-only, logged). */
+  async monthOf(actor: SessionUser, ownerId: string, month: Month): Promise<MonthDto> {
+    if (!isAdmin(actor)) throw forbidden('Admin only')
+    if (!(await this.finance.userExists(ownerId))) throw notFound('User')
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'admin.view',
+      entityType: 'finance',
+      entityId: ownerId,
+      data: { month },
+    })
+    // Looking must not write: no built-in categories are created for them.
+    return this.month({ ...actor, id: ownerId }, month, true)
+  }
+
+  async month(actor: SessionUser, month: Month, readOnly = false): Promise<MonthDto> {
     const [categories, rules] = await Promise.all([
-      this.categories(actor.id),
+      readOnly ? this.finance.categories(actor.id) : this.categories(actor.id),
       this.finance.rules(actor.id),
     ])
     const { overrides, transactions, lines, txs, summary } = await this.computeMonth(
@@ -237,18 +261,16 @@ export class FinanceService {
     actor: SessionUser,
     input: FinanceCategoryInput,
   ): Promise<FinanceCategoryDto> {
+    if (isBuiltInName(input.name)) throw validationFailed({ name: RESERVED_NAME })
     const existing = await this.categories(actor.id)
-    const [row] = await this.finance.createCategories([
-      {
-        ownerId: actor.id,
-        kind: input.kind,
-        name: input.name,
-        color: input.color,
-        budgetMinor: input.budget ? amount(input.budget, 'budget') : null,
-        sortOrder: existing.length,
-      },
-    ])
-    if (!row) throw new Error('Category insert returned nothing')
+    const row = await this.finance.createCategory({
+      ownerId: actor.id,
+      kind: input.kind,
+      name: input.name,
+      color: input.color,
+      budgetMinor: input.budget ? amount(input.budget, 'budget') : null,
+      sortOrder: existing.length,
+    })
     return toCategoryDto(row)
   }
 
@@ -257,6 +279,12 @@ export class FinanceService {
     id: string,
     input: FinanceCategoryInput,
   ): Promise<FinanceCategoryDto> {
+    // A built-in keeps its "default:" name; nothing else may take one.
+    if (isBuiltInName(input.name)) {
+      const current = (await this.finance.categories(actor.id)).find((c) => c.id === id)
+      if (!current) throw notFound('Category')
+      if (current.name !== input.name) throw validationFailed({ name: RESERVED_NAME })
+    }
     const row = await this.finance.updateCategory(id, actor.id, {
       kind: input.kind,
       name: input.name,
@@ -338,7 +366,7 @@ export class FinanceService {
     await this.finance.setOverride({
       ruleId,
       month,
-      amountMinor: input.amount === null ? null : amount(input.amount, 'amount'),
+      amountMinor: input.amount === null ? null : amount(input.amount, 'amount', true),
       note: input.note ?? null,
     })
   }

@@ -21,7 +21,12 @@ import { computeShares, splitParticipants } from '../../shared/split-shares'
 import type { TripRow, TripsRepository } from '../trips/trips.repository'
 import type { TripAccess } from '../trips/trips.service'
 import { type NameOf, baseShares, toExpenseDto } from './expenses.mapper'
-import type { ExpensesRepository, NewExpenseRow, ShareRow } from './expenses.repository'
+import type {
+  ExpenseWithShares,
+  ExpensesRepository,
+  NewExpenseRow,
+  ShareRow,
+} from './expenses.repository'
 
 type MemberDirectory = Pick<TripsRepository, 'members'>
 
@@ -60,14 +65,29 @@ export class ExpensesService {
     }
   }
 
-  /** Validates input and works out the stored row and per-member shares. */
-  private async build(trip: TripRow, input: ExpenseInput, createdBy: string) {
+  /**
+   * Validates input and works out the stored row and per-member shares. When
+   * editing, people already on the expense who have since left the trip may stay
+   * (as payer or sharer); only newly added people must be current members.
+   */
+  private async build(
+    trip: TripRow,
+    input: ExpenseInput,
+    createdBy: string,
+    existing?: ExpenseWithShares,
+  ) {
     const problems: Record<string, string> = {}
     const { memberIds } = await this.names(trip.id)
+    const allowed = new Set(memberIds)
+    for (const share of existing?.shares ?? []) allowed.add(share.userId)
     if (input.dayDate < trip.startDate || input.dayDate > trip.endDate) {
       problems.dayDate = 'Day must be within the trip dates'
     }
-    if (input.paidBy !== POOL_ID && !memberIds.has(input.paidBy))
+    if (
+      input.paidBy !== POOL_ID &&
+      !memberIds.has(input.paidBy) &&
+      input.paidBy !== existing?.expense.paidBy
+    )
       problems.paidBy = 'Not a trip member'
     if (input.itemId && !(await this.expenses.itemInTrip(input.itemId, trip.id))) {
       problems.itemId = 'Item is not in this trip'
@@ -87,7 +107,7 @@ export class ExpensesService {
 
     const split = input.split
     const participants = splitParticipants(split)
-    const outsiders = participants.filter((id) => !memberIds.has(id))
+    const outsiders = participants.filter((id) => !allowed.has(id))
     if (outsiders.length > 0)
       throw validationFailed({ split: 'Only trip members can share a cost' })
 
@@ -104,6 +124,7 @@ export class ExpensesService {
       itemId: input.itemId ?? null,
       title: input.title,
       category: input.category,
+      subcategory: input.subcategory ?? null,
       amountMinor: amount,
       currency: input.currency,
       fxRate: rate as string,
@@ -145,7 +166,12 @@ export class ExpensesService {
 
   async update(actor: SessionUser, expenseId: string, input: ExpenseInput): Promise<ExpenseDto> {
     const { found, trip } = await this.load(actor, expenseId, 'editor')
-    const { values, shares } = await this.build(trip, input, found.expense.createdBy ?? actor.id)
+    const { values, shares } = await this.build(
+      trip,
+      input,
+      found.expense.createdBy ?? actor.id,
+      found,
+    )
     const saved = await this.expenses.replace(expenseId, values, shares)
     await this.audit.record({
       actorId: actor.id,
@@ -276,11 +302,11 @@ export class ExpensesService {
     const { trip } = await this.trips.requireAccess(actor, tripId, 'editor')
     const changes: { fxRates?: Record<string, string>; dailyBudgetMinor?: bigint | null } = {}
     if (input.fxRates) {
+      // The map replaces the saved rates, so leaving a currency out removes it.
+      // Expenses keep the rate they were saved with, so removing one is safe.
       // The base currency is always 1:1, so it is never stored.
       changes.fxRates = Object.fromEntries(
-        Object.entries({ ...trip.fxRates, ...input.fxRates }).filter(
-          ([code]) => code !== trip.baseCurrency,
-        ),
+        Object.entries(input.fxRates).filter(([code]) => code !== trip.baseCurrency),
       )
     }
     if (input.dailyBudget !== undefined) {

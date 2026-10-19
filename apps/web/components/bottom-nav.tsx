@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { FEATURES, featureFor } from '@/features'
 import { cn } from '@/lib/cn'
+import { LanguageToggle } from './language-toggle'
 
 /** Phones fit five tabs; with more, Admin stays reachable from the profile tab. */
 const MAX_MOBILE_TABS = 5
@@ -145,6 +146,9 @@ export function AppNav({
             )
           })}
         </ul>
+        <div className="mt-auto flex justify-center lg:justify-start lg:px-2">
+          <LanguageToggle className="flex-col lg:flex-row" />
+        </div>
       </nav>
     </>
   )

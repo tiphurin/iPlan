@@ -14,6 +14,14 @@ const EnvSchema = z.object({
   DEV_LOGIN_ENABLED: flag,
   /** Comma-separated. These Google accounts become active admins on first sign-in. */
   ADMIN_EMAILS: z.string().default(''),
+  /** First password of the built-in "admin" account (must be changed at first sign-in). */
+  SUPERADMIN_PASSWORD: z.string().optional(),
+  /** Gmail (or any SMTP) for notification emails; unset = emails are only logged. */
+  SMTP_HOST: z.string().default('smtp.gmail.com'),
+  SMTP_PORT: z.coerce.number().int().default(465),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
+  MAIL_FROM: z.string().optional(),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
   LOCAL_STORAGE_DIR: z.string().default('.data/uploads'),
@@ -33,6 +41,8 @@ export interface ApiEnv {
   devLoginEnabled: boolean
   /** Lower-cased. */
   adminEmails: string[]
+  superadminPassword: string | null
+  smtp: { host: string; port: number; user: string; password: string; from: string } | null
   production: boolean
   storage:
     | { driver: 'local'; localDir: string }
@@ -88,6 +98,17 @@ export function readEnv(source: Record<string, string | undefined> = process.env
         : null,
     devLoginEnabled: env.DEV_LOGIN_ENABLED,
     adminEmails: parseEmailList(env.ADMIN_EMAILS),
+    superadminPassword: env.SUPERADMIN_PASSWORD || null,
+    smtp:
+      env.SMTP_USER && env.SMTP_PASSWORD
+        ? {
+            host: env.SMTP_HOST,
+            port: env.SMTP_PORT,
+            user: env.SMTP_USER,
+            password: env.SMTP_PASSWORD,
+            from: env.MAIL_FROM ?? `iPlan <${env.SMTP_USER}>`,
+          }
+        : null,
     production,
   }
 }

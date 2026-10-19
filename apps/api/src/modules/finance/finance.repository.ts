@@ -16,7 +16,11 @@ type NewTransaction = Omit<
 /** Everything here is scoped to one owner; services never cross users. */
 export interface FinanceRepository {
   categories(ownerId: string): Promise<CategoryRow[]>
+  /** Creates the built-ins; returns all of the owner's categories. */
   createCategories(rows: NewCategory[]): Promise<CategoryRow[]>
+  /** Creates one category and returns it. */
+  createCategory(row: NewCategory): Promise<CategoryRow>
+  userExists(id: string): Promise<boolean>
   updateCategory(
     id: string,
     ownerId: string,
@@ -53,7 +57,24 @@ export class DrizzleFinanceRepository implements FinanceRepository {
 
   async createCategories(rows: NewCategory[]) {
     if (rows.length === 0) return []
-    return this.db.insert(schema.financeCategory).values(rows).returning()
+    // A parallel first visit may have created the built-ins already; keep theirs.
+    await this.db.insert(schema.financeCategory).values(rows).onConflictDoNothing()
+    const owner = rows[0]?.ownerId
+    return owner ? this.categories(owner) : []
+  }
+
+  async createCategory(row: NewCategory) {
+    const [created] = await this.db.insert(schema.financeCategory).values(row).returning()
+    if (!created) throw new Error('Category insert returned nothing')
+    return created
+  }
+
+  async userExists(id: string) {
+    const rows = await this.db
+      .select({ id: schema.user.id })
+      .from(schema.user)
+      .where(eq(schema.user.id, id))
+    return rows.length > 0
   }
 
   async updateCategory(id: string, ownerId: string, changes: Partial<NewCategory>) {

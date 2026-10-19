@@ -9,6 +9,7 @@ export interface CheckInRow {
   userId: string
   name: string
   checkedInAt: Date
+  skipped: boolean
 }
 
 export interface ItemsRepository {
@@ -20,7 +21,7 @@ export interface ItemsRepository {
   create(values: NewItemRow): Promise<ItemRow>
   update(itemId: string, changes: Partial<NewItemRow>): Promise<ItemRow | null>
   delete(itemId: string): Promise<void>
-  upsertCheckIn(itemId: string, userId: string, at: Date): Promise<void>
+  upsertCheckIn(itemId: string, userId: string, at: Date, skipped?: boolean): Promise<void>
   deleteCheckIn(itemId: string, userId: string): Promise<void>
 }
 
@@ -42,6 +43,7 @@ export class DrizzleItemsRepository implements ItemsRepository {
         userId: schema.tripItemCheckIn.userId,
         name: schema.user.name,
         checkedInAt: schema.tripItemCheckIn.checkedInAt,
+        skipped: schema.tripItemCheckIn.skipped,
       })
       .from(schema.tripItemCheckIn)
       .innerJoin(schema.user, eq(schema.user.id, schema.tripItemCheckIn.userId))
@@ -96,13 +98,13 @@ export class DrizzleItemsRepository implements ItemsRepository {
     await this.db.delete(schema.tripItem).where(eq(schema.tripItem.id, itemId))
   }
 
-  async upsertCheckIn(itemId: string, userId: string, at: Date): Promise<void> {
+  async upsertCheckIn(itemId: string, userId: string, at: Date, skipped = false): Promise<void> {
     await this.db
       .insert(schema.tripItemCheckIn)
-      .values({ itemId, userId, checkedInAt: at })
+      .values({ itemId, userId, checkedInAt: at, skipped })
       .onConflictDoUpdate({
         target: [schema.tripItemCheckIn.itemId, schema.tripItemCheckIn.userId],
-        set: { checkedInAt: at },
+        set: { checkedInAt: at, skipped },
       })
   }
 

@@ -1,3 +1,4 @@
+import { isAdminRole } from '@iplan/contracts'
 import { AdminStatsDto } from '@iplan/contracts'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
@@ -9,7 +10,7 @@ import { getMe, serverApi } from '@/lib/server-api'
 export default async function AdminPage() {
   const me = await getMe()
   // Non-admins get a plain 404; the API enforces the same rule.
-  if (me?.role !== 'admin') notFound()
+  if (!me || !isAdminRole(me.role)) notFound()
   const [t, stats] = await Promise.all([
     getTranslations(),
     serverApi('/api/admin/stats', AdminStatsDto),
@@ -20,7 +21,7 @@ export default async function AdminPage() {
         <BackLink href="/profile" label={t('nav.profile')} />
       </div>
       <PageHeader title={t('admin.title')} />
-      <AdminView stats={stats} meId={me.id} />
+      <AdminView stats={stats} meId={me.id} superadmin={me.role === 'superadmin'} />
     </>
   )
 }

@@ -6,8 +6,9 @@ import { Copy, Trash2 } from 'lucide-react'
 import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { DateTimeField } from '@/components/ui/date-fields'
 import { Field, Input, Select, Textarea } from '@/components/ui/field'
 import { ApiError } from '@/lib/api-error'
 import { cn } from '@/lib/cn'
@@ -15,7 +16,10 @@ import { ITEM_KINDS, KIND_STYLE } from '@/lib/item-kinds'
 import { TIME_ZONES, zoneLabel } from '@/lib/time-zones'
 import { tripDays } from '@/lib/trip-dates'
 import { useItemMutations } from '@/lib/trips'
+import { goBack } from '@/lib/history'
 import { useFormat } from '@/lib/use-format'
+import { LinePicker } from './line-picker'
+import { PlaceSearch } from './place-search'
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? '').trim()
 
@@ -27,6 +31,9 @@ const DETAIL_FIELDS = [
   'line',
   'lineColor',
   'flightNumber',
+  'from',
+  'to',
+  'terminal',
 ] as const
 
 export function ItemForm({
@@ -46,15 +53,47 @@ export function ItemForm({
   const mutations = useItemMutations(trip.id)
   const [kind, setKind] = useState<TripItemKind>(item?.kind ?? 'place')
   const [zone, setZone] = useState(item?.timeZone ?? defaultTimeZone)
-  const [arrivalZone, setArrivalZone] = useState(item?.details.arrivalTimeZone ?? zone)
+  // Only flights have an arrival zone; for anything else the end is in the start's zone.
+  const storedEndZone =
+    item?.kind === 'flight' ? (item.details.arrivalTimeZone ?? item.timeZone) : item?.timeZone
+  const [arrivalZone, setArrivalZone] = useState(storedEndZone ?? zone)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const formRef = useRef<HTMLFormElement>(null)
+  const [startValue, setStartValue] = useState(
+    item ? toLocalInput(new Date(item.startsAt), item.timeZone) : `${defaultDay}T09:00`,
+  )
+  const [endValue, setEndValue] = useState(
+    item?.endsAt && storedEndZone ? toLocalInput(new Date(item.endsAt), storedEndZone) : '',
+  )
+  /** Remounts the end picker when its text is converted to another zone. */
+  const [endKey, setEndKey] = useState(0)
   const [formError, setFormError] = useState<string | null>(null)
   const busy = Object.values(mutations).some((m) => m.isPending)
   const zones = [...new Set<string>([...TIME_ZONES, zone, arrivalZone, trip.homeTimeZone])].filter(
     isValidTimeZone,
   )
   const endZone = kind === 'flight' ? arrivalZone : zone
-  const backToDay = `/trips/${trip.id}?day=${item?.dayDate ?? defaultDay}` as Route
+
+  /**
+   * Switching to or from a flight moves the end into another zone (arrival vs
+   * start). Keep the same moment by rewriting the end time shown in the new zone.
+   */
+  function changeKind(next: TripItemKind) {
+    const nextEndZone = next === 'flight' ? arrivalZone : zone
+    if (endValue && nextEndZone !== endZone) {
+      try {
+        setEndValue(toLocalInput(fromLocalInput(endValue, endZone), nextEndZone))
+        setEndKey((k) => k + 1)
+      } catch {
+        // An incomplete time stays as typed.
+      }
+    }
+    setKind(next)
+  }
+  // Going back lands on the edited item, not the top of the day.
+  const backToDay = `/trips/${trip.id}?day=${item?.dayDate ?? defaultDay}${
+    item ? `&focus=${item.id}` : ''
+  }` as Route
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -80,7 +119,7 @@ export function ItemForm({
     }
 
     // Start from stored extras (unknown keys survive), then apply the form's fields.
-    const managed = new Set<string>([...DETAIL_FIELDS, 'arrivalTimeZone'])
+    const managed = new Set<string>([...DETAIL_FIELDS, 'arrivalTimeZone', 'lat', 'lng'])
     const details: TripItemDetails = Object.fromEntries(
       Object.entries(item?.details ?? {}).filter(([key]) => !managed.has(key)),
     )
@@ -89,6 +128,13 @@ export function ItemForm({
       if (value) details[key] = value
     }
     if (kind === 'flight' && arrivalZone !== zone) details.arrivalTimeZone = arrivalZone
+    // Coordinates come with a picked place suggestion; typing an address clears them.
+    const lat = Number(text(form, 'lat'))
+    const lng = Number(text(form, 'lng'))
+    if (text(form, 'lat') && text(form, 'lng') && Number.isFinite(lat) && Number.isFinite(lng)) {
+      details.lat = lat
+      details.lng = lng
+    }
 
     const input = {
       kind,
@@ -103,9 +149,11 @@ export function ItemForm({
     setErrors({})
     setFormError(null)
     try {
-      if (item) await mutations.update.mutateAsync({ id: item.id, ...input })
-      else await mutations.create.mutateAsync(input)
-      router.push(`/trips/${trip.id}?day=${input.dayDate}` as Route)
+      const saved = item
+        ? await mutations.update.mutateAsync({ id: item.id, ...input })
+        : await mutations.create.mutateAsync(input)
+      // Back to where you were (scroll kept); a fresh visit lands on the item instead.
+      goBack(router, `/trips/${trip.id}?day=${input.dayDate}&focus=${saved.id}`)
       router.refresh()
     } catch (error) {
       if (error instanceof ApiError) {
@@ -118,19 +166,19 @@ export function ItemForm({
   async function onDuplicate() {
     if (!item) return
     await mutations.duplicate.mutateAsync(item.id)
-    router.push(backToDay)
+    goBack(router, backToDay)
     router.refresh()
   }
 
   async function onDelete() {
     if (!item || !window.confirm(t('common.confirmDelete'))) return
     await mutations.remove.mutateAsync(item.id)
-    router.push(backToDay)
+    goBack(router, backToDay)
     router.refresh()
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 px-4" noValidate>
+    <form ref={formRef} onSubmit={onSubmit} className="space-y-4 px-4" noValidate>
       {formError && (
         <p role="alert" className="rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">
           {formError}
@@ -147,7 +195,7 @@ export function ItemForm({
                 key={k}
                 type="button"
                 aria-pressed={kind === k}
-                onClick={() => setKind(k)}
+                onClick={() => changeKind(k)}
                 className={cn(
                   'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl border text-xs font-medium',
                   kind === k ? 'border-primary ring-2 ring-primary/20' : 'bg-card',
@@ -195,27 +243,30 @@ export function ItemForm({
 
       <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2">
         <Field label={t('item.start')} error={errors.startsAt}>
-          <Input
-            type="datetime-local"
+          <DateTimeField
             name="start"
-            required
+            label={t('item.start')}
+            onChange={setStartValue}
+            fallbackDate={item?.dayDate ?? defaultDay}
             defaultValue={
               item ? toLocalInput(new Date(item.startsAt), item.timeZone) : `${defaultDay}T09:00`
             }
           />
         </Field>
         <Field label={t('item.end')} hint={t('common.optional')} error={errors.endsAt}>
-          <Input
-            type="datetime-local"
+          <DateTimeField
+            key={endKey}
             name="end"
-            defaultValue={
-              item?.endsAt
-                ? toLocalInput(new Date(item.endsAt), item.details.arrivalTimeZone ?? item.timeZone)
-                : ''
-            }
+            label={t('item.end')}
+            onChange={setEndValue}
+            optional
+            fallbackDate={item?.dayDate ?? defaultDay}
+            defaultValue={endValue}
           />
         </Field>
       </div>
+
+      <TravelTime start={startValue} end={endValue} zone={zone} endZone={endZone} />
 
       {kind === 'flight' && (
         <>
@@ -228,33 +279,63 @@ export function ItemForm({
               ))}
             </Select>
           </Field>
-          <Field label={t('item.flightNumber')} hint={t('common.optional')}>
-            <Input name="flightNumber" maxLength={12} defaultValue={item?.details.flightNumber} />
+          <Field label={t('item.flightNumber')}>
+            <Input
+              name="flightNumber"
+              maxLength={12}
+              placeholder="VZ850"
+              autoCapitalize="characters"
+              defaultValue={item?.details.flightNumber}
+            />
           </Field>
+          <div className="grid grid-cols-3 gap-3">
+            <Field label={t('item.from')}>
+              <Input
+                name="from"
+                maxLength={40}
+                placeholder="BKK"
+                autoCapitalize="characters"
+                defaultValue={item?.details.from}
+              />
+            </Field>
+            <Field label={t('item.to')}>
+              <Input
+                name="to"
+                maxLength={40}
+                placeholder="ICN"
+                autoCapitalize="characters"
+                defaultValue={item?.details.to}
+              />
+            </Field>
+            <Field label={t('item.terminal')} hint={t('common.optional')}>
+              <Input name="terminal" maxLength={40} defaultValue={item?.details.terminal} />
+            </Field>
+          </div>
         </>
       )}
 
-      {kind === 'move' && (
-        <div className="grid grid-cols-2 gap-3">
-          <Field label={t('item.line')} hint={t('common.optional')}>
-            <Input name="line" maxLength={20} defaultValue={item?.details.line} />
-          </Field>
-          <Field label={t('item.lineColor')} error={errors['details.lineColor']}>
-            <Input
-              type="color"
-              name="lineColor"
-              className="p-1"
-              defaultValue={item?.details.lineColor ?? '#00a84d'}
-            />
-          </Field>
-        </div>
-      )}
+      {kind === 'move' && <LinePicker line={item?.details.line} color={item?.details.lineColor} />}
 
       {kind === 'place' && (
         <>
-          <Field label={t('item.address')} hint={t('common.optional')}>
-            <Input name="address" maxLength={300} defaultValue={item?.details.address} />
-          </Field>
+          <div className="space-y-1.5">
+            <p className="text-sm text-muted-foreground">{t('item.address')}</p>
+            <PlaceSearch
+              defaultAddress={item?.details.address}
+              defaultCoords={
+                typeof item?.details.lat === 'number' && typeof item.details.lng === 'number'
+                  ? { lat: item.details.lat, lng: item.details.lng }
+                  : undefined
+              }
+              onPick={(place) => {
+                // Fill an empty title with the place's name, like Apple Calendar.
+                const title = formRef.current?.elements.namedItem('title')
+                if (title instanceof HTMLInputElement && !title.value.trim()) {
+                  title.value = place.name
+                }
+              }}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label={t('item.hours')} hint={t('common.optional')}>
               <Input name="hours" maxLength={80} defaultValue={item?.details.hours} />
@@ -289,5 +370,38 @@ export function ItemForm({
         </div>
       )}
     </form>
+  )
+}
+
+/** "Travel time 5 h 35 min" from local start/end in their zones (handles crossing zones). */
+function TravelTime({
+  start,
+  end,
+  zone,
+  endZone,
+}: {
+  start: string
+  end: string
+  zone: string
+  endZone: string
+}) {
+  const t = useTranslations('item')
+  const f = useFormat()
+  if (!start || !end) return null
+  let ms: number
+  try {
+    ms = fromLocalInput(end, endZone).getTime() - fromLocalInput(start, zone).getTime()
+  } catch {
+    return null
+  }
+  return (
+    <p
+      className={cn(
+        'rounded-xl px-3 py-2 text-sm',
+        ms < 0 ? 'bg-danger/10 text-danger' : 'bg-muted text-muted-foreground',
+      )}
+    >
+      {ms < 0 ? t('endBeforeStart') : t('duration', { time: f.duration(ms) })}
+    </p>
   )
 }

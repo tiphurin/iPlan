@@ -5,7 +5,9 @@ import type { MeRepository, UserRow } from './modules/me/me.repository'
 import { ItemsService } from './modules/items/items.service'
 import { MeService } from './modules/me/me.service'
 import { TripsService } from './modules/trips/trips.service'
+import { InvitationsService } from './modules/invitations/invitations.service'
 import { LedgersService } from './modules/ledgers/ledgers.service'
+import { PeopleService } from './modules/people/people.service'
 import { MembersService } from './modules/members/members.service'
 import { AccessService } from './modules/access/access.service'
 import { AdminService } from './modules/admin/admin.service'
@@ -27,7 +29,9 @@ import {
   InMemoryFinance,
   InMemoryInfoCards,
   InMemoryItems,
+  InMemoryInvitations,
   InMemoryLedgers,
+  InMemoryPeople,
   InMemoryMembers,
   InMemoryTrips,
   MemoryStorage,
@@ -48,6 +52,9 @@ const owner: UserRow = {
   locale: 'th',
   status: 'active',
   avatarKey: null,
+  nickname: null,
+  mustChangePassword: false,
+  bootstrapSecretHash: null,
 }
 
 /** Non-admin accounts used to test approval and feature gates. */
@@ -55,9 +62,11 @@ const others: Record<string, UserRow> = {
   traveler: { ...owner, id: 'traveler', email: 'traveler@test', role: 'user' },
   waiting: { ...owner, id: 'waiting', email: 'waiting@test', role: 'user', status: 'pending' },
   boss: { ...owner, id: 'boss', email: 'Boss@Example.com', role: 'user', status: 'pending' },
+  newadmin: { ...owner, id: 'newadmin', role: 'superadmin', mustChangePassword: true },
 }
 
 const users: MeRepository = {
+  hasPassword: async () => false,
   findById: async (id) => (id === owner.id ? owner : (others[id] ?? null)),
   update: async (id, changes) => (id === owner.id ? { ...owner, ...changes } : null),
 }
@@ -68,8 +77,11 @@ const auth: AuthGateway = {
   getSessionUser: async (headers) => {
     const id = headers.get('cookie')?.replace('session=', '')
     if (id === owner.id) return owner
-    return id ? (others[id] ?? null) : null
+    const found = id ? others[id] : undefined
+    return found ?? null
   },
+  signInWithPassword: async () => new Response(null, { status: 401 }),
+  changePassword: async () => false,
 }
 
 const audit = new FakeAudit()
@@ -89,6 +101,13 @@ const deps = {
   adminEmails: ['boss@example.com'],
   services: {
     access,
+    people: new PeopleService(new InMemoryPeople(accessRepo)),
+    invitations: new InvitationsService(
+      new InMemoryInvitations(tripRepo),
+      new InMemoryPeople(accessRepo),
+      access,
+      audit,
+    ),
     me: new MeService(users, access),
     trips,
     items: new ItemsService(itemRepo, trips, audit),
@@ -96,7 +115,7 @@ const deps = {
     checklist: new ChecklistService(checklistRepo, trips, audit),
     infoCards: new InfoCardsService(infoRepo, trips, audit),
     expenses: new ExpensesService(expenseRepo, trips, tripRepo, audit),
-    attachments: new AttachmentsService(new InMemoryAttachments(), storage, trips, audit),
+    attachments: new AttachmentsService(new InMemoryAttachments(), storage, trips, audit, access),
     finance: new FinanceService(new InMemoryFinance(), audit),
     ledgers: new LedgersService(new InMemoryLedgers(), audit),
     admin: new AdminService(new InMemoryAdmin(), accessRepo, audit),
@@ -127,6 +146,24 @@ describe('API app', () => {
   it('delegates /api/auth/* to Better Auth', async () => {
     const res = await app.request('/api/auth/get-session')
     expect(await res.text()).toBe('auth')
+  })
+
+  it('keeps Better Auth admin and account endpoints off the HTTP surface', async () => {
+    for (const path of [
+      '/api/auth/admin/set-role',
+      '/api/auth/admin/impersonate-user',
+      '/api/auth/update-user',
+      '/api/auth/sign-in/email',
+      '/api/auth/change-password',
+      '/api/auth/sign-up/email',
+    ]) {
+      const res = await app.request(path, { method: 'POST', headers: signedIn })
+      expect(res.status, path).toBe(404)
+    }
+    expect(await (await app.request('/api/auth/callback/google')).text()).toBe('auth')
+    expect(await (await app.request('/api/auth/sign-in/social', { method: 'POST' })).text()).toBe(
+      'auth',
+    )
   })
 
   it('returns 401 with an error code when signed out', async () => {
@@ -195,6 +232,53 @@ describe('API app', () => {
       features: ['trips', 'finance', 'shared'],
     })
     expect((await app.request('/api/admin/groups', { headers })).status).toBe(200)
+  })
+
+  it('makes the built-in admin choose a new password before anything else', async () => {
+    const headers = { cookie: 'session=newadmin' }
+    const me = await app.request('/api/me', { headers })
+    expect(await me.json()).toMatchObject({ role: 'superadmin', mustChangePassword: true })
+    const trips = await app.request('/api/trips', { headers })
+    expect(trips.status).toBe(403)
+    expect(await trips.json()).toMatchObject({ error: { code: 'PASSWORD_CHANGE_REQUIRED' } })
+  })
+
+  it('rejects admin sign-in with an unknown username', async () => {
+    const res = await app.request('/api/admin-login', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ username: 'root', password: 'x' }),
+    })
+    expect(res.status).toBe(401)
+    expect(await res.json()).toMatchObject({ error: { code: 'PASSWORD_INVALID' } })
+  })
+
+  it('locks admin sign-in after 5 wrong passwords from one address', async () => {
+    const attempt = (ip: string, password = 'wrong') =>
+      app.request('/api/admin-login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-forwarded-for': `${ip}, 10.0.0.1` },
+        body: JSON.stringify({ username: 'admin', password }),
+      })
+    for (let i = 0; i < 5; i++) expect((await attempt('203.0.113.9')).status).toBe(401)
+    const locked = await attempt('203.0.113.9')
+    expect(locked.status).toBe(429)
+    expect(Number(locked.headers.get('retry-after'))).toBeGreaterThan(0)
+    expect(await locked.json()).toMatchObject({ error: { code: 'TOO_MANY_ATTEMPTS' } })
+    // Another address is not affected.
+    expect((await attempt('198.51.100.7')).status).toBe(401)
+  })
+
+  it('refuses picture uploads from accounts still waiting for approval', async () => {
+    const form = new FormData()
+    form.append('file', new File([new Uint8Array([0xff, 0xd8, 0xff])], 'a.jpg'))
+    const res = await app.request('/api/me/avatar', {
+      method: 'POST',
+      headers: { cookie: 'session=waiting' },
+      body: form,
+    })
+    expect(res.status).toBe(403)
+    expect(await res.json()).toMatchObject({ error: { code: 'ACCOUNT_PENDING' } })
   })
 
   it('hides dev login unless enabled', async () => {
@@ -284,6 +368,37 @@ describe('API app', () => {
   it('rejects malformed ids before reaching the service', async () => {
     const res = await app.request('/api/trips/not-a-uuid', { headers: signedIn })
     expect(res.status).toBe(422)
+  })
+
+  it('rejects amounts too large to store with 422, not 500', async () => {
+    const headers = { ...signedIn, 'content-type': 'application/json' }
+    const huge = '12345678901234567890'
+    const tx = await app.request('/api/finance/transactions', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ kind: 'expense', title: 'X', amount: huge, date: '2026-10-01' }),
+    })
+    expect(tx.status).toBe(422)
+    const ledger = await app.request('/api/ledgers', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ name: 'Home', currency: 'THB' }),
+    })
+    expect(ledger.status).toBe(201)
+    const { id } = (await ledger.json()) as { id: string }
+    const entry = await app.request(`/api/ledgers/${id}/entries`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        title: 'X',
+        amount: huge,
+        date: '2026-10-01',
+        paidBy: owner.id,
+        split: { mode: 'equal', participants: [owner.id] },
+      }),
+    })
+    expect(entry.status).toBe(422)
+    expect(await entry.json()).toMatchObject({ error: { code: 'VALIDATION_FAILED' } })
   })
 
   it('serves the OpenAPI document', async () => {

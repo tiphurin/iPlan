@@ -7,8 +7,8 @@ import type {
 } from '@iplan/contracts'
 import { isValidTimeZone } from '@iplan/core'
 import type { AuditLog } from '../../shared/audit'
-import type { SessionUser } from '../../shared/context'
-import { forbidden, notFound, validationFailed } from '../../shared/errors'
+import { type SessionUser, isAdmin, isSuperAdmin } from '../../shared/context'
+import { AppError, forbidden, notFound, validationFailed } from '../../shared/errors'
 import { toTripDetailDto, toTripDto } from './trips.mapper'
 import type { NewTripRow, TripWithRole, TripsRepository } from './trips.repository'
 
@@ -24,7 +24,9 @@ function daysBetween(start: string, end: string): number {
   return (Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86_400_000
 }
 
-function checkTripFields(fields: Pick<NewTripRow, 'startDate' | 'endDate' | 'homeTimeZone'>) {
+export function checkTripFields(
+  fields: Pick<NewTripRow, 'startDate' | 'endDate' | 'homeTimeZone'>,
+) {
   const problems: Record<string, string> = {}
   const span = daysBetween(fields.startDate, fields.endDate)
   if (span < 0) problems.endDate = 'End date must be on or after the start date'
@@ -42,7 +44,12 @@ export class TripsService implements TripAccess {
   ) {}
 
   async requireAccess(actor: SessionUser, tripId: string, minimum: TripRole) {
-    const found = await this.trips.findForUser(tripId, actor.id)
+    // Admins can look at any trip; only the superadmin can also change it.
+    const found =
+      (await this.trips.findForUser(tripId, actor.id)) ??
+      (isAdmin(actor)
+        ? await this.trips.findAny(tripId, isSuperAdmin(actor) ? 'owner' : 'viewer')
+        : null)
     // Non-members get "not found" so trip ids can't be probed.
     if (!found) throw notFound('Trip')
     if (RANK[found.role] < RANK[minimum]) throw forbidden(`Requires ${minimum} role`)
@@ -55,6 +62,14 @@ export class TripsService implements TripAccess {
 
   async get(actor: SessionUser, tripId: string): Promise<TripDetailDto> {
     const found = await this.requireAccess(actor, tripId, 'viewer')
+    if (isAdmin(actor) && !(await this.trips.findForUser(tripId, actor.id))) {
+      await this.audit.record({
+        actorId: actor.id,
+        action: 'admin.view',
+        entityType: 'trip',
+        entityId: tripId,
+      })
+    }
     return toTripDetailDto(found, await this.trips.members(tripId))
   }
 
@@ -88,12 +103,47 @@ export class TripsService implements TripAccess {
     if (input.startDate !== undefined) changes.startDate = input.startDate
     if (input.endDate !== undefined) changes.endDate = input.endDate
     if (input.homeTimeZone !== undefined) changes.homeTimeZone = input.homeTimeZone
-    if (input.baseCurrency !== undefined) changes.baseCurrency = input.baseCurrency
+    if (input.baseCurrency !== undefined && input.baseCurrency !== trip.baseCurrency) {
+      changes.baseCurrency = input.baseCurrency
+    }
+    const startDate = changes.startDate ?? trip.startDate
+    const endDate = changes.endDate ?? trip.endDate
     checkTripFields({
-      startDate: changes.startDate ?? trip.startDate,
-      endDate: changes.endDate ?? trip.endDate,
+      startDate,
+      endDate,
       homeTimeZone: changes.homeTimeZone ?? trip.homeTimeZone,
     })
+    if (
+      changes.baseCurrency !== undefined ||
+      changes.startDate !== undefined ||
+      changes.endDate !== undefined
+    ) {
+      const contents = await this.trips.contents(tripId)
+      // Expenses keep amounts converted into the trip currency; changing it would make them wrong.
+      if (changes.baseCurrency !== undefined) {
+        if (contents.expenseCount > 0) {
+          throw new AppError(
+            'TRIP_CURRENCY_LOCKED',
+            409,
+            'The trip currency cannot change once expenses exist',
+          )
+        }
+        // Saved rates and the daily budget are in the old currency, so they no longer apply.
+        changes.fxRates = {}
+        changes.dailyBudgetMinor = null
+      }
+      // Plans and expenses outside the new dates would disappear from every view.
+      if (
+        (contents.firstDay !== null && contents.firstDay < startDate) ||
+        (contents.lastDay !== null && contents.lastDay > endDate)
+      ) {
+        throw new AppError(
+          'TRIP_DATES_EXCLUDE_CONTENT',
+          409,
+          `Plans or expenses exist from ${contents.firstDay} to ${contents.lastDay}`,
+        )
+      }
+    }
     if (Object.keys(changes).length > 0) {
       await this.trips.update(tripId, changes)
       await this.audit.record({

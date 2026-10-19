@@ -24,6 +24,7 @@ import { useMemo, useState } from 'react'
 import { BackLink } from '@/components/back-link'
 import { Button } from '@/components/ui/button'
 import { Chip, Segmented } from '@/components/ui/chip'
+import { DateField } from '@/components/ui/date-fields'
 import { Field, Input, Textarea } from '@/components/ui/field'
 import { ApiError } from '@/lib/api-error'
 import { fmt } from '@/lib/expenses'
@@ -258,7 +259,7 @@ export function EntryForm({
             />
           </Field>
           <Field label={t('shared.date')} error={fields.date}>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <DateField label={t('shared.date')} value={date} onChange={setDate} />
           </Field>
         </div>
 

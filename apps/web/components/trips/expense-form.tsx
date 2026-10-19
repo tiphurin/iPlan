@@ -21,6 +21,8 @@ import { Button } from '@/components/ui/button'
 import { Field, Input, Select, Textarea } from '@/components/ui/field'
 import { ApiError } from '@/lib/api-error'
 import { cn } from '@/lib/cn'
+import { goBack } from '@/lib/history'
+import { MODE_PRESETS } from '@/lib/lines'
 import { fmt, useExpenseMutations } from '@/lib/expenses'
 import { tripDays } from '@/lib/trip-dates'
 import { useFormat } from '@/lib/use-format'
@@ -38,11 +40,22 @@ export function ExpenseForm({
   items,
   expense,
   defaultDay,
+  defaultItemId,
+  defaultCurrency,
+  defaultCategory,
+  defaultSubcategory,
+  returnTo,
 }: {
   trip: TripDetailDto
   items: TripItemDto[]
   expense?: ExpenseDto
   defaultDay: string
+  defaultItemId?: string | undefined
+  defaultCurrency?: string | undefined
+  defaultCategory?: ExpenseCategory | undefined
+  defaultSubcategory?: string | undefined
+  /** Where to go after saving (e.g. back to the place). Defaults to the expense list. */
+  returnTo?: string | undefined
 }) {
   const t = useTranslations()
   const f = useFormat()
@@ -51,40 +64,66 @@ export function ExpenseForm({
   const base = trip.baseCurrency
   const members = trip.members
   const decimal = (minor: string, code: string) => toDecimalString(money(BigInt(minor), code))
+  const memberIds = new Set(members.map((m) => m.userId))
+  // People on this expense who have since left the trip: their part is kept as it was.
+  const former = (expense?.shares ?? []).filter((s) => !memberIds.has(s.userId))
+  const formerIds = new Set(former.map((s) => s.userId))
+  const formerPayer =
+    expense && expense.paidBy !== POOL_ID && !memberIds.has(expense.paidBy)
+      ? { id: expense.paidBy }
+      : null
+  const formerPercent = (share: ExpenseDto['shares'][number]) => {
+    if (typeof share.percentBp === 'number') return String(share.percentBp / 100)
+    const whole = expense ? BigInt(expense.amountMinor) : 0n
+    return whole > 0n ? String(Number((BigInt(share.amountMinor) * 10_000n) / whole) / 100) : '0'
+  }
 
-  const [currency, setCurrency] = useState(expense?.currency ?? base)
+  const [currency, setCurrency] = useState(expense?.currency ?? defaultCurrency ?? base)
   const [amount, setAmount] = useState(
     expense ? decimal(expense.amountMinor, expense.currency) : '',
   )
   const [rate, setRate] = useState(expense?.fxRate ?? trip.fxRates[currency] ?? '')
   const [mode, setMode] = useState<SplitMode>(expense?.splitMode ?? 'equal')
-  const [category, setCategory] = useState<ExpenseCategory>(expense?.category ?? 'food')
+  const [category, setCategory] = useState<ExpenseCategory>(
+    expense?.category ?? defaultCategory ?? 'food',
+  )
+  const [subcategory, setSubcategory] = useState<string | null>(
+    expense?.subcategory ?? defaultSubcategory ?? null,
+  )
   const [day, setDay] = useState(expense?.dayDate ?? defaultDay)
+  const [itemId, setItemId] = useState(expense?.itemId ?? defaultItemId ?? '')
   const [participants, setParticipants] = useState<string[]>(
     expense?.splitMode === 'equal'
       ? expense.shares.map((s) => s.userId)
-      : members.map((m) => m.userId),
+      : [...members.map((m) => m.userId), ...formerIds],
   )
   const [exact, setExact] = useState<Record<string, string>>(
     Object.fromEntries(
-      members.map((m) => {
-        const share =
-          expense?.splitMode === 'exact'
-            ? expense.shares.find((s) => s.userId === m.userId)
-            : undefined
-        return [m.userId, share ? decimal(share.amountMinor, expense?.currency ?? base) : '']
-      }),
+      members
+        .map((m) => {
+          const share =
+            expense?.splitMode === 'exact'
+              ? expense.shares.find((s) => s.userId === m.userId)
+              : undefined
+          return [m.userId, share ? decimal(share.amountMinor, expense?.currency ?? base) : '']
+        })
+        .concat(former.map((s) => [s.userId, decimal(s.amountMinor, expense?.currency ?? base)])),
     ),
   )
   const [percent, setPercent] = useState<Record<string, string>>(
     Object.fromEntries(
-      members.map((m) => {
-        const share =
-          expense?.splitMode === 'percent'
-            ? expense.shares.find((s) => s.userId === m.userId)
-            : undefined
-        return [m.userId, typeof share?.percentBp === 'number' ? String(share.percentBp / 100) : '']
-      }),
+      members
+        .map((m) => {
+          const share =
+            expense?.splitMode === 'percent'
+              ? expense.shares.find((s) => s.userId === m.userId)
+              : undefined
+          return [
+            m.userId,
+            typeof share?.percentBp === 'number' ? String(share.percentBp / 100) : '',
+          ]
+        })
+        .concat(former.map((s) => [s.userId, formerPercent(s)])),
     ),
   )
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -103,7 +142,8 @@ export function ExpenseForm({
   const exactSum = Object.values(exact).reduce((sum, v) => sum + (tryParse(v, currency) ?? 0n), 0n)
   const percentSum = Object.values(percent).reduce((sum, v) => sum + (Number(v) || 0), 0)
   const currencies = [...new Set([base, ...Object.keys(trip.fxRates), currency])]
-  const dayItems = items.filter((i) => i.dayDate === day)
+  // The linked item stays selectable even after picking another day.
+  const dayItems = items.filter((i) => i.dayDate === day || i.id === itemId)
 
   function changeCurrency(code: string) {
     setCurrency(code)
@@ -111,7 +151,10 @@ export function ExpenseForm({
   }
 
   function presetPercent(values: number[]) {
-    setPercent(Object.fromEntries(members.map((m, i) => [m.userId, String(values[i] ?? 0)])))
+    setPercent((current) => ({
+      ...current,
+      ...Object.fromEntries(members.map((m, i) => [m.userId, String(values[i] ?? 0)])),
+    }))
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -137,8 +180,9 @@ export function ExpenseForm({
       ...(currency !== base && rate ? { fxRate: rate } : {}),
       paidBy: String(form.get('paidBy')),
       category,
+      subcategory: category === 'transport' ? subcategory : null,
       dayDate: day,
-      itemId: String(form.get('itemId') ?? '') || null,
+      itemId: itemId || null,
       note: String(form.get('note') ?? '').trim() || null,
       split,
     }
@@ -146,7 +190,8 @@ export function ExpenseForm({
     setFormError(null)
     try {
       await save.mutateAsync(expense ? { id: expense.id, input } : { input })
-      router.push(`/trips/${trip.id}/expenses` as Route)
+      // Came from a place or the list: go back there (scroll kept).
+      goBack(router, returnTo ?? `/trips/${trip.id}/expenses`)
       router.refresh()
     } catch (error) {
       if (error instanceof ApiError) {
@@ -217,6 +262,7 @@ export function ExpenseForm({
               {m.name}
             </option>
           ))}
+          {formerPayer && <option value={formerPayer.id}>{t('expenses.form.formerMember')}</option>}
           <option value={POOL_ID}>{t('expenses.form.pool')}</option>
         </Select>
       </Field>
@@ -286,7 +332,29 @@ export function ExpenseForm({
               )}
             </li>
           ))}
+          {former.map((s) => {
+            const shown =
+              mode === 'equal'
+                ? participants.includes(s.userId) && total !== null && participants.length > 0
+                  ? fmt(total / BigInt(participants.length), currency)
+                  : null
+                : mode === 'exact'
+                  ? `${exact[s.userId] ?? ''} ${currency}`
+                  : `${percent[s.userId] ?? ''}%`
+            return (
+              <li
+                key={s.userId}
+                className="flex min-h-12 items-center gap-3 px-4 py-1.5 text-muted-foreground"
+              >
+                <span className="flex-1">{t('expenses.form.formerMember')}</span>
+                {shown && <span className="text-sm tabular-nums">{shown}</span>}
+              </li>
+            )
+          })}
         </ul>
+        {former.length > 0 && (
+          <p className="text-xs text-muted-foreground">{t('expenses.form.formerHint')}</p>
+        )}
         {mode === 'exact' && remaining !== null && remaining !== 0n && (
           <p className={cn('text-sm', remaining < 0n ? 'text-danger' : 'text-muted-foreground')}>
             {remaining > 0n
@@ -342,6 +410,30 @@ export function ExpenseForm({
             </button>
           ))}
         </div>
+        {category === 'transport' && (
+          <div className="mt-3">
+            <p className="mb-1.5 text-sm text-muted-foreground">{t('lines.how')}</p>
+            <div className="flex flex-wrap gap-2">
+              {MODE_PRESETS.filter((m) => m.mode && m.mode !== 'walk').map((m) => (
+                <button
+                  key={m.line}
+                  type="button"
+                  aria-pressed={subcategory === m.mode}
+                  onClick={() => setSubcategory(subcategory === m.mode ? null : (m.mode ?? null))}
+                  className={cn(
+                    'inline-flex min-h-10 items-center gap-1.5 rounded-full border px-3 text-sm',
+                    subcategory === m.mode
+                      ? 'border-foreground bg-foreground text-background'
+                      : 'bg-card',
+                  )}
+                >
+                  <span aria-hidden>{m.emoji}</span>
+                  {t(`lines.${m.label}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </fieldset>
 
       <div className="grid grid-cols-2 gap-3">
@@ -355,7 +447,7 @@ export function ExpenseForm({
           </Select>
         </Field>
         <Field label={t('expenses.form.item')} error={errors.itemId}>
-          <Select name="itemId" defaultValue={expense?.itemId ?? ''}>
+          <Select value={itemId} onChange={(e) => setItemId(e.target.value)}>
             <option value="">{t('expenses.form.none')}</option>
             {dayItems.map((i) => (
               <option key={i.id} value={i.id}>

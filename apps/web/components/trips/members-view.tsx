@@ -1,16 +1,18 @@
 'use client'
 
-import { InviteDto, type InviteRole, type TripDetailDto } from '@iplan/contracts'
+import { InviteDto, type InviteRole, PendingInviteDto, type TripDetailDto } from '@iplan/contracts'
 import { formatDate } from '@iplan/i18n'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Copy, Link2, Share, Trash2, UserMinus } from 'lucide-react'
+import { Copy, Link2, Share, Trash2, UserMinus, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
+import { Avatar } from '@/components/avatar'
+import { PersonPicker } from '@/components/person-picker'
 import { Card, SectionTitle } from '@/components/ui/card'
-import { Select } from '@/components/ui/field'
+import { Segmented } from '@/components/ui/chip'
 import { apiFetch } from '@/lib/api-client'
 import { ApiError } from '@/lib/api-error'
 import { tripKeys, useTrip } from '@/lib/trips'
@@ -43,6 +45,25 @@ export function MembersView({
     queryFn: () => apiFetch(`/api/trips/${trip.id}/invites`, { schema: z.array(InviteDto) }),
     initialData: initialInvites,
     enabled: canInvite,
+  })
+  const people = useQuery({
+    queryKey: ['trips', trip.id, 'people'],
+    queryFn: () => apiFetch(`/api/trips/${trip.id}/people`, { schema: z.array(PendingInviteDto) }),
+  })
+  const invitePerson = useMutation({
+    mutationFn: (userId: string) =>
+      apiFetch(`/api/trips/${trip.id}/people`, {
+        method: 'POST',
+        body: { userId, role: inviteRole },
+        schema: z.array(PendingInviteDto),
+      }),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['trips', trip.id, 'people'] }),
+    onError: (e: unknown) => onError(e),
+  })
+  const cancelPerson = useMutation({
+    mutationFn: (id: string) => apiFetch(`/api/invitations/${id}`, { method: 'DELETE' }),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['trips', trip.id, 'people'] }),
+    onError: (e: unknown) => onError(e),
   })
   const onError = (e: unknown) =>
     setError(t(`errors.${e instanceof ApiError ? e.code : 'INTERNAL'}`))
@@ -140,17 +161,16 @@ export function MembersView({
                   )}
                 </div>
                 {isOwner && member.role !== 'owner' && (
-                  <Select
-                    aria-label={t('members.changeRole')}
-                    className="w-28 shrink-0 px-2"
-                    value={member.role}
-                    onChange={(e) =>
-                      setRole.mutate({ userId: member.userId, role: e.target.value as InviteRole })
-                    }
-                  >
-                    <option value="editor">{t('trips.role.editor')}</option>
-                    <option value="viewer">{t('trips.role.viewer')}</option>
-                  </Select>
+                  <Segmented
+                    label={t('members.changeRole')}
+                    className="shrink-0 text-xs"
+                    value={member.role === 'viewer' ? 'viewer' : 'editor'}
+                    onChange={(role) => setRole.mutate({ userId: member.userId, role })}
+                    options={[
+                      { value: 'editor', label: t('trips.role.editor') },
+                      { value: 'viewer', label: t('trips.role.viewer') },
+                    ]}
+                  />
                 )}
                 {member.role !== 'owner' && (isOwner || me) && (
                   <Button
@@ -169,20 +189,65 @@ export function MembersView({
         </ul>
       </section>
 
+      {(people.data?.length ?? 0) > 0 && (
+        <section>
+          <SectionTitle>{t('trips.awaiting')}</SectionTitle>
+          <ul className="space-y-1">
+            {people.data?.map((p) => (
+              <li
+                key={p.id}
+                className="flex items-center gap-3 rounded-2xl border border-dashed bg-card px-3.5 py-2"
+              >
+                <Avatar name={p.name} image={p.image} size={30} />
+                <span className="flex-1 truncate text-sm">{p.name}</span>
+                <span className="text-xs text-muted-foreground">{t(`trips.role.${p.role}`)}</span>
+                {isOwner && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={t('shared.cancelInvite')}
+                    onClick={() => cancelPerson.mutate(p.id)}
+                  >
+                    <X aria-hidden className="size-4" />
+                  </Button>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {isOwner && (
+        <section>
+          <SectionTitle>{t('trips.invitePeople')}</SectionTitle>
+          <PersonPicker
+            exclude={[
+              ...trip.members.map((m) => m.userId),
+              ...(people.data ?? []).map((p) => p.userId),
+            ]}
+            busy={invitePerson.isPending}
+            onPick={(p) => invitePerson.mutate(p.id)}
+          />
+          <p className="mt-1.5 px-1 text-xs text-faint">{t('trips.invitePeopleHint')}</p>
+        </section>
+      )}
+
       {canInvite && (
         <section>
           <SectionTitle>{t('members.invites')}</SectionTitle>
           <Card className="space-y-3">
             <p className="text-sm text-muted-foreground">{t('members.invitesHint')}</p>
             <div className="flex gap-2">
-              <Select
-                aria-label={t('members.inviteAs')}
+              <Segmented
+                label={t('members.inviteAs')}
+                className="flex-1"
                 value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value as InviteRole)}
-              >
-                <option value="editor">{t('trips.role.editor')}</option>
-                <option value="viewer">{t('trips.role.viewer')}</option>
-              </Select>
+                onChange={setInviteRole}
+                options={[
+                  { value: 'editor', label: t('trips.role.editor') },
+                  { value: 'viewer', label: t('trips.role.viewer') },
+                ]}
+              />
               <Button
                 className="shrink-0"
                 onClick={() => createInvite.mutate()}

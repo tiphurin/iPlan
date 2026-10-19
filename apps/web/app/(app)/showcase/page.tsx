@@ -1,3 +1,4 @@
+import { isAdminRole } from '@iplan/contracts'
 import {
   BarChart3,
   BookOpen,
@@ -54,7 +55,7 @@ export default async function ShowcasePage() {
     <>
       <PageHeader title={t('title')} subtitle={t('subtitle')} />
       <ul className="grid gap-3 px-4 sm:grid-cols-2">
-        {FEATURES.filter((f) => !f.admin || me?.role === 'admin').map(
+        {FEATURES.filter((f) => !f.admin || (me ? isAdminRole(me.role) : false)).map(
           ({ key, icon: Icon, href }) => (
             <li key={key}>
               <Link href={href as Route} className="block h-full active:opacity-80">

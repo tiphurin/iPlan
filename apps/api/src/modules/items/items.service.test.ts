@@ -95,11 +95,36 @@ describe('ItemsService', () => {
       now,
     )
     expect(again.checkIns).toEqual([
-      { userId: 'viewer', name: 'Viewer', checkedInAt: '2026-10-23T04:10:00.000Z' },
+      {
+        userId: 'viewer',
+        name: 'Viewer',
+        checkedInAt: '2026-10-23T04:10:00.000Z',
+        skipped: false,
+      },
     ])
+    // Skipping replaces the check-in; undo clears either.
+    const skipped = await service.checkIn(users.viewer, item.id, { skipped: true }, now)
+    expect(skipped.checkIns[0]).toMatchObject({ skipped: true })
     expect((await service.undoCheckIn(users.viewer, item.id)).checkIns).toEqual([])
     await expect(
       service.checkIn(users.viewer, item.id, { at: '2027-06-01T00:00:00.000Z' }, now),
     ).rejects.toMatchObject({ fields: { at: expect.any(String) } })
+  })
+
+  it('keeps an arrival zone only on flights', async () => {
+    const flight = await service.create(users.owner, tripId, {
+      ...lunch,
+      kind: 'flight',
+      details: { arrivalTimeZone: 'Asia/Bangkok', flightNumber: 'TG659' },
+    })
+    expect(flight.details).toEqual({ arrivalTimeZone: 'Asia/Bangkok', flightNumber: 'TG659' })
+    // Turning it into a place drops the arrival zone but keeps the rest.
+    const place = await service.update(users.owner, flight.id, { kind: 'place' })
+    expect(place.details).toEqual({ flightNumber: 'TG659' })
+    const created = await service.create(users.owner, tripId, {
+      ...lunch,
+      details: { arrivalTimeZone: 'Asia/Tokyo' },
+    })
+    expect(created.details).toEqual({})
   })
 })

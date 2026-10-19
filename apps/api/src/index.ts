@@ -5,6 +5,8 @@ import { authGateway, createAuth } from './infra/auth'
 import { devLogin } from './infra/dev-login'
 import { DrizzleChecklistRepository } from './modules/checklist/checklist.repository'
 import { ChecklistService } from './modules/checklist/checklist.service'
+import { DrizzleExpensesRepository } from './modules/expenses/expenses.repository'
+import { ExpensesService } from './modules/expenses/expenses.service'
 import { DrizzleInfoCardsRepository } from './modules/info-cards/info-cards.repository'
 import { InfoCardsService } from './modules/info-cards/info-cards.service'
 import { DrizzleItemsRepository } from './modules/items/items.repository'
@@ -25,7 +27,8 @@ export function buildApp(env = readEnv()): App {
   const db = createDb(env.databaseUrl)
   const auth = createAuth(db, env)
   const audit = new AuditRepository(db)
-  const trips = new TripsService(new DrizzleTripsRepository(db), audit)
+  const tripRepo = new DrizzleTripsRepository(db)
+  const trips = new TripsService(tripRepo, audit)
   return createApp({
     auth: authGateway(auth),
     ...(env.devLoginEnabled && { devLogin: (email) => devLogin(auth, email) }),
@@ -36,6 +39,7 @@ export function buildApp(env = readEnv()): App {
       members: new MembersService(new DrizzleMembersRepository(db), trips, audit),
       checklist: new ChecklistService(new DrizzleChecklistRepository(db), trips, audit),
       infoCards: new InfoCardsService(new DrizzleInfoCardsRepository(db), trips, audit),
+      expenses: new ExpensesService(new DrizzleExpensesRepository(db), trips, tripRepo, audit),
     },
   })
 }

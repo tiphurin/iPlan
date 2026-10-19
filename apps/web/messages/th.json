@@ -92,7 +92,8 @@
     "addItem": "เพิ่มแผน",
     "openToday": "ดูแบบวันนี้",
     "checklist": "เช็กลิสต์",
-    "info": "ข้อมูล"
+    "info": "ข้อมูล",
+    "expenses": "ค่าใช้จ่าย"
   },
   "kinds": {
     "place": "สถานที่",
@@ -233,5 +234,58 @@
     "wakeLate": "ตื่นช้ากว่าแผน {min} นาที",
     "wakeEarly": "ตื่นเร็วกว่าแผน {min} นาที",
     "wakeOnTime": "ตื่นตรงเวลา"
+  },
+  "expenses": {
+    "title": "ค่าใช้จ่าย",
+    "total": "ใช้ไปทั้งหมด",
+    "add": "เพิ่มค่าใช้จ่าย",
+    "edit": "แก้ไขค่าใช้จ่าย",
+    "empty": "ยังไม่มีค่าใช้จ่าย",
+    "settle": "ใครต้องจ่ายใคร",
+    "settled": "เคลียร์กันครบแล้ว",
+    "pays": "จ่ายให้",
+    "people": "แต่ละคน",
+    "paid": "จ่ายไป",
+    "share": "ส่วนของตัวเอง",
+    "net": "สุทธิ",
+    "byDay": "รายวันเทียบงบ",
+    "byCategory": "ตามหมวด",
+    "budget": "งบ {amount}",
+    "over": "เกินงบ",
+    "csv": "ดาวน์โหลด CSV",
+    "settings": "อัตราแลกเปลี่ยนและงบ",
+    "rate": "1 {code} = ? {base}",
+    "dailyBudget": "งบต่อวัน ({base})",
+    "saveSettings": "บันทึก",
+    "addCurrency": "เพิ่มสกุลเงิน",
+    "form": {
+      "title": "รายการ",
+      "amount": "จำนวนเงิน",
+      "currency": "สกุลเงิน",
+      "rate": "อัตรา (1 {code} = ? {base})",
+      "paidBy": "ใครจ่าย",
+      "pool": "กองกลาง",
+      "split": "หารยังไง",
+      "equal": "หารเท่ากัน",
+      "exact": "ระบุจำนวน",
+      "percent": "เปอร์เซ็นต์",
+      "remaining": "เหลืออีก {amount}",
+      "over": "เกินมา {amount}",
+      "category": "หมวด",
+      "day": "วัน",
+      "item": "สถานที่ในแผน",
+      "none": "ไม่ระบุ",
+      "note": "โน้ต",
+      "converted": "≈ {amount}"
+    },
+    "categories": {
+      "food": "อาหาร",
+      "transport": "เดินทาง",
+      "shopping": "ช็อปปิ้ง",
+      "stay": "ที่พัก",
+      "activity": "กิจกรรม",
+      "health": "สุขภาพ",
+      "other": "อื่นๆ"
+    }
   }
 }

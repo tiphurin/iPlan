@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+  bigint,
   boolean,
   date,
   index,
@@ -111,6 +112,10 @@ export const trip = pgTable('trip', {
   /** Zone used for trip-level dates (usually where the travellers live). */
   homeTimeZone: text('home_time_zone').notNull().default('Asia/Bangkok'),
   baseCurrency: text('base_currency').notNull().default('THB'),
+  /** Exchange rates into the base currency, as decimal strings: { KRW: "0.0255" }. */
+  fxRates: jsonb('fx_rates').$type<Record<string, string>>().notNull().default({}),
+  /** Planned spending per day in base-currency minor units. */
+  dailyBudgetMinor: bigint('daily_budget_minor', { mode: 'bigint' }),
   createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
   createdAt,
   updatedAt,
@@ -271,6 +276,70 @@ export const infoCard = pgTable(
     updatedAt,
   },
   (t) => [index('info_card_trip_idx').on(t.tripId)],
+)
+
+// ---------------------------------------------------------------------------
+// Trip expenses
+// ---------------------------------------------------------------------------
+
+export const expenseCategory = pgEnum('expense_category', [
+  'food',
+  'transport',
+  'shopping',
+  'stay',
+  'activity',
+  'health',
+  'other',
+])
+
+export const splitMode = pgEnum('split_mode', ['equal', 'exact', 'percent'])
+
+/** Party id used when the shared pool (kitty) paid instead of a member. */
+export const POOL = 'pool'
+
+export const expense = pgTable(
+  'expense',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tripId: uuid('trip_id')
+      .notNull()
+      .references(() => trip.id, { onDelete: 'cascade' }),
+    dayDate: date('day_date').notNull(),
+    /** Optional link to the plan item (place) the money was spent at. */
+    itemId: uuid('item_id').references(() => tripItem.id, { onDelete: 'set null' }),
+    title: text('title').notNull(),
+    category: expenseCategory('category').notNull().default('other'),
+    amountMinor: bigint('amount_minor', { mode: 'bigint' }).notNull(),
+    currency: text('currency').notNull(),
+    /** Base-currency units per 1 unit of `currency` when this was spent. */
+    fxRate: text('fx_rate').notNull(),
+    baseAmountMinor: bigint('base_amount_minor', { mode: 'bigint' }).notNull(),
+    /** A member's user id, or POOL. */
+    paidBy: text('paid_by').notNull(),
+    splitMode: splitMode('split_mode').notNull(),
+    note: text('note'),
+    createdBy: text('created_by').references(() => user.id, { onDelete: 'set null' }),
+    createdAt,
+    updatedAt,
+  },
+  (t) => [index('expense_trip_day_idx').on(t.tripId, t.dayDate)],
+)
+
+export const expenseShare = pgTable(
+  'expense_share',
+  {
+    expenseId: uuid('expense_id')
+      .notNull()
+      .references(() => expense.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    /** In the expense currency. */
+    amountMinor: bigint('amount_minor', { mode: 'bigint' }).notNull(),
+    /** Basis points when split by percentage. */
+    percentBp: integer('percent_bp'),
+  },
+  (t) => [primaryKey({ columns: [t.expenseId, t.userId] })],
 )
 
 // ---------------------------------------------------------------------------

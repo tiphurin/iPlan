@@ -136,3 +136,34 @@ export function settle(balances: Shares): Transfer[] {
   }
   return transfers
 }
+
+/**
+ * Splits `total` in proportion to integer weights (largest remainder), e.g. to
+ * turn shares in KRW into THB that still add up to the converted total.
+ */
+export function splitByWeights(total: bigint, weights: Shares): Shares {
+  const ids = Object.keys(weights)
+  assertMembers(ids)
+  const weightSum = Object.values(weights).reduce((a, b) => a + b, 0n)
+  if (weightSum <= 0n) throw new SplitError('Weights must add up to more than zero')
+  if (Object.values(weights).some((w) => w < 0n)) throw new SplitError('Weights cannot be negative')
+
+  const negative = total < 0n
+  const abs = negative ? -total : total
+  const rows = ids.map((id, index) => {
+    const exact = abs * (weights[id] ?? 0n)
+    return { id, index, floor: exact / weightSum, remainder: exact % weightSum }
+  })
+  let leftover = abs - rows.reduce((sum, row) => sum + row.floor, 0n)
+  const byRemainder = [...rows].sort((a, b) =>
+    a.remainder === b.remainder ? a.index - b.index : a.remainder > b.remainder ? -1 : 1,
+  )
+  for (const row of byRemainder) {
+    if (leftover === 0n) break
+    row.floor += 1n
+    leftover -= 1n
+  }
+  const shares: Record<string, bigint> = {}
+  for (const row of rows) shares[row.id] = negative ? -row.floor : row.floor
+  return shares
+}

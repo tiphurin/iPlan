@@ -5,6 +5,8 @@ import type { AuthGateway } from './infra/auth'
 import { DEV_LOGIN_EMAILS, type DevLoginEmail } from './infra/dev-login'
 import { checklistRoutes } from './modules/checklist/checklist.routes'
 import type { ChecklistService } from './modules/checklist/checklist.service'
+import { expenseRoutes } from './modules/expenses/expenses.routes'
+import type { ExpensesService } from './modules/expenses/expenses.service'
 import { infoCardRoutes } from './modules/info-cards/info-cards.routes'
 import type { InfoCardsService } from './modules/info-cards/info-cards.service'
 import { itemRoutes } from './modules/items/items.routes'
@@ -30,6 +32,7 @@ export interface AppDeps {
     members: MembersService
     checklist: ChecklistService
     infoCards: InfoCardsService
+    expenses: ExpensesService
   }
 }
 
@@ -110,6 +113,7 @@ export function createApp(deps: AppDeps) {
   app.route('/', memberRoutes(deps.services.members))
   app.route('/', checklistRoutes(deps.services.checklist))
   app.route('/', infoCardRoutes(deps.services.infoCards))
+  app.route('/', expenseRoutes(deps.services.expenses))
 
   app.doc31('/openapi.json', {
     openapi: '3.1.0',

@@ -14,6 +14,12 @@ import type {
   TickRow,
 } from '../modules/checklist/checklist.repository'
 import type {
+  ExpenseWithShares,
+  ExpensesRepository,
+  NewExpenseRow,
+  ShareRow,
+} from '../modules/expenses/expenses.repository'
+import type {
   InfoCardFields,
   InfoCardRow,
   InfoCardsRepository,
@@ -90,6 +96,8 @@ export class InMemoryTrips implements TripsRepository {
       endDate: values.endDate,
       homeTimeZone: values.homeTimeZone ?? 'Asia/Bangkok',
       baseCurrency: values.baseCurrency ?? 'THB',
+      fxRates: values.fxRates ?? {},
+      dailyBudgetMinor: values.dailyBudgetMinor ?? null,
       createdBy: values.createdBy ?? null,
       createdAt: now,
       updatedAt: now,
@@ -332,4 +340,64 @@ export async function seededTrip() {
   repo.addMember(id, 'editor', 'editor')
   repo.addMember(id, 'viewer', 'viewer')
   return { tripId: id, trips, repo, audit }
+}
+
+export class InMemoryExpenses implements ExpensesRepository {
+  rows = new Map<string, ExpenseWithShares>()
+  constructor(
+    private readonly trips: InMemoryTrips,
+    private readonly items?: InMemoryItems,
+  ) {}
+
+  async list(tripId: string) {
+    return [...this.rows.values()].filter((r) => r.expense.tripId === tripId)
+  }
+  async find(expenseId: string) {
+    return this.rows.get(expenseId) ?? null
+  }
+  private save(
+    id: string,
+    values: NewExpenseRow,
+    shares: Omit<ShareRow, 'expenseId'>[],
+    createdAt: Date,
+  ) {
+    const row: ExpenseWithShares = {
+      expense: {
+        id,
+        ...values,
+        itemId: values.itemId ?? null,
+        category: values.category ?? 'other',
+        note: values.note ?? null,
+        createdBy: values.createdBy ?? null,
+        createdAt,
+        updatedAt: new Date(),
+      },
+      shares: shares.map((s) => ({ ...s, expenseId: id })),
+    }
+    this.rows.set(id, row)
+    return row
+  }
+  async create(values: NewExpenseRow, shares: Omit<ShareRow, 'expenseId'>[]) {
+    return this.save(uuid(), values, shares, new Date())
+  }
+  async replace(expenseId: string, values: NewExpenseRow, shares: Omit<ShareRow, 'expenseId'>[]) {
+    return this.save(
+      expenseId,
+      values,
+      shares,
+      this.rows.get(expenseId)?.expense.createdAt ?? new Date(),
+    )
+  }
+  async delete(expenseId: string) {
+    this.rows.delete(expenseId)
+  }
+  async itemInTrip(itemId: string, tripId: string) {
+    return (await this.items?.findById(itemId))?.tripId === tripId
+  }
+  async updateTripMoney(
+    tripId: string,
+    changes: { fxRates?: Record<string, string>; dailyBudgetMinor?: bigint | null },
+  ) {
+    await this.trips.update(tripId, changes)
+  }
 }

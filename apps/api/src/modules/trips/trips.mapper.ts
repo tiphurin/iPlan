@@ -10,6 +10,8 @@ export function toTripDto({ trip, role, memberCount }: TripWithRole): TripDto {
     endDate: trip.endDate,
     homeTimeZone: trip.homeTimeZone,
     baseCurrency: trip.baseCurrency,
+    fxRates: trip.fxRates,
+    dailyBudgetMinor: trip.dailyBudgetMinor?.toString() ?? null,
     role,
     memberCount,
   }

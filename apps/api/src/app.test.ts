@@ -7,10 +7,12 @@ import { MeService } from './modules/me/me.service'
 import { TripsService } from './modules/trips/trips.service'
 import { MembersService } from './modules/members/members.service'
 import { ChecklistService } from './modules/checklist/checklist.service'
+import { ExpensesService } from './modules/expenses/expenses.service'
 import { InfoCardsService } from './modules/info-cards/info-cards.service'
 import {
   FakeAudit,
   InMemoryChecklist,
+  InMemoryExpenses,
   InMemoryInfoCards,
   InMemoryItems,
   InMemoryMembers,
@@ -56,6 +58,7 @@ const app = createApp({
     members: new MembersService(new InMemoryMembers(tripRepo), trips, audit),
     checklist: new ChecklistService(new InMemoryChecklist(), trips, audit),
     infoCards: new InfoCardsService(new InMemoryInfoCards(), trips, audit),
+    expenses: new ExpensesService(new InMemoryExpenses(tripRepo), trips, tripRepo, audit),
   },
 })
 const signedIn = { cookie: 'session=u1' }

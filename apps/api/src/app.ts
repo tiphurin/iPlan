@@ -2,6 +2,9 @@ import { createRoute, z } from '@hono/zod-openapi'
 import type { ErrorResponse } from '@iplan/contracts'
 import { Scalar } from '@scalar/hono-api-reference'
 import type { AuthGateway } from './infra/auth'
+import type { StorageProvider } from './infra/storage'
+import { attachmentRoutes } from './modules/attachments/attachments.routes'
+import type { AttachmentsService } from './modules/attachments/attachments.service'
 import { DEV_LOGIN_EMAILS, type DevLoginEmail } from './infra/dev-login'
 import { checklistRoutes } from './modules/checklist/checklist.routes'
 import type { ChecklistService } from './modules/checklist/checklist.service'
@@ -25,6 +28,7 @@ export interface AppDeps {
   auth: AuthGateway
   /** Present only when DEV_LOGIN_ENABLED is true. */
   devLogin?: (email: DevLoginEmail) => Promise<Response>
+  storage: StorageProvider
   services: {
     me: MeService
     trips: TripsService
@@ -33,6 +37,7 @@ export interface AppDeps {
     checklist: ChecklistService
     infoCards: InfoCardsService
     expenses: ExpensesService
+    attachments: AttachmentsService
   }
 }
 
@@ -114,6 +119,7 @@ export function createApp(deps: AppDeps) {
   app.route('/', checklistRoutes(deps.services.checklist))
   app.route('/', infoCardRoutes(deps.services.infoCards))
   app.route('/', expenseRoutes(deps.services.expenses))
+  app.route('/', attachmentRoutes(deps.services.attachments, deps.storage))
 
   app.doc31('/openapi.json', {
     openapi: '3.1.0',

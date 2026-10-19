@@ -15,6 +15,7 @@ import type { Route } from 'next'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { type FormEvent, useState } from 'react'
+import { Attachments } from '@/components/attachments'
 import { CATEGORY_COLORS } from '@/components/charts/donut'
 import { Button } from '@/components/ui/button'
 import { Field, Input, Select, Textarea } from '@/components/ui/field'
@@ -368,6 +369,12 @@ export function ExpenseForm({
       <Field label={t('expenses.form.note')} hint={t('common.optional')}>
         <Textarea name="note" rows={2} maxLength={500} defaultValue={expense?.note ?? ''} />
       </Field>
+
+      {expense ? (
+        <Attachments entityType="expense" entityId={expense.id} canEdit kind="slip" />
+      ) : (
+        <p className="text-sm text-muted-foreground">{t('attachments.saveFirst')}</p>
+      )}
 
       <Button type="submit" size="lg" disabled={save.isPending}>
         {t('common.save')}

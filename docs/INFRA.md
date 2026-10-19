@@ -49,18 +49,19 @@ Never commit a secret. `.env.example` lists every variable with a note on where 
 
 ### Environment variables
 
-| Variable                                    | Local value             | Production value from                                |
-| ------------------------------------------- | ----------------------- | ---------------------------------------------------- |
-| `DATABASE_URL`                              | Docker Postgres         | Neon → Connection details → pooled connection string |
-| `BETTER_AUTH_SECRET`                        | 32+ characters          | `openssl rand -base64 32`                            |
-| `BETTER_AUTH_URL`                           | `http://localhost:3000` | `https://<project>.vercel.app`                       |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | optional                | Google Cloud → Credentials → OAuth client            |
-| `DEV_LOGIN_ENABLED`                         | `true`                  | `false`                                              |
-| `S3_ENDPOINT`                               | `http://localhost:9000` | B2 bucket page → Endpoint (prefix `https://`)        |
-| `S3_REGION`                                 | `us-east-1`             | Region part of the B2 endpoint, e.g. `us-west-004`   |
-| `S3_BUCKET`                                 | `iplan-attachments`     | `iplan-attachments`                                  |
-| `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | MinIO credentials       | B2 → Application Keys (restricted to the one bucket) |
-| `S3_FORCE_PATH_STYLE`                       | `true`                  | `false`                                              |
+| Variable                                    | Local value                        | Production value from                                |
+| ------------------------------------------- | ---------------------------------- | ---------------------------------------------------- |
+| `DATABASE_URL`                              | Docker Postgres                    | Neon → Connection details → pooled connection string |
+| `BETTER_AUTH_SECRET`                        | 32+ characters                     | `openssl rand -base64 32`                            |
+| `BETTER_AUTH_URL`                           | `http://localhost:3000`            | `https://<project>.vercel.app`                       |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | optional                           | Google Cloud → Credentials → OAuth client            |
+| `DEV_LOGIN_ENABLED`                         | `true`                             | `false`                                              |
+| `STORAGE_DRIVER`                            | `local` (files in `.data/uploads`) | `s3`                                                 |
+| `S3_ENDPOINT`                               | `http://localhost:9000`            | B2 bucket page → Endpoint (prefix `https://`)        |
+| `S3_REGION`                                 | `us-east-1`                        | Region part of the B2 endpoint, e.g. `us-west-004`   |
+| `S3_BUCKET`                                 | `iplan-attachments`                | `iplan-attachments`                                  |
+| `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | MinIO credentials                  | B2 → Application Keys (restricted to the one bucket) |
+| `S3_FORCE_PATH_STYLE`                       | `true`                             | `false`                                              |
 
 Google OAuth redirect URIs to register: `http://localhost:3000/api/auth/callback/google` and `https://<project>.vercel.app/api/auth/callback/google`.
 

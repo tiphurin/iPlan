@@ -6,17 +6,20 @@ import { ItemsService } from './modules/items/items.service'
 import { MeService } from './modules/me/me.service'
 import { TripsService } from './modules/trips/trips.service'
 import { MembersService } from './modules/members/members.service'
+import { AttachmentsService } from './modules/attachments/attachments.service'
 import { ChecklistService } from './modules/checklist/checklist.service'
 import { ExpensesService } from './modules/expenses/expenses.service'
 import { InfoCardsService } from './modules/info-cards/info-cards.service'
 import {
   FakeAudit,
+  InMemoryAttachments,
   InMemoryChecklist,
   InMemoryExpenses,
   InMemoryInfoCards,
   InMemoryItems,
   InMemoryMembers,
   InMemoryTrips,
+  MemoryStorage,
 } from './testing/fakes'
 
 const owner: UserRow = {
@@ -49,8 +52,10 @@ const auth: AuthGateway = {
 const audit = new FakeAudit()
 const tripRepo = new InMemoryTrips()
 const trips = new TripsService(tripRepo, audit)
+const storage = new MemoryStorage()
 const app = createApp({
   auth,
+  storage,
   services: {
     me: new MeService(users),
     trips,
@@ -59,6 +64,7 @@ const app = createApp({
     checklist: new ChecklistService(new InMemoryChecklist(), trips, audit),
     infoCards: new InfoCardsService(new InMemoryInfoCards(), trips, audit),
     expenses: new ExpensesService(new InMemoryExpenses(tripRepo), trips, tripRepo, audit),
+    attachments: new AttachmentsService(new InMemoryAttachments(), storage, trips, audit),
   },
 })
 const signedIn = { cookie: 'session=u1' }

@@ -312,8 +312,71 @@ export class ExpensesService {
         row.expense.note ?? '',
       ]
     })
+    // Money put into the pool, its rule and totals, after a blank line.
+    const pool = await this.pool(actor, tripId)
+    const poolLines: string[][] =
+      pool.contributions.length > 0 || BigInt(pool.spentBaseMinor) > 0n
+        ? [
+            [],
+            [
+              'Pool',
+              `Rule: ${pool.mode === 'proportional' ? 'proportional to what each put in' : 'split as used, overpayment refunded'}`,
+            ],
+            [
+              'Date',
+              'Put in by',
+              'Amount',
+              'Currency',
+              'Rate',
+              `Amount (${trip.baseCurrency})`,
+              'Note',
+            ],
+            ...pool.contributions.map((x) => [
+              x.date,
+              x.name,
+              toDecimalString(money(BigInt(x.amountMinor), x.currency)),
+              x.currency,
+              x.fxRate,
+              toDecimalString(money(BigInt(x.baseAmountMinor), trip.baseCurrency)),
+              x.note ?? '',
+            ]),
+            ...pool.byMember.map((m) => [
+              '',
+              m.name,
+              '',
+              '',
+              '',
+              toDecimalString(money(BigInt(m.contributedBaseMinor), trip.baseCurrency)),
+              `${(m.percentBp / 100).toFixed(1)}%`,
+            ]),
+            [
+              'Total put in',
+              '',
+              '',
+              '',
+              '',
+              toDecimalString(money(BigInt(pool.totalBaseMinor), trip.baseCurrency)),
+            ],
+            [
+              'Spent from pool',
+              '',
+              '',
+              '',
+              '',
+              toDecimalString(money(BigInt(pool.spentBaseMinor), trip.baseCurrency)),
+            ],
+            [
+              'Left over (negative = short)',
+              '',
+              '',
+              '',
+              '',
+              toDecimalString(money(BigInt(pool.leftoverBaseMinor), trip.baseCurrency)),
+            ],
+          ]
+        : []
     // BOM so Excel opens Thai text as UTF-8.
-    return `\uFEFF${[header, ...lines].map((line) => line.map(cell).join(',')).join('\r\n')}\r\n`
+    return `\uFEFF${[header, ...lines, ...poolLines].map((line) => line.map(cell).join(',')).join('\r\n')}\r\n`
   }
 
   private poolOptions(mode: PoolMode, rows: ContributionRow[]) {

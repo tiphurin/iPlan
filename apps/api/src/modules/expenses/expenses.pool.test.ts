@@ -242,6 +242,24 @@ describe('ExpensesService pool', () => {
     ])
   })
 
+  it('the CSV export lists the pool: each contribution, each person, totals and the rule', async () => {
+    const { tripId, service } = await example()
+    const csv = await service.csv(users.viewer, tripId)
+    expect(csv).toContain('Pool,"Rule: split as used, overpayment refunded"')
+    expect(csv).toContain('Put in by')
+    expect(csv).toMatch(/Owner,7000\.00,THB,1,7000\.00/)
+    expect(csv).toContain('58.3%')
+    expect(csv).toContain('Total put in,,,,,12000.00')
+    expect(csv).toContain('Left over (negative = short),,,,,2000.00')
+    await service.setPoolMode(users.owner, tripId, 'proportional')
+    expect(await service.csv(users.viewer, tripId)).toContain('Rule: proportional')
+  })
+
+  it('the CSV has no pool part for a trip without a pool', async () => {
+    const { tripId, service } = await setup()
+    expect(await service.csv(users.viewer, tripId)).not.toContain('Pool')
+  })
+
   it('locks the trip currency once money is in the pool', async () => {
     const { tripId, service, trips } = await setup()
     await service.addContribution(users.owner, tripId, put('owner', '100'))

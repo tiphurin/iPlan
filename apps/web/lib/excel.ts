@@ -1,6 +1,6 @@
 'use client'
 
-import type { ExpenseDto, ExpenseSummaryDto, MonthDto } from '@iplan/contracts'
+import type { ExpenseDto, ExpenseSummaryDto, MonthDto, PoolDto } from '@iplan/contracts'
 import { money, toDecimalString } from '@iplan/core'
 
 interface Cell {
@@ -55,6 +55,18 @@ export interface TripExcelLabels {
   }
   category: (key: string) => string
   pool: string
+  /** The "Pool" sheet: who put in what, each person's part, totals and the rule. */
+  poolSheet: {
+    title: string
+    note: string
+    percent: string
+    rule: string
+    mode: string
+    putIn: string
+    spent: string
+    left: string
+    byMember: string
+  }
 }
 
 export async function exportTripExcel(
@@ -63,10 +75,53 @@ export async function exportTripExcel(
   summary: ExpenseSummaryDto,
   members: { userId: string; name: string }[],
   l: TripExcelLabels,
+  pool?: PoolDto,
 ) {
   const base = summary.baseCurrency
   const c = l.columns
   const party = (id: string, name: string) => (id === 'pool' ? l.pool : name)
+  const ps = l.poolSheet
+  const poolSheet =
+    pool && (pool.contributions.length > 0 || BigInt(pool.spentBaseMinor) > 0n)
+      ? [
+          {
+            sheet: ps.title,
+            columns: [
+              { width: 12 },
+              { width: 20 },
+              { width: 12 },
+              { width: 8 },
+              { width: 10 },
+              { width: 14 },
+              { width: 24 },
+            ],
+            data: [
+              head([c.date, c.name, c.amount, c.currency, c.rate, `${c.base} (${base})`, ps.note]),
+              ...pool.contributions.map((x) => [
+                text(x.date),
+                text(x.name),
+                amount(x.amountMinor, x.currency),
+                text(x.currency),
+                { value: Number(x.fxRate), type: Number, format: '0.0000' } as Cell,
+                amount(x.baseAmountMinor, base),
+                text(x.note ?? ''),
+              ]),
+              [text('')],
+              head([ps.byMember, `${ps.putIn} (${base})`, ps.percent]),
+              ...pool.byMember.map((m) => [
+                text(m.name),
+                amount(m.contributedBaseMinor, base),
+                { value: m.percentBp / 10000, type: Number, format: '0.0%' } as Cell,
+              ]),
+              [text('')],
+              [text(ps.rule), text(ps.mode)],
+              [text(ps.putIn), amount(pool.totalBaseMinor, base)],
+              [text(ps.spent), amount(pool.spentBaseMinor, base)],
+              [text(ps.left), amount(pool.leftoverBaseMinor, base)],
+            ],
+          },
+        ]
+      : []
   await save(
     [
       {
@@ -138,6 +193,7 @@ export async function exportTripExcel(
           ]),
         ],
       },
+      ...poolSheet,
     ],
     `${tripName}-expenses.xlsx`,
   )

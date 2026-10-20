@@ -1,4 +1,4 @@
-import { ExpenseSummaryDto } from '@iplan/contracts'
+import { ExpenseSummaryDto, PoolDto } from '@iplan/contracts'
 import { type Locale, formatDateRange, formatDayLabel, formatTime } from '@iplan/i18n'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
@@ -19,12 +19,15 @@ export const metadata: Metadata = { title: 'Print' }
 export default async function PrintTripPage({ params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params
   if (!(await getMe())) redirect(`/login?next=${encodeURIComponent(`/print/trips/${tripId}`)}`)
-  const [t, raw, { trip, items }, summary] = await Promise.all([
+  const [t, raw, { trip, items }, summary, pool] = await Promise.all([
     getTranslations(),
     getLocale(),
     loadTrip(tripId),
     serverApi(`/api/trips/${tripId}/expenses/summary`, ExpenseSummaryDto),
+    serverApi(`/api/trips/${tripId}/pool`, PoolDto),
   ])
+  const hasPool = pool.contributions.length > 0 || BigInt(pool.spentBaseMinor) > 0n
+  const left = BigInt(pool.leftoverBaseMinor)
   const locale = raw as Locale
   const base = summary.baseCurrency
   const c = (k: string) => t(`export.col.${k}`)
@@ -141,6 +144,51 @@ export default async function PrintTripPage({ params }: { params: Promise<{ trip
               />
             </div>
           </div>
+          {hasPool && (
+            <div className="break-inside-avoid space-y-1.5 pt-2">
+              <p className="font-semibold">
+                {t('expenses.pool.title')} · {t(`expenses.pool.modes.${pool.mode}`)}
+              </p>
+              <p>
+                {t('expenses.pool.putIn')} {fmtServer(pool.totalBaseMinor, base)} ·{' '}
+                {t('expenses.pool.spent')} {fmtServer(pool.spentBaseMinor, base)} ·{' '}
+                {left >= 0n
+                  ? t('expenses.pool.leftAmount', { amount: fmtServer(String(left), base) })
+                  : t('expenses.pool.shortAmount', { amount: fmtServer(String(-left), base) })}
+              </p>
+              <table className="w-full border-collapse tabular-nums">
+                <thead>
+                  <tr className="border-b text-left">
+                    <th className="py-1">{c('date')}</th>
+                    <th className="py-1">{c('name')}</th>
+                    <th className="py-1 text-right">{c('amount')}</th>
+                    <th className="py-1 text-right">{base}</th>
+                    <th className="py-1">{c('note')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pool.contributions.map((x) => (
+                    <tr key={x.id} className="border-b">
+                      <td className="py-1">{formatDayLabel(x.date, { locale })}</td>
+                      <td className="py-1">{x.name}</td>
+                      <td className="py-1 text-right">{fmtServer(x.amountMinor, x.currency)}</td>
+                      <td className="py-1 text-right">{fmtServer(x.baseAmountMinor, base)}</td>
+                      <td className="py-1">{x.note ?? ''}</td>
+                    </tr>
+                  ))}
+                  {pool.byMember.map((m) => (
+                    <tr key={m.userId} className="border-b font-semibold">
+                      <td className="py-1" />
+                      <td className="py-1">{m.name}</td>
+                      <td className="py-1 text-right">{(m.percentBp / 100).toFixed(1)}%</td>
+                      <td className="py-1 text-right">{fmtServer(m.contributedBaseMinor, base)}</td>
+                      <td className="py-1" />
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
           {summary.transfers.map((tr) => (
             <p key={`${tr.from}-${tr.to}`}>
               {tr.from === 'pool' ? t('expenses.form.pool') : tr.fromName} →{' '}

@@ -134,30 +134,48 @@ export function ExpensesView({
           <Button
             variant="secondary"
             onClick={() =>
-              void exportTripExcel(trip.name, expenses, summary, trip.members, {
-                expenses: t('expenses.title'),
-                people: t('expenses.people'),
-                settle: t('expenses.settle'),
-                columns: {
-                  date: t('export.col.date'),
-                  title: t('export.col.title'),
-                  category: t('export.col.category'),
-                  amount: t('export.col.amount'),
-                  currency: t('export.col.currency'),
-                  rate: t('export.col.rate'),
-                  base: t('export.col.base'),
-                  paidBy: t('export.col.paidBy'),
-                  split: t('export.col.split'),
-                  name: t('export.col.name'),
-                  paid: t('export.col.paid'),
-                  share: t('export.col.share'),
-                  net: t('export.col.net'),
-                  from: t('export.col.from'),
-                  to: t('export.col.to'),
+              void exportTripExcel(
+                trip.name,
+                expenses,
+                summary,
+                trip.members,
+                {
+                  expenses: t('expenses.title'),
+                  people: t('expenses.people'),
+                  settle: t('expenses.settle'),
+                  columns: {
+                    date: t('export.col.date'),
+                    title: t('export.col.title'),
+                    category: t('export.col.category'),
+                    amount: t('export.col.amount'),
+                    currency: t('export.col.currency'),
+                    rate: t('export.col.rate'),
+                    base: t('export.col.base'),
+                    paidBy: t('export.col.paidBy'),
+                    split: t('export.col.split'),
+                    name: t('export.col.name'),
+                    paid: t('export.col.paid'),
+                    share: t('export.col.share'),
+                    net: t('export.col.net'),
+                    from: t('export.col.from'),
+                    to: t('export.col.to'),
+                  },
+                  category: (k) => t(`expenses.categories.${k}`),
+                  pool: t('expenses.form.pool'),
+                  poolSheet: {
+                    title: t('expenses.pool.title'),
+                    note: t('expenses.pool.note'),
+                    percent: '%',
+                    rule: t('expenses.pool.rule'),
+                    mode: t(`expenses.pool.modes.${pool.mode}`),
+                    putIn: t('expenses.pool.putIn'),
+                    spent: t('expenses.pool.spent'),
+                    left: t('expenses.pool.left'),
+                    byMember: t('expenses.pool.byMember'),
+                  },
                 },
-                category: (k) => t(`expenses.categories.${k}`),
-                pool: t('expenses.form.pool'),
-              })
+                pool,
+              )
             }
           >
             <FileSpreadsheet aria-hidden className="size-4" />

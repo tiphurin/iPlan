@@ -23,6 +23,14 @@ describe('stations', () => {
     expect(stations['2']?.map((s) => s.en)).toContain('Hongik University')
   })
 
+  it('every station has an English name', () => {
+    for (const [line, list] of Object.entries(stations)) {
+      for (const s of list) expect(s.en, `${line}: ${s.local}`).toMatch(/[A-Za-z]/)
+    }
+    expect(stations['K']?.map((s) => s.en)).toContain('Ungilsan')
+    expect(stations['7']?.map((s) => s.en)).toContain('Bucheon City Hall')
+  })
+
   it('never lists a station twice on a line', () => {
     for (const [line, list] of Object.entries(stations)) {
       const names = list.map((s) => s.en.toLowerCase())

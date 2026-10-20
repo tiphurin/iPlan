@@ -99,6 +99,20 @@ function insertAfter(list, en, add) {
   return [...list.slice(0, i + 1), ...add, ...list.slice(i + 1)]
 }
 
+/**
+ * Official English names (Revised Romanization, as on the station signs) for
+ * stations whose OpenStreetMap entries have only the Korean name.
+ */
+const ENGLISH = {
+  부천시청: 'Bucheon City Hall',
+  원덕: 'Wondeok',
+  오빈: 'Obin',
+  국수: 'Guksu',
+  신원: 'Sinwon',
+  양수: 'Yangsu',
+  운길산: 'Ungilsan',
+}
+
 /** City areas, to look up English names of stations whose stop has only a local name. */
 const AREAS = [
   '13.55,100.3,14.1,100.95',
@@ -177,7 +191,7 @@ for (const [line, relIds] of Object.entries(LINES)) {
       const t = byKey.get(`${m.type}/${m.ref}`)?.tags ?? {}
       const local = clean(t.name)
       if (!local) continue
-      const en = clean(t['name:en']) ?? english.get(local) ?? local
+      const en = clean(t['name:en']) ?? english.get(local) ?? ENGLISH[local] ?? local
       const key = en.toLowerCase()
       if (seen.has(key)) continue
       seen.add(key)
@@ -189,7 +203,8 @@ for (const [line, relIds] of Object.entries(LINES)) {
   if (fixed.length < 3) throw new Error(`${line}: only ${fixed.length} stations`)
   out[line] = fixed
   const untranslated = fixed.filter((s) => !/[A-Za-z]/.test(s.en)).length
-  if (untranslated) console.warn(`   ${line}: ${untranslated} without an English name`)
+  // Every station needs an English name: add any new one to ENGLISH above.
+  if (untranslated) throw new Error(`${line}: ${untranslated} stations without an English name`)
   console.log(
     `${line.padEnd(9)} ${String(fixed.length).padStart(3)}  ${fixed[0].en} … ${fixed.at(-1).en}`,
   )

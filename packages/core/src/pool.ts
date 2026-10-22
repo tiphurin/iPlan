@@ -1,16 +1,11 @@
 /**
- * The shared pool (kitty): money members put in, spending the pool paid for,
- * and how that spending is shared. All amounts are base-currency minor units.
+ * The shared pool (kitty): a common wallet members put money into and spend
+ * from. Everyone pays only what they used: whoever put in more than they used
+ * gets the rest back, whoever used pool money without putting enough in pays
+ * the difference into the pool. The pool can never go below zero.
+ * All amounts are base-currency minor units.
  */
 import { type Shares, type SplitExpense, computeBalances, splitByWeights } from './split'
-
-/**
- * - `actual`: pool-paid expenses keep their own split; whoever put in more than
- *   they used gets the difference back.
- * - `proportional`: pool-paid expenses are shared by how much each member put in,
- *   so leftovers come back (and shortfalls are owed) in that same proportion.
- */
-export type PoolMode = 'actual' | 'proportional'
 
 export interface PoolContribution {
   readonly userId: string
@@ -21,7 +16,6 @@ export interface PoolContribution {
 export interface PoolOptions {
   /** Party id the pool uses in expenses' `paidBy`. */
   readonly poolId: string
-  readonly mode: PoolMode
   readonly contributions: readonly PoolContribution[]
 }
 
@@ -33,33 +27,11 @@ export function contributedBy(contributions: readonly PoolContribution[]): Share
 }
 
 /**
- * Pool-paid expenses with their shares as the mode says. In `proportional` mode
- * each pool-paid expense is split by contribution weight (largest remainder, so
- * the shares still add up); with no contributions yet the expense's own split stays.
- */
-export function applyPoolMode(
-  expenses: readonly SplitExpense[],
-  options: PoolOptions,
-): SplitExpense[] {
-  const weights = Object.fromEntries(
-    Object.entries(contributedBy(options.contributions)).filter(([, amount]) => amount > 0n),
-  )
-  if (options.mode !== 'proportional' || Object.keys(weights).length === 0) return [...expenses]
-  return expenses.map((expense) =>
-    expense.paidBy === options.poolId
-      ? { ...expense, shares: splitByWeights(expense.amount, weights) }
-      : expense,
-  )
-}
-
-/**
- * Net balance per party with the pool rules applied: each contribution counts
- * as money a member handed to the pool (member +amount, pool −amount). The pool
- * then ends up negative when it has money left to hand back, positive when it
- * spent more than it was given, and `settle` turns that into transfers.
+ * Overall net per member (pool and person-to-person together): positive = gets
+ * money back, negative = pays. The pool's own entry is what it hands back.
  */
 export function poolBalances(expenses: readonly SplitExpense[], options: PoolOptions): Shares {
-  const balances: Record<string, bigint> = { ...computeBalances(applyPoolMode(expenses, options)) }
+  const balances: Record<string, bigint> = { ...computeBalances(expenses) }
   for (const c of options.contributions) {
     balances[c.userId] = (balances[c.userId] ?? 0n) + c.amount
     balances[options.poolId] = (balances[options.poolId] ?? 0n) - c.amount
@@ -67,10 +39,94 @@ export function poolBalances(expenses: readonly SplitExpense[], options: PoolOpt
   return balances
 }
 
+export interface PoolMemberSettlement {
+  readonly userId: string
+  /** Put into the pool. */
+  readonly contributed: bigint
+  /** Their shares of what the pool paid for. */
+  readonly used: bigint
+  /** contributed − used: positive = gets back from the pool, negative = pays into it. */
+  readonly net: bigint
+}
+
+/**
+ * Each member against the pool: put in minus used. Members who never touched
+ * the pool are left out. The nets add up to what is left in the pool.
+ */
+export function poolSettlement(
+  expenses: readonly SplitExpense[],
+  options: PoolOptions,
+): PoolMemberSettlement[] {
+  const contributed = contributedBy(options.contributions)
+  const used: Record<string, bigint> = {}
+  for (const e of expenses) {
+    if (e.paidBy !== options.poolId) continue
+    for (const [id, share] of Object.entries(e.shares)) used[id] = (used[id] ?? 0n) + share
+  }
+  const ids = [...new Set([...Object.keys(contributed), ...Object.keys(used)])]
+  return ids
+    .map((userId) => {
+      const c = contributed[userId] ?? 0n
+      const u = used[userId] ?? 0n
+      return { userId, contributed: c, used: u, net: c - u }
+    })
+    .filter((m) => m.contributed !== 0n || m.used !== 0n)
+}
+
+/** One expense behind a person-to-person transfer. */
+export interface PairItem {
+  /** Index of the expense in the input list. */
+  readonly index: number
+  /** Positive when it adds to what `from` owes `to`, negative when it takes away. */
+  readonly amount: bigint
+}
+
+export interface PairTransfer {
+  readonly from: string
+  readonly to: string
+  readonly amount: bigint
+  readonly items: readonly PairItem[]
+}
+
+/**
+ * Person-to-person debts from expenses members paid themselves (pool-paid ones
+ * are settled with the pool). Each pair is netted on its own, so everyone pays
+ * the people who actually paid for them, never a third person.
+ */
+export function pairTransfers(expenses: readonly SplitExpense[], poolId: string): PairTransfer[] {
+  // key "x|y" with x < y: positive = x owes y.
+  const pairs = new Map<string, { total: bigint; items: PairItem[] }>()
+  expenses.forEach((e, index) => {
+    if (e.paidBy === poolId) return
+    for (const [id, share] of Object.entries(e.shares)) {
+      if (id === e.paidBy || share === 0n) continue
+      const [x, y] = id < e.paidBy ? [id, e.paidBy] : [e.paidBy, id]
+      const signed = id === x ? share : -share
+      const pair = pairs.get(`${x}|${y}`) ?? { total: 0n, items: [] }
+      pair.total += signed
+      pair.items.push({ index, amount: signed })
+      pairs.set(`${x}|${y}`, pair)
+    }
+  })
+  const out: PairTransfer[] = []
+  for (const [key, { total, items }] of pairs) {
+    if (total === 0n) continue
+    const [x, y] = key.split('|') as [string, string]
+    const flip = total < 0n
+    out.push({
+      from: flip ? y : x,
+      to: flip ? x : y,
+      amount: flip ? -total : total,
+      items: flip ? items.map((i) => ({ ...i, amount: -i.amount })) : items,
+    })
+  }
+  return out.sort((a, b) => (a.amount === b.amount ? 0 : a.amount > b.amount ? -1 : 1))
+}
+
 export interface PoolSummary {
   readonly totalIn: bigint
   readonly spent: bigint
-  /** Positive: left over in the pool. Negative: the pool is short. */
+  /** What is left in the pool; never below zero for new spending. */
   readonly leftover: bigint
   /** Per member: how much they put in and their share of the total in basis points. */
   readonly byMember: readonly { userId: string; contributed: bigint; percentBp: number }[]

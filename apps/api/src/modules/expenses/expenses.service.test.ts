@@ -67,6 +67,11 @@ describe('ExpensesService', () => {
 
   it('works out who owes whom, including the shared pool', async () => {
     const { tripId, service } = await setup()
+    await service.addContribution(users.owner, tripId, {
+      userId: 'owner',
+      amount: '90',
+      currency: 'THB',
+    })
     await service.create(users.owner, tripId, {
       ...meal,
       amount: '300',
@@ -83,9 +88,15 @@ describe('ExpensesService', () => {
     const summary = await service.summary(users.viewer, tripId)
     expect(summary.totalMinor).toBe('39000')
     const net = Object.fromEntries(summary.parties.map((p) => [p.id, p.netMinor]))
-    expect(net).toEqual({ owner: '17000', editor: '-13000', viewer: '-13000', pool: '9000' })
+    expect(net).toEqual({ owner: '26000', editor: '-13000', viewer: '-13000' })
+    // The 300 owner paid is settled between people; the 90 from the pool with the pool.
     const owed = summary.transfers.reduce((sum, t) => sum + BigInt(t.amountMinor), 0n)
-    expect(owed).toBe(26000n)
+    expect(owed).toBe(20000n)
+    expect(summary.pool.map((m) => [m.userId, m.netMinor])).toEqual([
+      ['owner', '6000'],
+      ['editor', '-3000'],
+      ['viewer', '-3000'],
+    ])
     expect(summary.byDay.find((d) => d.dayDate === '2026-10-23')).toEqual({
       dayDate: '2026-10-23',
       spentMinor: '39000',

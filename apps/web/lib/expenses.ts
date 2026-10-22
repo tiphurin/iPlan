@@ -7,7 +7,6 @@ import {
   PoolContributionDto,
   type PoolContributionInput,
   PoolDto,
-  type PoolMode,
   type TripMoneySettingsInput,
 } from '@iplan/contracts'
 import { money } from '@iplan/core'
@@ -94,14 +93,6 @@ export function usePoolMutations(tripId: string) {
       client.invalidateQueries({ queryKey: expenseKeys.summary(tripId) }),
     ])
   return {
-    mode: useMutation({
-      mutationFn: (mode: PoolMode) =>
-        apiFetch(`/api/trips/${tripId}/pool`, { method: 'PUT', body: { mode }, schema: PoolDto }),
-      onSuccess: (pool) => {
-        client.setQueryData(expenseKeys.pool(tripId), pool)
-        return refresh()
-      },
-    }),
     save: useMutation({
       mutationFn: ({ id, input }: { id?: string; input: PoolContributionInput }) =>
         id

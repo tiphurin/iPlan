@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
-  balanceRows,
   chartMax,
   dayBars,
   personBars,
   poolHeadline,
-  settleHeadline,
+  settleCards,
+  settleCount,
   viewerShare,
 } from './expense-charts'
 
@@ -66,46 +66,74 @@ describe('chartMax', () => {
   })
 })
 
-describe('balanceRows', () => {
-  it('puts those owed money first and drops idle parties', () => {
-    const rows = balanceRows([
-      { id: 'a', name: 'Ann', paidMinor: '100', shareMinor: '300', netMinor: '-200' },
-      { id: 'pool', name: 'Pool', paidMinor: '50', shareMinor: '0', netMinor: '50' },
-      { id: 'b', name: 'Ben', paidMinor: '450', shareMinor: '300', netMinor: '150' },
-      { id: 'c', name: 'Cat', paidMinor: '0', shareMinor: '0', netMinor: '0' },
-    ])
-    expect(rows.map((r) => [r.id, r.net])).toEqual([
-      ['b', 150],
-      ['pool', 50],
-      ['a', -200],
-    ])
-    expect(rows[1]?.isPool).toBe(true)
+describe('settleCards', () => {
+  const party = (id: string, netMinor = '0') => ({
+    id,
+    name: id.toUpperCase(),
+    paidMinor: '0',
+    shareMinor: '0',
+    contributedMinor: '0',
+    netMinor,
   })
-})
-
-describe('settleHeadline', () => {
-  const tr = (from: string, to: string, amountMinor: string) => ({
+  const tr = (
+    from: string,
+    to: string,
+    amountMinor: string,
+    items = [{ title: 'Hotel', amountMinor }],
+  ) => ({
     from,
-    fromName: from,
+    fromName: from.toUpperCase(),
     to,
-    toName: to,
+    toName: to.toUpperCase(),
     amountMinor,
+    items: items.map((i) => ({ expenseId: '00000000-0000-4000-8000-000000000001', ...i })),
   })
-  it('says settled when nothing is owed', () => {
-    expect(settleHeadline([])).toEqual({ kind: 'settled' })
+  const pool = (userId: string, contributedMinor: string, usedMinor: string) => ({
+    userId,
+    name: userId.toUpperCase(),
+    contributedMinor,
+    usedMinor,
+    netMinor: (BigInt(contributedMinor) - BigInt(usedMinor)).toString(),
   })
-  it('names the one transfer', () => {
-    expect(settleHeadline([tr('a', 'b', '450000')])).toEqual({
-      kind: 'single',
-      transfer: tr('a', 'b', '450000'),
+
+  it('case 5: pool and person lines on each card, viewer first', () => {
+    const summary = {
+      parties: [party('a'), party('b'), party('c')],
+      transfers: [
+        tr('a', 'b', '30000', [{ title: 'Dinner', amountMinor: '30000' }]),
+        tr('c', 'b', '30000'),
+      ],
+      pool: [pool('a', '300000', '60000'), pool('c', '100000', '60000'), pool('b', '0', '60000')],
+    }
+    const cards = settleCards(summary, 'b')
+    expect(cards.map((c) => [c.id, c.netMinor])).toEqual([
+      ['b', '0'],
+      ['c', '10000'],
+      ['a', '210000'],
+    ])
+    const b = cards[0]
+    expect(b?.pay).toMatchObject([
+      { kind: 'pool', amountMinor: '60000', contributedMinor: '0', usedMinor: '60000' },
+    ])
+    expect(b?.get.map((l) => [l.kind, l.id, l.amountMinor])).toEqual([
+      ['person', 'a', '30000'],
+      ['person', 'c', '30000'],
+    ])
+    expect(cards[2]?.get[0]).toMatchObject({ kind: 'pool', amountMinor: '240000' })
+    expect(cards[2]?.pay[0]).toMatchObject({
+      kind: 'person',
+      id: 'b',
+      items: [{ title: 'Dinner' }],
     })
+    expect(settleCount(summary)).toBe(5)
   })
-  it('counts and totals several transfers', () => {
-    expect(settleHeadline([tr('a', 'b', '100'), tr('c', 'b', '250')])).toEqual({
-      kind: 'many',
-      count: 2,
-      totalMinor: '350',
-    })
+
+  it('shows the viewer even with nothing to do, and counts zero when settled', () => {
+    const summary = { parties: [party('a')], transfers: [], pool: [pool('a', '1000', '1000')] }
+    expect(settleCards(summary, 'a')).toEqual([
+      { id: 'a', name: 'A', netMinor: '0', pay: [], get: [] },
+    ])
+    expect(settleCount(summary)).toBe(0)
   })
 })
 

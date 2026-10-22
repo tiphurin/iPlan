@@ -2,13 +2,12 @@
 
 import type { ExpenseDto, ExpenseSummaryDto, PoolDto, TripDetailDto } from '@iplan/contracts'
 import { money, toDecimalString } from '@iplan/core'
-import { ArrowRight, CircleCheck, Landmark, Settings2, X } from 'lucide-react'
+import { CircleCheck, Landmark, Settings2, X } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { type FormEvent, useState } from 'react'
 import { Avatar } from '@/components/avatar'
-import { BalanceBars } from '@/components/charts/balance-bars'
 import { DayBars } from '@/components/charts/day-bars'
 import { CATEGORY_COLORS, Donut } from '@/components/charts/donut'
 import { PersonBars } from '@/components/charts/person-bars'
@@ -18,7 +17,7 @@ import { Segmented } from '@/components/ui/chip'
 import { Field, Input } from '@/components/ui/field'
 import { Fab } from '@/components/ui/fab'
 import { cn } from '@/lib/cn'
-import { balanceRows, dayBars, personBars, settleHeadline, viewerShare } from '@/lib/expense-charts'
+import { dayBars, personBars, settleCards, settleCount, viewerShare } from '@/lib/expense-charts'
 import {
   fmt as fmtRaw,
   useExpenseMutations,
@@ -32,6 +31,7 @@ import { zoneCurrency } from '@/lib/time-zones'
 import { MoneySwitch } from './display-switches'
 import { useTrip } from '@/lib/trips'
 import { PoolCard } from './pool-card'
+import { SettleCards } from './settle-cards'
 import { useFormat } from '@/lib/use-format'
 
 interface ExpensesViewProps {
@@ -108,7 +108,7 @@ function ExpensesBody({
         size={size}
       />
     )
-  const headline = settleHeadline(summary.transfers)
+  const steps = settleCount(summary)
 
   function saveSettings(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -360,113 +360,28 @@ function ExpensesBody({
           <Card
             className={cn(
               'flex items-center gap-3',
-              headline.kind === 'settled' && 'border-success/40 bg-success/5',
+              steps === 0 && 'border-success/40 bg-success/5',
             )}
           >
-            {headline.kind === 'settled' ? (
-              <>
-                <CircleCheck aria-hidden className="size-8 shrink-0 text-success" />
-                <p className="text-lg font-semibold">{t('expenses.settled')}</p>
-              </>
-            ) : headline.kind === 'single' ? (
-              <>
-                <span className="flex shrink-0 items-center">
-                  {partyIcon(headline.transfer.from, headline.transfer.fromName, 34)}
-                  <ArrowRight aria-hidden className="mx-0.5 size-4 text-faint" />
-                  {partyIcon(headline.transfer.to, headline.transfer.toName, 34)}
-                </span>
-                <p className="min-w-0 flex-1 text-lg font-semibold">
-                  {t('expenses.settleView.one', {
-                    from: partyName(headline.transfer.from, headline.transfer.fromName),
-                    to: partyName(headline.transfer.to, headline.transfer.toName),
-                    amount: fmt(headline.transfer.amountMinor, base),
-                  })}
-                </p>
-              </>
-            ) : (
-              <p className="text-lg font-semibold">
-                {t('expenses.settleView.many', {
-                  count: headline.count,
-                  amount: fmt(headline.totalMinor, base),
-                })}
-              </p>
-            )}
+            {steps === 0 && <CircleCheck aria-hidden className="size-8 shrink-0 text-success" />}
+            <p className="text-lg font-semibold">
+              {steps === 0
+                ? t('expenses.settled')
+                : t('expenses.settleCards.steps', { count: steps })}
+            </p>
           </Card>
 
           {(pool.contributions.length > 0 || BigInt(pool.spentBaseMinor) > 0n) && (
             <PoolCard trip={trip} pool={pool} meId={meId} show={fmt} compact />
           )}
 
-          {/* One transfer is already spelled out in the headline. */}
-          {summary.transfers.length > 1 && (
-            <section>
-              <SectionTitle>{t('expenses.settleView.transfers')}</SectionTitle>
-              <ul className="divide-y overflow-hidden rounded-2xl border bg-card">
-                {summary.transfers.map((tr) => {
-                  const from = partyName(tr.from, tr.fromName)
-                  const to = partyName(tr.to, tr.toName)
-                  return (
-                    <li key={`${tr.from}-${tr.to}`} className="flex items-center gap-3 px-4 py-3">
-                      <span className="flex shrink-0 items-center">
-                        {partyIcon(tr.from, tr.fromName, 34)}
-                        <ArrowRight aria-hidden className="mx-0.5 size-4 text-faint" />
-                        {partyIcon(tr.to, tr.toName, 34)}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm text-muted-foreground">
-                          {from} → {to}
-                        </span>
-                        <span className="num block text-lg font-semibold">
-                          {fmt(tr.amountMinor, base)}
-                        </span>
-                      </span>
-                    </li>
-                  )
-                })}
-              </ul>
-            </section>
-          )}
-
-          <section>
-            <SectionTitle>{t('expenses.settleView.balances')}</SectionTitle>
-            <p className="mb-2 text-sm text-muted-foreground">{t('expenses.settleHint')}</p>
-            <Card>
-              <BalanceBars
-                rows={balanceRows(summary.parties).map((r) => ({
-                  ...r,
-                  name: partyName(r.id, r.name),
-                  icon: partyIcon(r.id, r.name, 30),
-                  netText:
-                    r.net > 0
-                      ? t('expenses.charts.getsBack', { amount: fmt(BigInt(r.net), base) })
-                      : r.net < 0
-                        ? t('expenses.charts.owes', { amount: fmt(BigInt(-r.net), base) })
-                        : t('expenses.charts.even'),
-                  detail: r.isPool
-                    ? BigInt(pool.totalBaseMinor) > 0n
-                      ? t('expenses.settleView.poolDetailIn', {
-                          in: fmt(pool.totalBaseMinor, base),
-                          paid: fmt(BigInt(r.paid), base),
-                        })
-                      : t('expenses.settleView.poolDetail', { paid: fmt(BigInt(r.paid), base) })
-                    : r.contributed > 0
-                      ? t('expenses.settleView.detailPool', {
-                          contributed: fmt(BigInt(r.contributed), base),
-                          paid: fmt(BigInt(r.paid), base),
-                          share: fmt(BigInt(r.share), base),
-                        })
-                      : t('expenses.settleView.detail', {
-                          paid: fmt(BigInt(r.paid), base),
-                          share: fmt(BigInt(r.share), base),
-                        }),
-                }))}
-                labels={{
-                  owes: t('expenses.settleView.owes'),
-                  getsBack: t('expenses.settleView.getsBack'),
-                }}
-              />
-            </Card>
-          </section>
+          <SettleCards
+            cards={settleCards(summary, meId)}
+            meId={meId}
+            t={t as unknown as (key: string, values?: Record<string, string | number>) => string}
+            fmt={(minor) => fmt(minor, base)}
+            icon={(id, name) => partyIcon(id, name, 26)}
+          />
         </>
       )}
 

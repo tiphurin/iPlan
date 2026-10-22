@@ -74,47 +74,105 @@ export function chartMax(values: (number | null)[]): number {
   return values.reduce<number>((max, v) => Math.max(max, v ?? 0), 1)
 }
 
-/** One row of the balance chart: what someone gets back (+) or still owes (−). */
-export interface BalanceRow {
+/** One thing to pay or to receive on someone's settle card. */
+export interface SettleLine {
+  /** Another member, or the shared pool. */
+  kind: 'person' | 'pool'
+  /** The other member's id, or the pool id. */
   id: string
   name: string
-  isPool: boolean
-  paid: number
-  share: number
-  contributed: number
-  net: number
+  amountMinor: string
+  /** Person lines: the expenses behind it; negative ones were paid the other way and are taken off. */
+  items: { title: string; amountMinor: string }[]
+  /** Pool lines: what this person put in and used. */
+  contributedMinor: string
+  usedMinor: string
 }
+
+/** Everything one person has to pay and receive to settle up. */
+export interface SettleCard {
+  id: string
+  name: string
+  /** Received − paid. */
+  netMinor: string
+  pay: SettleLine[]
+  get: SettleLine[]
+}
+
+type SettleInput = Pick<ExpenseSummaryDto, 'parties' | 'transfers' | 'pool'>
 
 /**
- * Everyone involved in the spending, those owed money first and those who owe
- * most last, so the chart reads top (gets back) to bottom (owes).
+ * One card per person: whom to pay and whom to receive from, with the reason.
+ * The pool is settled on its own: whoever used more than they put in pays into
+ * it, whoever put in more gets the rest back. The viewer comes first, then the
+ * people who pay most, then those who receive.
  */
-export function balanceRows(parties: readonly Party[]): BalanceRow[] {
-  return personBars(parties)
-    .map(({ id, name, isPool, paid, share, contributed, net }) => ({
-      id,
-      name,
-      isPool,
-      paid,
-      share,
-      contributed,
-      net,
-    }))
-    .sort((a, b) => b.net - a.net || a.name.localeCompare(b.name))
+export function settleCards(summary: SettleInput, meId: string | null): SettleCard[] {
+  const cards = new Map<string, SettleCard>()
+  const card = (id: string, name: string) => {
+    let c = cards.get(id)
+    if (!c) {
+      c = { id, name, netMinor: '0', pay: [], get: [] }
+      cards.set(id, c)
+    }
+    return c
+  }
+  const blank = { contributedMinor: '0', usedMinor: '0' }
+  for (const tr of summary.transfers) {
+    const items = tr.items.map((i) => ({ title: i.title, amountMinor: i.amountMinor }))
+    card(tr.from, tr.fromName).pay.push({
+      kind: 'person',
+      id: tr.to,
+      name: tr.toName,
+      amountMinor: tr.amountMinor,
+      items,
+      ...blank,
+    })
+    card(tr.to, tr.toName).get.push({
+      kind: 'person',
+      id: tr.from,
+      name: tr.fromName,
+      amountMinor: tr.amountMinor,
+      items,
+      ...blank,
+    })
+  }
+  for (const m of summary.pool) {
+    const net = BigInt(m.netMinor)
+    if (net === 0n) continue
+    const line: SettleLine = {
+      kind: 'pool',
+      id: POOL_ID,
+      name: '',
+      amountMinor: (net < 0n ? -net : net).toString(),
+      items: [],
+      contributedMinor: m.contributedMinor,
+      usedMinor: m.usedMinor,
+    }
+    const c = card(m.userId, m.name)
+    if (net < 0n) c.pay.unshift(line)
+    else c.get.unshift(line)
+  }
+  if (meId && !cards.has(meId)) {
+    const me = summary.parties.find((p) => p.id === meId)
+    if (me) card(me.id, me.name)
+  }
+  const total = (lines: SettleLine[]) => lines.reduce((sum, l) => sum + BigInt(l.amountMinor), 0n)
+  const out = [...cards.values()].map((c) => ({
+    ...c,
+    netMinor: (total(c.get) - total(c.pay)).toString(),
+  }))
+  return out.sort((a, b) => {
+    if (a.id === meId) return -1
+    if (b.id === meId) return 1
+    const diff = BigInt(a.netMinor) - BigInt(b.netMinor)
+    return diff === 0n ? a.name.localeCompare(b.name) : diff < 0n ? -1 : 1
+  })
 }
 
-/** What the settle tab says first, in plain words. */
-export type SettleHeadline =
-  | { kind: 'settled' }
-  | { kind: 'single'; transfer: ExpenseSummaryDto['transfers'][number] }
-  | { kind: 'many'; count: number; totalMinor: string }
-
-export function settleHeadline(transfers: ExpenseSummaryDto['transfers']): SettleHeadline {
-  const [first] = transfers
-  if (!first) return { kind: 'settled' }
-  if (transfers.length === 1) return { kind: 'single', transfer: first }
-  const total = transfers.reduce((sum, tr) => sum + BigInt(tr.amountMinor), 0n)
-  return { kind: 'many', count: transfers.length, totalMinor: total.toString() }
+/** How many payments are left before everyone is even (0 = settled). */
+export function settleCount(summary: Pick<ExpenseSummaryDto, 'transfers' | 'pool'>): number {
+  return summary.transfers.length + summary.pool.filter((m) => BigInt(m.netMinor) !== 0n).length
 }
 
 /** What the pool card says first about who put in how much. */

@@ -130,7 +130,7 @@ export function ExportSheet({
           note: t('expenses.pool.note'),
           percent: '%',
           rule: t('expenses.pool.rule'),
-          mode: t(`expenses.pool.modes.${pool.mode}`),
+          ruleText: t('expenses.pool.ruleText'),
           putIn: t('expenses.pool.putIn'),
           spent: t('expenses.pool.spent'),
           left: t('expenses.pool.left'),

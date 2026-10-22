@@ -1,138 +1,117 @@
 import { describe, expect, it } from 'vitest'
-import { applyPoolMode, poolBalances, summarizePool } from './pool'
-import { type SplitExpense, settle, splitEqual } from './split'
+import { pairTransfers, poolBalances, poolSettlement, summarizePool } from './pool'
+import { type SplitExpense, splitEqual } from './split'
 
 const POOL = 'pool'
 const baht = (n: number) => BigInt(n) * 100n
-const poolPaid = (amount: bigint, members = ['a', 'b']): SplitExpense => ({
-  paidBy: POOL,
-  amount,
-  shares: splitEqual(amount, members),
+const paid = (paidBy: string, amount: number, members: string[]): SplitExpense => ({
+  paidBy,
+  amount: baht(amount),
+  shares: splitEqual(baht(amount), members),
 })
-/** A puts in ฿7,000, B ฿5,000. */
-const contributions = [
-  { userId: 'a', amount: baht(7000) },
-  { userId: 'b', amount: baht(5000) },
-]
+const put = (userId: string, amount: number) => ({ userId, amount: baht(amount) })
 const sum = (shares: Record<string, bigint>) => Object.values(shares).reduce((x, y) => x + y, 0n)
 
-describe('poolBalances, actual mode', () => {
-  it('refunds whoever put in more than they used (7,000 / 5,000, spent 10,000 equally)', () => {
-    const balances = poolBalances([poolPaid(baht(10000))], {
-      poolId: POOL,
-      mode: 'actual',
-      contributions,
-    })
-    expect(balances).toEqual({ a: baht(2000), b: 0n, pool: -baht(2000) })
-    expect(settle(balances)).toEqual([{ from: POOL, to: 'a', amount: baht(2000) }])
-  })
-
-  it('puts a shortfall on members through their own shares', () => {
-    const balances = poolBalances([poolPaid(baht(14000))], {
-      poolId: POOL,
-      mode: 'actual',
-      contributions,
-    })
-    // Each used 7,000: A is even, B owes 2,000 to the pool.
-    expect(balances).toEqual({ a: 0n, b: -baht(2000), pool: baht(2000) })
-    expect(settle(balances)).toEqual([{ from: 'b', to: POOL, amount: baht(2000) }])
-  })
-
-  it('works with no contributions (pool is owed what it paid)', () => {
-    const balances = poolBalances([poolPaid(baht(100))], {
-      poolId: POOL,
-      mode: 'actual',
-      contributions: [],
-    })
-    expect(balances).toEqual({ a: -baht(50), b: -baht(50), pool: baht(100) })
-  })
-
-  it('mixes with member-paid expenses', () => {
-    const member: SplitExpense = {
-      paidBy: 'b',
-      amount: baht(600),
-      shares: splitEqual(baht(600), ['a', 'b']),
-    }
-    const balances = poolBalances([poolPaid(baht(10000)), member], {
-      poolId: POOL,
-      mode: 'actual',
-      contributions,
-    })
-    expect(balances).toEqual({ a: baht(1700), b: baht(300), pool: -baht(2000) })
-    expect(sum(balances)).toBe(0n)
-  })
-})
-
-describe('poolBalances, proportional mode', () => {
-  it('shares spending and the leftover by what each put in', () => {
-    const balances = poolBalances([poolPaid(baht(10000))], {
-      poolId: POOL,
-      mode: 'proportional',
-      contributions,
-    })
-    // A: 7/12 of 10,000 = 5,833.33 → gets 1,166.67 back; B: 4,166.67 → 833.33 back.
-    expect(balances).toEqual({ a: 116_667n, b: 83_333n, pool: -baht(2000) })
-    const transfers = settle(balances)
-    expect(transfers).toEqual([
-      { from: POOL, to: 'a', amount: 116_667n },
-      { from: POOL, to: 'b', amount: 83_333n },
+describe('pairTransfers: each person pays the people who paid for them', () => {
+  it('case 1: two people, A pays dinner 1,000', () => {
+    expect(pairTransfers([paid('a', 1000, ['a', 'b'])], POOL)).toEqual([
+      { from: 'b', to: 'a', amount: baht(500), items: [{ index: 0, amount: baht(500) }] },
     ])
   })
 
-  it('shares a shortfall in the same proportion', () => {
-    const balances = poolBalances([poolPaid(baht(15000))], {
-      poolId: POOL,
-      mode: 'proportional',
-      contributions,
-    })
-    expect(balances).toEqual({ a: -baht(1750), b: -baht(1250), pool: baht(3000) })
+  it('case 2: three people, A pays the hotel 3,000 and B dinner 1,500', () => {
+    const transfers = pairTransfers(
+      [paid('a', 3000, ['a', 'b', 'c']), paid('b', 1500, ['a', 'b', 'c'])],
+      POOL,
+    )
+    expect(transfers.map((t) => [t.from, t.to, t.amount])).toEqual([
+      ['c', 'a', baht(1000)],
+      ['b', 'a', baht(500)],
+      ['c', 'b', baht(500)],
+    ])
+    // B → A nets the hotel (+1,000) against the dinner B paid for A (−500).
+    expect(transfers.find((t) => t.from === 'b')?.items).toEqual([
+      { index: 0, amount: baht(1000) },
+      { index: 1, amount: -baht(500) },
+    ])
   })
 
-  it('falls back to each expense split when nobody has put money in', () => {
-    const expenses = [poolPaid(baht(90), ['a', 'b', 'c'])]
+  it('leaves pool-paid expenses out and drops pairs that even out', () => {
     expect(
-      applyPoolMode(expenses, { poolId: POOL, mode: 'proportional', contributions: [] }),
-    ).toEqual(expenses)
+      pairTransfers(
+        [paid(POOL, 900, ['a', 'b']), paid('a', 200, ['b']), paid('b', 200, ['a'])],
+        POOL,
+      ),
+    ).toEqual([])
+  })
+})
+
+describe('poolSettlement: put in minus used', () => {
+  it('case 3: both put in 2,000, spent 3,000 → 500 back each', () => {
+    const s = poolSettlement([paid(POOL, 3000, ['a', 'b'])], {
+      poolId: POOL,
+      contributions: [put('a', 2000), put('b', 2000)],
+    })
+    expect(s).toEqual([
+      { userId: 'a', contributed: baht(2000), used: baht(1500), net: baht(500) },
+      { userId: 'b', contributed: baht(2000), used: baht(1500), net: baht(500) },
+    ])
   })
 
-  it('rounds to the satang and still adds up, leaving member-paid expenses alone', () => {
-    const member: SplitExpense = {
-      paidBy: 'a',
-      amount: 1001n,
-      shares: splitEqual(1001n, ['a', 'c']),
-    }
-    const applied = applyPoolMode([poolPaid(1001n, ['a', 'b', 'c']), member], {
+  it('case 4: B put nothing in but used 600 → pays 600 in; A gets 2,400, C 400', () => {
+    const s = poolSettlement([paid(POOL, 1800, ['a', 'b', 'c'])], {
       poolId: POOL,
-      mode: 'proportional',
-      contributions: [
-        { userId: 'a', amount: 100n },
-        { userId: 'b', amount: 100n },
-        { userId: 'c', amount: 100n },
-      ],
+      contributions: [put('a', 3000), put('c', 1000)],
     })
-    expect(applied[0]?.shares).toEqual({ a: 334n, b: 334n, c: 333n })
-    expect(applied[1]).toBe(member)
+    expect(s.map((m) => [m.userId, m.net])).toEqual([
+      ['a', baht(2400)],
+      ['c', baht(400)],
+      ['b', -baht(600)],
+    ])
+    // Left in the pool (2,200) = sum of the nets.
+    expect(s.reduce((x, m) => x + m.net, 0n)).toBe(baht(2200))
   })
 
-  it('adds up contributions per member, including ones already converted from other currencies', () => {
-    // ₩100,000 at 0.0255 = ฿2,550 plus ฿1,450 from A; ฿4,000 from B: 50/50.
-    const balances = poolBalances([poolPaid(baht(6000))], {
+  it('never makes whoever put in more pay more: refunds are put in minus used', () => {
+    const s = poolSettlement([paid(POOL, 1200, ['a', 'c'])], {
       poolId: POOL,
-      mode: 'proportional',
-      contributions: [
-        { userId: 'a', amount: 255_000n },
-        { userId: 'b', amount: baht(4000) },
-        { userId: 'a', amount: 145_000n },
-      ],
+      contributions: [put('a', 3000), put('c', 1000)],
     })
-    expect(balances).toEqual({ a: baht(1000), b: baht(1000), pool: -baht(2000) })
+    expect(s.map((m) => [m.userId, m.used, m.net])).toEqual([
+      ['a', baht(600), baht(2400)],
+      ['c', baht(600), baht(400)],
+    ])
+  })
+
+  it('case 5: pool and a member-paid dinner are settled separately', () => {
+    const expenses = [paid(POOL, 1800, ['a', 'b', 'c']), paid('b', 900, ['a', 'b', 'c'])]
+    const contributions = [put('a', 3000), put('c', 1000)]
+    expect(poolSettlement(expenses, { poolId: POOL, contributions }).map((m) => m.net)).toEqual([
+      baht(2400),
+      baht(400),
+      -baht(600),
+    ])
+    expect(pairTransfers(expenses, POOL).map((t) => [t.from, t.to, t.amount])).toEqual([
+      ['a', 'b', baht(300)],
+      ['c', 'b', baht(300)],
+    ])
+    // Overall: A +2,100, B 0, C +100, and the pool hands back its 2,200.
+    const overall = poolBalances(expenses, { poolId: POOL, contributions })
+    expect(overall).toEqual({ a: baht(2100), b: 0n, c: baht(100), pool: -baht(2200) })
+    expect(sum(overall)).toBe(0n)
   })
 })
 
 describe('summarizePool', () => {
   it('totals what went in, what was spent and each share in basis points', () => {
     const member: SplitExpense = { paidBy: 'a', amount: 500n, shares: { a: 500n } }
-    expect(summarizePool([poolPaid(baht(10000)), member], contributions, POOL)).toEqual({
+    expect(
+      summarizePool(
+        [paid(POOL, 10000, ['a', 'b']), member],
+        [put('a', 7000), put('b', 5000)],
+        POOL,
+      ),
+    ).toEqual({
       totalIn: baht(12000),
       spent: baht(10000),
       leftover: baht(2000),
@@ -143,11 +122,11 @@ describe('summarizePool', () => {
     })
   })
 
-  it('reports a shortfall as a negative leftover and copes with an empty pool', () => {
-    expect(summarizePool([poolPaid(baht(100))], [], POOL)).toEqual({
+  it('copes with an empty pool', () => {
+    expect(summarizePool([], [], POOL)).toEqual({
       totalIn: 0n,
-      spent: baht(100),
-      leftover: -baht(100),
+      spent: 0n,
+      leftover: 0n,
       byMember: [],
     })
   })

@@ -7,7 +7,6 @@ import {
   PoolContributionInput,
   PoolContributionUpdateInput,
   PoolDto,
-  PoolModeInput,
   TripMoneySettingsInput,
 } from '@iplan/contracts'
 import { requireUser } from '../../shared/auth-guard'
@@ -95,18 +94,6 @@ const poolGet = createRoute({
   request: { params: TripParams },
   responses: { 200: { description: 'Pool', content: json(PoolDto) }, ...denied },
 })
-const poolMode = createRoute({
-  method: 'put',
-  path: '/trips/{tripId}/pool',
-  tags: poolTags,
-  summary: 'Choose how pool spending is shared (editor or owner)',
-  request: { params: TripParams, body: { content: json(PoolModeInput), required: true } },
-  responses: {
-    200: { description: 'Pool', content: json(PoolDto) },
-    ...denied,
-    422: errorResponses[422],
-  },
-})
 const contribute = createRoute({
   method: 'post',
   path: '/trips/{tripId}/pool/contributions',
@@ -183,16 +170,6 @@ export function expenseRoutes(service: ExpensesService) {
     })
     .openapi(poolGet, async (c) =>
       c.json(await service.pool(requireUser(c), c.req.valid('param').tripId), 200),
-    )
-    .openapi(poolMode, async (c) =>
-      c.json(
-        await service.setPoolMode(
-          requireUser(c),
-          c.req.valid('param').tripId,
-          c.req.valid('json').mode,
-        ),
-        200,
-      ),
     )
     .openapi(contribute, async (c) =>
       c.json(

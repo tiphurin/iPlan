@@ -39,18 +39,33 @@ const transfersOf = (summary: { transfers: { from: string; to: string; amountMin
   summary.transfers.map((t) => [t.from, t.to, t.amountMinor])
 
 describe('ExpensesService pool', () => {
-  it('actual mode: whoever put in more than they used gets it back', async () => {
+  it('everyone pays what they used: put in more than used, get the rest back', async () => {
     const { tripId, service } = await example()
     const summary = await service.summary(users.viewer, tripId)
-    expect(summary.poolMode).toBe('actual')
-    expect(netOf(summary)).toEqual({ owner: '200000', editor: '0', viewer: '0', pool: '-200000' })
-    expect(transfersOf(summary)).toEqual([['pool', 'owner', '200000']])
+    expect(netOf(summary)).toEqual({ owner: '200000', editor: '0', viewer: '0' })
+    expect(summary.pool).toEqual([
+      {
+        userId: 'owner',
+        name: 'Owner',
+        contributedMinor: '700000',
+        usedMinor: '500000',
+        netMinor: '200000',
+      },
+      {
+        userId: 'editor',
+        name: 'Editor',
+        contributedMinor: '500000',
+        usedMinor: '500000',
+        netMinor: '0',
+      },
+    ])
+    // Pool-paid spending is settled with the pool, not between people.
+    expect(summary.transfers).toEqual([])
     const owner = summary.parties.find((p) => p.id === 'owner')
     expect(owner).toMatchObject({ contributedMinor: '700000', shareMinor: '500000' })
 
     const pool = await service.pool(users.viewer, tripId)
     expect(pool).toMatchObject({
-      mode: 'actual',
       baseCurrency: 'THB',
       totalBaseMinor: '1200000',
       spentBaseMinor: '1000000',
@@ -63,65 +78,77 @@ describe('ExpensesService pool', () => {
     expect(pool.contributions).toHaveLength(2)
   })
 
-  it('proportional mode: shares spending and the leftover by what each put in', async () => {
-    const { tripId, service, audit } = await example()
-    const pool = await service.setPoolMode(users.editor, tripId, 'proportional')
-    expect(pool.mode).toBe('proportional')
-    expect(audit.entries.at(-1)).toMatchObject({
-      action: 'trip.pool_mode',
-      data: { mode: 'proportional' },
+  it('someone who used the pool without putting in pays their part into it', async () => {
+    const { tripId, service } = await setup()
+    await service.addContribution(users.owner, tripId, put('owner', '3000'))
+    await service.create(users.owner, tripId, {
+      ...poolSpend('1800'),
+      split: { mode: 'equal', participants: ['owner', 'editor', 'viewer'] },
     })
     const summary = await service.summary(users.viewer, tripId)
-    // Owner: 7/12 of 10,000 = 5,833.33 → 1,166.67 back. Editor: 4,166.67 → 833.33 back.
-    expect(netOf(summary)).toEqual({
-      owner: '116667',
-      editor: '83333',
-      viewer: '0',
-      pool: '-200000',
-    })
-    expect(transfersOf(summary)).toEqual([
-      ['pool', 'owner', '116667'],
-      ['pool', 'editor', '83333'],
-    ])
-    expect(summary.parties.find((p) => p.id === 'owner')?.shareMinor).toBe('583333')
-    // Switching back recomputes live.
-    await service.setPoolMode(users.owner, tripId, 'actual')
-    expect(transfersOf(await service.summary(users.viewer, tripId))).toEqual([
-      ['pool', 'owner', '200000'],
+    expect(summary.pool.map((m) => [m.userId, m.netMinor])).toEqual([
+      ['owner', '240000'],
+      ['editor', '-60000'],
+      ['viewer', '-60000'],
     ])
   })
 
-  it('shares a shortfall by the normal split (actual) or by proportion', async () => {
+  it('never lets the pool go below zero', async () => {
     const { tripId, service } = await example()
-    await service.create(users.owner, tripId, poolSpend('4000'))
-    // Spent 14,000 from 12,000: each used 7,000, so Editor owes the pool 2,000.
-    expect(netOf(await service.summary(users.viewer, tripId))).toEqual({
-      owner: '0',
-      editor: '-200000',
-      viewer: '0',
-      pool: '200000',
+    // 2,000 left: a 4,000 pool payment is refused, a 2,000 one fits exactly.
+    await expect(service.create(users.owner, tripId, poolSpend('4000'))).rejects.toMatchObject({
+      code: 'POOL_SHORT',
+      status: 422,
     })
-    expect((await service.pool(users.viewer, tripId)).leftoverBaseMinor).toBe('-200000')
-    await service.setPoolMode(users.owner, tripId, 'proportional')
-    // 2,000 short split 7:5; each expense rounds to the satang on its own.
-    expect(netOf(await service.summary(users.viewer, tripId))).toEqual({
-      owner: '-116666',
-      editor: '-83334',
-      viewer: '0',
-      pool: '200000',
+    const exact = await service.create(users.owner, tripId, poolSpend('2000'))
+    // Raising it, or taking money out, would now go below zero.
+    await expect(service.update(users.owner, exact.id, poolSpend('2001'))).rejects.toMatchObject({
+      code: 'POOL_SHORT',
     })
+    const [first] = (await service.pool(users.viewer, tripId)).contributions
+    await expect(service.removeContribution(users.owner, first?.id ?? '')).rejects.toMatchObject({
+      code: 'POOL_SHORT',
+    })
+    await expect(
+      service.updateContribution(users.owner, first?.id ?? '', { amount: '6999' }),
+    ).rejects.toMatchObject({ code: 'POOL_SHORT' })
+    // Lowering a pool payment or paying it yourself is always fine.
+    await service.update(users.owner, exact.id, poolSpend('1000'))
+    await service.update(users.owner, exact.id, { ...poolSpend('9000'), paidBy: 'owner' })
+    expect((await service.pool(users.viewer, tripId)).leftoverBaseMinor).toBe('200000')
+    // An empty pool cannot pay at all.
+    const empty = await setup()
+    await expect(
+      empty.service.create(users.owner, empty.tripId, poolSpend('1')),
+    ).rejects.toMatchObject({ code: 'POOL_SHORT' })
   })
 
-  it('falls back to each expense split when nobody has put money in', async () => {
+  it('people pay whoever paid for them, netted per pair, with the expenses behind it', async () => {
     const { tripId, service } = await setup()
-    await service.setPoolMode(users.owner, tripId, 'proportional')
-    await service.create(users.owner, tripId, poolSpend('100'))
-    expect(netOf(await service.summary(users.viewer, tripId))).toEqual({
-      owner: '-5000',
-      editor: '-5000',
-      viewer: '0',
-      pool: '10000',
+    const all = ['owner', 'editor', 'viewer']
+    const hotel = await service.create(users.owner, tripId, {
+      ...poolSpend('3000'),
+      title: 'Hotel',
+      paidBy: 'owner',
+      split: { mode: 'equal', participants: all },
     })
+    const dinner = await service.create(users.owner, tripId, {
+      ...poolSpend('1500'),
+      title: 'Dinner',
+      paidBy: 'editor',
+      split: { mode: 'equal', participants: all },
+    })
+    const summary = await service.summary(users.viewer, tripId)
+    expect(transfersOf(summary)).toEqual([
+      ['viewer', 'owner', '100000'],
+      ['editor', 'owner', '50000'],
+      ['viewer', 'editor', '50000'],
+    ])
+    expect(summary.transfers[1]?.items).toEqual([
+      { expenseId: hotel.id, title: 'Hotel', amountMinor: '100000' },
+      { expenseId: dinner.id, title: 'Dinner', amountMinor: '-50000' },
+    ])
+    expect(summary.pool).toEqual([])
   })
 
   it('converts other currencies with the given or saved rate, and needs one', async () => {
@@ -183,9 +210,6 @@ describe('ExpensesService pool', () => {
     await expect(
       service.addContribution(users.viewer, tripId, put('viewer', '1')),
     ).rejects.toMatchObject({ code: 'FORBIDDEN' })
-    await expect(service.setPoolMode(users.viewer, tripId, 'proportional')).rejects.toMatchObject({
-      code: 'FORBIDDEN',
-    })
     await expect(
       service.updateContribution(users.viewer, c.id, { amount: '1' }),
     ).rejects.toMatchObject({ code: 'FORBIDDEN' })
@@ -237,22 +261,19 @@ describe('ExpensesService pool', () => {
 
     await service.removeContribution(users.owner, krw.id)
     expect(audit.entries.at(-1)).toMatchObject({ action: 'pool.delete', entityId: krw.id })
-    expect(transfersOf(await service.summary(users.viewer, tripId))).toEqual([
-      ['pool', 'owner', '200000'],
-    ])
+    const after = await service.summary(users.viewer, tripId)
+    expect(after.pool.find((m) => m.userId === 'owner')?.netMinor).toBe('200000')
   })
 
-  it('the CSV export lists the pool: each contribution, each person, totals and the rule', async () => {
+  it('the CSV export lists the pool: each contribution, each person and totals', async () => {
     const { tripId, service } = await example()
     const { body: csv } = await service.csv(users.viewer, tripId)
-    expect(csv).toContain('Pool,"Rule: split as used, overpayment refunded"')
+    expect(csv).toContain('\r\nPool\r\n')
     expect(csv).toContain('Put in by')
     expect(csv).toMatch(/Owner,7000\.00,THB,1,7000\.00/)
     expect(csv).toContain('58.3%')
     expect(csv).toContain('Total put in,,,,,12000.00')
     expect(csv).toContain('Left over (negative = short),,,,,2000.00')
-    await service.setPoolMode(users.owner, tripId, 'proportional')
-    expect((await service.csv(users.viewer, tripId)).body).toContain('Rule: proportional')
   })
 
   it('names the CSV after the trip, safe for any system', () => {

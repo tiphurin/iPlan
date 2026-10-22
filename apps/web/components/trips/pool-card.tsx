@@ -4,7 +4,6 @@ import type {
   PoolContributionDto,
   PoolContributionInput,
   PoolDto,
-  PoolMode,
   TripDetailDto,
 } from '@iplan/contracts'
 import { convertMoney, money, parseMoney, toDecimalString } from '@iplan/core'
@@ -15,7 +14,6 @@ import { type FormEvent, useState } from 'react'
 import { Avatar } from '@/components/avatar'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Segmented } from '@/components/ui/chip'
 import { DateField } from '@/components/ui/date-fields'
 import { Field, Input, Select } from '@/components/ui/field'
 import { Progress } from '@/components/ui/progress'
@@ -26,8 +24,6 @@ import { confirmDialog } from '@/lib/confirm'
 import { poolHeadline } from '@/lib/expense-charts'
 import { fmt, fmt as fmtRaw, usePoolMutations } from '@/lib/expenses'
 import { useFormat } from '@/lib/use-format'
-
-const MODES: readonly PoolMode[] = ['actual', 'proportional']
 
 /**
  * The shared pool: what went in, what it spent, what is left, who put in how
@@ -50,7 +46,6 @@ export function PoolCard({
   const fmt = show ?? fmtRaw
   const t = useTranslations()
   const f = useFormat()
-  const mutations = usePoolMutations(trip.id)
   const canEdit = trip.role !== 'viewer'
   const base = pool.baseCurrency
   const [editing, setEditing] = useState<PoolContributionDto | 'new' | null>(null)
@@ -91,7 +86,6 @@ export function PoolCard({
             {t('expenses.pool.summary', { in: fmt(total, base), spent: fmt(spent, base) })} ·{' '}
             <span className={cn(leftover < 0n && 'font-semibold text-danger')}>{leftText}</span>
           </p>
-          <p className="text-xs text-faint">{t(`expenses.pool.modes.${pool.mode}`)}</p>
         </div>
       </Card>
     )
@@ -150,32 +144,8 @@ export function PoolCard({
         </section>
       )}
 
-      <section className="space-y-2">
-        <h3 className="text-sm font-semibold">{t('expenses.pool.rule')}</h3>
-        {canEdit && (
-          <Segmented
-            label={t('expenses.pool.rule')}
-            value={pool.mode}
-            onChange={(mode) => mode !== pool.mode && mutations.mode.mutate(mode)}
-            options={MODES.map((mode) => ({
-              value: mode,
-              label: t(`expenses.pool.modesShort.${mode}`),
-            }))}
-          />
-        )}
-        <ul className="space-y-1.5">
-          {MODES.filter((mode) => canEdit || mode === pool.mode).map((mode) => (
-            <li
-              key={mode}
-              className={cn('text-sm', mode === pool.mode ? 'text-foreground' : 'text-faint')}
-            >
-              <span className="font-semibold">{t(`expenses.pool.modes.${mode}`)}</span>
-              {' — '}
-              {t(`expenses.pool.explain.${mode}`)}
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* One rule for everyone: pay what you used. */}
+      <p className="text-sm text-muted-foreground">{t('expenses.pool.ruleText')}</p>
 
       <section className="space-y-2">
         <h3 className="text-sm font-semibold">{t('expenses.pool.contributions')}</h3>

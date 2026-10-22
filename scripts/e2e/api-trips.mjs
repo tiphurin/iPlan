@@ -811,8 +811,7 @@ await runSuite('api-trips', async ({ check, status, error, section, cleanup }) =
   const pool = await friend('GET', `/trips/${P}/pool`)
   check(
     'pool totals: 12,000 in, 10,000 spent, 2,000 left',
-    pool.json?.mode === 'actual' &&
-      pool.json?.totalBaseMinor === '1200000' &&
+    pool.json?.totalBaseMinor === '1200000' &&
       pool.json?.spentBaseMinor === '1000000' &&
       pool.json?.leftoverBaseMinor === '200000',
     pool,
@@ -825,56 +824,45 @@ await runSuite('api-trips', async ({ check, status, error, section, cleanup }) =
   )
   const netOf = (res) =>
     Object.fromEntries((res.json?.parties ?? []).map((p) => [p.id, p.netMinor]))
-  const transfersOf = (res) =>
-    JSON.stringify((res.json?.transfers ?? []).map((t) => [t.from, t.to, t.amountMinor]))
+  const poolOf = (res) =>
+    JSON.stringify(
+      (res.json?.pool ?? []).map((m) => [m.userId, m.contributedMinor, m.usedMinor, m.netMinor]),
+    )
   const actual = await owner('GET', `/trips/${P}/expenses/summary`)
   check(
-    'actual mode: pool → owner 2,000',
-    actual.json?.poolMode === 'actual' &&
-      transfersOf(actual) === JSON.stringify([['pool', OWNER, '200000']]) &&
+    'pay what you used: owner gets 2,000 back from the pool, friend even',
+    poolOf(actual) ===
+      JSON.stringify([
+        [OWNER, '700000', '500000', '200000'],
+        [FRIEND, '500000', '500000', '0'],
+      ]) &&
       netOf(actual)[OWNER] === '200000' &&
-      netOf(actual)[FRIEND] === '0',
+      netOf(actual)[FRIEND] === '0' &&
+      !('pool' in netOf(actual)),
     actual,
   )
-  const switchMode = await friend('PUT', `/trips/${P}/pool`, { mode: 'proportional' })
-  check(
-    'switch to proportional',
-    switchMode.status === 200 && switchMode.json?.mode === 'proportional',
-    switchMode,
-  )
-  const prop = await owner('GET', `/trips/${P}/expenses/summary`)
-  check(
-    'proportional: owner 1,166.67 / friend 833.33 back',
-    transfersOf(prop) ===
-      JSON.stringify([
-        ['pool', OWNER, '116667'],
-        ['pool', FRIEND, '83333'],
-      ]) &&
-      netOf(prop)[OWNER] === '116667' &&
-      netOf(prop)[FRIEND] === '83333',
-    prop,
-  )
   error(
-    'unknown pool mode',
-    await owner('PUT', `/trips/${P}/pool`, { mode: 'random' }),
+    'the pool cannot pay more than it holds',
+    await owner(
+      'POST',
+      `/trips/${P}/expenses`,
+      expense({ amount: '2000.01', paidBy: 'pool', dayDate: '2031-03-12' }),
+    ),
     422,
-    'VALIDATION_FAILED',
+    'POOL_SHORT',
+  )
+  status(
+    'pool rule can no longer be switched',
+    await friend('PUT', `/trips/${P}/pool`, { mode: 'proportional' }),
+    [404, 405],
   )
   const poolCsv = await owner('GET', `/trips/${P}/expenses.csv`)
   check(
     'CSV has the pool section',
     poolCsv.status === 200 &&
       poolCsv.text.includes('Pool') &&
-      poolCsv.text.includes('Rule: proportional') &&
       poolCsv.text.includes('Total put in,,,,,12000.00'),
     poolCsv,
-  )
-  await owner('PUT', `/trips/${P}/pool`, { mode: 'actual' })
-  const back = await owner('GET', `/trips/${P}/expenses/summary`)
-  check(
-    'switching back recomputes live',
-    transfersOf(back) === JSON.stringify([['pool', OWNER, '200000']]),
-    back,
   )
   error(
     'currency locked once money is in the pool',

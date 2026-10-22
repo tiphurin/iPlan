@@ -42,9 +42,8 @@ export const SplitMode = z.enum(['equal', 'exact', 'percent'])
 export type SplitMode = z.infer<typeof SplitMode>
 
 /**
- * How pool-paid spending is shared between members:
- * - actual: each expense keeps its own split; whoever put in more than they used gets it back.
- * - proportional: shared (and any leftover or shortfall) by how much each member put in.
+ * Old pool rule kept only so earlier backups still import. The pool now always
+ * works one way: everyone pays what they used ("actual").
  */
 export const PoolMode = z.enum(['actual', 'proportional'])
 export type PoolMode = z.infer<typeof PoolMode>
@@ -128,8 +127,6 @@ export type ExpenseDto = z.infer<typeof ExpenseDto>
 
 export const ExpenseSummaryDto = z.object({
   baseCurrency: z.string(),
-  /** How pool-paid spending is shared; parties and transfers follow it. */
-  poolMode: PoolMode,
   totalMinor: Minor,
   parties: z.array(
     z.object({
@@ -139,12 +136,16 @@ export const ExpenseSummaryDto = z.object({
       paidMinor: Minor,
       /** Their share of the spending. */
       shareMinor: Minor,
-      /** Put into the shared pool (members only; 0 for the pool itself). */
+      /** Put into the shared pool. */
       contributedMinor: Minor,
-      /** Positive: is owed money. Negative: owes money. Pool rules already applied. */
+      /** Overall, pool included. Positive: gets money back. Negative: pays. */
       netMinor: Minor,
     }),
   ),
+  /**
+   * Person-to-person payments for expenses members paid themselves, netted per
+   * pair only: everyone pays the people who paid for them.
+   */
   transfers: z.array(
     z.object({
       from: z.string(),
@@ -152,6 +153,18 @@ export const ExpenseSummaryDto = z.object({
       to: z.string(),
       toName: z.string(),
       amountMinor: Minor,
+      /** The expenses behind it; negative amounts were paid the other way and are taken off. */
+      items: z.array(z.object({ expenseId: z.uuid(), title: z.string(), amountMinor: Minor })),
+    }),
+  ),
+  /** Each member against the pool: put in − used. Positive gets back, negative pays in. */
+  pool: z.array(
+    z.object({
+      userId: z.string(),
+      name: z.string(),
+      contributedMinor: Minor,
+      usedMinor: Minor,
+      netMinor: Minor,
     }),
   ),
   byDay: z.array(
@@ -168,9 +181,6 @@ export const TripMoneySettingsInput = z.object({
   dailyBudget: Major.nullable().optional(),
 })
 export type TripMoneySettingsInput = z.infer<typeof TripMoneySettingsInput>
-
-export const PoolModeInput = z.object({ mode: PoolMode })
-export type PoolModeInput = z.infer<typeof PoolModeInput>
 
 /** Money a member put into the shared pool. */
 export const PoolContributionInput = z.object({
@@ -205,7 +215,6 @@ export const PoolContributionDto = z.object({
 export type PoolContributionDto = z.infer<typeof PoolContributionDto>
 
 export const PoolDto = z.object({
-  mode: PoolMode,
   baseCurrency: z.string(),
   contributions: z.array(PoolContributionDto),
   /** Everything put in, in base minor units. */

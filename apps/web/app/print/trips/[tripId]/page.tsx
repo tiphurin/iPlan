@@ -11,8 +11,8 @@ import { fmtServer } from '@/lib/money-format'
 import { baseToLocal, usableRate } from '@/lib/money-convert'
 import { DayBars } from '@/components/charts/day-bars'
 import { CATEGORY_COLORS, Donut } from '@/components/charts/donut'
-import { balanceRows, dayBars, personBars } from '@/lib/expense-charts'
-import { BalanceBars } from '@/components/charts/balance-bars'
+import { dayBars, personBars, settleCards } from '@/lib/expense-charts'
+import { SettleCards } from '@/components/trips/settle-cards'
 import { PersonBars } from '@/components/charts/person-bars'
 import { getMe, serverApi } from '@/lib/server-api'
 import { tripDays } from '@/lib/trip-dates'
@@ -47,7 +47,8 @@ export default async function PrintTripPage({
   const parts = new Set((query.sections ?? 'plan,expenses').split(','))
   const showPlan = parts.has('plan') || !parts.has('expenses')
   const showExpenses = parts.has('expenses')
-  if (!(await getMe())) redirect(`/login?next=${encodeURIComponent(`/print/trips/${tripId}`)}`)
+  const me = await getMe()
+  if (!me) redirect(`/login?next=${encodeURIComponent(`/print/trips/${tripId}`)}`)
   // ?lang=th|en is the export language, which may differ from the app's.
   const locale: Locale =
     query.lang === 'th' || query.lang === 'en' ? query.lang : ((await getLocale()) as Locale)
@@ -209,9 +210,7 @@ export default async function PrintTripPage({
             </div>
             {hasPool && (
               <div className="break-inside-avoid space-y-1.5 pt-2">
-                <p className="font-semibold">
-                  {t('expenses.pool.title')} · {t(`expenses.pool.modes.${pool.mode}`)}
-                </p>
+                <p className="font-semibold">{t('expenses.pool.title')}</p>
                 <p>
                   {t('expenses.pool.putIn')} {fb(pool.totalBaseMinor)} · {t('expenses.pool.spent')}{' '}
                   {fb(pool.spentBaseMinor)} ·{' '}
@@ -258,13 +257,6 @@ export default async function PrintTripPage({
                 )}
               </div>
             )}
-            {summary.transfers.map((tr) => (
-              <p key={`${tr.from}-${tr.to}`}>
-                {tr.from === 'pool' ? t('expenses.form.pool') : tr.fromName} →{' '}
-                {tr.to === 'pool' ? t('expenses.form.pool') : tr.toName}:{' '}
-                <strong>{fb(tr.amountMinor)}</strong>
-              </p>
-            ))}
             <div className="space-y-6 pt-3">
               <div className="break-inside-avoid space-y-1.5">
                 <p className="font-semibold">{t('expenses.charts.people')}</p>
@@ -279,20 +271,18 @@ export default async function PrintTripPage({
                   labels={{ paid: t('expenses.charts.paid'), share: t('expenses.charts.share') }}
                 />
               </div>
-              <div className="break-inside-avoid space-y-1.5">
-                <p className="font-semibold">{t('expenses.settleView.balances')}</p>
-                <BalanceBars
-                  rows={balanceRows(summary.parties).map((r) => ({
-                    ...r,
-                    name: r.isPool ? t('expenses.form.pool') : r.name,
-                    icon: null,
-                    netText: netText(r.net),
-                    detail: '',
-                  }))}
-                  labels={{
-                    owes: t('expenses.settleView.owes'),
-                    getsBack: t('expenses.settleView.getsBack'),
-                  }}
+              <div className="space-y-2">
+                <p className="font-semibold">{t('expenses.settle')}</p>
+                <SettleCards
+                  cards={settleCards(summary, me.id)}
+                  meId={me.id}
+                  t={
+                    t as unknown as (
+                      key: string,
+                      values?: Record<string, string | number>,
+                    ) => string
+                  }
+                  fmt={(minor) => fb(minor)}
                 />
               </div>
             </div>

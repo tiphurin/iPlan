@@ -61,7 +61,7 @@ export interface TripExcelLabels {
     note: string
     percent: string
     rule: string
-    mode: string
+    ruleText: string
     putIn: string
     spent: string
     left: string
@@ -114,7 +114,7 @@ export async function exportTripExcel(
                 { value: m.percentBp / 10000, type: Number, format: '0.0%' } as Cell,
               ]),
               [text('')],
-              [text(ps.rule), text(ps.mode)],
+              [text(ps.rule), text(ps.ruleText)],
               [text(ps.putIn), amount(pool.totalBaseMinor, base)],
               [text(ps.spent), amount(pool.spentBaseMinor, base)],
               [text(ps.left), amount(pool.leftoverBaseMinor, base)],
@@ -183,13 +183,28 @@ export async function exportTripExcel(
       },
       {
         sheet: l.settle,
-        columns: [{ width: 20 }, { width: 20 }, { width: 14 }],
+        columns: [{ width: 20 }, { width: 20 }, { width: 14 }, { width: 40 }],
         data: [
-          head([c.from, c.to, `${c.amount} (${base})`]),
+          head([c.from, c.to, `${c.amount} (${base})`, c.title]),
+          // The pool first: who pays into it, who gets money back from it.
+          ...summary.pool
+            .filter((m) => BigInt(m.netMinor) !== 0n)
+            .map((m) => {
+              const net = BigInt(m.netMinor)
+              return [
+                text(net < 0n ? m.name : l.pool),
+                text(net < 0n ? l.pool : m.name),
+                amount((net < 0n ? -net : net).toString(), base),
+                text(
+                  `${ps.putIn} ${toDecimalString(money(BigInt(m.contributedMinor), base))} · ${ps.spent} ${toDecimalString(money(BigInt(m.usedMinor), base))}`,
+                ),
+              ]
+            }),
           ...summary.transfers.map((t) => [
-            text(party(t.from, t.fromName)),
-            text(party(t.to, t.toName)),
+            text(t.fromName),
+            text(t.toName),
             amount(t.amountMinor, base),
+            text(t.items.map((i) => i.title).join(', ')),
           ]),
         ],
       },

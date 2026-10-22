@@ -1,4 +1,4 @@
-import { ExpenseDto } from '@iplan/contracts'
+import { ExpenseDto, PoolDto } from '@iplan/contracts'
 import type { Route } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
@@ -18,10 +18,11 @@ export default async function ExpensePage({
 }) {
   const { tripId, expenseId } = await params
   const { from } = await searchParams
-  const [t, { trip, items }, expenses] = await Promise.all([
+  const [t, { trip, items }, expenses, pool] = await Promise.all([
     getTranslations(),
     loadTrip(tripId),
     serverApi(`/api/trips/${tripId}/expenses`, z.array(ExpenseDto)),
+    serverApi(`/api/trips/${tripId}/pool`, PoolDto),
   ])
   const expense = expenses.find((e) => e.id === expenseId)
   if (!expense || trip.role === 'viewer') notFound()
@@ -42,6 +43,7 @@ export default async function ExpensePage({
         expense={expense}
         defaultDay={expense.dayDate}
         returnTo={place ? back.href : undefined}
+        poolLeftMinor={pool.leftoverBaseMinor}
       />
     </>
   )

@@ -72,6 +72,19 @@ async function main() {
       .insert(schema.infoCard)
       .values(DEMO_INFO_CARDS.map((card, i) => ({ ...card, tripId: demo.trip.id, sortOrder: i })))
 
+    // Both put ฿1,000 into the pool first: the pool only spends money it holds.
+    await tx.insert(schema.tripPoolContribution).values(
+      [owner.id, friend.id].map((userId) => ({
+        tripId: demo.trip.id,
+        userId,
+        amountMinor: 100_000n,
+        currency: 'THB',
+        fxRate: '1',
+        baseAmountMinor: 100_000n,
+        date: demo.trip.startDate,
+        createdBy: owner.id,
+      })),
+    )
     const ids = { owner: owner.id, friend: friend.id, pool: 'pool' }
     for (const e of DEMO_EXPENSES) {
       const amount = parseMoney(e.amount, e.currency).amount

@@ -106,7 +106,8 @@
     "NOT_IN_CIRCLE": "You can only invite people who share a circle with you",
     "INVITATION_GONE": "This trip or shared wallet no longer exists",
     "TRIP_CURRENCY_LOCKED": "The trip currency can't change once expenses are recorded",
-    "TRIP_DATES_EXCLUDE_CONTENT": "Some plans or expenses fall outside the new dates. Move or delete them first."
+    "TRIP_DATES_EXCLUDE_CONTENT": "Some plans or expenses fall outside the new dates. Move or delete them first.",
+    "POOL_SHORT": "Not enough money in the pool. Put more in first, or pick who really paid."
   },
   "trips": {
     "empty": "No trips yet",
@@ -381,7 +382,9 @@
       "none": "No split",
       "note": "Note",
       "converted": "≈ {amount}",
-      "noneHint": "{name} pays it all; nobody owes anything"
+      "noneHint": "{name} pays it all; nobody owes anything",
+      "poolLeft": "Pool ({amount} left)",
+      "poolShort": "The pool has {left} left, not enough for {amount}. Put more in first, or pick who really paid."
     },
     "categories": {
       "food": "Food",
@@ -399,7 +402,6 @@
       "settle": "Who pays whom",
       "budget": "Budget"
     },
-    "settleHint": "From all entries: whoever paid more than their share gets paid back",
     "paysTo": "pays",
     "peopleHint": "Paid = money put in · Share = your part of the splits · Net + gets back / − owes",
     "budgetIs": "Budget {amount} a day for the whole group",
@@ -428,18 +430,6 @@
       "owes": "Owes {amount}",
       "even": "Even"
     },
-    "settleView": {
-      "one": "{from} pays {to} {amount}",
-      "many": "{count} transfers ({amount} in total) settle everyone up",
-      "transfers": "Who pays whom",
-      "balances": "Balance per person",
-      "detail": "Paid {paid} · share {share}",
-      "poolDetail": "Pool paid {paid}",
-      "owes": "Owes",
-      "getsBack": "Gets back",
-      "detailPool": "Put in pool {contributed} · paid {paid} · share {share}",
-      "poolDetailIn": "Received {in} · paid {paid}"
-    },
     "pool": {
       "title": "Pool",
       "putIn": "Put in",
@@ -457,18 +447,6 @@
       "byMember": "Who put in how much",
       "contributions": "Money put in",
       "rule": "How pool spending is shared",
-      "modes": {
-        "actual": "Split as used (refund overpayment)",
-        "proportional": "Proportional to what each put in"
-      },
-      "modesShort": {
-        "actual": "As used",
-        "proportional": "By share put in"
-      },
-      "explain": {
-        "actual": "Each expense keeps its own split; whoever put in more than they used gets the rest back.",
-        "proportional": "Pool spending is split by each person's % of the pool; leftovers or shortfalls follow the same %."
-      },
       "headline": {
         "empty": "Nobody has put money in yet",
         "only": "Only {name} has put money in",
@@ -481,7 +459,25 @@
       "summary": "In {in} · spent {spent}",
       "leftAmount": "{amount} left",
       "shortAmount": "{amount} short",
-      "readOnly": "View only: trip editors record pool money"
+      "readOnly": "View only: trip editors record pool money",
+      "ruleText": "Everyone pays what they used: put in more than you used and you get the rest back; used the pool without putting in and you pay your part into it. The pool only spends what it holds."
+    },
+    "settleCards": {
+      "steps": "{count, plural, one {# payment} other {# payments}} and everyone is even",
+      "you": "(you)",
+      "pay": "Pay",
+      "get": "Receive",
+      "payTotal": "Pays {amount}",
+      "getTotal": "Gets {amount}",
+      "even": "Even",
+      "nothing": "Nothing to pay",
+      "to": "To {name}",
+      "from": "From {name}",
+      "poolIn": "Into the pool",
+      "poolBack": "Back from the pool",
+      "poolWhy": "Put in {put}, used {used}",
+      "poolInNone": "Used {used} of the pool without putting in",
+      "more": "and {count} more"
     }
   },
   "attachments": {
@@ -1027,8 +1023,8 @@
         "title": "Trip costs",
         "add": "Add from a place; tap a cost to edit",
         "split": "Equal / amounts / % / no split",
-        "pool": "Put money in the pool, pick the rule",
-        "settle": "Who pays whom, with charts; switch totals between ₩/฿",
+        "pool": "Put money in the pool; it only spends what it holds and everyone pays what they used",
+        "settle": "Each person's card shows whom to pay, whom to receive from and why; switch totals between ₩/฿",
         "export": "Tap Export on the trip page: PDF (plan and/or costs with charts), Excel or CSV; pick the language and currency, preview, then confirm"
       }
     },

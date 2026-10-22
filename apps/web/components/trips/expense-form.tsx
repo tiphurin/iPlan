@@ -48,6 +48,7 @@ export function ExpenseForm({
   defaultCategory,
   defaultSubcategory,
   returnTo,
+  poolLeftMinor,
 }: {
   trip: TripDetailDto
   items: TripItemDto[]
@@ -59,6 +60,8 @@ export function ExpenseForm({
   defaultSubcategory?: string | undefined
   /** Where to go after saving (e.g. back to the place). Defaults to the expense list. */
   returnTo?: string | undefined
+  /** Money left in the pool (base minor units); the pool can only pay what it holds. */
+  poolLeftMinor: string
 }) {
   const t = useTranslations()
   const f = useFormat()
@@ -165,6 +168,20 @@ export function ExpenseForm({
       base,
     )
   }
+  // What the pool can pay for this cost: what is left, plus this cost if the pool already paid it.
+  const poolAvailable =
+    BigInt(poolLeftMinor) + (expense?.paidBy === POOL_ID ? BigInt(expense.baseAmountMinor) : 0n)
+  let baseMinor: bigint | null = null
+  if (total !== null && total > 0n) {
+    baseMinor =
+      currency === base
+        ? total
+        : /^\d+(\.\d+)?$/.test(effectiveRate)
+          ? convertMoney(money(total, currency), { from: currency, to: base, rate: effectiveRate })
+              .amount
+          : null
+  }
+  const poolShort = payer === POOL_ID && baseMinor !== null && baseMinor > poolAvailable
   const exactSum = Object.values(exact).reduce((sum, v) => sum + (tryParse(v, currency) ?? 0n), 0n)
   const percentSum = Object.values(percent).reduce((sum, v) => sum + (Number(v) || 0), 0)
   const currencies = [...new Set([base, ...Object.keys(trip.fxRates), currency])]
@@ -310,9 +327,21 @@ export function ExpenseForm({
             </option>
           ))}
           {formerPayer && <option value={formerPayer.id}>{t('expenses.form.formerMember')}</option>}
-          <option value={POOL_ID}>{t('expenses.form.pool')}</option>
+          <option value={POOL_ID} disabled={poolAvailable <= 0n && payer !== POOL_ID}>
+            {t('expenses.form.poolLeft', {
+              amount: fmt(poolAvailable > 0n ? poolAvailable : 0n, base),
+            })}
+          </option>
         </Select>
       </Field>
+      {poolShort && (
+        <p role="alert" className="rounded-xl bg-warning/10 px-3 py-2 text-sm">
+          {t('expenses.form.poolShort', {
+            left: fmt(poolAvailable > 0n ? poolAvailable : 0n, base),
+            amount: fmt(baseMinor ?? 0n, base),
+          })}
+        </p>
+      )}
 
       <fieldset className="space-y-2">
         <legend className="mb-1.5 text-sm font-medium">{t('expenses.form.split')}</legend>
@@ -537,7 +566,7 @@ export function ExpenseForm({
         <p className="text-sm text-muted-foreground">{t('attachments.saveFirst')}</p>
       )}
 
-      <Button type="submit" size="lg" disabled={save.isPending}>
+      <Button type="submit" size="lg" disabled={save.isPending || poolShort}>
         {t('common.save')}
       </Button>
       {expense && (

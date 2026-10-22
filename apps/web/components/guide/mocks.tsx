@@ -482,7 +482,7 @@ export function ShiftMock() {
   )
 }
 
-/** Who put what into the pool, and the rule. */
+/** Who put what into the pool, and who pays in or gets back. */
 export function PoolMock() {
   return (
     <Frame>
@@ -499,9 +499,16 @@ export function PoolMock() {
           <span>42%</span>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-0.5 rounded-full bg-muted p-0.5 text-center text-[7px]">
-        <span className="rounded-full bg-card py-0.5 font-bold">ตามที่ใช้จริง</span>
-        <span className="py-0.5">ตามสัดส่วน</span>
+      {/* Settling: what each person pays into or gets back from the pool. */}
+      <div className="space-y-0.5 text-[7px]">
+        <div className="flex justify-between rounded bg-danger/10 px-1 py-0.5">
+          <span>C · เข้ากองกลาง</span>
+          <span className="font-bold">฿600</span>
+        </div>
+        <div className="flex justify-between rounded bg-success/10 px-1 py-0.5">
+          <span>A · คืนจากกองกลาง</span>
+          <span className="font-bold">฿2,400</span>
+        </div>
       </div>
     </Frame>
   )

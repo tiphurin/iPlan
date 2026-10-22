@@ -7,24 +7,23 @@ import {
   type PoolContributionInput,
   type PoolContributionUpdateInput,
   type PoolDto,
-  type PoolMode,
   type TripMoneySettingsInput,
 } from '@iplan/contracts'
 import {
   MoneyError,
-  applyPoolMode,
   contributedBy,
   convertMoney,
+  pairTransfers,
   parseMoney,
   poolBalances,
-  settle,
+  poolSettlement,
   summarizePool,
   toDecimalString,
   money,
 } from '@iplan/core'
 import type { AuditLog } from '../../shared/audit'
 import type { SessionUser } from '../../shared/context'
-import { notFound, validationFailed } from '../../shared/errors'
+import { notFound, poolShort, validationFailed } from '../../shared/errors'
 import { computeShares, splitParticipants } from '../../shared/split-shares'
 import type { TripRow, TripsRepository } from '../trips/trips.repository'
 import type { TripAccess } from '../trips/trips.service'
@@ -68,7 +67,6 @@ const CSV_TEXT: Record<
     | 'split'
     | 'note'
     | 'pool'
-    | 'rule'
     | 'putInBy'
     | 'totalIn'
     | 'spentFromPool'
@@ -77,7 +75,6 @@ const CSV_TEXT: Record<
   > & {
     categories: Record<string, string>
     splits: Record<string, string>
-    rules: Record<'actual' | 'proportional', string>
   }
 > = {
   en: {
@@ -91,7 +88,6 @@ const CSV_TEXT: Record<
     split: 'Split',
     note: 'Note',
     pool: 'Pool',
-    rule: 'Rule',
     putInBy: 'Put in by',
     totalIn: 'Total put in',
     spentFromPool: 'Spent from pool',
@@ -106,10 +102,6 @@ const CSV_TEXT: Record<
       other: 'Other',
     },
     splits: { equal: 'Equal', exact: 'Exact amounts', percent: 'Percent' },
-    rules: {
-      actual: 'split as used, overpayment refunded',
-      proportional: 'proportional to what each put in',
-    },
   },
   th: {
     date: 'วันที่',
@@ -122,7 +114,6 @@ const CSV_TEXT: Record<
     split: 'หารแบบ',
     note: 'โน้ต',
     pool: 'กองกลาง',
-    rule: 'กติกา',
     putInBy: 'ใครลง',
     totalIn: 'ลงรวม',
     spentFromPool: 'ใช้จากกองกลาง',
@@ -137,10 +128,6 @@ const CSV_TEXT: Record<
       other: 'อื่นๆ',
     },
     splits: { equal: 'หารเท่ากัน', exact: 'ระบุจำนวน', percent: 'เปอร์เซ็นต์' },
-    rules: {
-      actual: 'หารตามที่ใช้จริง (คืนส่วนที่ลงเกิน)',
-      proportional: 'ยินดีลงมากกว่า (หารและคืนตามสัดส่วนที่ลง)',
-    },
   },
 }
 
@@ -266,6 +253,8 @@ export class ExpensesService {
   async create(actor: SessionUser, tripId: string, input: ExpenseInput): Promise<ExpenseDto> {
     const { trip } = await this.trips.requireAccess(actor, tripId, 'editor')
     const { values, shares } = await this.build(trip, input, actor.id)
+    if (values.paidBy === POOL_ID)
+      await this.assertPoolCovers(tripId, { spent: values.baseAmountMinor })
     const saved = await this.expenses.create(values, shares)
     await this.audit.record({
       actorId: actor.id,
@@ -285,6 +274,9 @@ export class ExpensesService {
       found.expense.createdBy ?? actor.id,
       found,
     )
+    const wasPool = found.expense.paidBy === POOL_ID ? found.expense.baseAmountMinor : 0n
+    const isPool = values.paidBy === POOL_ID ? values.baseAmountMinor : 0n
+    if (isPool > wasPool) await this.assertPoolCovers(trip.id, { spent: isPool - wasPool })
     const saved = await this.expenses.replace(expenseId, values, shares)
     await this.audit.record({
       actorId: actor.id,
@@ -316,15 +308,12 @@ export class ExpensesService {
     ])
 
     const contributions = await this.expenses.listContributions(tripId)
-    const pool = this.poolOptions(trip.poolMode, contributions)
-    const split = applyPoolMode(
-      rows.map((row) => ({
-        paidBy: row.expense.paidBy,
-        amount: row.expense.baseAmountMinor,
-        shares: baseShares(row),
-      })),
-      pool,
-    )
+    const pool = this.poolOptions(contributions)
+    const split = rows.map((row) => ({
+      paidBy: row.expense.paidBy,
+      amount: row.expense.baseAmountMinor,
+      shares: baseShares(row),
+    }))
     const balances = poolBalances(split, pool)
     const contributed = contributedBy(pool.contributions)
     const paid = new Map<string, bigint>()
@@ -333,7 +322,10 @@ export class ExpensesService {
       paid.set(s.paidBy, (paid.get(s.paidBy) ?? 0n) + s.amount)
       for (const [id, v] of Object.entries(s.shares)) share.set(id, (share.get(id) ?? 0n) + v)
     }
-    const partyIds = [...new Set([...memberIds, ...Object.keys(balances)])]
+    // Members only: the pool is shown on its own (put in / used per member).
+    const partyIds = [...new Set([...memberIds, ...Object.keys(balances)])].filter(
+      (id) => id !== POOL_ID,
+    )
     const byDay = new Map<string, bigint>()
     const byCategory = new Map<string, bigint>()
     for (const { expense } of rows) {
@@ -346,7 +338,6 @@ export class ExpensesService {
 
     return {
       baseCurrency: trip.baseCurrency,
-      poolMode: trip.poolMode,
       totalMinor: rows.reduce((sum, r) => sum + r.expense.baseAmountMinor, 0n).toString(),
       parties: partyIds.map((id) => ({
         id,
@@ -356,12 +347,24 @@ export class ExpensesService {
         contributedMinor: (contributed[id] ?? 0n).toString(),
         netMinor: (balances[id] ?? 0n).toString(),
       })),
-      transfers: settle(balances).map((t) => ({
+      transfers: pairTransfers(split, POOL_ID).map((t) => ({
         from: t.from,
         fromName: nameOf(t.from),
         to: t.to,
         toName: nameOf(t.to),
         amountMinor: t.amount.toString(),
+        items: t.items.map((item) => ({
+          expenseId: rows[item.index]?.expense.id ?? '',
+          title: rows[item.index]?.expense.title ?? '',
+          amountMinor: item.amount.toString(),
+        })),
+      })),
+      pool: poolSettlement(split, pool).map((m) => ({
+        userId: m.userId,
+        name: nameOf(m.userId),
+        contributedMinor: m.contributed.toString(),
+        usedMinor: m.used.toString(),
+        netMinor: m.net.toString(),
       })),
       byDay: daysOf(trip.startDate, trip.endDate).map((dayDate) => ({
         dayDate,
@@ -425,14 +428,14 @@ export class ExpensesService {
         row.expense.note ?? '',
       ]
     })
-    // Money put into the pool, its rule and totals, after a blank line.
+    // Money put into the pool and its totals, after a blank line.
     const pool = await this.pool(actor, tripId)
     const total = (label: string, minor: string) => [label, '', '', '', '', dec(BigInt(minor))]
     const poolLines: string[][] =
       pool.contributions.length > 0 || BigInt(pool.spentBaseMinor) > 0n
         ? [
             [],
-            [L.pool, `${L.rule}: ${L.rules[pool.mode]}`],
+            [L.pool],
             [L.date, L.putInBy, L.amount, L.currency, L.rate, baseCol, L.note],
             ...pool.contributions.map((x) => [
               x.date,
@@ -462,10 +465,9 @@ export class ExpensesService {
     return { fileName: `${safeFileName(trip.name)}.csv`, body }
   }
 
-  private poolOptions(mode: PoolMode, rows: ContributionRow[]) {
+  private poolOptions(rows: ContributionRow[]) {
     return {
       poolId: POOL_ID,
-      mode,
       contributions: rows.map((r) => ({ userId: r.userId, amount: r.baseAmountMinor })),
     }
   }
@@ -484,11 +486,10 @@ export class ExpensesService {
         amount: r.expense.baseAmountMinor,
         shares: {},
       })),
-      this.poolOptions(trip.poolMode, contributions).contributions,
+      this.poolOptions(contributions).contributions,
       POOL_ID,
     )
     return {
-      mode: trip.poolMode,
       baseCurrency: trip.baseCurrency,
       contributions: contributions.map((c) => toContributionDto(c, nameOf)),
       totalBaseMinor: summary.totalIn.toString(),
@@ -503,17 +504,25 @@ export class ExpensesService {
     }
   }
 
-  async setPoolMode(actor: SessionUser, tripId: string, mode: PoolMode): Promise<PoolDto> {
-    await this.trips.requireAccess(actor, tripId, 'editor')
-    await this.expenses.updatePoolMode(tripId, mode)
-    await this.audit.record({
-      actorId: actor.id,
-      action: 'trip.pool_mode',
-      entityType: 'trip',
-      entityId: tripId,
-      data: { mode },
-    })
-    return this.pool(actor, tripId)
+  /**
+   * The pool can never pay out more than was put in. Throws when a change would
+   * leave it below zero (or further below, for trips saved before this rule).
+   */
+  private async assertPoolCovers(
+    tripId: string,
+    change: { spent?: bigint; putIn?: bigint },
+  ): Promise<void> {
+    const [rows, contributions] = await Promise.all([
+      this.expenses.list(tripId),
+      this.expenses.listContributions(tripId),
+    ])
+    const spent = rows
+      .filter((r) => r.expense.paidBy === POOL_ID)
+      .reduce((sum, r) => sum + r.expense.baseAmountMinor, 0n)
+    const putIn = contributions.reduce((sum, c) => sum + c.baseAmountMinor, 0n)
+    const before = putIn - spent
+    const after = before + (change.putIn ?? 0n) - (change.spent ?? 0n)
+    if (after < 0n && after < before) throw poolShort()
   }
 
   /**
@@ -604,6 +613,10 @@ export class ExpensesService {
       note: input.note === undefined ? found.note : input.note,
     }
     const values = await this.buildContribution(trip, merged, found.createdBy ?? actor.id, found)
+    if (values.baseAmountMinor < found.baseAmountMinor)
+      await this.assertPoolCovers(trip.id, {
+        putIn: values.baseAmountMinor - found.baseAmountMinor,
+      })
     const saved = await this.expenses.updateContribution(id, values)
     await this.audit.record({
       actorId: actor.id,
@@ -617,6 +630,7 @@ export class ExpensesService {
 
   async removeContribution(actor: SessionUser, id: string): Promise<void> {
     const { found, trip } = await this.loadContribution(actor, id)
+    await this.assertPoolCovers(trip.id, { putIn: -found.baseAmountMinor })
     await this.expenses.deleteContribution(id)
     await this.audit.record({
       actorId: actor.id,

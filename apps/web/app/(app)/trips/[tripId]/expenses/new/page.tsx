@@ -1,3 +1,4 @@
+import { PoolDto } from '@iplan/contracts'
 import { todayKey } from '@iplan/i18n'
 import type { Route } from 'next'
 import { notFound } from 'next/navigation'
@@ -7,6 +8,7 @@ import { PageHeader } from '@/components/page-header'
 import { ExpenseForm } from '@/components/trips/expense-form'
 import { loadTrip } from '@/lib/load-trip'
 import { modeOfLine } from '@/lib/lines'
+import { serverApi } from '@/lib/server-api'
 import { zoneCurrency } from '@/lib/time-zones'
 
 export default async function NewExpensePage({
@@ -18,7 +20,11 @@ export default async function NewExpensePage({
 }) {
   const { tripId } = await params
   const { item: itemId, from } = await searchParams
-  const [t, { trip, items }] = await Promise.all([getTranslations(), loadTrip(tripId)])
+  const [t, { trip, items }, pool] = await Promise.all([
+    getTranslations(),
+    loadTrip(tripId),
+    serverApi(`/api/trips/${tripId}/pool`, PoolDto),
+  ])
   if (trip.role === 'viewer') notFound()
   const today = todayKey(trip.homeTimeZone)
   // "Add expense here" from a place: that place, its day and the local currency.
@@ -54,6 +60,7 @@ export default async function NewExpensePage({
         }
         defaultSubcategory={place?.kind === 'flight' ? 'plane' : modeOfLine(place?.details.line)}
         returnTo={place ? back.href : undefined}
+        poolLeftMinor={pool.leftoverBaseMinor}
       />
     </>
   )

@@ -29,6 +29,7 @@ export const ErrorCode = z.enum([
   'INVITATION_GONE',
   'TRIP_CURRENCY_LOCKED',
   'TRIP_DATES_EXCLUDE_CONTENT',
+  'POOL_SHORT',
 ])
 export type ErrorCode = z.infer<typeof ErrorCode>
 

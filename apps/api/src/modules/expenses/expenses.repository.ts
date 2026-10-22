@@ -43,7 +43,6 @@ export interface ExpensesRepository {
   createContribution(values: NewContributionRow): Promise<ContributionRow>
   updateContribution(id: string, values: NewContributionRow): Promise<ContributionRow>
   deleteContribution(id: string): Promise<void>
-  updatePoolMode(tripId: string, mode: 'actual' | 'proportional'): Promise<void>
 }
 
 export class DrizzleExpensesRepository implements ExpensesRepository {
@@ -168,9 +167,5 @@ export class DrizzleExpensesRepository implements ExpensesRepository {
 
   async deleteContribution(id: string) {
     await this.db.delete(schema.tripPoolContribution).where(eq(schema.tripPoolContribution.id, id))
-  }
-
-  async updatePoolMode(tripId: string, mode: 'actual' | 'proportional') {
-    await this.db.update(schema.trip).set({ poolMode: mode }).where(eq(schema.trip.id, tripId))
   }
 }

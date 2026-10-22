@@ -511,9 +511,6 @@ export class InMemoryExpenses implements ExpensesRepository {
   async deleteContribution(id: string) {
     this.contributions.delete(id)
   }
-  async updatePoolMode(tripId: string, mode: 'actual' | 'proportional') {
-    await this.trips.update(tripId, { poolMode: mode })
-  }
 }
 
 export class MemoryStorage implements StorageProvider {

@@ -139,6 +139,7 @@ Then **Trips → Import trip from file**. The converter reads the prototype's bu
 | `yarn build`                        | Build all packages and apps                              |
 | `yarn lint` / `yarn typecheck`      | ESLint / `tsc --noEmit` in every package                 |
 | `yarn test`                         | Vitest in every package                                  |
+| `yarn e2e`                          | End-to-end tests against the running dev server          |
 | `yarn format` / `yarn format:check` | Prettier write / check                                   |
 | `yarn db:up`                        | Start local Postgres                                     |
 | `yarn db:reset`                     | Wipe the local DB, migrate, add dev-login accounts       |
@@ -149,6 +150,24 @@ Then **Trips → Import trip from file**. The converter reads the prototype's bu
 | `yarn db:studio`                    | Browse the database in Drizzle Studio                    |
 | `yarn db:down`                      | Stop local Postgres                                      |
 | `yarn legacy:convert`               | Convert the old prototype into an importable trip file   |
+
+## End-to-end tests
+
+`yarn e2e` checks the real app end to end: the API with dev-login accounts, then every main page in headless Google Chrome (iPhone-sized, through the DevTools protocol, so no extra packages). Start `yarn dev` first (with dev login enabled and the dev-login accounts seeded), then:
+
+```sh
+yarn e2e                       # all three files, with a summary table
+yarn e2e api-trips             # only some: api-trips, api-money, browser
+BASE=http://192.168.1.20:3000 yarn e2e
+```
+
+| File                        | Covers                                                                                    |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `scripts/e2e/api-trips.mjs` | Trips, items, checklist, members, expenses and settle-up, pool, calendar, backup, covers  |
+| `scripts/e2e/api-money.mjs` | Personal finance, shared wallets, admin reads, pending users, auth surface, profile rules |
+| `scripts/e2e/browser.mjs`   | Every main page without console errors, unsaved-changes dialog, Plan/Today, time switch   |
+
+Everything a run creates is named `e2e-…` and deleted at the end, even when checks fail; changed demo accounts are put back. Any failure makes the command exit non-zero. `CHROME=/path/to/chrome` picks another browser; failed browser flows save a screenshot in the OS temp folder.
 
 ## API
 

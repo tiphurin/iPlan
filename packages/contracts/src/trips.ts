@@ -160,6 +160,22 @@ export const CreateTripItemInput = z.object(itemFields)
 export type CreateTripItemInput = z.infer<typeof CreateTripItemInput>
 
 export const UpdateTripItemInput = z.object(itemFields).partial()
+
+/**
+ * Move several plan items by the same amount of time at once (e.g. the ones
+ * after an item that now ends later). All or nothing.
+ */
+export const ShiftItemsInput = z.object({
+  itemIds: z.array(z.uuid()).min(1).max(100),
+  /** Minutes to move by; negative moves earlier. Up to a day either way. */
+  minutes: z
+    .number()
+    .int()
+    .min(-1440)
+    .max(1440)
+    .refine((m) => m !== 0, 'Must move by at least a minute'),
+})
+export type ShiftItemsInput = z.infer<typeof ShiftItemsInput>
 export type UpdateTripItemInput = z.infer<typeof UpdateTripItemInput>
 
 export const CheckInInput = z.object({

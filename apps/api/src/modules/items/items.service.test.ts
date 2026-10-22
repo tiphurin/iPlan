@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { CreateTripItemInput } from '@iplan/contracts'
+import { CreateTripItemInput, ShiftItemsInput } from '@iplan/contracts'
 import { FakeAudit, InMemoryItems, InMemoryTrips, users } from '../../testing/fakes'
 import { TripsService } from '../trips/trips.service'
 import { ItemsService } from './items.service'
@@ -163,5 +163,66 @@ describe('ItemsService', () => {
       details: { arrivalTimeZone: 'Asia/Tokyo' },
     })
     expect(created.details).toEqual({})
+  })
+
+  it('moves several items by the same minutes, all or nothing', async () => {
+    const a = await service.create(users.owner, tripId, lunch)
+    const b = await service.create(users.owner, tripId, {
+      ...lunch,
+      title: 'Coffee',
+      startsAt: '2026-10-23T05:30:00.000Z',
+      endsAt: null,
+    })
+    const after = await service.shift(users.editor, tripId, { itemIds: [a.id, b.id], minutes: 30 })
+    const byId = Object.fromEntries(after.map((i) => [i.id, i]))
+    expect(byId[a.id]).toMatchObject({
+      startsAt: '2026-10-23T04:30:00.000Z',
+      endsAt: '2026-10-23T05:30:00.000Z',
+    })
+    expect(byId[b.id]).toMatchObject({ startsAt: '2026-10-23T06:00:00.000Z', endsAt: null })
+    // Earlier works too.
+    const back = await service.shift(users.owner, tripId, { itemIds: [a.id], minutes: -30 })
+    expect(back.find((i) => i.id === a.id)?.startsAt).toBe('2026-10-23T04:00:00.000Z')
+  })
+
+  it('refuses fixed items, other trips, viewers, and changes nothing then', async () => {
+    const free = await service.create(users.owner, tripId, lunch)
+    const flight = await service.create(users.owner, tripId, {
+      ...lunch,
+      title: 'Flight',
+      startsAt: '2026-10-23T08:00:00.000Z',
+      endsAt: '2026-10-23T10:00:00.000Z',
+      details: { fixed: true },
+    })
+    await expect(
+      service.shift(users.owner, tripId, { itemIds: [free.id, flight.id], minutes: 15 }),
+    ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' })
+    // All or nothing: the free item did not move either.
+    expect((await items.findById(free.id))?.startsAt.toISOString()).toBe(lunch.startsAt)
+    await expect(
+      service.shift(users.viewer, tripId, { itemIds: [free.id], minutes: 15 }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+    await expect(
+      service.shift(users.owner, tripId, {
+        itemIds: ['00000000-0000-4000-8000-000000000999'],
+        minutes: 15,
+      }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('keeps the plan day when moving and validates the request', async () => {
+    const last = await service.create(users.owner, tripId, {
+      ...lunch,
+      dayDate: '2026-10-27',
+      startsAt: '2026-10-27T04:00:00.000Z',
+      endsAt: '2026-10-27T05:00:00.000Z',
+    })
+    // Moving keeps the plan day; only its clock time changes, which is always allowed.
+    await expect(
+      service.shift(users.owner, tripId, { itemIds: [last.id], minutes: 120 }),
+    ).resolves.toBeDefined()
+    expect(ShiftItemsInput.safeParse({ itemIds: [last.id], minutes: 0 }).success).toBe(false)
+    expect(ShiftItemsInput.safeParse({ itemIds: [], minutes: 10 }).success).toBe(false)
+    expect(ShiftItemsInput.safeParse({ itemIds: [last.id], minutes: 2000 }).success).toBe(false)
   })
 })

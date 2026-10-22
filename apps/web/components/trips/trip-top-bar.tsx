@@ -2,6 +2,7 @@
 
 import type { TripDetailDto } from '@iplan/contracts'
 import {
+  Download,
   CalendarDays,
   ChevronLeft,
   ClipboardList,
@@ -14,11 +15,12 @@ import {
 import type { Route } from 'next'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import type { ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
 import { LanguageToggle } from '@/components/language-toggle'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 import { CalendarSync } from './calendar-sync'
+import { ExportSheet } from './export-sheet'
 
 /**
  * Stays on top while scrolling: back, title, calendar/edit, the Plan | Today
@@ -36,6 +38,7 @@ export function TripTopBar({
   below?: ReactNode
 }) {
   const t = useTranslations()
+  const [exporting, setExporting] = useState(false)
   const tabs = [
     { key: 'plan', href: `/trips/${trip.id}${day ? `?day=${day}` : ''}`, icon: CalendarDays },
     { key: 'today', href: `/trips/${trip.id}/today`, icon: Clock },
@@ -54,7 +57,7 @@ export function TripTopBar({
 
   return (
     <>
-      <div className="sticky top-0 z-20 bg-background/95 pt-[env(safe-area-inset-top)] backdrop-blur-xl md:pt-2">
+      <div className="sticky top-0 z-20 bg-background/95 short:static pt-[env(safe-area-inset-top)] backdrop-blur-xl md:pt-2">
         <div className="flex items-center gap-1 px-2 pt-1">
           <Link
             href="/trips"
@@ -102,7 +105,7 @@ export function TripTopBar({
         {below}
         <div className="h-px bg-border" />
       </div>
-      <nav className="scrollbar-none flex gap-2 overflow-x-auto px-4 pt-3">
+      <nav className="flex flex-wrap gap-2 px-4 pt-3">
         {more.map(({ path, icon: Icon, label, color }) => (
           <Link
             key={path}
@@ -113,7 +116,16 @@ export function TripTopBar({
             {label}
           </Link>
         ))}
+        <button
+          type="button"
+          onClick={() => setExporting(true)}
+          className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border bg-card px-3 text-sm"
+        >
+          <Download aria-hidden className="size-4 text-l2" />
+          {t('export.open')}
+        </button>
       </nav>
+      <ExportSheet trip={trip} open={exporting} onClose={() => setExporting(false)} />
     </>
   )
 }

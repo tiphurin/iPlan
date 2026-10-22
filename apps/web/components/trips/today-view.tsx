@@ -1,8 +1,17 @@
 'use client'
 
+import { todayKey } from '@iplan/i18n'
 import type { TripDetailDto, TripItemDto } from '@iplan/contracts'
 import { currentTripDay, delayMinutes, punctuality, scheduleStatus, timeline } from '@iplan/core'
-import { Check, FastForward, FlaskConical, RotateCcw, SkipForward, Undo2 } from 'lucide-react'
+import {
+  Check,
+  Clock,
+  FastForward,
+  FlaskConical,
+  RotateCcw,
+  SkipForward,
+  Undo2,
+} from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -15,8 +24,10 @@ import { useItemMutations, useItems, useTrip } from '@/lib/trips'
 import { useFormat } from '@/lib/use-format'
 import { dayColor } from '@/lib/day-colors'
 import { tripDays } from '@/lib/trip-dates'
-import { awayZone } from '@/lib/time-zones'
+import { awayZone, zoneCurrency } from '@/lib/time-zones'
 import { TripDisplayProvider, useTripDisplay } from '@/lib/trip-display'
+import { confirmDialog } from '@/lib/confirm'
+import { itemsToShift, roundUpFive } from '@/lib/shift'
 import { SleepCard } from './sleep-card'
 import { ItemSheet } from './item-sheet'
 import { TripTopBar } from './trip-top-bar'
@@ -154,8 +165,41 @@ function TodayBody({ initialTrip, initialItems, meId, serverNow }: TodayProps) {
           on_time: t('todayView.onTime'),
         }[punctuality(delay)]
 
+  // Running late: offer to push the rest of today back (fixed-time items stay put).
+  const lateBy =
+    late && lateMin !== null ? lateMin : delay !== null && delay >= LATE_AFTER_MIN ? delay : 0
+  const pushPlan = (() => {
+    if (!current || lateBy === 0 || skipped) return null
+    const { move, stoppedAt } = itemsToShift(items, current)
+    // Not checked in yet: the current item starts late too; checked in late: only what follows.
+    const ids = [...(myCheckIn ? [] : [current.id]), ...move.map((i) => i.id)]
+    return ids.length > 0 ? { ids, minutes: roundUpFive(lateBy), stoppedAt } : null
+  })()
+
+  async function onPushPlan() {
+    if (!pushPlan) return
+    const amount = `+${f.duration(pushPlan.minutes * 60_000)}`
+    const ok = await confirmDialog({
+      title: t('todayView.pushTitle'),
+      message: [
+        t('todayView.pushBody', { amount, count: pushPlan.ids.length }),
+        pushPlan.stoppedAt ? t('item.shiftStops', { title: pushPlan.stoppedAt.title }) : '',
+      ]
+        .filter(Boolean)
+        .join(' '),
+      confirmLabel: t('item.shiftYes', { count: pushPlan.ids.length }),
+      cancelLabel: t('item.shiftNo'),
+    })
+    if (ok) mutations.shift.mutate({ itemIds: pushPlan.ids, minutes: pushPlan.minutes })
+  }
+
   const before = tripStart !== undefined && now.getTime() < tripStart
-  const after = tripEnd !== undefined && now.getTime() >= tripEnd
+  // The trip is over only once its last day has passed at home, not merely when today's
+  // plan has ended (the trip may still have days left).
+  const after =
+    tripEnd !== undefined &&
+    now.getTime() >= tripEnd &&
+    todayKey(trip.homeTimeZone, now) > trip.endDate
 
   return (
     <>
@@ -329,6 +373,19 @@ function TodayBody({ initialTrip, initialItems, meId, serverNow }: TodayProps) {
                       </div>
                     )}
                   </div>
+                  {pushPlan && trip.role !== 'viewer' && (
+                    <button
+                      type="button"
+                      onClick={() => void onPushPlan()}
+                      disabled={mutations.shift.isPending}
+                      className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-2xl bg-white/15 px-4 text-sm font-semibold disabled:opacity-60"
+                    >
+                      <Clock aria-hidden className="size-4" />
+                      {t('todayView.pushButton', {
+                        amount: `+${f.duration(pushPlan.minutes * 60_000)}`,
+                      })}
+                    </button>
+                  )}
                 </Hero>
               ) : (
                 <Card>
@@ -397,7 +454,11 @@ function TodayBody({ initialTrip, initialItems, meId, serverNow }: TodayProps) {
               color={dayColor(day ? tripDays(trip.startDate, trip.endDate).indexOf(day) : 1)}
               meId={meId}
               statusOf={rowStatus}
-              spent={{ currency: trip.baseCurrency, rates: trip.fxRates }}
+              spent={{
+                currency: trip.baseCurrency,
+                rates: trip.fxRates,
+                local: away ? zoneCurrency(away) : undefined,
+              }}
               onOpen={(item) => setOpenItemId(item.id)}
             />
           </section>
@@ -406,7 +467,11 @@ function TodayBody({ initialTrip, initialItems, meId, serverNow }: TodayProps) {
       <ItemSheet
         item={items.find((i) => i.id === openItemId) ?? null}
         trip={trip}
-        spent={{ currency: trip.baseCurrency, rates: trip.fxRates }}
+        spent={{
+          currency: trip.baseCurrency,
+          rates: trip.fxRates,
+          local: away ? zoneCurrency(away) : undefined,
+        }}
         onClose={() => setOpenItemId(null)}
       />
     </>

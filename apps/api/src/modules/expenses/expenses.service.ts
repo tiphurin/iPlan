@@ -52,6 +52,109 @@ function daysOf(start: string, end: string): string[] {
   return days
 }
 
+export type CsvLang = 'th' | 'en'
+
+/** Words used in the CSV, per language. */
+const CSV_TEXT: Record<
+  CsvLang,
+  Record<
+    | 'date'
+    | 'title'
+    | 'category'
+    | 'amount'
+    | 'currency'
+    | 'rate'
+    | 'paidBy'
+    | 'split'
+    | 'note'
+    | 'pool'
+    | 'rule'
+    | 'putInBy'
+    | 'totalIn'
+    | 'spentFromPool'
+    | 'leftOver',
+    string
+  > & {
+    categories: Record<string, string>
+    splits: Record<string, string>
+    rules: Record<'actual' | 'proportional', string>
+  }
+> = {
+  en: {
+    date: 'Date',
+    title: 'Title',
+    category: 'Category',
+    amount: 'Amount',
+    currency: 'Currency',
+    rate: 'Rate',
+    paidBy: 'Paid by',
+    split: 'Split',
+    note: 'Note',
+    pool: 'Pool',
+    rule: 'Rule',
+    putInBy: 'Put in by',
+    totalIn: 'Total put in',
+    spentFromPool: 'Spent from pool',
+    leftOver: 'Left over (negative = short)',
+    categories: {
+      food: 'Food',
+      transport: 'Transport',
+      stay: 'Stay',
+      activity: 'Activities',
+      shopping: 'Shopping',
+      health: 'Health',
+      other: 'Other',
+    },
+    splits: { equal: 'Equal', exact: 'Exact amounts', percent: 'Percent' },
+    rules: {
+      actual: 'split as used, overpayment refunded',
+      proportional: 'proportional to what each put in',
+    },
+  },
+  th: {
+    date: 'วันที่',
+    title: 'รายการ',
+    category: 'หมวด',
+    amount: 'จำนวนเงิน',
+    currency: 'สกุลเงิน',
+    rate: 'อัตรา',
+    paidBy: 'ใครจ่าย',
+    split: 'หารแบบ',
+    note: 'โน้ต',
+    pool: 'กองกลาง',
+    rule: 'กติกา',
+    putInBy: 'ใครลง',
+    totalIn: 'ลงรวม',
+    spentFromPool: 'ใช้จากกองกลาง',
+    leftOver: 'เหลือ (ติดลบ = ขาด)',
+    categories: {
+      food: 'อาหาร',
+      transport: 'เดินทาง',
+      stay: 'ที่พัก',
+      activity: 'กิจกรรม',
+      shopping: 'ช้อปปิ้ง',
+      health: 'สุขภาพ',
+      other: 'อื่นๆ',
+    },
+    splits: { equal: 'หารเท่ากัน', exact: 'ระบุจำนวน', percent: 'เปอร์เซ็นต์' },
+    rules: {
+      actual: 'หารตามที่ใช้จริง (คืนส่วนที่ลงเกิน)',
+      proportional: 'ยินดีลงมากกว่า (หารและคืนตามสัดส่วนที่ลง)',
+    },
+  },
+}
+
+/** A trip name usable as a file name on every system. */
+export function safeFileName(name: string): string {
+  const cleaned = [...name]
+    .map((ch) => (ch < ' ' || '\\/:*?"<>|'.includes(ch) ? ' ' : ch))
+    .join('')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 80)
+  return cleaned || 'trip'
+}
+
 /** CSV cell: quote when needed and neutralise spreadsheet formulas. */
 function cell(value: string): string {
   const safe = /^[=+\-@]/.test(value) ? `'${value}` : value
@@ -274,70 +377,70 @@ export class ExpensesService {
     }
   }
 
-  /** Spreadsheet-friendly export: one row per expense, one share column per person. */
-  async csv(actor: SessionUser, tripId: string): Promise<string> {
+  /**
+   * Spreadsheet-friendly export: one row per expense, one share column per
+   * person, then the pool. Headers in Thai or English; the file is named after
+   * the trip.
+   */
+  async csv(
+    actor: SessionUser,
+    tripId: string,
+    lang: CsvLang = 'en',
+  ): Promise<{ fileName: string; body: string }> {
     const { trip } = await this.trips.requireAccess(actor, tripId, 'viewer')
     const [rows, { nameOf }, members] = await Promise.all([
       this.expenses.list(tripId),
       this.names(tripId),
       this.directory.members(tripId),
     ])
+    const L = CSV_TEXT[lang]
+    const baseCol = `${L.amount} (${trip.baseCurrency})`
+    const dec = (minor: bigint) => toDecimalString(money(minor, trip.baseCurrency))
     const header = [
-      'Date',
-      'Title',
-      'Category',
-      'Amount',
-      'Currency',
-      'Rate',
-      `Amount (${trip.baseCurrency})`,
-      'Paid by',
-      'Split',
+      L.date,
+      L.title,
+      L.category,
+      L.amount,
+      L.currency,
+      L.rate,
+      baseCol,
+      L.paidBy,
+      L.split,
       ...members.map((m) => `${m.name} (${trip.baseCurrency})`),
-      'Note',
+      L.note,
     ]
     const lines = rows.map((row) => {
       const base = baseShares(row)
-      const dec = (minor: bigint) => toDecimalString(money(minor, trip.baseCurrency))
       return [
         row.expense.dayDate,
         row.expense.title,
-        row.expense.category,
+        L.categories[row.expense.category] ?? row.expense.category,
         toDecimalString(money(row.expense.amountMinor, row.expense.currency)),
         row.expense.currency,
         row.expense.fxRate,
         dec(row.expense.baseAmountMinor),
-        nameOf(row.expense.paidBy),
-        row.expense.splitMode,
+        row.expense.paidBy === POOL_ID ? L.pool : nameOf(row.expense.paidBy),
+        L.splits[row.expense.splitMode] ?? row.expense.splitMode,
         ...members.map((m) => (base[m.userId] === undefined ? '' : dec(base[m.userId] ?? 0n))),
         row.expense.note ?? '',
       ]
     })
     // Money put into the pool, its rule and totals, after a blank line.
     const pool = await this.pool(actor, tripId)
+    const total = (label: string, minor: string) => [label, '', '', '', '', dec(BigInt(minor))]
     const poolLines: string[][] =
       pool.contributions.length > 0 || BigInt(pool.spentBaseMinor) > 0n
         ? [
             [],
-            [
-              'Pool',
-              `Rule: ${pool.mode === 'proportional' ? 'proportional to what each put in' : 'split as used, overpayment refunded'}`,
-            ],
-            [
-              'Date',
-              'Put in by',
-              'Amount',
-              'Currency',
-              'Rate',
-              `Amount (${trip.baseCurrency})`,
-              'Note',
-            ],
+            [L.pool, `${L.rule}: ${L.rules[pool.mode]}`],
+            [L.date, L.putInBy, L.amount, L.currency, L.rate, baseCol, L.note],
             ...pool.contributions.map((x) => [
               x.date,
               x.name,
               toDecimalString(money(BigInt(x.amountMinor), x.currency)),
               x.currency,
               x.fxRate,
-              toDecimalString(money(BigInt(x.baseAmountMinor), trip.baseCurrency)),
+              dec(BigInt(x.baseAmountMinor)),
               x.note ?? '',
             ]),
             ...pool.byMember.map((m) => [
@@ -346,37 +449,17 @@ export class ExpensesService {
               '',
               '',
               '',
-              toDecimalString(money(BigInt(m.contributedBaseMinor), trip.baseCurrency)),
+              dec(BigInt(m.contributedBaseMinor)),
               `${(m.percentBp / 100).toFixed(1)}%`,
             ]),
-            [
-              'Total put in',
-              '',
-              '',
-              '',
-              '',
-              toDecimalString(money(BigInt(pool.totalBaseMinor), trip.baseCurrency)),
-            ],
-            [
-              'Spent from pool',
-              '',
-              '',
-              '',
-              '',
-              toDecimalString(money(BigInt(pool.spentBaseMinor), trip.baseCurrency)),
-            ],
-            [
-              'Left over (negative = short)',
-              '',
-              '',
-              '',
-              '',
-              toDecimalString(money(BigInt(pool.leftoverBaseMinor), trip.baseCurrency)),
-            ],
+            total(L.totalIn, pool.totalBaseMinor),
+            total(L.spentFromPool, pool.spentBaseMinor),
+            total(L.leftOver, pool.leftoverBaseMinor),
           ]
         : []
     // BOM so Excel opens Thai text as UTF-8.
-    return `\uFEFF${[header, ...lines, ...poolLines].map((line) => line.map(cell).join(',')).join('\r\n')}\r\n`
+    const body = `\uFEFF${[header, ...lines, ...poolLines].map((line) => line.map(cell).join(',')).join('\r\n')}\r\n`
+    return { fileName: `${safeFileName(trip.name)}.csv`, body }
   }
 
   private poolOptions(mode: PoolMode, rows: ContributionRow[]) {

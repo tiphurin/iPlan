@@ -2,6 +2,7 @@ import { createRoute, z } from '@hono/zod-openapi'
 import {
   CheckInInput,
   CreateTripItemInput,
+  ShiftItemsInput,
   TripItemDto,
   UpdateTripItemInput,
 } from '@iplan/contracts'
@@ -51,6 +52,21 @@ const updateItem = createRoute({
   request: { params: ItemParams, body: { content: json(UpdateTripItemInput), required: true } },
   responses: {
     200: item,
+    401: errorResponses[401],
+    403: errorResponses[403],
+    404: errorResponses[404],
+    422: errorResponses[422],
+  },
+})
+
+const shiftItems = createRoute({
+  method: 'post',
+  path: '/trips/{tripId}/items/shift',
+  tags,
+  summary: 'Move several items by the same minutes, all or nothing (editor or owner)',
+  request: { params: TripParams, body: { content: json(ShiftItemsInput), required: true } },
+  responses: {
+    200: { description: 'All items after the move', content: json(z.array(TripItemDto)) },
     401: errorResponses[401],
     403: errorResponses[403],
     404: errorResponses[404],
@@ -123,6 +139,12 @@ export function itemRoutes(service: ItemsService) {
     .openapi(updateItem, async (c) =>
       c.json(
         await service.update(requireUser(c), c.req.valid('param').itemId, c.req.valid('json')),
+        200,
+      ),
+    )
+    .openapi(shiftItems, async (c) =>
+      c.json(
+        await service.shift(requireUser(c), c.req.valid('param').tripId, c.req.valid('json')),
         200,
       ),
     )

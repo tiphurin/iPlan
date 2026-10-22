@@ -7,10 +7,11 @@ import { PageHeader } from '@/components/page-header'
 import { ExpensesView } from '@/components/trips/expenses-view'
 import { loadTrip } from '@/lib/load-trip'
 import { getMe, serverApi } from '@/lib/server-api'
+import { awayZone } from '@/lib/time-zones'
 
 export default async function ExpensesPage({ params }: { params: Promise<{ tripId: string }> }) {
   const { tripId } = await params
-  const [t, { trip }, expenses, summary, pool, me] = await Promise.all([
+  const [t, { trip, items }, expenses, summary, pool, me] = await Promise.all([
     getTranslations(),
     loadTrip(tripId),
     serverApi(`/api/trips/${tripId}/expenses`, z.array(ExpenseDto)),
@@ -30,6 +31,7 @@ export default async function ExpensesPage({ params }: { params: Promise<{ tripI
         initialSummary={summary}
         initialPool={pool}
         meId={me?.id ?? null}
+        away={awayZone(items, trip.homeTimeZone)}
       />
     </>
   )

@@ -193,6 +193,9 @@ main:has([data-back-link]) [data-header-lang] {
   font-weight: 600;
 }
 
+/* Phones turned sideways (and other short screens): nothing sticks to the top. */
+@custom-variant short (@media (max-height: 500px));
+
 @utility scrollbar-none {
   scrollbar-width: none;
   &::-webkit-scrollbar {

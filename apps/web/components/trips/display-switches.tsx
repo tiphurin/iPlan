@@ -10,6 +10,12 @@ import { zoneCurrency, zoneShort } from '@/lib/time-zones'
 import { useFormat } from '@/lib/use-format'
 
 const SYMBOL: Record<string, string> = { THB: '฿', KRW: '₩', JPY: '¥', USD: '$', EUR: '€' }
+const TRACK = 'inline-flex items-center gap-0.5 rounded-full bg-muted p-1'
+const option = (on: boolean) =>
+  cn(
+    'flex min-h-10 items-center gap-1.5 rounded-full px-3 text-sm transition-colors',
+    on ? 'seg-on font-semibold' : 'text-muted-foreground',
+  )
 
 /**
  * Two compact switches: live clocks that pick which zone the plan shows, and
@@ -40,16 +46,10 @@ export function DisplaySwitches({
   const local = zoneCurrency(away)
   const hasMoney =
     local !== undefined && local !== trip.baseCurrency && Boolean(trip.fxRates[local])
-  const option = (on: boolean) =>
-    cn(
-      'flex min-h-10 items-center gap-1.5 rounded-full px-3 text-sm transition-colors',
-      on ? 'seg-on font-semibold' : 'text-muted-foreground',
-    )
-  const track = 'inline-flex items-center gap-0.5 rounded-full bg-muted p-1'
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div role="radiogroup" aria-label={t('timeMode')} className={track}>
+      <div role="radiogroup" aria-label={t('timeMode')} className={TRACK}>
         <Clock aria-hidden className="mx-1.5 size-4 text-faint" />
         {(
           [
@@ -74,30 +74,37 @@ export function DisplaySwitches({
           </button>
         ))}
       </div>
-      {hasMoney && local && (
-        <div role="radiogroup" aria-label={t('moneyMode')} className={track}>
-          <Banknote aria-hidden className="mx-1.5 size-4 text-faint" />
-          {(
-            [
-              ['local', local],
-              ['base', trip.baseCurrency],
-            ] as const
-          ).map(([mode, code]) => (
-            <button
-              key={mode}
-              type="button"
-              role="radio"
-              aria-checked={display.money === mode}
-              aria-label={t(`currency.${code}`, { code })}
-              onClick={() => setDisplay({ money: mode })}
-              className={option(display.money === mode)}
-            >
-              <span className="font-display">{SYMBOL[code] ?? ''}</span>
-              {code}
-            </button>
-          ))}
-        </div>
-      )}
+      {hasMoney && local && <MoneySwitch trip={trip} local={local} />}
+    </div>
+  )
+}
+
+/** "₩ KRW | ฿ THB": the currency trip amounts are shown in (shared by the plan and the costs). */
+export function MoneySwitch({ trip, local }: { trip: TripDetailDto; local: string }) {
+  const t = useTranslations('tripView')
+  const { display, setDisplay } = useTripDisplay()
+  return (
+    <div role="radiogroup" aria-label={t('moneyMode')} className={TRACK}>
+      <Banknote aria-hidden className="mx-1.5 size-4 text-faint" />
+      {(
+        [
+          ['local', local],
+          ['base', trip.baseCurrency],
+        ] as const
+      ).map(([mode, code]) => (
+        <button
+          key={mode}
+          type="button"
+          role="radio"
+          aria-checked={display.money === mode}
+          aria-label={t(`currency.${code}`, { code })}
+          onClick={() => setDisplay({ money: mode })}
+          className={option(display.money === mode)}
+        >
+          <span className="font-display">{SYMBOL[code] ?? ''}</span>
+          {code}
+        </button>
+      ))}
     </div>
   )
 }

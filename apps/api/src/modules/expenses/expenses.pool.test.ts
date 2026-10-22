@@ -1,7 +1,7 @@
 import { PoolContributionInput } from '@iplan/contracts'
 import { describe, expect, it } from 'vitest'
 import { InMemoryExpenses, seededTrip, users } from '../../testing/fakes'
-import { ExpensesService } from './expenses.service'
+import { ExpensesService, safeFileName } from './expenses.service'
 
 async function setup() {
   const { tripId, trips, repo, audit } = await seededTrip()
@@ -244,7 +244,7 @@ describe('ExpensesService pool', () => {
 
   it('the CSV export lists the pool: each contribution, each person, totals and the rule', async () => {
     const { tripId, service } = await example()
-    const csv = await service.csv(users.viewer, tripId)
+    const { body: csv } = await service.csv(users.viewer, tripId)
     expect(csv).toContain('Pool,"Rule: split as used, overpayment refunded"')
     expect(csv).toContain('Put in by')
     expect(csv).toMatch(/Owner,7000\.00,THB,1,7000\.00/)
@@ -252,12 +252,17 @@ describe('ExpensesService pool', () => {
     expect(csv).toContain('Total put in,,,,,12000.00')
     expect(csv).toContain('Left over (negative = short),,,,,2000.00')
     await service.setPoolMode(users.owner, tripId, 'proportional')
-    expect(await service.csv(users.viewer, tripId)).toContain('Rule: proportional')
+    expect((await service.csv(users.viewer, tripId)).body).toContain('Rule: proportional')
+  })
+
+  it('names the CSV after the trip, safe for any system', () => {
+    expect(safeFileName('Seoul 2026 / ทริป: "แม่"?')).toBe('Seoul 2026 ทริป แม่')
+    expect(safeFileName('   ')).toBe('trip')
   })
 
   it('the CSV has no pool part for a trip without a pool', async () => {
     const { tripId, service } = await setup()
-    expect(await service.csv(users.viewer, tripId)).not.toContain('Pool')
+    expect((await service.csv(users.viewer, tripId)).body).not.toContain('Pool')
   })
 
   it('locks the trip currency once money is in the pool', async () => {

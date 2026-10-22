@@ -116,6 +116,16 @@ export function useItemMutations(tripId: string) {
         apiFetch(`/api/items/${id}/duplicate`, { method: 'POST', schema: TripItemDto }),
       onSuccess: refresh,
     }),
+    /** Move several items by the same minutes (all or nothing). */
+    shift: useMutation({
+      mutationFn: (input: { itemIds: string[]; minutes: number }) =>
+        apiFetch(`/api/trips/${tripId}/items/shift`, {
+          method: 'POST',
+          body: input,
+          schema: z.array(TripItemDto),
+        }),
+      onSuccess: (items) => client.setQueryData(tripKeys.items(tripId), items),
+    }),
     checkIn: useMutation({
       mutationFn: ({ id, at, skipped }: { id: string; at: Date; skipped?: boolean }) =>
         apiFetch(`/api/items/${id}/check-in`, {

@@ -106,16 +106,16 @@ export function AppNav({
 
       <nav
         aria-label={label}
-        className="fixed inset-y-0 left-0 z-40 hidden w-20 flex-col border-r bg-card px-2 py-5 md:flex lg:w-60 lg:px-4"
+        className="scrollbar-none fixed inset-y-0 left-0 z-40 hidden w-20 flex-col overflow-y-auto border-r bg-card px-2 py-5 short:py-2 md:flex lg:w-60 lg:px-4"
       >
         <Link
           href="/"
-          className="mb-6 flex items-center justify-center gap-2 font-display text-[22px] font-bold lg:justify-start lg:px-2"
+          className="mb-6 flex items-center justify-center gap-2 font-display text-[22px] font-bold short:mb-2 lg:justify-start lg:px-2"
         >
           <LogoMark size={32} />
           <span className="hidden lg:inline">iPlan</span>
         </Link>
-        <ul className="space-y-1">
+        <ul className="space-y-1 short:space-y-0">
           {tabs.map(({ key, href, icon: Icon, label: text, color }) => {
             const on = isActive(key, href)
             return (
@@ -125,7 +125,7 @@ export function AppNav({
                   aria-current={on ? 'page' : undefined}
                   title={text}
                   className={cn(
-                    'flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-[15px]',
+                    'flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] short:min-h-11 lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-[15px]',
                     on
                       ? 'bg-muted font-semibold text-foreground'
                       : 'text-muted-foreground hover:bg-muted',

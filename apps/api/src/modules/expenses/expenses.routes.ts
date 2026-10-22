@@ -41,8 +41,11 @@ const csv = createRoute({
   method: 'get',
   path: '/trips/{tripId}/expenses.csv',
   tags,
-  summary: 'Download expenses as CSV',
-  request: { params: TripParams },
+  summary: 'Download expenses as CSV (headers in Thai or English), named after the trip',
+  request: {
+    params: TripParams,
+    query: z.object({ lang: z.enum(['th', 'en']).optional() }),
+  },
   responses: {
     200: { description: 'CSV file', content: { 'text/csv': { schema: z.string() } } },
     ...denied,
@@ -142,10 +145,16 @@ export function expenseRoutes(service: ExpensesService) {
     )
     .openapi(csv, async (c) => {
       const tripId = c.req.valid('param').tripId
-      const body = await service.csv(requireUser(c), tripId)
+      const { fileName, body } = await service.csv(
+        requireUser(c),
+        tripId,
+        c.req.valid('query').lang ?? 'en',
+      )
+      // ASCII fallback plus the real (often Thai) name, as RFC 6266 describes.
+      const ascii = fileName.replace(/[^\x20-\x7e]/g, '_').replace(/"/g, '')
       return c.body(body, 200, {
         'content-type': 'text/csv; charset=utf-8',
-        'content-disposition': `attachment; filename="iplan-expenses-${tripId.slice(0, 8)}.csv"`,
+        'content-disposition': `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
       })
     })
     .openapi(create, async (c) =>

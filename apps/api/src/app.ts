@@ -1,6 +1,7 @@
 import { createRoute, z } from '@hono/zod-openapi'
 import type { ErrorResponse, FeatureKey, UserRole } from '@iplan/contracts'
 import { createMiddleware } from 'hono/factory'
+import { HTTPException } from 'hono/http-exception'
 import { Scalar } from '@scalar/hono-api-reference'
 import type { AuthGateway } from './infra/auth'
 import type { StorageProvider } from './infra/storage'
@@ -162,6 +163,18 @@ export function createApp(deps: AppDeps) {
           ...(error.fields && { fields: error.fields }),
         },
       }
+      return c.json(body, error.status)
+    }
+    // Hono's own client errors (e.g. "Malformed JSON in request body") are the caller's
+    // fault: answer with their 4xx status, never a 500.
+    if (error instanceof HTTPException && error.status < 500) {
+      const code =
+        error.status === 401
+          ? 'UNAUTHORIZED'
+          : error.status === 403
+            ? 'FORBIDDEN'
+            : 'VALIDATION_FAILED'
+      const body: ErrorResponse = { error: { code, message: error.message || 'Bad request' } }
       return c.json(body, error.status)
     }
     console.error(error)

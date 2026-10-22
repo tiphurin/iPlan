@@ -20,6 +20,8 @@ export interface ItemsRepository {
   nextSortOrder(tripId: string, dayDate: string): Promise<number>
   create(values: NewItemRow): Promise<ItemRow>
   update(itemId: string, changes: Partial<NewItemRow>): Promise<ItemRow | null>
+  /** Sets new start/end times for several items in one transaction. */
+  retime(changes: { id: string; startsAt: Date; endsAt: Date | null }[]): Promise<void>
   delete(itemId: string): Promise<void>
   upsertCheckIn(itemId: string, userId: string, at: Date, skipped?: boolean): Promise<void>
   deleteCheckIn(itemId: string, userId: string): Promise<void>
@@ -92,6 +94,17 @@ export class DrizzleItemsRepository implements ItemsRepository {
       .where(eq(schema.tripItem.id, itemId))
       .returning()
     return row ?? null
+  }
+
+  async retime(changes: { id: string; startsAt: Date; endsAt: Date | null }[]): Promise<void> {
+    await this.db.transaction(async (tx) => {
+      for (const c of changes) {
+        await tx
+          .update(schema.tripItem)
+          .set({ startsAt: c.startsAt, endsAt: c.endsAt, updatedAt: new Date() })
+          .where(eq(schema.tripItem.id, c.id))
+      }
+    })
   }
 
   async delete(itemId: string): Promise<void> {

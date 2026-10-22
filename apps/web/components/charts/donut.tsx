@@ -2,6 +2,8 @@
 export interface DonutSlice {
   key: string
   label: string
+  /** Optional amount shown before the percentage (print pages), so the label never gets cut. */
+  amount?: string
   value: number
   color: string
 }
@@ -49,6 +51,7 @@ export function Donut({ slices, center }: { slices: DonutSlice[]; center?: strin
               style={{ backgroundColor: slice.color }}
             />
             <span className="flex-1 truncate">{slice.label}</span>
+            {slice.amount && <span className="tabular-nums">{slice.amount}</span>}
             <span className="text-muted-foreground tabular-nums">
               {total > 0 ? Math.round((slice.value / total) * 100) : 0}%
             </span>

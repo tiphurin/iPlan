@@ -206,6 +206,13 @@
     "durationHours": "Hours",
     "durationMinutes": "Minutes",
     "applyDuration": "Use this duration",
+    "fixed": "Fixed time (can't move)",
+    "fixedHint": "E.g. a flight, a booked slot, an appointment: if earlier plans run late, this one is not moved",
+    "shiftTitle": "Move the items after this too?",
+    "shiftBody": "The end moved {amount} · the next {count} items today move by the same amount",
+    "shiftStops": "(stopping before \"{title}\", which has a fixed time)",
+    "shiftYes": "Move {count} items",
+    "shiftNo": "Don't move",
     "planColor": "Colour in the plan",
     "planColorAuto": "Follow the ride here",
     "planColorHint": "Magic wand = use the colour of the line you arrived on (e.g. blue after Line 4)"
@@ -219,6 +226,9 @@
     "doneOf": "{done} of {total} done",
     "checkIn": "Check in",
     "undoCheckIn": "Undo check-in",
+    "pushButton": "Running late · push the rest back {amount}",
+    "pushTitle": "Push the rest of today back?",
+    "pushBody": "{count} items move later by {amount} to match the real time",
     "late": "{min} min behind plan",
     "early": "{min} min ahead of plan",
     "onTime": "On time",
@@ -246,7 +256,9 @@
     "dh": "{d}d {h}h",
     "hm": "{h}h {m}m",
     "m": "{m} min",
-    "lessThanMinute": "under a minute"
+    "lessThanMinute": "under a minute",
+    "d": "{d}d",
+    "h": "{h}h"
   },
   "members": {
     "title": "Members",
@@ -338,6 +350,7 @@
     "net": "Net",
     "byDay": "Per day vs budget",
     "byCategory": "By category",
+    "byDayList": "Every expense by day",
     "budget": "Budget {amount}",
     "over": "Over budget",
     "csv": "Download CSV",
@@ -664,7 +677,35 @@
       "adjusted": "Adjusted",
       "note": "Note",
       "time": "Time"
-    }
+    },
+    "open": "Export",
+    "title": "Export trip",
+    "format": "File type",
+    "formats": {
+      "pdf": "PDF",
+      "excel": "Excel",
+      "csv": "CSV"
+    },
+    "formatHints": {
+      "pdf": "To read or print, with charts; choose the plan and/or the costs",
+      "excel": "Costs, people, who pays whom and the pool on separate sheets",
+      "csv": "Raw cost data that opens anywhere"
+    },
+    "include": "What goes in the PDF",
+    "sections": {
+      "plan": "Trip plan",
+      "expenses": "Costs"
+    },
+    "sectionHints": {
+      "plan": "Every day's items with times, places and notes",
+      "expenses": "Totals, pie chart, bar charts, who pays whom and the pool"
+    },
+    "pickOne": "Pick at least one",
+    "preview": "Preview",
+    "confirm": "Export",
+    "back": "Back",
+    "language": "Language in the file",
+    "currency": "Show totals in"
   },
   "showcase": {
     "title": "All features",
@@ -950,7 +991,10 @@
         "title": "Trips",
         "plan": "Add the day plan",
         "invite": "Invite, they accept",
-        "checkin": "On the day, check in"
+        "checkin": "On the day, check in",
+        "cover": "A photo or colour as the trip cover",
+        "route": "Getting around: country, lines (changes allowed), start and end stations",
+        "shift": "Make an item longer, tap \"Move\": the next items follow (fixed times stay)"
       },
       "money": {
         "title": "My money",
@@ -962,7 +1006,7 @@
         "title": "Shared wallet",
         "create": "Create a wallet",
         "invite": "Invite, they accept",
-        "split": "Who paid, how to split",
+        "split": "Who paid, how to split (or no split)",
         "settle": "Pay back, tap \"Paid\"",
         "month": "Monthly status, partial payments too"
       },
@@ -971,12 +1015,21 @@
         "switch": "Switch Plan / Today",
         "late": "Orange when close, red when late: check in or skip",
         "toggle": "Switch time home/local and money ₩/฿",
-        "spend": "Budget and spending under each place"
+        "spend": "Budget and spending under each place",
+        "push": "Running late? \"Push the rest back\""
       },
       "calendar": {
         "title": "Calendar",
         "subscribe": "Trip calendar button: iPhone or Google (syncs itself)",
         "item": "One item: tap Apple Calendar again to update"
+      },
+      "tripMoney": {
+        "title": "Trip costs",
+        "add": "Add from a place; tap a cost to edit",
+        "split": "Equal / amounts / % / no split",
+        "pool": "Put money in the pool, pick the rule",
+        "settle": "Who pays whom, with charts; switch totals between ₩/฿",
+        "export": "Tap Export on the trip page: PDF (plan and/or costs with charts), Excel or CSV; pick the language and currency, preview, then confirm"
       }
     },
     "admin": {

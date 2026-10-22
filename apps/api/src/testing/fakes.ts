@@ -217,6 +217,12 @@ export class InMemoryItems implements ItemsRepository {
   async findById(itemId: string) {
     return this.items.get(itemId) ?? null
   }
+  async retime(changes: { id: string; startsAt: Date; endsAt: Date | null }[]) {
+    for (const c of changes) {
+      const row = this.items.get(c.id)
+      if (row) this.items.set(c.id, { ...row, startsAt: c.startsAt, endsAt: c.endsAt })
+    }
+  }
   async nextSortOrder(tripId: string, dayDate: string) {
     const orders = [...this.items.values()]
       .filter((i) => i.tripId === tripId && i.dayDate === dayDate)

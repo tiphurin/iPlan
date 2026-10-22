@@ -1,6 +1,7 @@
 import type {
   CheckInInput,
   CreateTripItemInput,
+  ShiftItemsInput,
   TripItemDto,
   UpdateTripItemInput,
 } from '@iplan/contracts'
@@ -135,6 +136,40 @@ export class ItemsService {
       data: { fields: Object.keys(changes) },
     })
     return this.dto(row)
+  }
+
+  /**
+   * Moves the given items (all in this trip) by the same number of minutes, all
+   * or nothing. Items marked "fixed" (booked times) are refused, so a booked
+   * flight never moves by accident.
+   */
+  async shift(actor: SessionUser, tripId: string, input: ShiftItemsInput): Promise<TripItemDto[]> {
+    const { trip } = await this.trips.requireAccess(actor, tripId, 'editor')
+    const rows = await this.items.listByTrip(tripId)
+    const byId = new Map(rows.map((r) => [r.id, r]))
+    const ids = [...new Set(input.itemIds)]
+    const missing = ids.filter((id) => !byId.has(id))
+    if (missing.length > 0) throw notFound('Item')
+    const ms = input.minutes * 60_000
+    const changes = ids.map((id) => {
+      const row = byId.get(id) as ItemRow
+      if ((row.details as { fixed?: unknown } | null)?.fixed === true) {
+        throw validationFailed({ itemIds: `"${row.title}" has a fixed time and can't move` })
+      }
+      const startsAt = new Date(row.startsAt.getTime() + ms)
+      const endsAt = row.endsAt ? new Date(row.endsAt.getTime() + ms) : null
+      checkItem(trip, { ...row, startsAt, endsAt })
+      return { id, startsAt, endsAt }
+    })
+    await this.items.retime(changes)
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'item.shift',
+      entityType: 'trip',
+      entityId: tripId,
+      data: { items: ids.length, minutes: input.minutes },
+    })
+    return this.list(actor, tripId)
   }
 
   async duplicate(actor: SessionUser, itemId: string): Promise<TripItemDto> {

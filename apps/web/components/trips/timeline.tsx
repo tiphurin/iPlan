@@ -31,6 +31,8 @@ export interface SpentInfo {
   currency: string
   /** Base units per 1 foreign unit, e.g. { KRW: "0.023" }. */
   rates: Record<string, string>
+  /** The destination's currency, for items without a budget in it. */
+  local?: string | undefined
 }
 
 export function Timeline({
@@ -387,7 +389,13 @@ export function MoneyLine({
   const { display } = useTripDisplay()
   if (!budget && !spentMinor) return null
   const base = spent?.currency
-  const local = budget && budget.currency !== base ? budget.currency : undefined
+  // The budget's own currency, else the destination's (so "Spent" follows the ₩ | ฿ switch too).
+  const local =
+    budget && budget.currency !== base
+      ? budget.currency
+      : spent?.local && spent.local !== base
+        ? spent.local
+        : undefined
   // Saved rates come from people (or old backups): only use a positive decimal.
   const saved = local && spent ? spent.rates[local] : undefined
   const rate = saved && /^\d+(\.\d+)?$/.test(saved) && Number(saved) > 0 ? saved : undefined

@@ -130,7 +130,10 @@ describe('ExpensesService', () => {
   it('exports CSV with a BOM, per-person columns and formula-safe cells', async () => {
     const { tripId, service } = await setup()
     await service.create(users.owner, tripId, { ...meal, title: '=HYPERLINK("x")' })
-    const csv = await service.csv(users.viewer, tripId)
+    const { body: csv, fileName } = await service.csv(users.viewer, tripId)
+    expect(fileName).toMatch(/\.csv$/)
+    const th = await service.csv(users.viewer, tripId, 'th')
+    expect(th.body).toContain('วันที่,รายการ,หมวด')
     expect(csv.startsWith('﻿Date,Title')).toBe(true)
     expect(csv).toContain('Owner (THB)')
     expect(csv).toContain(`"'=HYPERLINK(""x"")"`)

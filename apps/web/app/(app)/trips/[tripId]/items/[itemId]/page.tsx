@@ -54,6 +54,7 @@ export default async function ItemPage({ params }: Props) {
         <ItemForm
           trip={trip}
           item={item}
+          items={items}
           defaultDay={item.dayDate}
           defaultTimeZone={item.timeZone}
         />

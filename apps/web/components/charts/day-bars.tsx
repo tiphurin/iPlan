@@ -139,7 +139,7 @@ export function DayBars({ bars, labels, static: isStatic = false }: DayBarsProps
           </span>
         )}
       </figcaption>
-      <table className={isStatic ? 'mt-2 w-full text-[11px] tabular-nums' : 'sr-only'}>
+      <table className={isStatic ? 'mt-2 w-full text-sm tabular-nums' : 'sr-only'}>
         <tbody>
           {bars.map((b) => (
             <tr key={b.key}>

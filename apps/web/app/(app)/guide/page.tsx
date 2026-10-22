@@ -12,6 +12,12 @@ import {
   SwitchMock,
   ToggleMock,
   ChartMock,
+  CoverMock,
+  ExportMock,
+  NoSplitMock,
+  PoolMock,
+  RouteMock,
+  ShiftMock,
   CheckInMock,
   GoogleMock,
   GroupsMock,
@@ -53,6 +59,9 @@ const USER_FLOWS: Flow[] = [
     color: 'var(--l2)',
     steps: [
       { key: 'plan', picture: <TimelineMock /> },
+      { key: 'cover', picture: <CoverMock /> },
+      { key: 'route', picture: <RouteMock /> },
+      { key: 'shift', picture: <ShiftMock /> },
       { key: 'invite', picture: <InviteMock /> },
       { key: 'checkin', picture: <CheckInMock /> },
     ],
@@ -63,8 +72,20 @@ const USER_FLOWS: Flow[] = [
     steps: [
       { key: 'switch', picture: <SwitchMock /> },
       { key: 'late', picture: <LateMock /> },
+      { key: 'push', picture: <ShiftMock /> },
       { key: 'toggle', picture: <ToggleMock /> },
       { key: 'spend', picture: <SpendMock /> },
+    ],
+  },
+  {
+    key: 'tripMoney',
+    color: 'var(--l1)',
+    steps: [
+      { key: 'add', picture: <SpendMock /> },
+      { key: 'split', picture: <NoSplitMock /> },
+      { key: 'pool', picture: <PoolMock /> },
+      { key: 'settle', picture: <SettleMock /> },
+      { key: 'export', picture: <ExportMock /> },
     ],
   },
   {

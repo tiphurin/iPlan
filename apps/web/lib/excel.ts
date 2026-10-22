@@ -195,7 +195,7 @@ export async function exportTripExcel(
       },
       ...poolSheet,
     ],
-    `${tripName}-expenses.xlsx`,
+    `${tripName}.xlsx`,
   )
 }
 

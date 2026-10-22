@@ -15,7 +15,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { cn } from '@/lib/cn'
 import { dayColor } from '@/lib/day-colors'
 import { useExpenses } from '@/lib/expenses'
-import { awayZone } from '@/lib/time-zones'
+import { awayZone, zoneCurrency } from '@/lib/time-zones'
 import { TripDisplayProvider } from '@/lib/trip-display'
 import { tripDays } from '@/lib/trip-dates'
 import { useItems, useTrip } from '@/lib/trips'
@@ -191,7 +191,12 @@ export function TripView({
                 homeTimeZone={trip.homeTimeZone}
                 color={dayColor(dayIndex)}
                 meId={meId}
-                spent={{ byItem: spentByItem, currency: trip.baseCurrency, rates: trip.fxRates }}
+                spent={{
+                  byItem: spentByItem,
+                  currency: trip.baseCurrency,
+                  rates: trip.fxRates,
+                  local: away ? zoneCurrency(away) : undefined,
+                }}
                 focusId={focusId}
                 onOpen={(item) => setOpenItemId(item.id)}
               />
@@ -207,7 +212,12 @@ export function TripView({
       <ItemSheet
         item={items.find((i) => i.id === openItemId) ?? null}
         trip={trip}
-        spent={{ byItem: spentByItem, currency: trip.baseCurrency, rates: trip.fxRates }}
+        spent={{
+          byItem: spentByItem,
+          currency: trip.baseCurrency,
+          rates: trip.fxRates,
+          local: away ? zoneCurrency(away) : undefined,
+        }}
         onClose={() => setOpenItemId(null)}
       />
 

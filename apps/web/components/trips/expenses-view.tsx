@@ -2,16 +2,7 @@
 
 import type { ExpenseDto, ExpenseSummaryDto, PoolDto, TripDetailDto } from '@iplan/contracts'
 import { money, toDecimalString } from '@iplan/core'
-import {
-  ArrowRight,
-  CircleCheck,
-  Download,
-  FileSpreadsheet,
-  FileText,
-  Landmark,
-  Settings2,
-  X,
-} from 'lucide-react'
+import { ArrowRight, CircleCheck, Landmark, Settings2, X } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -21,33 +12,60 @@ import { BalanceBars } from '@/components/charts/balance-bars'
 import { DayBars } from '@/components/charts/day-bars'
 import { CATEGORY_COLORS, Donut } from '@/components/charts/donut'
 import { PersonBars } from '@/components/charts/person-bars'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Card, SectionTitle } from '@/components/ui/card'
 import { Segmented } from '@/components/ui/chip'
 import { Field, Input } from '@/components/ui/field'
 import { Fab } from '@/components/ui/fab'
 import { cn } from '@/lib/cn'
-import { exportTripExcel } from '@/lib/excel'
 import { balanceRows, dayBars, personBars, settleHeadline, viewerShare } from '@/lib/expense-charts'
-import { fmt, useExpenseMutations, useExpenseSummary, useExpenses, usePool } from '@/lib/expenses'
+import {
+  fmt as fmtRaw,
+  useExpenseMutations,
+  useExpenseSummary,
+  useExpenses,
+  usePool,
+} from '@/lib/expenses'
+import { useShownMoney } from '@/lib/money-view'
+import { TripDisplayProvider } from '@/lib/trip-display'
+import { zoneCurrency } from '@/lib/time-zones'
+import { MoneySwitch } from './display-switches'
 import { useTrip } from '@/lib/trips'
 import { PoolCard } from './pool-card'
 import { useFormat } from '@/lib/use-format'
 
-export function ExpensesView({
-  initialTrip,
-  initialExpenses,
-  initialSummary,
-  initialPool,
-  meId,
-}: {
+interface ExpensesViewProps {
   initialTrip: TripDetailDto
   initialExpenses: ExpenseDto[]
   initialSummary: ExpenseSummaryDto
   initialPool: PoolDto
   /** The viewer, to show their own share of the total. */
   meId: string | null
-}) {
+  /** The trip's destination zone, whose currency the ₩ | ฿ switch offers. */
+  away: string | null
+}
+
+/** Shares the plan's ₩ | ฿ choice (remembered per trip) with the cost pages. */
+export function ExpensesView(props: ExpensesViewProps) {
+  return (
+    <TripDisplayProvider
+      tripId={props.initialTrip.id}
+      home={props.initialTrip.homeTimeZone}
+      away={props.away}
+    >
+      <ExpensesBody {...props} />
+    </TripDisplayProvider>
+  )
+}
+
+function ExpensesBody({
+  initialTrip,
+  initialExpenses,
+  initialSummary,
+  initialPool,
+  meId,
+  away,
+}: ExpensesViewProps) {
   const t = useTranslations()
   const f = useFormat()
   const { data: trip } = useTrip(initialTrip.id, initialTrip)
@@ -61,6 +79,10 @@ export function ExpensesView({
   const [removed, setRemoved] = useState<string[]>([])
   const canEdit = trip.role !== 'viewer'
   const base = summary.baseCurrency
+  const local = away ? zoneCurrency(away) : undefined
+  // Totals follow the ₩ | ฿ switch; each expense still shows what was really paid.
+  const shownMoney = useShownMoney(base, local, trip.fxRates)
+  const fmt = shownMoney.fmt
   const maxDay = summary.byDay.reduce(
     (max, d) => Math.max(max, Number(d.spentMinor), Number(d.budgetMinor ?? 0)),
     1,
@@ -124,70 +146,9 @@ export function ExpensesView({
           </p>
         )}
         <div className="mt-3 flex flex-wrap gap-2">
-          <a
-            href={`/api/trips/${trip.id}/expenses.csv`}
-            className={buttonVariants({ variant: 'secondary' })}
-          >
-            <Download aria-hidden className="size-4" />
-            {t('expenses.csv')}
-          </a>
-          <Button
-            variant="secondary"
-            onClick={() =>
-              void exportTripExcel(
-                trip.name,
-                expenses,
-                summary,
-                trip.members,
-                {
-                  expenses: t('expenses.title'),
-                  people: t('expenses.people'),
-                  settle: t('expenses.settle'),
-                  columns: {
-                    date: t('export.col.date'),
-                    title: t('export.col.title'),
-                    category: t('export.col.category'),
-                    amount: t('export.col.amount'),
-                    currency: t('export.col.currency'),
-                    rate: t('export.col.rate'),
-                    base: t('export.col.base'),
-                    paidBy: t('export.col.paidBy'),
-                    split: t('export.col.split'),
-                    name: t('export.col.name'),
-                    paid: t('export.col.paid'),
-                    share: t('export.col.share'),
-                    net: t('export.col.net'),
-                    from: t('export.col.from'),
-                    to: t('export.col.to'),
-                  },
-                  category: (k) => t(`expenses.categories.${k}`),
-                  pool: t('expenses.form.pool'),
-                  poolSheet: {
-                    title: t('expenses.pool.title'),
-                    note: t('expenses.pool.note'),
-                    percent: '%',
-                    rule: t('expenses.pool.rule'),
-                    mode: t(`expenses.pool.modes.${pool.mode}`),
-                    putIn: t('expenses.pool.putIn'),
-                    spent: t('expenses.pool.spent'),
-                    left: t('expenses.pool.left'),
-                    byMember: t('expenses.pool.byMember'),
-                  },
-                },
-                pool,
-              )
-            }
-          >
-            <FileSpreadsheet aria-hidden className="size-4" />
-            {t('export.excel')}
-          </Button>
-          <Link
-            href={`/print/trips/${trip.id}` as Route}
-            className={buttonVariants({ variant: 'secondary' })}
-          >
-            <FileText aria-hidden className="size-4" />
-            {t('export.pdf')}
-          </Link>
+          {local && local !== base && trip.fxRates[local] && (
+            <MoneySwitch trip={trip} local={local} />
+          )}
           {canEdit && (
             <Button
               variant="secondary"
@@ -270,7 +231,7 @@ export function ExpensesView({
 
       {tab === 'list' && (
         <>
-          <PoolCard trip={trip} pool={pool} meId={meId} />
+          <PoolCard trip={trip} pool={pool} meId={meId} show={fmt} />
           {expenses.length > 0 && (
             <section aria-label={t('expenses.charts.label')}>
               {/* Phones: a swipeable row of chart cards; md+: two columns. */}
@@ -375,10 +336,11 @@ export function ExpensesView({
                           </span>
                           <span className="text-right tabular-nums">
                             <span className="block font-semibold">
-                              {fmt(e.amountMinor, e.currency)}
+                              {fmtRaw(e.amountMinor, e.currency)}
                             </span>
-                            {e.currency !== base && (
+                            {e.currency !== shownMoney.shown && (
                               <span className="block text-xs text-muted-foreground">
+                                {e.currency === base ? '≈ ' : ''}
                                 {fmt(e.baseAmountMinor, base)}
                               </span>
                             )}
@@ -432,7 +394,7 @@ export function ExpensesView({
           </Card>
 
           {(pool.contributions.length > 0 || BigInt(pool.spentBaseMinor) > 0n) && (
-            <PoolCard trip={trip} pool={pool} meId={meId} compact />
+            <PoolCard trip={trip} pool={pool} meId={meId} show={fmt} compact />
           )}
 
           {/* One transfer is already spelled out in the headline. */}

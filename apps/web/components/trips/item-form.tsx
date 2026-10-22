@@ -17,6 +17,7 @@ import { TIME_ZONES, zoneLabel } from '@/lib/time-zones'
 import { tripDays } from '@/lib/trip-dates'
 import { useItemMutations } from '@/lib/trips'
 import { goBack } from '@/lib/history'
+import { itemsToShift, minutesMoved } from '@/lib/shift'
 import { useFormat } from '@/lib/use-format'
 import { ColorSwatches } from '@/components/ui/color-swatches'
 import { LinePicker } from './line-picker'
@@ -42,11 +43,14 @@ const DETAIL_FIELDS = [
 export function ItemForm({
   trip,
   item,
+  items = [],
   defaultDay,
   defaultTimeZone,
 }: {
   trip: TripDetailDto
   item?: TripItemDto
+  /** The trip's items, to offer moving the ones after this item when its time changes. */
+  items?: TripItemDto[]
   defaultDay: string
   defaultTimeZone: string
 }) {
@@ -128,7 +132,14 @@ export function ItemForm({
     }
 
     // Start from stored extras (unknown keys survive), then apply the form's fields.
-    const managed = new Set<string>([...DETAIL_FIELDS, 'via', 'arrivalTimeZone', 'lat', 'lng'])
+    const managed = new Set<string>([
+      ...DETAIL_FIELDS,
+      'via',
+      'fixed',
+      'arrivalTimeZone',
+      'lat',
+      'lng',
+    ])
     const details: TripItemDetails = Object.fromEntries(
       Object.entries(item?.details ?? {}).filter(([key]) => !managed.has(key)),
     )
@@ -136,6 +147,8 @@ export function ItemForm({
       const value = text(form, key)
       if (value) details[key] = value
     }
+    // A booked time (flight, appointment) never moves when earlier items run long.
+    if (form.get('fixed') === 'true') details.fixed = true
     const via = form.getAll('via').map(String).filter(Boolean)
     if (kind === 'move' && via.length) details.via = via
     if (kind === 'flight' && arrivalZone !== zone) details.arrivalTimeZone = arrivalZone
@@ -163,6 +176,7 @@ export function ItemForm({
       const saved = item
         ? await mutations.update.mutateAsync({ id: item.id, ...input })
         : await mutations.create.mutateAsync(input)
+      if (item) await offerShift(item, saved)
       // Back to where you were (scroll kept); a fresh visit lands on the item instead.
       markSaved()
       goBack(router, `/trips/${trip.id}?day=${input.dayDate}&focus=${saved.id}`)
@@ -172,6 +186,37 @@ export function ItemForm({
         setErrors(error.fields)
         setFormError(t(`errors.${error.code}`))
       } else setFormError(t('errors.INTERNAL'))
+    }
+  }
+
+  /**
+   * The item now ends later (or earlier): offer to move the rest of that day by
+   * the same amount, stopping before the first fixed-time item.
+   */
+  async function offerShift(before: TripItemDto, after: TripItemDto) {
+    const minutes = minutesMoved(before, after)
+    if (minutes === 0) return
+    const { move, stoppedAt } = itemsToShift(items, before)
+    if (move.length === 0) return
+    const amount = `${minutes > 0 ? '+' : '−'}${f.duration(Math.abs(minutes) * 60_000)}`
+    const ok = await confirmDialog({
+      title: t('item.shiftTitle'),
+      message: [
+        t('item.shiftBody', { amount, count: move.length }),
+        stoppedAt ? t('item.shiftStops', { title: stoppedAt.title }) : '',
+      ]
+        .filter(Boolean)
+        .join(' '),
+      confirmLabel: t('item.shiftYes', { count: move.length }),
+      cancelLabel: t('item.shiftNo'),
+    })
+    if (!ok) return
+    try {
+      await mutations.shift.mutateAsync({ itemIds: move.map((i) => i.id), minutes })
+    } catch (error) {
+      // The item itself is saved; say why the others didn't move.
+      setFormError(t(`errors.${error instanceof ApiError ? error.code : 'INTERNAL'}`))
+      throw error
     }
   }
 
@@ -280,6 +325,20 @@ export function ItemForm({
           />
         </Field>
       </div>
+
+      <label className="flex min-h-11 items-start gap-3 rounded-2xl border px-3 py-2.5">
+        <input
+          type="checkbox"
+          name="fixed"
+          value="true"
+          defaultChecked={item?.details.fixed === true}
+          className="mt-0.5 size-5 shrink-0 accent-[var(--primary)]"
+        />
+        <span>
+          <span className="block text-sm font-medium">{t('item.fixed')}</span>
+          <span className="block text-xs text-muted-foreground">{t('item.fixedHint')}</span>
+        </span>
+      </label>
 
       <TravelTime
         start={startValue}

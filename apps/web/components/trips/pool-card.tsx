@@ -24,7 +24,7 @@ import { ApiError } from '@/lib/api-error'
 import { cn } from '@/lib/cn'
 import { confirmDialog } from '@/lib/confirm'
 import { poolHeadline } from '@/lib/expense-charts'
-import { fmt, usePoolMutations } from '@/lib/expenses'
+import { fmt, fmt as fmtRaw, usePoolMutations } from '@/lib/expenses'
 import { useFormat } from '@/lib/use-format'
 
 const MODES: readonly PoolMode[] = ['actual', 'proportional']
@@ -38,12 +38,16 @@ export function PoolCard({
   pool,
   meId,
   compact = false,
+  show,
 }: {
   trip: TripDetailDto
   pool: PoolDto
   meId: string | null
   compact?: boolean
+  /** Formatter for totals that follows the ₩ | ฿ switch. */
+  show?: (minor: string | bigint, currency: string) => string
 }) {
+  const fmt = show ?? fmtRaw
   const t = useTranslations()
   const f = useFormat()
   const mutations = usePoolMutations(trip.id)
@@ -192,11 +196,11 @@ export function PoolCard({
                   </span>
                   <span className="text-right tabular-nums">
                     <span className="block text-sm font-semibold">
-                      {fmt(c.amountMinor, c.currency)}
+                      {fmtRaw(c.amountMinor, c.currency)}
                     </span>
                     {c.currency !== base && (
                       <span className="block text-xs text-muted-foreground">
-                        {fmt(c.baseAmountMinor, base)}
+                        {fmtRaw(c.baseAmountMinor, base)}
                       </span>
                     )}
                   </span>

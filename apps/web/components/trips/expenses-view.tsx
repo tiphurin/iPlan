@@ -381,6 +381,7 @@ function ExpensesBody({
             t={t as unknown as (key: string, values?: Record<string, string | number>) => string}
             fmt={(minor) => fmt(minor, base)}
             icon={(id, name) => partyIcon(id, name, 26)}
+            {...(canEdit && { expenseHref: (id: string) => `/trips/${trip.id}/expenses/${id}` })}
           />
         </>
       )}

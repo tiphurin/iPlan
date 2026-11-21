@@ -13,7 +13,7 @@ import { Field, Input, Select, Textarea } from '@/components/ui/field'
 import { ApiError } from '@/lib/api-error'
 import { cn } from '@/lib/cn'
 import { ITEM_KINDS, KIND_STYLE } from '@/lib/item-kinds'
-import { TIME_ZONES, zoneLabel } from '@/lib/time-zones'
+import { CURRENCIES, TIME_ZONES, zoneCenter, zoneCurrency, zoneLabel } from '@/lib/time-zones'
 import { tripDays } from '@/lib/trip-dates'
 import { useItemMutations } from '@/lib/trips'
 import { goBack } from '@/lib/history'
@@ -82,6 +82,19 @@ export function ItemForm({
     item && item.kind !== 'move' ? (item.details.lineColor ?? '') : '',
   )
   const busy = Object.values(mutations).some((m) => m.isPending)
+  // Bias place search to this item, else another place in the trip, else the zone's city.
+  const placeNear =
+    (typeof item?.details.lat === 'number' && typeof item.details.lng === 'number'
+      ? { lat: item.details.lat, lng: item.details.lng }
+      : undefined) ??
+    items
+      .filter((i) => i.timeZone === zone)
+      .flatMap((i) =>
+        typeof i.details.lat === 'number' && typeof i.details.lng === 'number'
+          ? [{ lat: i.details.lat, lng: i.details.lng }]
+          : [],
+      )[0] ??
+    zoneCenter(zone)
   const zones = [...new Set<string>([...TIME_ZONES, zone, arrivalZone, trip.homeTimeZone])].filter(
     isValidTimeZone,
   )
@@ -119,6 +132,10 @@ export function ItemForm({
     } catch {
       problems.startsAt = t('errors.VALIDATION_FAILED')
     }
+    const budgetAmount = text(form, 'budgetAmount').replaceAll(',', '')
+    if (budgetAmount && !/^\d+(\.\d{1,2})?$/.test(budgetAmount)) {
+      problems.budget = t('errors.VALIDATION_FAILED')
+    }
     if (text(form, 'end')) {
       try {
         endsAt = fromLocalInput(text(form, 'end'), endZone)
@@ -139,6 +156,9 @@ export function ItemForm({
       'arrivalTimeZone',
       'lat',
       'lng',
+      'budget',
+      'verify',
+      'optional',
     ])
     const details: TripItemDetails = Object.fromEntries(
       Object.entries(item?.details ?? {}).filter(([key]) => !managed.has(key)),
@@ -149,6 +169,11 @@ export function ItemForm({
     }
     // A booked time (flight, appointment) never moves when earlier items run long.
     if (form.get('fixed') === 'true') details.fixed = true
+    if (form.get('verify') === 'true') details.verify = true
+    if (form.get('optional') === 'true') details.optional = true
+    // An empty amount removes the budget.
+    if (budgetAmount)
+      details.budget = { amount: budgetAmount, currency: text(form, 'budgetCurrency') }
     const via = form.getAll('via').map(String).filter(Boolean)
     if (kind === 'move' && via.length) details.via = via
     if (kind === 'flight' && arrivalZone !== zone) details.arrivalTimeZone = arrivalZone
@@ -434,6 +459,7 @@ export function ItemForm({
           <div className="space-y-1.5">
             <p className="text-sm text-muted-foreground">{t('item.address')}</p>
             <PlaceSearch
+              near={placeNear}
               defaultAddress={item?.details.address}
               defaultCoords={
                 typeof item?.details.lat === 'number' && typeof item.details.lng === 'number'
@@ -462,6 +488,55 @@ export function ItemForm({
           </Field>
         </>
       )}
+
+      {(['verify', 'optional'] as const).map((flag) => (
+        <label
+          key={flag}
+          className="flex min-h-11 items-start gap-3 rounded-2xl border px-3 py-2.5"
+        >
+          <input
+            type="checkbox"
+            name={flag}
+            value="true"
+            defaultChecked={item?.details[flag] === true}
+            className="mt-0.5 size-5 shrink-0 accent-[var(--primary)]"
+          />
+          <span>
+            <span className="block text-sm font-medium">{t(`item.${flag}`)}</span>
+            <span className="block text-xs text-muted-foreground">{t(`item.${flag}Hint`)}</span>
+          </span>
+        </label>
+      ))}
+
+      <Field label={t('item.budget')} hint={t('item.budgetHint')} error={errors.budget}>
+        <div className="grid grid-cols-[1fr_7rem] gap-2">
+          <Input
+            name="budgetAmount"
+            inputMode="decimal"
+            placeholder="0"
+            defaultValue={item?.details.budget?.amount ?? ''}
+            aria-label={t('item.budget')}
+          />
+          <Select
+            name="budgetCurrency"
+            defaultValue={item?.details.budget?.currency ?? zoneCurrency(zone) ?? trip.baseCurrency}
+            aria-label={t('item.budgetCurrency')}
+          >
+            {[
+              ...new Set<string>([
+                ...(item?.details.budget ? [item.details.budget.currency] : []),
+                trip.baseCurrency,
+                ...Object.keys(trip.fxRates),
+                ...CURRENCIES,
+              ]),
+            ].map((code) => (
+              <option key={code} value={code}>
+                {code}
+              </option>
+            ))}
+          </Select>
+        </div>
+      </Field>
 
       <Field label={t('item.notes')} hint={t('common.optional')}>
         <Textarea name="notes" maxLength={2000} defaultValue={item?.notes ?? ''} />

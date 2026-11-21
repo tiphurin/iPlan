@@ -31,10 +31,17 @@ export class S3Storage implements StorageProvider {
   }
 
   async put(key: string, body: Uint8Array, contentType: string): Promise<void> {
-    const res = await this.client.fetch(this.url(key), {
+    // Sign only, then send the bytes ourselves: aws4fetch's own fetch wraps them in a
+    // Request, which the production (Next.js) build streams without Content-Length,
+    // and B2 rejects that with 411 MissingContentLength.
+    const signed = await this.client.sign(this.url(key), {
       method: 'PUT',
-      body: new Uint8Array(body),
       headers: { 'content-type': contentType },
+    })
+    const res = await fetch(signed.url, {
+      method: 'PUT',
+      headers: signed.headers,
+      body: new Uint8Array(body),
     })
     if (!res.ok) throw new Error(`S3 put failed: ${res.status} ${await res.text()}`)
   }

@@ -22,7 +22,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <UnsavedGuard />
       <ConfirmHost />
       <AppNav features={me.features} isAdmin={isAdminRole(me.role)} />
-      <div className="md:pl-20 lg:pl-60">
+      {/* Landscape iPhones: keep clear of the notch / Dynamic Island on either side. */}
+      <div className="pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)] md:pl-[calc(5rem+env(safe-area-inset-left))] lg:pl-[calc(15rem+env(safe-area-inset-left))]">
         <main className="mx-auto min-h-dvh max-w-xl pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:max-w-5xl md:px-4 md:pb-12">
           {children}
         </main>

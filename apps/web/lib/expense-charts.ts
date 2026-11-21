@@ -83,7 +83,7 @@ export interface SettleLine {
   name: string
   amountMinor: string
   /** Person lines: the expenses behind it; negative ones were paid the other way and are taken off. */
-  items: { title: string; amountMinor: string }[]
+  items: { expenseId: string; title: string; amountMinor: string }[]
   /** Pool lines: what this person put in and used. */
   contributedMinor: string
   usedMinor: string
@@ -119,7 +119,11 @@ export function settleCards(summary: SettleInput, meId: string | null): SettleCa
   }
   const blank = { contributedMinor: '0', usedMinor: '0' }
   for (const tr of summary.transfers) {
-    const items = tr.items.map((i) => ({ title: i.title, amountMinor: i.amountMinor }))
+    const items = tr.items.map((i) => ({
+      expenseId: i.expenseId,
+      title: i.title,
+      amountMinor: i.amountMinor,
+    }))
     card(tr.from, tr.fromName).pay.push({
       kind: 'person',
       id: tr.to,

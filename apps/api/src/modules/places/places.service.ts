@@ -3,6 +3,19 @@ import type { PlaceDto } from '@iplan/contracts'
 /** Photon: free OpenStreetMap search with autocomplete, no key, no account. */
 const PHOTON = 'https://photon.komoot.io/api/'
 const CACHE_LIMIT = 300
+const MAX_RESULTS = 6
+
+/**
+ * Photon answers in each place's local language unless told otherwise, so an
+ * English query like "Myeongdong" came back as "명동". Typed in Latin letters
+ * only → ask for English names; Hangul, Thai, kana or Han → local names.
+ */
+export function photonLang(query: string): 'en' | undefined {
+  return /[A-Za-z]/.test(query) &&
+    !/[\u0E00-\u0E7F\u3040-\u30FF\u3400-\u9FFF\uAC00-\uD7AF]/.test(query)
+    ? 'en'
+    : undefined
+}
 
 interface PhotonFeature {
   geometry?: { coordinates?: [number, number] }
@@ -40,7 +53,10 @@ export class PlacesService {
     near?: { lat: number; lng: number },
     kind?: 'station' | 'airport',
   ): Promise<PlaceDto[]> {
-    const params = new URLSearchParams({ q: query, limit: '6' })
+    // Ask for a few more than shown: identical duplicates are dropped below.
+    const params = new URLSearchParams({ q: query, limit: '10' })
+    const lang = photonLang(query)
+    if (lang) params.set('lang', lang)
     if (near) {
       params.set('lat', String(near.lat))
       params.set('lon', String(near.lng))
@@ -63,10 +79,16 @@ export class PlacesService {
       })
       if (!response.ok) return []
       const body = (await response.json()) as { features?: PhotonFeature[] }
-      places = (body.features ?? []).flatMap((f) => {
-        const place = photonToPlace(f)
-        return place ? [place] : []
-      })
+      const seen = new Set<string>()
+      places = (body.features ?? [])
+        .flatMap((f) => {
+          const place = photonToPlace(f)
+          const key = place && `${place.name}|${place.address}`
+          if (!place || !key || seen.has(key)) return []
+          seen.add(key)
+          return [place]
+        })
+        .slice(0, MAX_RESULTS)
     } catch {
       // Search is a convenience; typing the address by hand still works.
       return []

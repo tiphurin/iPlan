@@ -72,6 +72,34 @@ const ZONE_INFO: Record<string, { code: string; currency: string }> = {
   'America/Los_Angeles': { code: 'LA', currency: 'USD' },
 }
 
+/** Rough city centre of each zone in TIME_ZONES, to bias place search to the right country. */
+const ZONE_CENTER: Record<string, { lat: number; lng: number }> = {
+  'Asia/Bangkok': { lat: 13.7563, lng: 100.5018 },
+  'Asia/Seoul': { lat: 37.5665, lng: 126.978 },
+  'Asia/Tokyo': { lat: 35.6762, lng: 139.6503 },
+  'Asia/Taipei': { lat: 25.033, lng: 121.5654 },
+  'Asia/Hong_Kong': { lat: 22.3193, lng: 114.1694 },
+  'Asia/Shanghai': { lat: 31.2304, lng: 121.4737 },
+  'Asia/Singapore': { lat: 1.3521, lng: 103.8198 },
+  'Asia/Kuala_Lumpur': { lat: 3.139, lng: 101.6869 },
+  'Asia/Ho_Chi_Minh': { lat: 10.8231, lng: 106.6297 },
+  'Asia/Jakarta': { lat: -6.2088, lng: 106.8456 },
+  'Asia/Manila': { lat: 14.5995, lng: 120.9842 },
+  'Asia/Kolkata': { lat: 28.6139, lng: 77.209 },
+  'Asia/Dubai': { lat: 25.2048, lng: 55.2708 },
+  'Europe/London': { lat: 51.5072, lng: -0.1276 },
+  'Europe/Paris': { lat: 48.8566, lng: 2.3522 },
+  'Europe/Zurich': { lat: 47.3769, lng: 8.5417 },
+  'Australia/Sydney': { lat: -33.8688, lng: 151.2093 },
+  'America/New_York': { lat: 40.7128, lng: -74.006 },
+  'America/Los_Angeles': { lat: 34.0522, lng: -118.2437 },
+}
+
+/** Centre of the zone's main city, or undefined for zones we don't know (e.g. UTC). */
+export function zoneCenter(timeZone: string): { lat: number; lng: number } | undefined {
+  return ZONE_CENTER[timeZone]
+}
+
 /** "KR" for Asia/Seoul; the city name for zones we don't know. */
 export function zoneShort(timeZone: string): string {
   return ZONE_INFO[timeZone]?.code ?? zoneCity(timeZone)

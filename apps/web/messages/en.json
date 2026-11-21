@@ -216,7 +216,14 @@
     "shiftNo": "Don't move",
     "planColor": "Colour in the plan",
     "planColorAuto": "Follow the ride here",
-    "planColorHint": "Magic wand = use the colour of the line you arrived on (e.g. blue after Line 4)"
+    "planColorHint": "Magic wand = use the colour of the line you arrived on (e.g. blue after Line 4)",
+    "verify": "To check",
+    "verifyHint": "Opening hours or booking still need checking",
+    "optional": "Optional",
+    "optionalHint": "Skip it if time runs short",
+    "budget": "Budget",
+    "budgetHint": "Optional · leave empty to remove",
+    "budgetCurrency": "Budget currency"
   },
   "todayView": {
     "now": "Now",
@@ -477,7 +484,8 @@
       "poolBack": "Back from the pool",
       "poolWhy": "Put in {put}, used {used}",
       "poolInNone": "Used {used} of the pool without putting in",
-      "more": "and {count} more"
+      "more": "and {count} more",
+      "paidBy": "Paid by {name}"
     }
   },
   "attachments": {

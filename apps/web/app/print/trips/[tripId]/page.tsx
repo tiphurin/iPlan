@@ -283,6 +283,7 @@ export default async function PrintTripPage({
                     ) => string
                   }
                   fmt={(minor) => fb(minor)}
+                  expanded
                 />
               </div>
             </div>

@@ -72,7 +72,7 @@ export function AppNav({
     <>
       <nav
         aria-label={label}
-        className="fixed inset-x-0 bottom-0 z-40 border-t bg-card px-1.5 pt-1.5 pb-[calc(6px+env(safe-area-inset-bottom))] md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t bg-card pt-1.5 pr-[max(6px,env(safe-area-inset-right))] pb-[calc(6px+env(safe-area-inset-bottom))] pl-[max(6px,env(safe-area-inset-left))] md:hidden"
       >
         <ul
           className="mx-auto grid max-w-xl"
@@ -106,7 +106,7 @@ export function AppNav({
 
       <nav
         aria-label={label}
-        className="scrollbar-none fixed inset-y-0 left-0 z-40 hidden w-20 flex-col overflow-y-auto border-r bg-card px-2 py-5 short:py-2 md:flex lg:w-60 lg:px-4"
+        className="scrollbar-none fixed inset-y-0 left-0 z-40 hidden w-[calc(5rem+env(safe-area-inset-left))] flex-col overflow-y-auto border-r bg-card pt-5 pr-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] pl-[calc(0.5rem+env(safe-area-inset-left))] short:pt-2 short:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:flex lg:w-[calc(15rem+env(safe-area-inset-left))] lg:pr-4 lg:pl-[calc(1rem+env(safe-area-inset-left))]"
       >
         <Link
           href="/"

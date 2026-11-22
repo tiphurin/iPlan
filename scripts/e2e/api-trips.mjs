@@ -225,6 +225,78 @@ await runSuite('api-trips', async ({ check, status, error, section, cleanup }) =
   )
   await owner('PATCH', `/trips/${T}`, { startDate: START })
 
+  // Reorder a day: new times for several items at once, guarded by the start each one had.
+  const reordered = await owner('POST', `/trips/${T}/items/retime`, {
+    changes: [
+      {
+        id: move.json?.id,
+        expectStartsAt: move.json?.startsAt,
+        startsAt: at('2031-03-11', '09:00'),
+        endsAt: at('2031-03-11', '09:30'),
+        verify: true,
+      },
+      {
+        id: place.json?.id,
+        expectStartsAt: place.json?.startsAt,
+        startsAt: at('2031-03-11', '09:45'),
+        endsAt: at('2031-03-11', '11:45'),
+      },
+    ],
+  })
+  const afterReorder = Object.fromEntries((reordered.json ?? []).map((i) => [i.id, i]))
+  // Same moment, whatever the offset it is written with.
+  const sameTime = (a, b) => typeof a === 'string' && Date.parse(a) === Date.parse(b)
+  check(
+    'retime moves both items and marks the route "to check"',
+    reordered.status === 200 &&
+      sameTime(afterReorder[move.json?.id]?.startsAt, at('2031-03-11', '09:00')) &&
+      afterReorder[move.json?.id]?.details?.verify === true &&
+      afterReorder[move.json?.id]?.details?.line === 'Line 3' &&
+      sameTime(afterReorder[place.json?.id]?.endsAt, at('2031-03-11', '11:45')),
+    reordered,
+  )
+  error(
+    'retime refuses a plan changed meanwhile',
+    await owner('POST', `/trips/${T}/items/retime`, {
+      changes: [
+        {
+          id: place.json?.id,
+          expectStartsAt: place.json?.startsAt,
+          startsAt: at('2031-03-11', '08:00'),
+          endsAt: at('2031-03-11', '09:00'),
+        },
+      ],
+    }),
+    409,
+    'PLAN_CHANGED',
+  )
+  const undone = await owner('POST', `/trips/${T}/items/retime`, {
+    changes: [
+      {
+        id: move.json?.id,
+        expectStartsAt: at('2031-03-11', '09:00'),
+        startsAt: move.json?.startsAt,
+        endsAt: move.json?.endsAt,
+        verify: false,
+      },
+      {
+        id: place.json?.id,
+        expectStartsAt: at('2031-03-11', '09:45'),
+        startsAt: place.json?.startsAt,
+        endsAt: place.json?.endsAt,
+      },
+    ],
+  })
+  const afterUndo = Object.fromEntries((undone.json ?? []).map((i) => [i.id, i]))
+  check(
+    'undo puts both items back',
+    undone.status === 200 &&
+      afterUndo[move.json?.id]?.startsAt === move.json?.startsAt &&
+      afterUndo[move.json?.id]?.details?.verify === undefined &&
+      afterUndo[place.json?.id]?.startsAt === place.json?.startsAt,
+    undone,
+  )
+
   // ───────────────────────── Checklist
   section('Checklist')
   const cl = await owner('POST', `/trips/${T}/checklist`, {

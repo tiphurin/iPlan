@@ -3,6 +3,7 @@
 import {
   type CreateTripInput,
   type CreateTripItemInput,
+  type RetimeItemsInput,
   TripDetailDto,
   TripItemDto,
   type UpdateTripInput,
@@ -120,6 +121,16 @@ export function useItemMutations(tripId: string) {
     shift: useMutation({
       mutationFn: (input: { itemIds: string[]; minutes: number }) =>
         apiFetch(`/api/trips/${tripId}/items/shift`, {
+          method: 'POST',
+          body: input,
+          schema: z.array(TripItemDto),
+        }),
+      onSuccess: (items) => client.setQueryData(tripKeys.items(tripId), items),
+    }),
+    /** New times for several items at once (reorder a day, or undo it); all or nothing. */
+    retime: useMutation({
+      mutationFn: (input: RetimeItemsInput) =>
+        apiFetch(`/api/trips/${tripId}/items/retime`, {
           method: 'POST',
           body: input,
           schema: z.array(TripItemDto),

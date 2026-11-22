@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { CreateTripItemInput, ShiftItemsInput } from '@iplan/contracts'
+import { CreateTripItemInput, RetimeItemsInput, ShiftItemsInput } from '@iplan/contracts'
 import { FakeAudit, InMemoryItems, InMemoryTrips, users } from '../../testing/fakes'
 import { TripsService } from '../trips/trips.service'
 import { ItemsService } from './items.service'
@@ -224,5 +224,152 @@ describe('ItemsService', () => {
     expect(ShiftItemsInput.safeParse({ itemIds: [last.id], minutes: 0 }).success).toBe(false)
     expect(ShiftItemsInput.safeParse({ itemIds: [], minutes: 10 }).success).toBe(false)
     expect(ShiftItemsInput.safeParse({ itemIds: [last.id], minutes: 2000 }).success).toBe(false)
+  })
+
+  describe('retime', () => {
+    const t = (hhmm: string) => `2026-10-23T${hhmm}:00.000Z`
+
+    it('swaps two places in one go, marks the changed route, and undoes it', async () => {
+      const palace = await service.create(users.owner, tripId, {
+        ...lunch,
+        title: 'Palace',
+        startsAt: t('03:00'),
+        endsAt: t('04:30'),
+      })
+      const train = await service.create(users.owner, tripId, {
+        ...lunch,
+        kind: 'move',
+        title: 'Train',
+        startsAt: t('04:35'),
+        endsAt: t('04:45'),
+        details: { line: '3', verify: false },
+      })
+      const market = await service.create(users.owner, tripId, {
+        ...lunch,
+        title: 'Market',
+        startsAt: t('04:45'),
+        endsAt: t('06:30'),
+      })
+      const swap = {
+        changes: [
+          {
+            id: train.id,
+            expectStartsAt: train.startsAt,
+            startsAt: t('03:00'),
+            endsAt: t('03:10'),
+            verify: true,
+          },
+          {
+            id: market.id,
+            expectStartsAt: market.startsAt,
+            startsAt: t('03:10'),
+            endsAt: t('04:55'),
+          },
+          {
+            id: palace.id,
+            expectStartsAt: palace.startsAt,
+            startsAt: t('04:55'),
+            endsAt: t('06:25'),
+          },
+        ],
+      }
+      const after = await service.retime(users.editor, tripId, swap)
+      const byId = Object.fromEntries(after.map((i) => [i.id, i]))
+      expect(byId[market.id]).toMatchObject({ startsAt: t('03:10'), endsAt: t('04:55') })
+      expect(byId[palace.id]).toMatchObject({ startsAt: t('04:55'), endsAt: t('06:25') })
+      // Marked "to check", other details kept.
+      expect(byId[train.id]?.details).toEqual({ line: '3', verify: true })
+      expect(byId[palace.id]?.details).toEqual({})
+
+      // Undo: the same call with the old times and the old flag.
+      const undone = await service.retime(users.owner, tripId, {
+        changes: [
+          {
+            id: train.id,
+            expectStartsAt: t('03:00'),
+            startsAt: train.startsAt,
+            endsAt: train.endsAt,
+            verify: false,
+          },
+          {
+            id: market.id,
+            expectStartsAt: t('03:10'),
+            startsAt: market.startsAt,
+            endsAt: market.endsAt,
+          },
+          {
+            id: palace.id,
+            expectStartsAt: t('04:55'),
+            startsAt: palace.startsAt,
+            endsAt: palace.endsAt,
+          },
+        ],
+      })
+      const back = Object.fromEntries(undone.map((i) => [i.id, i]))
+      expect(back[palace.id]).toMatchObject({ startsAt: palace.startsAt, endsAt: palace.endsAt })
+      expect(back[train.id]?.details).toEqual({ line: '3' })
+    })
+
+    it('refuses a plan changed meanwhile, fixed items, viewers and repeats, changing nothing', async () => {
+      const a = await service.create(users.owner, tripId, lunch)
+      const fixed = await service.create(users.owner, tripId, {
+        ...lunch,
+        title: 'Booked',
+        startsAt: t('08:00'),
+        endsAt: t('09:00'),
+        details: { fixed: true },
+      })
+      const move = (expect = a.startsAt) => ({
+        id: a.id,
+        expectStartsAt: expect,
+        startsAt: t('05:00'),
+        endsAt: t('06:00'),
+      })
+      // Someone else moved it after the client loaded the plan.
+      await expect(
+        service.retime(users.owner, tripId, { changes: [move(t('03:00'))] }),
+      ).rejects.toMatchObject({ code: 'PLAN_CHANGED', status: 409 })
+      await expect(
+        service.retime(users.owner, tripId, {
+          changes: [
+            move(),
+            {
+              id: fixed.id,
+              expectStartsAt: fixed.startsAt,
+              startsAt: t('09:00'),
+              endsAt: t('10:00'),
+            },
+          ],
+        }),
+      ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' })
+      // All or nothing: the free item did not move either.
+      expect((await items.findById(a.id))?.startsAt.toISOString()).toBe(lunch.startsAt)
+      // A fixed item may be sent unchanged (e.g. only to flag its route).
+      await expect(
+        service.retime(users.owner, tripId, {
+          changes: [
+            {
+              id: fixed.id,
+              expectStartsAt: fixed.startsAt,
+              startsAt: fixed.startsAt,
+              endsAt: fixed.endsAt,
+              verify: true,
+            },
+          ],
+        }),
+      ).resolves.toBeDefined()
+      await expect(
+        service.retime(users.viewer, tripId, { changes: [move()] }),
+      ).rejects.toMatchObject({ code: 'FORBIDDEN' })
+      await expect(
+        service.retime(users.owner, tripId, { changes: [move(), move()] }),
+      ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' })
+      await expect(
+        service.retime(users.owner, tripId, {
+          changes: [{ ...move(), endsAt: t('04:00') }],
+        }),
+      ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' })
+      expect(RetimeItemsInput.safeParse({ changes: [] }).success).toBe(false)
+    })
   })
 })

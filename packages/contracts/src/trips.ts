@@ -176,6 +176,29 @@ export const ShiftItemsInput = z.object({
     .refine((m) => m !== 0, 'Must move by at least a minute'),
 })
 export type ShiftItemsInput = z.infer<typeof ShiftItemsInput>
+
+/**
+ * New times for several items at once, all or nothing (reordering a day, or
+ * undoing that). Each change carries the start it replaces, so a plan someone
+ * else changed meanwhile is refused instead of overwritten.
+ */
+export const RetimeItemsInput = z.object({
+  changes: z
+    .array(
+      z.object({
+        id: z.uuid(),
+        /** The item's current start, as the client last saw it. */
+        expectStartsAt: Instant,
+        startsAt: Instant,
+        endsAt: Instant.nullable(),
+        /** true = mark "to check" (its route changed), false = clear it, absent = leave it. */
+        verify: z.boolean().optional(),
+      }),
+    )
+    .min(1)
+    .max(100),
+})
+export type RetimeItemsInput = z.infer<typeof RetimeItemsInput>
 export type UpdateTripItemInput = z.infer<typeof UpdateTripItemInput>
 
 export const CheckInInput = z.object({

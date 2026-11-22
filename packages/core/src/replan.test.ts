@@ -60,6 +60,21 @@ describe('dayBlocks', () => {
     expect(tail.map((t) => t.id)).toEqual(['home'])
   })
 
+  it('locks a block when any of its items is locked (a booked train counts)', () => {
+    const items = [
+      item('a', 'place', '10:00', '11:00'),
+      item('train', 'move', '11:10', '11:30', true),
+      item('b', 'place', '11:30', '12:00'),
+    ]
+    expect(dayBlocks(items).blocks.map((b) => [b.id, b.fixed])).toEqual([
+      ['a', false],
+      ['b', true],
+    ])
+    // Putting b first keeps its train and b at their times; a after it.
+    const r = replanDay(items, ['b', 'a'])
+    expect(r.changes.map((c) => c.id)).toEqual(['a'])
+  })
+
   it('keeps the given order for items that start together', () => {
     const items = [
       item('b', 'move', '10:00', '10:10'),

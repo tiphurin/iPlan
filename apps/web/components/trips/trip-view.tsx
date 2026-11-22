@@ -83,6 +83,8 @@ export function TripView({
     null,
   )
   const mutations = useItemMutations(initialTrip.id)
+  // Days already over keep their order: what happened, happened (and has check-ins).
+  const dayIsPast = day < todayKey(trip.homeTimeZone)
   const placesToday = useMemo(() => dayBlocks(toPlanItems(dayItems)).blocks.length, [dayItems])
   useEffect(() => {
     if (!undo) return
@@ -200,7 +202,7 @@ export function TripView({
               <p className="text-sm text-muted-foreground">
                 {t('trips.itemCount', { count: dayItems.length })}
               </p>
-              {canEdit && !reordering && placesToday >= 2 && (
+              {canEdit && !reordering && placesToday >= 2 && !dayIsPast && (
                 <Button variant="secondary" className="min-h-11" onClick={() => setReorderDay(day)}>
                   <ArrowUpDown aria-hidden className="size-4" />
                   {t('reorder.start')}
@@ -247,6 +249,7 @@ export function TripView({
       <ItemSheet
         item={items.find((i) => i.id === openItemId) ?? null}
         trip={trip}
+        meId={meId}
         spent={{
           byItem: spentByItem,
           currency: trip.baseCurrency,

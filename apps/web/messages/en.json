@@ -227,7 +227,8 @@
     "shiftLocked": "{title} stays (fixed time)",
     "shiftClash": "{title} would run {amount} into “{fixed}”. Adjust it after moving.",
     "shiftYesLater": "Push back {count, plural, one {# item} other {# items}}",
-    "shiftYesEarlier": "Move up {count, plural, one {# item} other {# items}}"
+    "shiftYesEarlier": "Move up {count, plural, one {# item} other {# items}}",
+    "undoCheckInConfirm": "Undo this check-in? Its time will be removed."
   },
   "todayView": {
     "now": "Now",
@@ -842,7 +843,8 @@
     "saveNothing": "Nothing moved yet",
     "cantSave": "Can’t save",
     "saved": "New order saved",
-    "undo": "Undo"
+    "undo": "Undo",
+    "checkedIn": "Checked in"
   },
   "timeline": {
     "fixed": "Fixed",

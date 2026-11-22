@@ -10,7 +10,8 @@ export function toPlanItems(items: readonly TripItemDto[]): PlanItem[] {
     kind: i.kind,
     startsAt: Date.parse(i.startsAt),
     endsAt: i.endsAt === null ? null : Date.parse(i.endsAt),
-    fixed: i.details.fixed === true,
+    // A checked-in item already happened at that time: it never moves either.
+    fixed: i.details.fixed === true || i.checkIns.length > 0,
   }))
 }
 

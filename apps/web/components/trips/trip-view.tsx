@@ -1,13 +1,14 @@
 'use client'
 
-import type { ExpenseDto, TripDetailDto, TripItemDto } from '@iplan/contracts'
-import { currentTripDay } from '@iplan/core'
+import type { ExpenseDto, RetimeItemsInput, TripDetailDto, TripItemDto } from '@iplan/contracts'
+import { currentTripDay, dayBlocks } from '@iplan/core'
 import { formatDateRange, todayKey } from '@iplan/i18n'
-import { CalendarDays } from 'lucide-react'
+import { ArrowUpDown, CalendarDays } from 'lucide-react'
 import type { Route } from 'next'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Fab } from '@/components/ui/fab'
 import { MonthCalendar } from '@/components/ui/month-calendar'
@@ -18,9 +19,11 @@ import { useExpenses } from '@/lib/expenses'
 import { awayZone, zoneCurrency } from '@/lib/time-zones'
 import { TripDisplayProvider } from '@/lib/trip-display'
 import { tripDays } from '@/lib/trip-dates'
-import { useItems, useTrip } from '@/lib/trips'
+import { toPlanItems } from '@/lib/reorder'
+import { useItemMutations, useItems, useTrip } from '@/lib/trips'
 import { useFormat } from '@/lib/use-format'
 import { ItemSheet } from './item-sheet'
+import { ReorderDay } from './reorder-day'
 import { Timeline } from './timeline'
 import { TripTopBar } from './trip-top-bar'
 import { DisplaySwitches } from './display-switches'
@@ -72,6 +75,20 @@ export function TripView({
   const dayItems = items.filter((i) => i.dayDate === day)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [openItemId, setOpenItemId] = useState<string | null>(null)
+  // Reorder mode belongs to one day; switching days ends it without saving.
+  const [reorderDay, setReorderDay] = useState<string | null>(null)
+  const reordering = reorderDay === day
+  /** What undoes the last saved reorder, offered for a few seconds. */
+  const [undo, setUndo] = useState<{ changes: RetimeItemsInput['changes']; day: string } | null>(
+    null,
+  )
+  const mutations = useItemMutations(initialTrip.id)
+  const placesToday = useMemo(() => dayBlocks(toPlanItems(dayItems)).blocks.length, [dayItems])
+  useEffect(() => {
+    if (!undo) return
+    const id = window.setTimeout(() => setUndo(null), 8000)
+    return () => window.clearTimeout(id)
+  }, [undo])
   // The calendar follows the selected day until the user flips months.
   const [shown, setShown] = useState({ day, month: day.slice(0, 7) })
   const month = shown.day === day ? shown.month : day.slice(0, 7)
@@ -179,10 +196,28 @@ export function TripView({
             <h2 className="mt-2 mb-1 text-2xl font-bold">
               {t('trips.dayN', { n: dayIndex + 1 })} · {f.day(day)}
             </h2>
-            <p className="mb-2 text-sm text-muted-foreground">
-              {t('trips.itemCount', { count: dayItems.length })}
-            </p>
-            {dayItems.length === 0 ? (
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="text-sm text-muted-foreground">
+                {t('trips.itemCount', { count: dayItems.length })}
+              </p>
+              {canEdit && !reordering && placesToday >= 2 && (
+                <Button variant="secondary" className="min-h-11" onClick={() => setReorderDay(day)}>
+                  <ArrowUpDown aria-hidden className="size-4" />
+                  {t('reorder.start')}
+                </Button>
+              )}
+            </div>
+            {reordering ? (
+              <ReorderDay
+                key={day}
+                tripId={trip.id}
+                items={dayItems}
+                onDone={(changes) => {
+                  setReorderDay(null)
+                  if (changes) setUndo({ changes, day })
+                }}
+              />
+            ) : dayItems.length === 0 ? (
               <Card className="text-center text-muted-foreground">{t('trips.noItems')}</Card>
             ) : (
               <Timeline
@@ -221,7 +256,34 @@ export function TripView({
         onClose={() => setOpenItemId(null)}
       />
 
-      {canEdit && <Fab href={`/trips/${trip.id}/items/new?day=${day}`} label={t('common.add')} />}
+      {undo && (
+        <div
+          role="status"
+          className="fixed inset-x-4 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center justify-between gap-3 rounded-2xl bg-foreground px-4 py-2 text-sm text-background shadow-lg md:bottom-6"
+        >
+          <span>{t('reorder.saved')}</span>
+          <button
+            type="button"
+            onClick={async () => {
+              const { changes } = undo
+              setUndo(null)
+              try {
+                await mutations.retime.mutateAsync({ changes })
+              } catch {
+                // The plan changed meanwhile; the reload below shows what is there now.
+              }
+              router.refresh()
+            }}
+            className="min-h-11 font-semibold text-primary"
+          >
+            {t('reorder.undo')}
+          </button>
+        </div>
+      )}
+
+      {canEdit && !reordering && !undo && (
+        <Fab href={`/trips/${trip.id}/items/new?day=${day}`} label={t('common.add')} />
+      )}
     </TripDisplayProvider>
   )
 }

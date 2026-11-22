@@ -7,6 +7,7 @@ import type {
   ItemRow,
   ItemsRepository,
   NewItemRow,
+  RetimeChange,
 } from '../modules/items/items.repository'
 import type { AttachmentEntity } from '@iplan/contracts'
 import type { StorageProvider } from '../infra/storage'
@@ -217,10 +218,16 @@ export class InMemoryItems implements ItemsRepository {
   async findById(itemId: string) {
     return this.items.get(itemId) ?? null
   }
-  async retime(changes: { id: string; startsAt: Date; endsAt: Date | null }[]) {
+  async retime(changes: RetimeChange[]) {
     for (const c of changes) {
       const row = this.items.get(c.id)
-      if (row) this.items.set(c.id, { ...row, startsAt: c.startsAt, endsAt: c.endsAt })
+      if (row)
+        this.items.set(c.id, {
+          ...row,
+          startsAt: c.startsAt,
+          endsAt: c.endsAt,
+          ...(c.details !== undefined && { details: c.details }),
+        })
     }
   }
   async nextSortOrder(tripId: string, dayDate: string) {

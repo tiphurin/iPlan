@@ -12,6 +12,14 @@ export interface CheckInRow {
   skipped: boolean
 }
 
+/** New times for one item; `details` replaces its details when given. */
+export interface RetimeChange {
+  id: string
+  startsAt: Date
+  endsAt: Date | null
+  details?: NewItemRow['details']
+}
+
 export interface ItemsRepository {
   listByTrip(tripId: string): Promise<ItemRow[]>
   checkInsByTrip(tripId: string): Promise<CheckInRow[]>
@@ -21,7 +29,7 @@ export interface ItemsRepository {
   create(values: NewItemRow): Promise<ItemRow>
   update(itemId: string, changes: Partial<NewItemRow>): Promise<ItemRow | null>
   /** Sets new start/end times for several items in one transaction. */
-  retime(changes: { id: string; startsAt: Date; endsAt: Date | null }[]): Promise<void>
+  retime(changes: RetimeChange[]): Promise<void>
   delete(itemId: string): Promise<void>
   upsertCheckIn(itemId: string, userId: string, at: Date, skipped?: boolean): Promise<void>
   deleteCheckIn(itemId: string, userId: string): Promise<void>
@@ -96,12 +104,17 @@ export class DrizzleItemsRepository implements ItemsRepository {
     return row ?? null
   }
 
-  async retime(changes: { id: string; startsAt: Date; endsAt: Date | null }[]): Promise<void> {
+  async retime(changes: RetimeChange[]): Promise<void> {
     await this.db.transaction(async (tx) => {
       for (const c of changes) {
         await tx
           .update(schema.tripItem)
-          .set({ startsAt: c.startsAt, endsAt: c.endsAt, updatedAt: new Date() })
+          .set({
+            startsAt: c.startsAt,
+            endsAt: c.endsAt,
+            ...(c.details !== undefined && { details: c.details }),
+            updatedAt: new Date(),
+          })
           .where(eq(schema.tripItem.id, c.id))
       }
     })

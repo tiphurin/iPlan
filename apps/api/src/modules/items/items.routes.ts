@@ -2,6 +2,7 @@ import { createRoute, z } from '@hono/zod-openapi'
 import {
   CheckInInput,
   CreateTripItemInput,
+  RetimeItemsInput,
   ShiftItemsInput,
   TripItemDto,
   UpdateTripItemInput,
@@ -74,6 +75,22 @@ const shiftItems = createRoute({
   },
 })
 
+const retimeItems = createRoute({
+  method: 'post',
+  path: '/trips/{tripId}/items/retime',
+  tags,
+  summary: 'Set new times for several items, all or nothing (editor or owner)',
+  request: { params: TripParams, body: { content: json(RetimeItemsInput), required: true } },
+  responses: {
+    200: { description: 'All items after the change', content: json(z.array(TripItemDto)) },
+    401: errorResponses[401],
+    403: errorResponses[403],
+    404: errorResponses[404],
+    409: errorResponses[409],
+    422: errorResponses[422],
+  },
+})
+
 const deleteItem = createRoute({
   method: 'delete',
   path: '/items/{itemId}',
@@ -139,6 +156,12 @@ export function itemRoutes(service: ItemsService) {
     .openapi(updateItem, async (c) =>
       c.json(
         await service.update(requireUser(c), c.req.valid('param').itemId, c.req.valid('json')),
+        200,
+      ),
+    )
+    .openapi(retimeItems, async (c) =>
+      c.json(
+        await service.retime(requireUser(c), c.req.valid('param').tripId, c.req.valid('json')),
         200,
       ),
     )

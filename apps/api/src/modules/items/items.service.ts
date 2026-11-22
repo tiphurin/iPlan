@@ -1,6 +1,7 @@
 import type {
   CheckInInput,
   CreateTripItemInput,
+  RetimeItemsInput,
   ShiftItemsInput,
   TripItemDto,
   UpdateTripItemInput,
@@ -8,11 +9,11 @@ import type {
 import { isValidTimeZone } from '@iplan/core'
 import type { AuditLog } from '../../shared/audit'
 import type { SessionUser } from '../../shared/context'
-import { notFound, validationFailed } from '../../shared/errors'
+import { notFound, planChanged, validationFailed } from '../../shared/errors'
 import type { TripRow } from '../trips/trips.repository'
 import type { TripAccess } from '../trips/trips.service'
 import { toItemDto } from './items.mapper'
-import type { ItemRow, ItemsRepository, NewItemRow } from './items.repository'
+import type { ItemRow, ItemsRepository, NewItemRow, RetimeChange } from './items.repository'
 
 /** Furthest a check-in may be from now (the time simulator stays within the trip). */
 const MAX_CHECK_IN_SKEW_MS = 45 * 86_400_000
@@ -168,6 +169,57 @@ export class ItemsService {
       entityType: 'trip',
       entityId: tripId,
       data: { items: ids.length, minutes: input.minutes },
+    })
+    return this.list(actor, tripId)
+  }
+
+  /**
+   * Sets new times for several items in one go (reordering a day, or undoing
+   * that), all or nothing. Refused when an item's start is no longer what the
+   * client saw (someone changed the plan meanwhile), and when a fixed-time item
+   * would move. Can mark items "to check" when their route changed.
+   */
+  async retime(
+    actor: SessionUser,
+    tripId: string,
+    input: RetimeItemsInput,
+  ): Promise<TripItemDto[]> {
+    const { trip } = await this.trips.requireAccess(actor, tripId, 'editor')
+    const rows = await this.items.listByTrip(tripId)
+    const byId = new Map(rows.map((r) => [r.id, r]))
+    if (new Set(input.changes.map((c) => c.id)).size !== input.changes.length) {
+      throw validationFailed({ changes: 'Each item may appear once' })
+    }
+    const changes: RetimeChange[] = input.changes.map((c) => {
+      const row = byId.get(c.id)
+      if (!row) throw notFound('Item')
+      if (row.startsAt.getTime() !== Date.parse(c.expectStartsAt)) throw planChanged()
+      const startsAt = new Date(c.startsAt)
+      const endsAt = c.endsAt === null ? null : new Date(c.endsAt)
+      const details = (row.details ?? {}) as Record<string, unknown>
+      const moves =
+        startsAt.getTime() !== row.startsAt.getTime() ||
+        (endsAt?.getTime() ?? null) !== (row.endsAt?.getTime() ?? null)
+      if (moves && details.fixed === true) {
+        throw validationFailed({ changes: `"${row.title}" has a fixed time and can't move` })
+      }
+      checkItem(trip, { ...row, startsAt, endsAt })
+      if (c.verify === undefined) return { id: c.id, startsAt, endsAt }
+      const { verify: _old, ...rest } = details
+      return {
+        id: c.id,
+        startsAt,
+        endsAt,
+        details: (c.verify ? { ...rest, verify: true } : rest) as NewItemRow['details'],
+      }
+    })
+    await this.items.retime(changes)
+    await this.audit.record({
+      actorId: actor.id,
+      action: 'item.retime',
+      entityType: 'trip',
+      entityId: tripId,
+      data: { items: changes.length },
     })
     return this.list(actor, tripId)
   }

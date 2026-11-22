@@ -107,7 +107,8 @@
     "INVITATION_GONE": "This trip or shared wallet no longer exists",
     "TRIP_CURRENCY_LOCKED": "The trip currency can't change once expenses are recorded",
     "TRIP_DATES_EXCLUDE_CONTENT": "Some plans or expenses fall outside the new dates. Move or delete them first.",
-    "POOL_SHORT": "Not enough money in the pool. Put more in first, or pick who really paid."
+    "POOL_SHORT": "Not enough money in the pool. Put more in first, or pick who really paid.",
+    "PLAN_CHANGED": "The plan was changed elsewhere meanwhile. Reload and try again."
   },
   "trips": {
     "empty": "No trips yet",
@@ -1191,5 +1192,25 @@
     "done": "Done · {when}",
     "prevYear": "Previous year",
     "nextYear": "Next year"
+  },
+  "reorder": {
+    "start": "Reorder",
+    "hint": "Drag ⠿ or tap ↑↓. A place moves with the way there; times are recalculated",
+    "checkRoutes": "{count, plural, one {# item starts} other {# items start}} from somewhere else now and will be marked “To check”",
+    "conflict": "Runs into “{title}”, fixed at {time} ({amount} late). Move it back or shorten something to save",
+    "changes": "Times that change",
+    "listLabel": "Order of today’s plan",
+    "routeTag": "Check route",
+    "fixed": "Fixed time",
+    "was": "Was {time}",
+    "drag": "Drag to move {title}",
+    "up": "Move {title} up",
+    "down": "Move {title} down",
+    "cancel": "Cancel",
+    "save": "Save ({count, plural, one {# item} other {# items}})",
+    "saveNothing": "Nothing moved yet",
+    "cantSave": "Can’t save",
+    "saved": "New order saved",
+    "undo": "Undo"
   }
 }

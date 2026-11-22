@@ -503,7 +503,15 @@
     "delete": "ลบไฟล์",
     "close": "ปิด",
     "pdf": "PDF",
-    "saveFirst": "บันทึกรายการก่อน แล้วค่อยแนบสลิป"
+    "saveFirst": "บันทึกรายการก่อน แล้วค่อยแนบสลิป",
+    "view": "ดูรูปที่ {n} จาก {count}",
+    "reviewTitle": "อัปโหลด {count} ไฟล์",
+    "removePicked": "เอาออก",
+    "upload": "อัปโหลด {count} ไฟล์",
+    "uploadingCount": "กำลังอัปโหลด {done}/{count}…",
+    "someFailed": "อัปโหลดไม่สำเร็จ {count} ไฟล์ กดอัปโหลดอีกครั้ง หรือเอาออก",
+    "previous": "รูปก่อนหน้า",
+    "next": "รูปถัดไป"
   },
   "finance": {
     "title": "การเงิน",

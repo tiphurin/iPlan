@@ -10,6 +10,8 @@ export const PRESETS: Record<UploadKind, { maxEdge: number; quality: number }> =
   photo: { maxEdge: 1600, quality: 0.8 },
 }
 const THUMB = { maxEdge: 400, quality: 0.7 }
+/** Trip cards are at most ~400 px wide on screen; 800 px stays sharp on retina. */
+const COVER_CARD = { maxEdge: 800, quality: 0.75 }
 
 /** Target size that fits inside maxEdge without ever enlarging. */
 export function fitWithin(width: number, height: number, maxEdge: number) {
@@ -77,8 +79,10 @@ export async function prepareAvatar(file: File): Promise<Blob> {
   return (await render(img, { maxEdge: 400, quality: 0.85 })).blob
 }
 
-/** Trip cover photo: 1600 px at 0.80 like other photos, EXIF stripped, no thumbnail. */
-export async function prepareCover(file: File): Promise<Blob> {
+/** Trip cover: 1600 px at 0.80 like other photos, plus an 800 px copy for trip cards. EXIF stripped. */
+export async function prepareCover(file: File): Promise<{ full: Blob; small: Blob }> {
   const img = await loadImage(file)
-  return (await render(img, PRESETS.photo)).blob
+  const full = (await render(img, PRESETS.photo)).blob
+  const small = (await render(img, COVER_CARD)).blob
+  return { full, small }
 }

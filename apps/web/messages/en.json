@@ -511,7 +511,9 @@
     "uploadingCount": "Uploading {done}/{count}…",
     "someFailed": "{count, plural, one {# file} other {# files}} didn’t upload. Tap Upload to retry, or remove them.",
     "previous": "Previous photo",
-    "next": "Next photo"
+    "next": "Next photo",
+    "share": "Share / save",
+    "shareFailed": "The share sheet didn’t open. Try again."
   },
   "finance": {
     "title": "Money",

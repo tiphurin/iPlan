@@ -10,12 +10,13 @@ import {
   FileText,
   ImagePlus,
   LoaderCircle,
+  Share,
   Trash2,
   TriangleAlert,
   X,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { type CSSProperties, useEffect, useRef, useState } from 'react'
+import { type CSSProperties, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { z } from 'zod'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { SectionTitle } from '@/components/ui/card'
@@ -24,6 +25,7 @@ import { apiFetch } from '@/lib/api-client'
 import { ApiError, toApiError } from '@/lib/api-error'
 import { cn } from '@/lib/cn'
 import { confirmDialog } from '@/lib/confirm'
+import { canShareFile, isStandaloneApp, shareFile } from '@/lib/deliver-file'
 import { type UploadKind, prepareUpload } from '@/lib/image'
 
 const key = (entityType: string, entityId: string) => ['attachments', entityType, entityId] as const
@@ -318,6 +320,36 @@ function Viewer({
   const track = useRef<HTMLDivElement>(null)
   const [index, setIndex] = useState(start)
   const current = files[index] ?? files[0]
+  // A home-screen iPhone app can't open a file in a new tab: it gets stuck on the file with
+  // no way back. There the button shares the file instead; it is fetched ahead, because the
+  // share sheet only opens straight from a tap.
+  const standalone = useSyncExternalStore(
+    () => () => undefined,
+    isStandaloneApp,
+    () => false,
+  )
+  const [ready, setReady] = useState<{ id: string; file: File } | null>(null)
+  const [shareFailed, setShareFailed] = useState(false)
+  const currentId = current?.id
+  const currentUrl = current?.url
+  const currentType = current?.contentType
+  useEffect(() => {
+    if (!standalone || !currentId || !currentUrl) return
+    let alive = true
+    void fetch(currentUrl, { credentials: 'same-origin' })
+      .then((r) => (r.ok ? r.blob() : null))
+      .then((blob) => {
+        if (!alive || !blob) return
+        const ext = currentType === 'application/pdf' ? 'pdf' : (blob.type.split('/')[1] ?? 'jpg')
+        const name = `iplan-${index + 1}.${ext === 'jpeg' ? 'jpg' : ext}`
+        setReady({ id: currentId, file: new File([blob], name, { type: blob.type }) })
+      })
+      .catch(() => undefined)
+    return () => {
+      alive = false
+    }
+  }, [standalone, currentId, currentUrl, currentType, index])
+  const shareable = ready && ready.id === currentId && canShareFile(ready.file) ? ready.file : null
 
   // Open on the tapped photo, then follow the swipe.
   useEffect(() => {
@@ -362,19 +394,40 @@ function Viewer({
           {index + 1} / {files.length}
         </span>
         <div className="flex gap-1">
-          <a
-            href={current.url}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={t('attachments.open')}
-            className={buttonVariants({
-              variant: 'ghost',
-              size: 'icon',
-              className: 'text-white hover:bg-white/10',
-            })}
-          >
-            <ExternalLink aria-hidden className="size-5" />
-          </a>
+          {standalone ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t('attachments.share')}
+              disabled={!shareable}
+              className="text-white hover:bg-white/10 disabled:opacity-40"
+              onClick={async () => {
+                if (!shareable) return
+                setShareFailed(false)
+                try {
+                  await shareFile(shareable)
+                } catch {
+                  setShareFailed(true)
+                }
+              }}
+            >
+              <Share aria-hidden className="size-5" />
+            </Button>
+          ) : (
+            <a
+              href={current.url}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t('attachments.open')}
+              className={buttonVariants({
+                variant: 'ghost',
+                size: 'icon',
+                className: 'text-white hover:bg-white/10',
+              })}
+            >
+              <ExternalLink aria-hidden className="size-5" />
+            </a>
+          )}
           {canEdit && (
             <Button
               variant="ghost"
@@ -389,6 +442,11 @@ function Viewer({
         </div>
       </div>
 
+      {shareFailed && (
+        <p role="alert" className="mx-4 rounded-xl bg-white/10 px-3 py-2 text-center text-sm">
+          {t('attachments.shareFailed')}
+        </p>
+      )}
       <div className="relative min-h-0 flex-1">
         <div
           ref={track}

@@ -17,12 +17,12 @@ import { CURRENCIES, TIME_ZONES, zoneCenter, zoneCurrency, zoneLabel } from '@/l
 import { tripDays } from '@/lib/trip-dates'
 import { useItemMutations } from '@/lib/trips'
 import { goBack } from '@/lib/history'
-import { itemsToShift, minutesMoved } from '@/lib/shift'
+import { itemsToShift, minutesMoved, previousItem, shiftOverlap } from '@/lib/shift'
 import { useFormat } from '@/lib/use-format'
 import { ColorSwatches } from '@/components/ui/color-swatches'
 import { LinePicker } from './line-picker'
 import { PlaceSearch } from './place-search'
-import { confirmDialog } from '@/lib/confirm'
+import { type ConfirmRow, confirmDialog } from '@/lib/confirm'
 import { useUnsavedChanges } from '@/lib/unsaved'
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? '').trim()
@@ -99,6 +99,15 @@ export function ItemForm({
     isValidTimeZone,
   )
   const endZone = kind === 'flight' ? arrivalZone : zone
+  // "After the previous item": where the day was before this item (its end, else its start).
+  const before = previousItem(items, {
+    dayDate: item?.dayDate ?? defaultDay,
+    before: item?.startsAt,
+    excludeId: item?.id,
+  })
+  const afterPrevious = before
+    ? toLocalInput(new Date(before.endsAt ?? before.startsAt), zone)
+    : null
 
   /**
    * Switching to or from a flight moves the end into another zone (arrival vs
@@ -223,16 +232,43 @@ export function ItemForm({
     if (minutes === 0) return
     const { move, stoppedAt } = itemsToShift(items, before)
     if (move.length === 0) return
-    const amount = `${minutes > 0 ? '+' : '−'}${f.duration(Math.abs(minutes) * 60_000)}`
+    const amount = f.duration(Math.abs(minutes) * 60_000)
+    const later = minutes > 0
+    const at = (iso: string, zone: string, plus = 0) =>
+      f.time(new Date(Date.parse(iso) + plus * 60_000).toISOString(), zone)
+    const overlap = shiftOverlap(move, minutes, stoppedAt)
+    const rows: ConfirmRow[] = move.map((i) => ({
+      label: i.title,
+      from: at(i.startsAt, i.timeZone),
+      to: at(i.startsAt, i.timeZone, minutes),
+    }))
+    if (stoppedAt) {
+      rows.push({
+        label: t('item.shiftLocked', { title: stoppedAt.title }),
+        to: at(stoppedAt.startsAt, stoppedAt.timeZone),
+        tone: 'locked',
+      })
+    }
+    if (stoppedAt && overlap > 0) {
+      rows.push({
+        label: t('item.shiftClash', {
+          title: move.at(-1)?.title ?? '',
+          fixed: stoppedAt.title,
+          amount: f.duration(overlap * 60_000),
+        }),
+        tone: 'warn',
+      })
+    }
     const ok = await confirmDialog({
-      title: t('item.shiftTitle'),
-      message: [
-        t('item.shiftBody', { amount, count: move.length }),
-        stoppedAt ? t('item.shiftStops', { title: stoppedAt.title }) : '',
-      ]
-        .filter(Boolean)
-        .join(' '),
-      confirmLabel: t('item.shiftYes', { count: move.length }),
+      title: t(later ? 'item.shiftTitleLater' : 'item.shiftTitleEarlier', {
+        title: after.title,
+        amount,
+      }),
+      message: t('item.shiftListIntro'),
+      rows,
+      confirmLabel: t(later ? 'item.shiftYesLater' : 'item.shiftYesEarlier', {
+        count: move.length,
+      }),
       cancelLabel: t('item.shiftNo'),
     })
     if (!ok) return
@@ -333,6 +369,16 @@ export function ItemForm({
             label={t('item.start')}
             onChange={setStartValue}
             fallbackDate={item?.dayDate ?? defaultDay}
+            suggestions={
+              afterPrevious
+                ? [
+                    {
+                      label: t('dates.afterPrevious', { time: afterPrevious.slice(11, 16) }),
+                      value: afterPrevious,
+                    },
+                  ]
+                : []
+            }
             defaultValue={
               item ? toLocalInput(new Date(item.startsAt), item.timeZone) : `${defaultDay}T09:00`
             }
@@ -345,6 +391,8 @@ export function ItemForm({
             label={t('item.end')}
             onChange={setEndValue}
             optional
+            // Lengths only make sense when the end is in the start's zone (not a flight's arrival).
+            durationsFrom={endZone === zone ? startValue : undefined}
             fallbackDate={item?.dayDate ?? defaultDay}
             defaultValue={endValue}
           />

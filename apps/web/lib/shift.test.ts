@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { itemsToShift, minutesMoved, roundUpFive } from './shift'
+import { itemsToShift, minutesMoved, previousItem, roundUpFive, shiftOverlap } from './shift'
 
 const item = (id: string, startsAt: string, fixed = false, dayDate = '2026-10-23') => ({
   id,
@@ -49,5 +49,46 @@ describe('shifting the rest of the day', () => {
 
   it('rounds lateness up to 5 minutes', () => {
     expect([1, 5, 6, 14, 15].map(roundUpFive)).toEqual([5, 5, 10, 15, 15])
+  })
+})
+
+describe('previousItem', () => {
+  const at = (id: string, dayDate: string, startsAt: string) => ({ id, dayDate, startsAt })
+  const items = [
+    at('a', '2026-10-24', '2026-10-24T01:00:00.000Z'),
+    at('b', '2026-10-24', '2026-10-24T03:00:00.000Z'),
+    at('c', '2026-10-24', '2026-10-24T05:00:00.000Z'),
+    at('x', '2026-10-25', '2026-10-24T04:00:00.000Z'),
+  ]
+  it('finds the item just before, on the same plan day, never the item itself', () => {
+    expect(
+      previousItem(items, {
+        dayDate: '2026-10-24',
+        before: '2026-10-24T05:00:00.000Z',
+        excludeId: 'c',
+      })?.id,
+    ).toBe('b')
+    expect(
+      previousItem(items, { dayDate: '2026-10-24', before: '2026-10-24T01:00:00.000Z' }),
+    ).toBeNull()
+  })
+  it('is the last item of the day for a new item', () => {
+    expect(previousItem(items, { dayDate: '2026-10-24' })?.id).toBe('c')
+    expect(previousItem(items, { dayDate: '2026-10-26' })).toBeNull()
+  })
+})
+
+describe('shiftOverlap', () => {
+  const fixed = { startsAt: '2026-10-24T11:10:00.000Z' }
+  const moved = [{ startsAt: '2026-10-24T09:05:00.000Z', endsAt: '2026-10-24T11:10:00.000Z' }]
+  it('counts how far the last moved item runs into the fixed one', () => {
+    expect(shiftOverlap(moved, 20, fixed)).toBe(20)
+    expect(shiftOverlap(moved, -10, fixed)).toBe(0)
+    expect(shiftOverlap(moved, 0, fixed)).toBe(0)
+  })
+  it('uses the start when the item has no end, and is 0 with nothing to hit', () => {
+    expect(shiftOverlap([{ startsAt: '2026-10-24T11:00:00.000Z' }], 15, fixed)).toBe(5)
+    expect(shiftOverlap(moved, 20, null)).toBe(0)
+    expect(shiftOverlap([], 20, fixed)).toBe(0)
   })
 })

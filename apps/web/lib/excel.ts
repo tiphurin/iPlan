@@ -21,15 +21,19 @@ const amount = (minor: string | bigint, currency: string): Cell => ({
   format: currency === 'KRW' || currency === 'JPY' ? '#,##0' : NUM,
 })
 
+const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+/** Builds the workbook as a file; the caller downloads or shares it (see deliver-file). */
 async function save(
   sheets: { sheet: string; data: Cell[][]; columns?: { width: number }[] }[],
   fileName: string,
-) {
+): Promise<File> {
   // Loaded only when someone taps "Excel".
   const { default: writeXlsxFile } = await import('write-excel-file/browser')
-  await writeXlsxFile(
+  const blob = await writeXlsxFile(
     sheets.map((s) => ({ ...s, stickyRowsCount: 1 })) as Parameters<typeof writeXlsxFile>[0],
-  ).toFile(fileName)
+  ).toBlob()
+  return new File([blob], fileName, { type: XLSX })
 }
 
 export interface TripExcelLabels {
@@ -50,6 +54,7 @@ export interface TripExcelLabels {
     paid: string
     share: string
     net: string
+    contributed: string
     from: string
     to: string
   }
@@ -76,7 +81,7 @@ export async function exportTripExcel(
   members: { userId: string; name: string }[],
   l: TripExcelLabels,
   pool?: PoolDto,
-) {
+): Promise<File> {
   const base = summary.baseCurrency
   const c = l.columns
   const party = (id: string, name: string) => (id === 'pool' ? l.pool : name)
@@ -122,7 +127,7 @@ export async function exportTripExcel(
           },
         ]
       : []
-  await save(
+  return save(
     [
       {
         sheet: l.expenses,
@@ -170,12 +175,14 @@ export async function exportTripExcel(
       },
       {
         sheet: l.people,
-        columns: [{ width: 20 }, { width: 14 }, { width: 14 }, { width: 14 }],
+        columns: [{ width: 20 }, { width: 14 }, { width: 14 }, { width: 14 }, { width: 14 }],
         data: [
-          head([c.name, c.paid, c.share, c.net]),
+          // Net = paid + put into the pool − own share, so all three are shown.
+          head([c.name, c.paid, c.contributed, c.share, c.net]),
           ...summary.parties.map((p) => [
             text(party(p.id, p.name)),
             amount(p.paidMinor, base),
+            amount(p.contributedMinor, base),
             amount(p.shareMinor, base),
             amount(p.netMinor, base),
           ]),
@@ -234,9 +241,9 @@ export interface MonthExcelLabels {
   category: (id: string | null) => string
 }
 
-export async function exportMonthExcel(data: MonthDto, l: MonthExcelLabels) {
+export async function exportMonthExcel(data: MonthDto, l: MonthExcelLabels): Promise<File> {
   const c = l.columns
-  await save(
+  return save(
     [
       {
         sheet: l.summary,

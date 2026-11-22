@@ -50,20 +50,25 @@ export default async function PrintMonthPage({ params }: { params: Promise<{ mon
         <h1 className="text-2xl font-bold">
           {t('finance.title')} · {formatMonth(month, { locale })}
         </h1>
-        <table className="w-full border-collapse tabular-nums">
-          <tbody>
-            {ROWS.map(([key, label], i) => (
-              <tr key={key} className={i === ROWS.length - 1 ? 'border-t-2 font-bold' : 'border-b'}>
-                <td className="py-1">
-                  {t(`finance.${label}`)}
-                  {key === 'oneOffIncomeMinor' && ` (${t('finance.tx.income')})`}
-                  {key === 'oneOffExpensesMinor' && ` (${t('finance.tx.expense')})`}
-                </td>
-                <td className="py-1 text-right">{fmtServer(data.summary[key])}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="-mx-4 overflow-x-auto px-4 print:mx-0 print:overflow-visible print:px-0">
+          <table className="w-full min-w-[32rem] border-collapse whitespace-nowrap tabular-nums print:min-w-0 print:whitespace-normal">
+            <tbody>
+              {ROWS.map(([key, label], i) => (
+                <tr
+                  key={key}
+                  className={i === ROWS.length - 1 ? 'border-t-2 font-bold' : 'border-b'}
+                >
+                  <td className="py-1">
+                    {t(`finance.${label}`)}
+                    {key === 'oneOffIncomeMinor' && ` (${t('finance.tx.income')})`}
+                    {key === 'oneOffExpensesMinor' && ` (${t('finance.tx.expense')})`}
+                  </td>
+                  <td className="py-1 text-right">{fmtServer(data.summary[key])}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
         <section className="grid grid-cols-2 gap-6 break-inside-avoid">
           <div>
             <h2 className="mb-1 text-lg font-semibold">{t('finance.trend')}</h2>
@@ -103,45 +108,49 @@ export default async function PrintMonthPage({ params }: { params: Promise<{ mon
         </section>
         <section>
           <h2 className="mb-1 text-lg font-semibold">{t('finance.recurring')}</h2>
-          <table className="w-full border-collapse tabular-nums">
-            <tbody>
-              {data.lines.map((line) => (
-                <tr key={line.ruleId} className="border-b">
-                  <td className="py-1">
-                    {line.name}
-                    {line.overridden && (
-                      <span className="text-muted-foreground"> · {t('finance.adjusted')}</span>
-                    )}
-                  </td>
-                  <td className="py-1 text-right">{fmtServer(line.amountMinor)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="-mx-4 overflow-x-auto px-4 print:mx-0 print:overflow-visible print:px-0">
+            <table className="w-full min-w-[32rem] border-collapse whitespace-nowrap tabular-nums print:min-w-0 print:whitespace-normal">
+              <tbody>
+                {data.lines.map((line) => (
+                  <tr key={line.ruleId} className="border-b">
+                    <td className="py-1">
+                      {line.name}
+                      {line.overridden && (
+                        <span className="text-muted-foreground"> · {t('finance.adjusted')}</span>
+                      )}
+                    </td>
+                    <td className="py-1 text-right">{fmtServer(line.amountMinor)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
         <section>
           <h2 className="mb-1 text-lg font-semibold">{t('finance.oneOff')}</h2>
-          <table className="w-full border-collapse tabular-nums">
-            <tbody>
-              {data.transactions.map((tx) => (
-                <tr key={tx.id} className="border-b">
-                  <td className="py-1 pr-2 whitespace-nowrap">
-                    {formatDayLabel(tx.date, { locale })}
-                  </td>
-                  <td className="py-1">
-                    {tx.title}
-                    {tx.categoryId && (
-                      <span className="text-muted-foreground"> · {names.get(tx.categoryId)}</span>
-                    )}
-                  </td>
-                  <td className="py-1 text-right">
-                    {tx.kind === 'expense' ? '−' : '+'}
-                    {fmtServer(tx.amountMinor)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="-mx-4 overflow-x-auto px-4 print:mx-0 print:overflow-visible print:px-0">
+            <table className="w-full min-w-[32rem] border-collapse whitespace-nowrap tabular-nums print:min-w-0 print:whitespace-normal">
+              <tbody>
+                {data.transactions.map((tx) => (
+                  <tr key={tx.id} className="border-b">
+                    <td className="py-1 pr-2 whitespace-nowrap">
+                      {formatDayLabel(tx.date, { locale })}
+                    </td>
+                    <td className="py-1">
+                      {tx.title}
+                      {tx.categoryId && (
+                        <span className="text-muted-foreground"> · {names.get(tx.categoryId)}</span>
+                      )}
+                    </td>
+                    <td className="py-1 text-right">
+                      {tx.kind === 'expense' ? '−' : '+'}
+                      {fmtServer(tx.amountMinor)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       </main>
     </>

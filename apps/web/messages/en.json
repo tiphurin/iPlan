@@ -686,7 +686,8 @@
       "planned": "Usual",
       "adjusted": "Adjusted",
       "note": "Note",
-      "time": "Time"
+      "time": "Time",
+      "contributed": "Put in pool"
     },
     "open": "Export",
     "title": "Export trip",
@@ -715,7 +716,15 @@
     "confirm": "Export",
     "back": "Back",
     "language": "Language in the file",
-    "currency": "Show totals in"
+    "currency": "Show totals in",
+    "readyTitle": "Your file is ready",
+    "readyHint": "Tap Share, then “Save to Files”, or send it by LINE or Mail",
+    "share": "Share / save file",
+    "shareFailed": "The share sheet didn’t open. Open the app in Safari and export again.",
+    "sharePrint": "Share / Print",
+    "openSafari": "Open in Safari",
+    "sharePrintHint": "In the share sheet choose “Print”, pinch out on the preview, then save as PDF. No “Print”? Open in Safari (you may need to sign in again).",
+    "shareFailedPrint": "The share sheet didn’t open. Tap “Open in Safari” and print there."
   },
   "showcase": {
     "title": "All features",

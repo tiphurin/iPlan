@@ -150,26 +150,30 @@ export default async function PrintTripPage({
             <h2 className="text-lg font-semibold">
               {t('expenses.title')} · {fb(summary.totalMinor)}
             </h2>
-            <table className="w-full border-collapse tabular-nums">
-              <thead>
-                <tr className="border-b text-left">
-                  <th className="py-1">{c('name')}</th>
-                  <th className="py-1 text-right">{c('paid')}</th>
-                  <th className="py-1 text-right">{c('share')}</th>
-                  <th className="py-1 text-right">{c('net')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {summary.parties.map((p) => (
-                  <tr key={p.id} className="border-b">
-                    <td className="py-1">{p.id === 'pool' ? t('expenses.form.pool') : p.name}</td>
-                    <td className="py-1 text-right">{fb(p.paidMinor)}</td>
-                    <td className="py-1 text-right">{fb(p.shareMinor)}</td>
-                    <td className="py-1 text-right">{fb(p.netMinor)}</td>
+            <div className="-mx-4 overflow-x-auto px-4 print:mx-0 print:overflow-visible print:px-0">
+              <table className="w-full min-w-[32rem] border-collapse whitespace-nowrap tabular-nums print:min-w-0 print:whitespace-normal">
+                <thead>
+                  <tr className="border-b text-left">
+                    <th className="py-1">{c('name')}</th>
+                    <th className="py-1 text-right">{c('paid')}</th>
+                    <th className="py-1 text-right">{c('contributed')}</th>
+                    <th className="py-1 text-right">{c('share')}</th>
+                    <th className="py-1 text-right">{c('net')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {summary.parties.map((p) => (
+                    <tr key={p.id} className="border-b">
+                      <td className="py-1">{p.id === 'pool' ? t('expenses.form.pool') : p.name}</td>
+                      <td className="py-1 text-right">{fb(p.paidMinor)}</td>
+                      <td className="py-1 text-right">{fb(p.contributedMinor)}</td>
+                      <td className="py-1 text-right">{fb(p.shareMinor)}</td>
+                      <td className="py-1 text-right">{fb(p.netMinor)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <div className="space-y-6 pt-2">
               {summary.byCategory.length > 0 && (
                 <div className="break-inside-avoid space-y-1.5">
@@ -219,41 +223,43 @@ export default async function PrintTripPage({
                     : t('expenses.pool.shortAmount', { amount: fb(String(-left)) })}
                 </p>
                 {pool.contributions.length > 0 && (
-                  <table className="w-full border-collapse tabular-nums">
-                    <thead>
-                      <tr className="border-b text-left">
-                        <th className="py-1">{c('date')}</th>
-                        <th className="py-1">{c('name')}</th>
-                        <th className="py-1 text-right">{c('amount')}</th>
-                        <th className="py-1 pr-3 text-right">{base}</th>
-                        <th className="py-1">{c('note')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pool.contributions.map((x) => (
-                        <tr key={x.id} className="border-b">
-                          <td className="py-1">{formatDayLabel(x.date, { locale })}</td>
-                          <td className="py-1">{x.name}</td>
-                          <td className="py-1 text-right">
-                            {fmtServer(x.amountMinor, x.currency)}
-                          </td>
-                          <td className="py-1 pr-3 text-right">
-                            {fmtServer(x.baseAmountMinor, base)}
-                          </td>
-                          <td className="py-1">{x.note ?? ''}</td>
+                  <div className="-mx-4 overflow-x-auto px-4 print:mx-0 print:overflow-visible print:px-0">
+                    <table className="w-full min-w-[32rem] border-collapse whitespace-nowrap tabular-nums print:min-w-0 print:whitespace-normal">
+                      <thead>
+                        <tr className="border-b text-left">
+                          <th className="py-1">{c('date')}</th>
+                          <th className="py-1">{c('name')}</th>
+                          <th className="py-1 text-right">{c('amount')}</th>
+                          <th className="py-1 pr-3 text-right">{base}</th>
+                          <th className="py-1">{c('note')}</th>
                         </tr>
-                      ))}
-                      {pool.byMember.map((m) => (
-                        <tr key={m.userId} className="border-b font-semibold">
-                          <td className="py-1" />
-                          <td className="py-1">{m.name}</td>
-                          <td className="py-1 text-right">{(m.percentBp / 100).toFixed(1)}%</td>
-                          <td className="py-1 text-right">{fb(m.contributedBaseMinor)}</td>
-                          <td className="py-1" />
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {pool.contributions.map((x) => (
+                          <tr key={x.id} className="border-b">
+                            <td className="py-1">{formatDayLabel(x.date, { locale })}</td>
+                            <td className="py-1">{x.name}</td>
+                            <td className="py-1 text-right">
+                              {fmtServer(x.amountMinor, x.currency)}
+                            </td>
+                            <td className="py-1 pr-3 text-right">
+                              {fmtServer(x.baseAmountMinor, base)}
+                            </td>
+                            <td className="py-1">{x.note ?? ''}</td>
+                          </tr>
+                        ))}
+                        {pool.byMember.map((m) => (
+                          <tr key={m.userId} className="border-b font-semibold">
+                            <td className="py-1" />
+                            <td className="py-1">{m.name}</td>
+                            <td className="py-1 text-right">{(m.percentBp / 100).toFixed(1)}%</td>
+                            <td className="py-1 text-right">{fb(m.contributedBaseMinor)}</td>
+                            <td className="py-1" />
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
             )}

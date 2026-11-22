@@ -19,6 +19,8 @@ import { type DayMark, MonthCalendar } from '@/components/ui/month-calendar'
 import { Progress } from '@/components/ui/progress'
 import { Fab } from '@/components/ui/fab'
 import { cn } from '@/lib/cn'
+import { FileReady } from '@/components/file-ready'
+import { deliverFile } from '@/lib/deliver-file'
 import { exportMonthExcel } from '@/lib/excel'
 import { fmt } from '@/lib/expenses'
 import { useCategoryName, useMonth } from '@/lib/finance'
@@ -36,6 +38,7 @@ export function MoneyView({ month, initial }: { month: string; initial: MonthDto
   const { data } = useMonth(month, initial)
   const [adjusting, setAdjusting] = useState<MonthLineDto | null>(null)
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
+  const [ready, setReady] = useState<File | null>(null)
   const from = addMonths(month as Month, -5)
   const { data: overview } = useQuery({
     queryKey: ['finance', 'overview', from, month],
@@ -104,6 +107,7 @@ export function MoneyView({ month, initial }: { month: string; initial: MonthDto
 
   return (
     <div className="space-y-5 px-4">
+      <FileReady file={ready} onClose={() => setReady(null)} />
       <div className="flex items-center justify-between rounded-full border bg-card p-1">
         <Button variant="ghost" size="icon" aria-label={t('prevMonth')} onClick={() => go(-1)}>
           <ChevronLeft aria-hidden className="size-6" />
@@ -166,8 +170,8 @@ export function MoneyView({ month, initial }: { month: string; initial: MonthDto
             <Button
               variant="secondary"
               className="shrink-0"
-              onClick={() =>
-                void exportMonthExcel(data, {
+              onClick={async () => {
+                const file = await exportMonthExcel(data, {
                   summary: t('balance'),
                   lines: t('recurring'),
                   oneOff: t('oneOff'),
@@ -203,7 +207,9 @@ export function MoneyView({ month, initial }: { month: string; initial: MonthDto
                     return c ? categoryName(c.name) : ''
                   },
                 })
-              }
+                // Home-screen app on iPhone: downloads don't work there, so share instead.
+                if (deliverFile(file) === 'share') setReady(file)
+              }}
             >
               <FileSpreadsheet aria-hidden className="size-4" />
               {tAll('export.excel')}

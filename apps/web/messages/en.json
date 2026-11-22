@@ -502,7 +502,15 @@
     "delete": "Delete file",
     "close": "Close",
     "pdf": "PDF",
-    "saveFirst": "Save first, then attach slips"
+    "saveFirst": "Save first, then attach slips",
+    "view": "View photo {n} of {count}",
+    "reviewTitle": "Upload {count, plural, one {# file} other {# files}}",
+    "removePicked": "Remove",
+    "upload": "Upload {count, plural, one {# file} other {# files}}",
+    "uploadingCount": "Uploading {done}/{count}…",
+    "someFailed": "{count, plural, one {# file} other {# files}} didn’t upload. Tap Upload to retry, or remove them.",
+    "previous": "Previous photo",
+    "next": "Next photo"
   },
   "finance": {
     "title": "Money",

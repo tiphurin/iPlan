@@ -67,9 +67,16 @@ export function useDeleteTrip(tripId: string) {
 }
 
 /** Uploads an already-resized cover photo (see prepareCover) and returns the updated trip. */
-export async function uploadTripCover(tripId: string, photo: Blob): Promise<TripDetailDto> {
+export async function uploadTripCover(
+  tripId: string,
+  photo: Blob,
+  small?: Blob,
+): Promise<TripDetailDto> {
   const form = new FormData()
-  form.set('file', photo, photo.type === 'image/webp' ? 'cover.webp' : 'cover.jpg')
+  const ext = (b: Blob) => (b.type === 'image/webp' ? 'webp' : 'jpg')
+  form.set('file', photo, `cover.${ext(photo)}`)
+  // The 800 px copy trip cards load instead of the full photo.
+  if (small) form.set('small', small, `cover-small.${ext(small)}`)
   const response = await fetch(`/api/trips/${tripId}/cover`, {
     method: 'PUT',
     body: form,

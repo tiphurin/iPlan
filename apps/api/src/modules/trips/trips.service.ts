@@ -20,6 +20,11 @@ export const RANK: Record<TripRole, number> = { viewer: 0, editor: 1, owner: 2 }
 export const MAX_TRIP_DAYS = 60
 /** The browser shrinks covers to 1600 px WebP first, so real uploads are far below this. */
 export const MAX_COVER_BYTES = MAX_ATTACHMENT_BYTES
+
+/** The small cover (trip cards) lives next to the full one: cover-x.webp → cover-x.sm.webp. */
+export function smallCoverKey(key: string): string {
+  return key.replace(/(\.[a-z]+)$/, '.sm$1')
+}
 const COVER_EXT: Record<string, string> = {
   'image/webp': 'webp',
   'image/jpeg': 'jpg',
@@ -180,7 +185,13 @@ export class TripsService implements TripAccess {
    * Replaces the cover photo (editor or owner); the old file is deleted afterwards.
    * The type comes from the bytes themselves, never from what the browser declared.
    */
-  async setCover(actor: SessionUser, tripId: string, bytes: Uint8Array): Promise<TripDetailDto> {
+  async setCover(
+    actor: SessionUser,
+    tripId: string,
+    bytes: Uint8Array,
+    /** Optional small version for trip cards, same image type. */
+    small?: Uint8Array,
+  ): Promise<TripDetailDto> {
     const { trip } = await this.requireAccess(actor, tripId, 'editor')
     const storage = this.requireStorage()
     if (bytes.byteLength > MAX_COVER_BYTES) {
@@ -191,8 +202,12 @@ export class TripsService implements TripAccess {
     if (!contentType || !ext) throw validationFailed({ file: 'Use a JPEG, PNG or WebP image' })
     const key = `trips/${tripId}/cover-${randomUUID()}.${ext}`
     await storage.put(key, bytes, contentType)
+    // A small version of another type (or too big) is skipped: cards fall back to the full one.
+    if (small && small.byteLength <= MAX_COVER_BYTES && sniffType(small) === contentType) {
+      await storage.put(smallCoverKey(key), small, contentType)
+    }
     await this.trips.update(tripId, { coverKey: key })
-    if (trip.coverKey) await storage.delete(trip.coverKey).catch(() => undefined)
+    if (trip.coverKey) await this.deleteCover(trip.coverKey)
     await this.audit.record({
       actorId: actor.id,
       action: 'trip.cover.set',
@@ -208,9 +223,7 @@ export class TripsService implements TripAccess {
     const { trip } = await this.requireAccess(actor, tripId, 'editor')
     if (trip.coverKey) {
       await this.trips.update(tripId, { coverKey: null })
-      await this.requireStorage()
-        .delete(trip.coverKey)
-        .catch(() => undefined)
+      await this.deleteCover(trip.coverKey)
       await this.audit.record({
         actorId: actor.id,
         action: 'trip.cover.remove',
@@ -221,24 +234,36 @@ export class TripsService implements TripAccess {
     return this.get(actor, tripId)
   }
 
-  /** Storage key and type of the cover photo, after checking the viewer can see the trip. */
+  /** Both sizes of a cover; a missing small one is fine. */
+  private async deleteCover(key: string) {
+    const storage = this.requireStorage()
+    await storage.delete(key).catch(() => undefined)
+    await storage.delete(smallCoverKey(key)).catch(() => undefined)
+  }
+
+  /**
+   * Storage key and type of the cover photo, after checking the viewer can see
+   * the trip. `small` asks for the card-size version, falling back to the full one.
+   */
   async coverFile(
     actor: SessionUser,
     tripId: string,
-  ): Promise<{ key: string; contentType: string } | null> {
+    small = false,
+  ): Promise<{ key: string; contentType: string; fallbackKey?: string } | null> {
     const { trip } = await this.requireAccess(actor, tripId, 'viewer')
     if (!trip.coverKey) return null
     const ext = trip.coverKey.split('.').pop() ?? ''
     const contentType =
       Object.entries(COVER_EXT).find(([, e]) => e === ext)?.[0] ?? 'application/octet-stream'
-    return { key: trip.coverKey, contentType }
+    return small
+      ? { key: smallCoverKey(trip.coverKey), contentType, fallbackKey: trip.coverKey }
+      : { key: trip.coverKey, contentType }
   }
 
   async remove(actor: SessionUser, tripId: string): Promise<void> {
     const { trip } = await this.requireAccess(actor, tripId, 'owner')
     await this.trips.delete(tripId)
-    if (trip.coverKey && this.storage)
-      await this.storage.delete(trip.coverKey).catch(() => undefined)
+    if (trip.coverKey && this.storage) await this.deleteCover(trip.coverKey)
     await this.audit.record({
       actorId: actor.id,
       action: 'trip.delete',

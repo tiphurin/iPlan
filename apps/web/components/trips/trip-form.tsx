@@ -55,7 +55,7 @@ export function TripForm({
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState<string | null>(null)
   // Cover photo: picked (resized, not yet uploaded) or the stored one unless removed.
-  const [photo, setPhoto] = useState<{ blob: Blob; url: string } | null>(null)
+  const [photo, setPhoto] = useState<{ blob: Blob; small: Blob; url: string } | null>(null)
   const [photoRemoved, setPhotoRemoved] = useState(false)
   const [photoBusy, setPhotoBusy] = useState(false)
   const [photoError, setPhotoError] = useState<string | null>(null)
@@ -75,8 +75,8 @@ export function TripForm({
     setPhotoBusy(true)
     setPhotoError(null)
     try {
-      const blob = await prepareCover(file)
-      setPhoto({ blob, url: URL.createObjectURL(blob) })
+      const { full, small } = await prepareCover(file)
+      setPhoto({ blob: full, small, url: URL.createObjectURL(full) })
       setPhotoRemoved(false)
     } catch {
       setPhotoError(t('trips.coverPhotoUnreadable'))
@@ -93,7 +93,7 @@ export function TripForm({
 
   /** Uploads or removes the cover after the trip itself is saved. */
   async function saveCover(tripId: string) {
-    if (photo) await uploadTripCover(tripId, photo.blob)
+    if (photo) await uploadTripCover(tripId, photo.blob, photo.small)
     else if (photoRemoved && trip?.coverUrl) await removeTripCover(tripId)
     else return
     await client.invalidateQueries({ queryKey: tripKeys.all })

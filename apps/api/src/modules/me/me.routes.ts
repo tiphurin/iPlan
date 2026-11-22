@@ -7,6 +7,7 @@ import { SUPERADMIN } from '../../infra/superadmin'
 import { AVATAR_MAX_BYTES } from '../../shared/avatar'
 import { requireAccount, requireUser } from '../../shared/auth-guard'
 import { AppError, forbidden, validationFailed } from '../../shared/errors'
+import { serveStoredFile } from '../../shared/serve-file'
 import { createRouter, errorResponses } from '../../shared/openapi'
 import type { MeService } from './me.service'
 
@@ -175,16 +176,7 @@ export function meRoutes(
       if (!found || !storage) {
         return c.json({ error: { code: 'NOT_FOUND' as const, message: 'No picture' } }, 404)
       }
-      if (storage.signedUrl) return c.redirect(await storage.signedUrl(found.key, 3600), 302)
-      const bytes = await storage.get(found.key)
-      if (!bytes)
-        return c.json({ error: { code: 'NOT_FOUND' as const, message: 'No picture' } }, 404)
-      return c.body(bytes, 200, {
-        'content-type': found.contentType,
-        // The URL changes with every upload (?v=), so it can be cached for long.
-        'cache-control': 'private, max-age=31536000, immutable',
-        'x-content-type-options': 'nosniff',
-      })
+      return serveStoredFile(c, storage, found)
     })
     .openapi(getMe, async (c) => c.json(await service.get(requireAccount(c)), 200))
     .openapi(updateMe, async (c) =>

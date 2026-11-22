@@ -3,6 +3,7 @@ import { AttachmentDto, AttachmentEntity, AttachmentKind, AttachmentQuery } from
 import type { StorageProvider } from '../../infra/storage'
 import { requireUser } from '../../shared/auth-guard'
 import { validationFailed } from '../../shared/errors'
+import { serveStoredFile } from '../../shared/serve-file'
 import { createRouter, errorResponses } from '../../shared/openapi'
 import type { AttachmentsService } from './attachments.service'
 
@@ -90,15 +91,7 @@ export function attachmentRoutes(service: AttachmentsService, storage: StoragePr
         c.req.valid('param').id,
         c.req.valid('query').thumb === '1',
       )
-      if (storage.signedUrl) return c.redirect(await storage.signedUrl(key, 300), 302)
-      const bytes = await storage.get(key)
-      if (!bytes) return c.json({ error: { code: 'NOT_FOUND', message: 'File missing' } }, 404)
-      return c.body(bytes, 200, {
-        'content-type': contentType,
-        // Private: only this signed-in browser may cache it.
-        'cache-control': 'private, max-age=86400, immutable',
-        'x-content-type-options': 'nosniff',
-      })
+      return serveStoredFile(c, storage, { key, contentType })
     })
     .openapi(remove, async (c) => {
       await service.remove(requireUser(c), c.req.valid('param').id)

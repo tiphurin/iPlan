@@ -35,7 +35,8 @@ export async function TripCover({
           {/* The colour behind shows while the photo loads (or if it fails). */}
           {/* eslint-disable-next-line @next/next/no-img-element -- permission-checked API image */}
           <img
-            src={trip.coverUrl}
+            // Cards load the 800 px copy (the API falls back to the full photo for older covers).
+            src={`${trip.coverUrl}&size=sm`}
             alt=""
             loading="lazy"
             decoding="async"

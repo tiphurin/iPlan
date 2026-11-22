@@ -230,6 +230,24 @@ describe('TripsService cover photo', () => {
     expect(trip.coverUrl).not.toBeNull()
   })
 
+  it('keeps a small card version next to the cover and deletes both together', async () => {
+    await service.setCover(users.owner, tripId, webp, webp)
+    const key = repo.trips.get(tripId)?.coverKey ?? ''
+    const small = key.replace(/\.webp$/, '.sm.webp')
+    expect(storage.files.has(small)).toBe(true)
+    await expect(service.coverFile(users.viewer, tripId, true)).resolves.toEqual({
+      key: small,
+      contentType: 'image/webp',
+      fallbackKey: key,
+    })
+    // A small version of another type is skipped (cards then use the full cover).
+    await service.setCover(users.owner, tripId, webp, png)
+    const next = repo.trips.get(tripId)?.coverKey ?? ''
+    expect([...storage.files.keys()]).toEqual([next])
+    await service.removeCover(users.owner, tripId)
+    expect(storage.files.size).toBe(0)
+  })
+
   it('rejects files that are not images by their bytes', async () => {
     const pdf = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d])
     await expect(service.setCover(users.owner, tripId, pdf)).rejects.toMatchObject({

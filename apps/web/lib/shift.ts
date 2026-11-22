@@ -45,3 +45,35 @@ export function minutesMoved(
 export function roundUpFive(minutes: number): number {
   return Math.max(5, Math.ceil(minutes / 5) * 5)
 }
+
+/**
+ * The item just before a time on the same plan day (the one a new or edited item
+ * would follow), or null. Without `before` it is the day's last item.
+ */
+export function previousItem<T extends { id: string; dayDate: string; startsAt: string }>(
+  items: readonly T[],
+  at: { dayDate: string; before?: string | undefined; excludeId?: string | undefined },
+): T | null {
+  const earlier = items.filter(
+    (i) =>
+      i.id !== at.excludeId &&
+      i.dayDate === at.dayDate &&
+      (at.before === undefined || i.startsAt < at.before),
+  )
+  return earlier.sort((a, b) => a.startsAt.localeCompare(b.startsAt)).at(-1) ?? null
+}
+
+/**
+ * Minutes the last moved item would run into the fixed item that stopped the
+ * shift (0 when it still fits, or when nothing stopped it).
+ */
+export function shiftOverlap(
+  moved: readonly { startsAt: string; endsAt?: string | null | undefined }[],
+  minutes: number,
+  stoppedAt: { startsAt: string } | null,
+): number {
+  const last = moved.at(-1)
+  if (!last || !stoppedAt) return 0
+  const end = Date.parse(last.endsAt ?? last.startsAt) + minutes * 60_000
+  return Math.max(0, Math.round((end - Date.parse(stoppedAt.startsAt)) / 60_000))
+}

@@ -209,11 +209,7 @@
     "applyDuration": "Use this duration",
     "fixed": "Fixed time (can't move)",
     "fixedHint": "E.g. a flight, a booked slot, an appointment: if earlier plans run late, this one is not moved",
-    "shiftTitle": "Move the items after this too?",
-    "shiftBody": "The end moved {amount} · the next {count} items today move by the same amount",
-    "shiftStops": "(stopping before \"{title}\", which has a fixed time)",
-    "shiftYes": "Move {count} items",
-    "shiftNo": "Don't move",
+    "shiftNo": "No, only this item",
     "planColor": "Colour in the plan",
     "planColorAuto": "Follow the ride here",
     "planColorHint": "Magic wand = use the colour of the line you arrived on (e.g. blue after Line 4)",
@@ -223,7 +219,14 @@
     "optionalHint": "Skip it if time runs short",
     "budget": "Budget",
     "budgetHint": "Optional · leave empty to remove",
-    "budgetCurrency": "Budget currency"
+    "budgetCurrency": "Budget currency",
+    "shiftTitleLater": "{title} now ends {amount} later. Push the rest back?",
+    "shiftTitleEarlier": "{title} now ends {amount} earlier. Move the rest up?",
+    "shiftListIntro": "These times change:",
+    "shiftLocked": "{title} stays (fixed time)",
+    "shiftClash": "{title} would run {amount} into “{fixed}”. Adjust it after moving.",
+    "shiftYesLater": "Push back {count, plural, one {# item} other {# items}}",
+    "shiftYesEarlier": "Move up {count, plural, one {# item} other {# items}}"
   },
   "todayView": {
     "now": "Now",
@@ -258,7 +261,8 @@
     "lateNow": "{min} min late, not checked in",
     "skippedNow": "Skipped",
     "skip": "Skip",
-    "getReady": "Get ready"
+    "getReady": "Get ready",
+    "pushNo": "Not now"
   },
   "duration": {
     "dh": "{d}d {h}h",
@@ -1190,6 +1194,12 @@
     "minute": "Minute",
     "done": "Done · {when}",
     "prevYear": "Previous year",
-    "nextYear": "Next year"
+    "nextYear": "Next year",
+    "changeDay": "Change day",
+    "typeTime": "Type a time like 1015, or use the wheels below",
+    "timeInvalid": "That isn’t a time. Try 1015 or 10:15",
+    "nudge": "{minutes, plural, one {Move # minute} other {Move # minutes}}",
+    "lengths": "Lasts",
+    "afterPrevious": "After the previous item {time}"
   }
 }

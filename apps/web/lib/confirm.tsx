@@ -1,10 +1,11 @@
 'use client'
 
-import { TriangleAlert } from 'lucide-react'
+import { Lock, TriangleAlert } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useEffect, useId, useRef, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/cn'
 
 export interface ConfirmOptions {
   /** Bold first line; defaults to "Are you sure?". */
@@ -14,6 +15,17 @@ export interface ConfirmOptions {
   cancelLabel?: string
   /** Red confirm button for deleting or losing something. */
   danger?: boolean
+  /** What will change, one line each: "Gwangjang Market 14:15 → 14:35". */
+  rows?: ConfirmRow[]
+}
+
+export interface ConfirmRow {
+  label: string
+  /** Current value, shown struck through when `to` is given. */
+  from?: string
+  to?: string
+  /** "warn" for a problem the person should see before confirming; "locked" for what stays put. */
+  tone?: 'warn' | 'locked'
 }
 
 interface Pending extends ConfirmOptions {
@@ -102,6 +114,39 @@ export function ConfirmHost() {
             </p>
           </div>
         </div>
+        {open.rows && open.rows.length > 0 && (
+          <ul className="mt-3 max-h-[45dvh] divide-y overflow-y-auto rounded-xl border text-sm">
+            {open.rows.map((row, i) => (
+              <li
+                key={`${i}-${row.label}`}
+                className={cn(
+                  'flex items-start justify-between gap-3 px-3 py-2',
+                  row.tone === 'warn' && 'bg-warning/10 text-warning',
+                  row.tone === 'locked' && 'text-muted-foreground',
+                )}
+              >
+                <span className="min-w-0 flex-1">
+                  {row.tone === 'locked' && <Lock aria-hidden className="mr-1 inline size-3.5" />}
+                  {row.tone === 'warn' && (
+                    <TriangleAlert aria-hidden className="mr-1 inline size-3.5" />
+                  )}
+                  {row.label}
+                </span>
+                {(row.from || row.to) && (
+                  <span className="shrink-0 tabular-nums">
+                    {row.from && row.to ? (
+                      <>
+                        <s className="text-faint">{row.from}</s> → <b>{row.to}</b>
+                      </>
+                    ) : (
+                      (row.to ?? row.from)
+                    )}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
         <div className="mt-5 grid grid-cols-2 gap-2">
           <Button variant="secondary" onClick={() => answer(false)}>
             {open.cancelLabel ?? t('cancel')}

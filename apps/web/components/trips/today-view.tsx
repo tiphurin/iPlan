@@ -26,8 +26,8 @@ import { dayColor } from '@/lib/day-colors'
 import { tripDays } from '@/lib/trip-dates'
 import { awayZone, zoneCurrency } from '@/lib/time-zones'
 import { TripDisplayProvider, useTripDisplay } from '@/lib/trip-display'
-import { confirmDialog } from '@/lib/confirm'
-import { itemsToShift, roundUpFive } from '@/lib/shift'
+import { type ConfirmRow, confirmDialog } from '@/lib/confirm'
+import { itemsToShift, roundUpFive, shiftOverlap } from '@/lib/shift'
 import { SleepCard } from './sleep-card'
 import { ItemSheet } from './item-sheet'
 import { TripTopBar } from './trip-top-bar'
@@ -172,23 +172,46 @@ function TodayBody({ initialTrip, initialItems, meId, serverNow }: TodayProps) {
     if (!current || lateBy === 0 || skipped) return null
     const { move, stoppedAt } = itemsToShift(items, current)
     // Not checked in yet: the current item starts late too; checked in late: only what follows.
-    const ids = [...(myCheckIn ? [] : [current.id]), ...move.map((i) => i.id)]
-    return ids.length > 0 ? { ids, minutes: roundUpFive(lateBy), stoppedAt } : null
+    const moved = [...(myCheckIn ? [] : [current]), ...move]
+    const ids = moved.map((i) => i.id)
+    return ids.length > 0 ? { ids, moved, minutes: roundUpFive(lateBy), stoppedAt } : null
   })()
 
   async function onPushPlan() {
     if (!pushPlan) return
     const amount = `+${f.duration(pushPlan.minutes * 60_000)}`
+    const at = (iso: string, zone: string, plus = 0) =>
+      f.time(new Date(Date.parse(iso) + plus * 60_000).toISOString(), zone)
+    const { moved, minutes, stoppedAt } = pushPlan
+    const rows: ConfirmRow[] = moved.map((i) => ({
+      label: i.title,
+      from: at(i.startsAt, i.timeZone),
+      to: at(i.startsAt, i.timeZone, minutes),
+    }))
+    const overlap = shiftOverlap(moved, minutes, stoppedAt)
+    if (stoppedAt) {
+      rows.push({
+        label: t('item.shiftLocked', { title: stoppedAt.title }),
+        to: at(stoppedAt.startsAt, stoppedAt.timeZone),
+        tone: 'locked',
+      })
+    }
+    if (stoppedAt && overlap > 0) {
+      rows.push({
+        label: t('item.shiftClash', {
+          title: moved.at(-1)?.title ?? '',
+          fixed: stoppedAt.title,
+          amount: f.duration(overlap * 60_000),
+        }),
+        tone: 'warn',
+      })
+    }
     const ok = await confirmDialog({
       title: t('todayView.pushTitle'),
-      message: [
-        t('todayView.pushBody', { amount, count: pushPlan.ids.length }),
-        pushPlan.stoppedAt ? t('item.shiftStops', { title: pushPlan.stoppedAt.title }) : '',
-      ]
-        .filter(Boolean)
-        .join(' '),
-      confirmLabel: t('item.shiftYes', { count: pushPlan.ids.length }),
-      cancelLabel: t('item.shiftNo'),
+      message: t('todayView.pushBody', { amount, count: pushPlan.ids.length }),
+      rows,
+      confirmLabel: t('item.shiftYesLater', { count: pushPlan.ids.length }),
+      cancelLabel: t('todayView.pushNo'),
     })
     if (ok) mutations.shift.mutate({ itemIds: pushPlan.ids, minutes: pushPlan.minutes })
   }

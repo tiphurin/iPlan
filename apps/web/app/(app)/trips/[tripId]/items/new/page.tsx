@@ -26,7 +26,12 @@ export default async function NewItemPage({ params, searchParams }: Props) {
         <BackLink history href={`/trips/${tripId}?day=${defaultDay}` as Route} label={trip.name} />
       </div>
       <PageHeader title={t('item.new')} />
-      <ItemForm trip={trip} defaultDay={defaultDay} defaultTimeZone={defaultTimeZone} />
+      <ItemForm
+        trip={trip}
+        items={items}
+        defaultDay={defaultDay}
+        defaultTimeZone={defaultTimeZone}
+      />
     </>
   )
 }

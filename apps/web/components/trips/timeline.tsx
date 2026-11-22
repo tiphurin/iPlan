@@ -231,6 +231,14 @@ function TimelineRow({
               )}
               {item.notes && <span className="block text-xs text-faint">{item.notes}</span>}
             </span>
+            {item.kind === 'move' && (budget || spent?.byItem?.get(item.id)) && (
+              <MoneyLine
+                compact
+                budget={budget}
+                spentMinor={spent?.byItem?.get(item.id)}
+                spent={spent}
+              />
+            )}
           </Opener>
         ) : (
           <Opener
@@ -380,10 +388,13 @@ export function MoneyLine({
   budget,
   spentMinor,
   spent,
+  compact = false,
 }: {
   budget: { amount: string; currency: string } | undefined
   spentMinor: bigint | undefined
   spent: SpentInfo | undefined
+  /** One small pill for the slim travel rows: spent if any, else the budget. */
+  compact?: boolean
 }) {
   const t = useTranslations('timeline')
   const { display } = useTripDisplay()
@@ -427,6 +438,12 @@ export function MoneyLine({
   const localFirst = display.money === 'local' && local !== undefined && rate !== undefined
 
   const show = (baseValue: bigint | null, localValue: bigint | null) => {
+    if (compact) {
+      // The pill has room for one amount: the one the ₩ | ฿ switch puts first.
+      const b = baseValue !== null && base ? formatMoney(money(baseValue, base)) : null
+      const l = localValue !== null && local ? formatMoney(money(localValue, local)) : null
+      return <span className="num">{localFirst ? (l ?? b) : (b ?? l)}</span>
+    }
     const b = baseValue !== null && base ? formatMoney(money(baseValue, base)) : null
     const l = localValue !== null && local ? formatMoney(money(localValue, local)) : null
     const [first, second] = localFirst ? [l, b] : [b ?? l, b ? l : null]
@@ -434,6 +451,29 @@ export function MoneyLine({
       <span className="num">
         {first}
         {second && <span className="ml-1 font-normal text-faint">(≈ {second})</span>}
+      </span>
+    )
+  }
+
+  if (compact) {
+    const hasSpent = spentMinor !== undefined && spent !== undefined
+    return (
+      <span
+        className={cn(
+          'ml-auto shrink-0 self-start rounded-full border bg-card px-2 py-0.5 text-xs font-semibold text-foreground',
+          over && 'border-danger/40 text-danger',
+        )}
+      >
+        {hasSpent ? (
+          show(spentMinor, toLocal(spentMinor))
+        ) : budget ? (
+          <>
+            <span className="mr-1 font-normal text-muted-foreground">{t('budget')}</span>
+            {budgetMinor === null
+              ? budgetText(budget)
+              : show(budgetBase, local ? budgetMinor : null)}
+          </>
+        ) : null}
       </span>
     )
   }

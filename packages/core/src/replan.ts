@@ -72,7 +72,9 @@ export function dayBlocks(items: readonly PlanItem[]): DayPlan {
     if (ANCHORS.has(item.kind)) anchors.push(item)
     else if (item.kind === 'move') legs.push(item)
     else {
-      blocks.push({ id: item.id, items: [...legs, item], fixed: item.fixed })
+      const all = [...legs, item]
+      // One locked item (a booked train, a checked-in stop) locks the whole block.
+      blocks.push({ id: item.id, items: all, fixed: all.some((x) => x.fixed) })
       legs = []
     }
   }

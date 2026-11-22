@@ -185,8 +185,12 @@ export class ItemsService {
     input: RetimeItemsInput,
   ): Promise<TripItemDto[]> {
     const { trip } = await this.trips.requireAccess(actor, tripId, 'editor')
-    const rows = await this.items.listByTrip(tripId)
+    const [rows, checkIns] = await Promise.all([
+      this.items.listByTrip(tripId),
+      this.items.checkInsByTrip(tripId),
+    ])
     const byId = new Map(rows.map((r) => [r.id, r]))
+    const checkedIn = new Set(checkIns.map((c) => c.itemId))
     if (new Set(input.changes.map((c) => c.id)).size !== input.changes.length) {
       throw validationFailed({ changes: 'Each item may appear once' })
     }
@@ -202,6 +206,10 @@ export class ItemsService {
         (endsAt?.getTime() ?? null) !== (row.endsAt?.getTime() ?? null)
       if (moves && details.fixed === true) {
         throw validationFailed({ changes: `"${row.title}" has a fixed time and can't move` })
+      }
+      // Someone already checked in at that time: undo the check-in first to move it.
+      if (moves && checkedIn.has(row.id)) {
+        throw validationFailed({ changes: `"${row.title}" is checked in and can't move` })
       }
       checkItem(trip, { ...row, startsAt, endsAt })
       if (c.verify === undefined) return { id: c.id, startsAt, endsAt }

@@ -222,7 +222,9 @@ export function ReorderDay({
                         {block.fixed && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 text-muted-foreground">
                             <Lock aria-hidden className="size-3" />
-                            {t('fixed')}
+                            {block.items.some((x) => (byId.get(x.id)?.checkIns.length ?? 0) > 0)
+                              ? t('checkedIn')
+                              : t('fixed')}
                           </span>
                         )}
                         {was && (

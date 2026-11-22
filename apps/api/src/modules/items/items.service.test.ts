@@ -344,6 +344,12 @@ describe('ItemsService', () => {
       ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' })
       // All or nothing: the free item did not move either.
       expect((await items.findById(a.id))?.startsAt.toISOString()).toBe(lunch.startsAt)
+      // Checked in: it happened at that time, so it can't move until the check-in is undone.
+      await service.checkIn(users.owner, a.id, {})
+      await expect(
+        service.retime(users.owner, tripId, { changes: [move()] }),
+      ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' })
+      await service.undoCheckIn(users.owner, a.id)
       // A fixed item may be sent unchanged (e.g. only to flag its route).
       await expect(
         service.retime(users.owner, tripId, {

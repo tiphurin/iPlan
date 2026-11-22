@@ -227,7 +227,8 @@
     "shiftLocked": "{title} ไม่เลื่อน (เวลาตายตัว)",
     "shiftClash": "{title} จะเลยเข้าไปในเวลาของ “{fixed}” {amount} ต้องปรับเองหลังเลื่อน",
     "shiftYesLater": "ถอยตาม {count} รายการ",
-    "shiftYesEarlier": "ขยับตาม {count} รายการ"
+    "shiftYesEarlier": "ขยับตาม {count} รายการ",
+    "undoCheckInConfirm": "ยกเลิกเช็กอินรายการนี้? เวลาเช็กอินจะถูกลบ"
   },
   "todayView": {
     "now": "ตอนนี้",
@@ -842,7 +843,8 @@
     "saveNothing": "ยังไม่ได้ย้าย",
     "cantSave": "บันทึกไม่ได้",
     "saved": "บันทึกลำดับใหม่แล้ว",
-    "undo": "ย้อนกลับ"
+    "undo": "ย้อนกลับ",
+    "checkedIn": "เช็กอินแล้ว"
   },
   "timeline": {
     "fixed": "นัดแน่นอน",

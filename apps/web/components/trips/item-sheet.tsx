@@ -1,7 +1,7 @@
 'use client'
 
 import type { TripDetailDto, TripItemDto } from '@iplan/contracts'
-import { CalendarPlus, Check, ExternalLink, MapPin, Pencil, Phone } from 'lucide-react'
+import { CalendarPlus, Check, ExternalLink, MapPin, Pencil, Phone, Undo2 } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -10,9 +10,11 @@ import { buttonVariants } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
 import { googleCalendarUrl } from '@/lib/calendar'
 import { cn } from '@/lib/cn'
+import { confirmDialog } from '@/lib/confirm'
 import { mapLinks } from '@/lib/maps'
 import { zoneShort } from '@/lib/time-zones'
 import { useTripDisplay } from '@/lib/trip-display'
+import { useItemMutations } from '@/lib/trips'
 import { useFormat } from '@/lib/use-format'
 import { ItemExpenses } from './item-expenses'
 import { MoneyLine, type SpentInfo } from './timeline'
@@ -24,17 +26,21 @@ import { MoneyLine, type SpentInfo } from './timeline'
 export function ItemSheet({
   item,
   trip,
+  meId,
   spent,
   onClose,
 }: {
   item: TripItemDto | null
   trip: TripDetailDto
+  /** Shows "Undo check-in" on your own check-in. */
+  meId?: string | undefined
   spent?: SpentInfo | undefined
   onClose: () => void
 }) {
   const t = useTranslations()
   const f = useFormat()
   const { zoneFor } = useTripDisplay()
+  const { undoCheckIn } = useItemMutations(trip.id)
   if (!item) return null
   const canEdit = trip.role !== 'viewer'
   const zone = zoneFor(item.timeZone)
@@ -169,10 +175,27 @@ export function ItemSheet({
                 )}
               >
                 <Check aria-hidden className="size-4" />
-                {c.name} ·{' '}
-                {c.skipped
-                  ? t('timeline.skipped')
-                  : t('item.checkedIn', { time: f.time(c.checkedInAt, zone) })}
+                <span className="flex-1">
+                  {c.name} ·{' '}
+                  {c.skipped
+                    ? t('timeline.skipped')
+                    : t('item.checkedIn', { time: f.time(c.checkedInAt, zone) })}
+                </span>
+                {c.userId === meId && (
+                  <button
+                    type="button"
+                    disabled={undoCheckIn.isPending}
+                    onClick={async () => {
+                      if (await confirmDialog(t('item.undoCheckInConfirm'))) {
+                        undoCheckIn.mutate(item.id)
+                      }
+                    }}
+                    className="inline-flex min-h-11 items-center gap-1 rounded-full border px-3 text-sm text-foreground"
+                  >
+                    <Undo2 aria-hidden className="size-4" />
+                    {t('todayView.undoCheckIn')}
+                  </button>
+                )}
               </li>
             ))}
           </ul>

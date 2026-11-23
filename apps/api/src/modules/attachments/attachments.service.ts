@@ -101,6 +101,13 @@ export class AttachmentsService {
     return (await this.attachments.list(entityType, entityId)).map(toAttachmentDto)
   }
 
+  /** How many files each plan item of a trip has (members of the trip only). */
+  async countPerItem(actor: SessionUser, tripId: string): Promise<Record<string, number>> {
+    await this.access.requireFeature(actor, featureOf('trip_item'))
+    await this.trips.requireAccess(actor, tripId, 'viewer')
+    return this.attachments.countPerItem(tripId)
+  }
+
   async upload(actor: SessionUser, input: UploadInput): Promise<AttachmentDto> {
     const { tripId, prefix } = await this.scopeFor(
       actor,

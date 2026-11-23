@@ -3,7 +3,7 @@
 import type { TripItemDto } from '@iplan/contracts'
 import { convertMoney, money, parseMoney } from '@iplan/core'
 import { formatMoney } from '@iplan/i18n'
-import { Check, MapPin, Phone } from 'lucide-react'
+import { Camera, Check, MapPin, Phone } from 'lucide-react'
 import type { Route } from 'next'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -45,6 +45,7 @@ export function Timeline({
   spent,
   focusId,
   onOpen,
+  photos,
 }: {
   items: TripItemDto[]
   tripId: string
@@ -58,6 +59,8 @@ export function Timeline({
   focusId?: string | null
   /** Open details in place (a sheet) instead of navigating to the item page. */
   onOpen?: (item: TripItemDto) => void
+  /** Files per item, shown as "📷 3" on its card. */
+  photos?: Record<string, number> | undefined
 }) {
   useEffect(() => {
     if (!focusId) return
@@ -83,6 +86,7 @@ export function Timeline({
           spent={spent}
           focused={item.id === focusId}
           onOpen={onOpen}
+          photos={photos?.[item.id] ?? 0}
         />
       ))}
     </ol>
@@ -100,6 +104,7 @@ function TimelineRow({
   spent,
   focused,
   onOpen,
+  photos,
 }: {
   item: TripItemDto
   tripId: string
@@ -111,6 +116,7 @@ function TimelineRow({
   spent: SpentInfo | undefined
   focused: boolean
   onOpen: ((item: TripItemDto) => void) | undefined
+  photos: number
 }) {
   const t = useTranslations()
   const f = useFormat()
@@ -309,6 +315,13 @@ function TimelineRow({
                 {item.details.fixed === true && <Tag tone="fix">{t('timeline.fixed')}</Tag>}
                 {item.details.verify === true && <Tag tone="ver">{t('timeline.verify')}</Tag>}
                 {item.details.optional === true && <Tag tone="opt">{t('timeline.optional')}</Tag>}
+                {photos > 0 && (
+                  <Tag tone="photo">
+                    <Camera aria-hidden className="mr-1 inline size-3" />
+                    <span className="sr-only">{t('timeline.photos', { count: photos })}</span>
+                    <span aria-hidden>{photos}</span>
+                  </Tag>
+                )}
                 {mine &&
                   (skipped ? (
                     <Tag tone="opt">{t('timeline.skipped')}</Tag>
@@ -356,7 +369,13 @@ function Opener({
   )
 }
 
-function Tag({ tone, children }: { tone: 'fix' | 'ver' | 'opt' | 'ok'; children: ReactNode }) {
+function Tag({
+  tone,
+  children,
+}: {
+  tone: 'fix' | 'ver' | 'opt' | 'ok' | 'photo'
+  children: ReactNode
+}) {
   return (
     <span
       className={cn(
@@ -365,6 +384,7 @@ function Tag({ tone, children }: { tone: 'fix' | 'ver' | 'opt' | 'ok'; children:
         tone === 'ver' && 'border-warning text-warning',
         tone === 'opt' && 'border-dashed text-muted-foreground',
         tone === 'ok' && 'border-success text-success',
+        tone === 'photo' && 'text-muted-foreground',
       )}
     >
       {children}

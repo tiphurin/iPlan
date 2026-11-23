@@ -65,8 +65,26 @@ async function part(value: unknown, field: string) {
   return { bytes: new Uint8Array(await value.arrayBuffer()), contentType: value.type }
 }
 
+const counts = createRoute({
+  method: 'get',
+  path: '/trips/{tripId}/attachment-counts',
+  tags,
+  summary: 'Number of files per plan item of a trip (members only)',
+  request: { params: z.object({ tripId: z.uuid() }) },
+  responses: {
+    200: {
+      description: 'Plan item id → number of files',
+      content: { 'application/json': { schema: z.record(z.string(), z.number().int()) } },
+    },
+    ...denied,
+  },
+})
+
 export function attachmentRoutes(service: AttachmentsService, storage: StorageProvider) {
   return createRouter()
+    .openapi(counts, async (c) =>
+      c.json(await service.countPerItem(requireUser(c), c.req.valid('param').tripId), 200),
+    )
     .openapi(list, async (c) => {
       const { entityType, entityId } = c.req.valid('query')
       return c.json(await service.list(requireUser(c), entityType, entityId), 200)

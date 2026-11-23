@@ -15,12 +15,14 @@ const PDF = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31])
 const WEBP = new Uint8Array([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50])
 const EXPENSE = '00000000-0000-4000-8000-0000000000ee'
 const TRANSACTION = '00000000-0000-4000-8000-0000000000ff'
+const ITEM = '00000000-0000-4000-8000-0000000000aa'
 
 async function setup() {
   const { tripId, trips, audit } = await seededTrip()
   const repo = new InMemoryAttachments()
   repo.entities.set(EXPENSE, { tripId })
   repo.entities.set(TRANSACTION, { ownerId: 'owner' })
+  repo.entities.set(ITEM, { tripId })
   const storage = new MemoryStorage()
   const accessRepo = new InMemoryAccess()
   // stranger can use trips (but isn't a member of this one).
@@ -70,6 +72,24 @@ describe('AttachmentsService', () => {
       code: 'NOT_FOUND',
     })
     expect(await service.list(users.viewer, 'expense', EXPENSE)).toHaveLength(1)
+  })
+
+  it('counts photos per plan item for trip members only (expense slips not counted)', async () => {
+    const { tripId, service } = await setup()
+    const photo = { entityType: 'trip_item' as const, entityId: ITEM, kind: 'photo' as const }
+    await service.upload(users.editor, {
+      ...photo,
+      file: { bytes: JPEG, contentType: 'image/jpeg' },
+    })
+    await service.upload(users.editor, {
+      ...photo,
+      file: { bytes: WEBP, contentType: 'image/webp' },
+    })
+    await service.upload(users.editor, upload(JPEG))
+    await expect(service.countPerItem(users.viewer, tripId)).resolves.toEqual({ [ITEM]: 2 })
+    await expect(service.countPerItem(users.stranger, tripId)).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    })
   })
 
   it('rejects fake or oversized files and viewers', async () => {

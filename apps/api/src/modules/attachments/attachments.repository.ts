@@ -1,6 +1,6 @@
 import type { AttachmentEntity } from '@iplan/contracts'
 import { type Executor, schema } from '@iplan/db'
-import { and, asc, eq } from 'drizzle-orm'
+import { and, asc, count, eq } from 'drizzle-orm'
 
 export type AttachmentRow = typeof schema.attachment.$inferSelect
 export type NewAttachmentRow = Omit<typeof schema.attachment.$inferInsert, 'id' | 'createdAt'>
@@ -11,6 +11,8 @@ export interface AttachmentsRepository {
   /** Who controls the entity: a trip (shared) or a single owner (personal finance). */
   scopeOf(entityType: AttachmentEntity, entityId: string): Promise<AttachmentScope | null>
   list(entityType: AttachmentEntity, entityId: string): Promise<AttachmentRow[]>
+  /** Files per plan item of one trip, for the 📷 count on the timeline. */
+  countPerItem(tripId: string): Promise<Record<string, number>>
   find(id: string): Promise<AttachmentRow | null>
   create(values: NewAttachmentRow): Promise<AttachmentRow>
   delete(id: string): Promise<void>
@@ -45,6 +47,17 @@ export class DrizzleAttachmentsRepository implements AttachmentsRepository {
         and(eq(schema.attachment.entityType, entityType), eq(schema.attachment.entityId, entityId)),
       )
       .orderBy(asc(schema.attachment.createdAt))
+  }
+
+  async countPerItem(tripId: string) {
+    const rows = await this.db
+      .select({ entityId: schema.attachment.entityId, n: count() })
+      .from(schema.attachment)
+      .where(
+        and(eq(schema.attachment.tripId, tripId), eq(schema.attachment.entityType, 'trip_item')),
+      )
+      .groupBy(schema.attachment.entityId)
+    return Object.fromEntries(rows.map((r) => [r.entityId, Number(r.n)]))
   }
 
   async find(id: string) {

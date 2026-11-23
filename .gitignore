@@ -39,3 +39,6 @@ packages/db/seed/private/
 
 # Vercel CLI link (vercel link / pull); holds project ids and pulled env
 .vercel/
+
+# Personal trip files kept next to the repo, never committed.
+korea-trip-pdf-kit/

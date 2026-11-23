@@ -61,6 +61,15 @@ export function ItemSheet({
           {item.details.flightNumber && ` · ${item.details.flightNumber}`}
         </p>
 
+        {/* Photos first, like a place in Maps: the first thing you want to see again. */}
+        <Attachments
+          entityType="trip_item"
+          entityId={item.id}
+          canEdit={canEdit}
+          kind="photo"
+          variant="strip"
+        />
+
         <div className="grid gap-2">
           {canEdit && (
             <Link
@@ -200,8 +209,6 @@ export function ItemSheet({
             ))}
           </ul>
         )}
-
-        <Attachments entityType="trip_item" entityId={item.id} canEdit={canEdit} kind="photo" />
       </div>
     </Sheet>
   )

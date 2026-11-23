@@ -513,7 +513,9 @@
     "previous": "Previous photo",
     "next": "Next photo",
     "share": "Share / save",
-    "shareFailed": "The share sheet didn’t open. Try again."
+    "shareFailed": "The share sheet didn’t open. Try again.",
+    "addPhoto": "Add photos",
+    "more": "More"
   },
   "finance": {
     "title": "Money",
@@ -865,13 +867,26 @@
     "undo": "Undo",
     "checkedIn": "Checked in"
   },
+  "cover": {
+    "view": "View cover photo",
+    "change": "Change cover",
+    "add": "Add a cover photo",
+    "confirmTitle": "Use this as the cover?",
+    "save": "Use this photo",
+    "cancel": "Cancel",
+    "remove": "Remove cover photo",
+    "removeConfirm": "Remove the cover photo? The trip goes back to its colour.",
+    "unreadable": "That image can’t be read. Try another one.",
+    "failed": "The cover didn’t upload. Try again."
+  },
   "timeline": {
     "fixed": "Fixed",
     "verify": "To verify",
     "optional": "Optional",
     "budget": "Budget",
     "spent": "Spent",
-    "skipped": "Skipped"
+    "skipped": "Skipped",
+    "photos": "{count, plural, one {# photo} other {# photos}}"
   },
   "profile": {
     "adminHint": "Approvals, groups and feature access",

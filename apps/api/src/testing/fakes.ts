@@ -546,6 +546,14 @@ export class InMemoryAttachments implements AttachmentsRepository {
       (r) => r.entityType === entityType && r.entityId === entityId,
     )
   }
+  async countPerItem(tripId: string) {
+    const out: Record<string, number> = {}
+    for (const r of this.rows.values()) {
+      if (r.tripId === tripId && r.entityType === 'trip_item')
+        out[r.entityId] = (out[r.entityId] ?? 0) + 1
+    }
+    return out
+  }
   async find(id: string) {
     return this.rows.get(id) ?? null
   }

@@ -78,11 +78,14 @@ export function Attachments({
   entityId,
   canEdit,
   kind,
+  variant = 'grid',
 }: {
   entityType: AttachmentEntity
   entityId: string
   canEdit: boolean
   kind: UploadKind
+  /** "strip": one swipeable row of photos, for the top of a plan item's sheet. */
+  variant?: 'grid' | 'strip'
 }) {
   const t = useTranslations()
   const client = useQueryClient()
@@ -97,7 +100,12 @@ export function Attachments({
         schema: z.array(AttachmentDto),
       }),
   })
-  const refresh = () => client.invalidateQueries({ queryKey: key(entityType, entityId) })
+  const refresh = () =>
+    Promise.all([
+      client.invalidateQueries({ queryKey: key(entityType, entityId) }),
+      // The 📷 counts on the timeline.
+      client.invalidateQueries({ queryKey: ['attachment-counts'] }),
+    ])
 
   function choose(list: File[]) {
     setPending(
@@ -148,50 +156,88 @@ export function Attachments({
 
   const left = pending.filter((p) => p.status !== 'done').length
 
+  const tile = (file: AttachmentDto, index: number, className: string, style: CSSProperties) => (
+    <button
+      key={file.id}
+      type="button"
+      onClick={() => setViewing(index)}
+      aria-label={t('attachments.view', { n: index + 1, count: files.length })}
+      className={cn('overflow-hidden rounded-xl border bg-muted', className)}
+      style={style}
+    >
+      {file.contentType === 'application/pdf' ? (
+        <span className="flex size-full flex-col items-center justify-center gap-1 text-xs text-muted-foreground">
+          <FileText aria-hidden className="size-8" />
+          {t('attachments.pdf')}
+        </span>
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element -- private, permission-checked image
+        <img
+          src={file.thumbUrl ?? file.url}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="size-full object-cover"
+        />
+      )}
+    </button>
+  )
+
   return (
     <section>
-      <SectionTitle>{t('attachments.title')}</SectionTitle>
-      {/* Columns, not a fixed grid: a portrait photo stays tall, a landscape one wide. */}
-      <div className="columns-2 gap-2 sm:columns-3">
-        {canEdit && (
-          <button
-            type="button"
-            onClick={() => input.current?.click()}
-            className="mb-2 flex aspect-[4/3] w-full break-inside-avoid flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-xs text-muted-foreground"
-          >
-            <ImagePlus aria-hidden className="size-7" />
-            {t('attachments.add')}
-          </button>
-        )}
-        {files.map((file, index) => (
-          <button
-            key={file.id}
-            type="button"
-            onClick={() => setViewing(index)}
-            aria-label={t('attachments.view', { n: index + 1, count: files.length })}
-            className="mb-2 block w-full break-inside-avoid overflow-hidden rounded-xl border bg-muted"
-            style={file.contentType === 'application/pdf' ? { aspectRatio: '1 / 1' } : ratio(file)}
-          >
-            {file.contentType === 'application/pdf' ? (
-              <span className="flex size-full flex-col items-center justify-center gap-1 text-xs text-muted-foreground">
-                <FileText aria-hidden className="size-8" />
-                {t('attachments.pdf')}
-              </span>
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element -- private, permission-checked image
-              <img
-                src={file.thumbUrl ?? file.url}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                className="size-full object-cover"
-              />
+      {variant === 'strip' ? (
+        files.length === 0 && !canEdit ? null : (
+          // One row at the photos' own proportions; swipe for more.
+          <div className="scrollbar-none -mx-4 flex h-28 gap-2 overflow-x-auto px-4">
+            {files.map((file, index) =>
+              tile(
+                file,
+                index,
+                'h-full shrink-0',
+                file.contentType === 'application/pdf' ? { aspectRatio: '3 / 4' } : ratio(file),
+              ),
             )}
-          </button>
-        ))}
-      </div>
-      {!canEdit && files.length === 0 && (
-        <p className="text-sm text-muted-foreground">{t('attachments.empty')}</p>
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => input.current?.click()}
+                aria-label={t('attachments.add')}
+                className="flex h-full w-24 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-xs text-muted-foreground"
+              >
+                <ImagePlus aria-hidden className="size-6" />
+                {files.length === 0 ? t('attachments.addPhoto') : t('attachments.more')}
+              </button>
+            )}
+          </div>
+        )
+      ) : (
+        <>
+          <SectionTitle>{t('attachments.title')}</SectionTitle>
+          {/* Columns, not a fixed grid: a portrait photo stays tall, a landscape one wide. */}
+          <div className="columns-2 gap-2 sm:columns-3">
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => input.current?.click()}
+                className="mb-2 flex aspect-[4/3] w-full break-inside-avoid flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-xs text-muted-foreground"
+              >
+                <ImagePlus aria-hidden className="size-7" />
+                {t('attachments.add')}
+              </button>
+            )}
+            {files.map((file, index) =>
+              tile(
+                file,
+                index,
+                'mb-2 block w-full break-inside-avoid',
+                file.contentType === 'application/pdf' ? { aspectRatio: '1 / 1' } : ratio(file),
+              ),
+            )}
+          </div>
+          {!canEdit && files.length === 0 && (
+            <p className="text-sm text-muted-foreground">{t('attachments.empty')}</p>
+          )}
+        </>
       )}
       <input
         ref={input}
@@ -303,18 +349,21 @@ export function Attachments({
  * Full screen, black, one photo at a time: swipe (or ← →) to the next, pinch to
  * zoom, "2 / 5" on top. PDFs open in place.
  */
-function Viewer({
+export function Viewer({
   files,
   start,
   canEdit,
   onClose,
   onDelete,
+  deleteLabel,
 }: {
-  files: AttachmentDto[]
+  files: Pick<AttachmentDto, 'id' | 'url' | 'contentType'>[]
   start: number
   canEdit: boolean
   onClose: () => void
   onDelete: (id: string) => void
+  /** E.g. "Remove cover photo"; defaults to "Delete file". */
+  deleteLabel?: string | undefined
 }) {
   const t = useTranslations()
   const track = useRef<HTMLDivElement>(null)
@@ -432,7 +481,7 @@ function Viewer({
             <Button
               variant="ghost"
               size="icon"
-              aria-label={t('attachments.delete')}
+              aria-label={deleteLabel ?? t('attachments.delete')}
               className="text-red-400 hover:bg-white/10"
               onClick={() => onDelete(current.id)}
             >

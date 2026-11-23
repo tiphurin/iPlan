@@ -8,11 +8,14 @@ import type { Route } from 'next'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Fab } from '@/components/ui/fab'
 import { MonthCalendar } from '@/components/ui/month-calendar'
 import { Sheet } from '@/components/ui/sheet'
+import { apiFetch } from '@/lib/api-client'
 import { cn } from '@/lib/cn'
 import { dayColor } from '@/lib/day-colors'
 import { useExpenses } from '@/lib/expenses'
@@ -22,6 +25,7 @@ import { tripDays } from '@/lib/trip-dates'
 import { toPlanItems } from '@/lib/reorder'
 import { useItemMutations, useItems, useTrip } from '@/lib/trips'
 import { useFormat } from '@/lib/use-format'
+import { CoverBanner } from './cover-banner'
 import { ItemSheet } from './item-sheet'
 import { ReorderDay } from './reorder-day'
 import { Timeline } from './timeline'
@@ -49,6 +53,15 @@ export function TripView({
   const { data: trip } = useTrip(initialTrip.id, initialTrip)
   const { data: items } = useItems(initialTrip.id, initialItems)
   const { data: expenses } = useExpenses(initialTrip.id, initialExpenses)
+  // "📷 3" on cards; a convenience, so the plan shows without waiting for it.
+  const { data: photos } = useQuery({
+    queryKey: ['attachment-counts', initialTrip.id],
+    queryFn: () =>
+      apiFetch(`/api/trips/${initialTrip.id}/attachment-counts`, {
+        schema: z.record(z.string(), z.number()),
+      }),
+    staleTime: 60_000,
+  })
   const away = awayZone(items, trip.homeTimeZone)
   /** Spending linked to each plan item, in the trip's base currency. */
   const spentByItem = useMemo(() => {
@@ -179,6 +192,9 @@ export function TripView({
     <TripDisplayProvider tripId={trip.id} home={trip.homeTimeZone} away={away}>
       <TripTopBar trip={trip} view="plan" day={day} below={dayStrip} />
       <div className="px-4 pt-3 pb-2">
+        <div className="mb-3">
+          <CoverBanner trip={trip} />
+        </div>
         <p className="text-sm text-muted-foreground">
           {formatDateRange(trip.startDate, trip.endDate, { locale: f.locale })}
           {trip.destination && ` · ${trip.destination}`}
@@ -236,6 +252,7 @@ export function TripView({
                 }}
                 focusId={focusId}
                 onOpen={(item) => setOpenItemId(item.id)}
+                photos={photos}
               />
             )}
           </div>
